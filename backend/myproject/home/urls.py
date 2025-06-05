@@ -86,9 +86,11 @@ urlpatterns = [
     # final ans
     path('generate_final_ans/', views.generate_final_ans, name='generate_final_ans'),
     path("get_progress/<uuid:job_id>/", views.get_progress, name="get_progress"),
+    
     path('generate_final_ans_nist90b/', views.generate_final_ans_nist90b, name='generate_final_ans_nist90b'),
     path("get_progress/<uuid:job_id>/", views.get_progress, name="get_progress"),
     path("get_progress90b/<uuid:job_id>/", views.get_progress90b, name="get_progress90b"),
+    
     path('generate_final_ans_dieharder/', views.generate_final_ans_dieharder, name='generate_final_ans_dieharder'),
     path("get_progress_dieharder/<uuid:job_id>/", views.get_progress_dieharder, name="get_progress_dieharder"),
 ]

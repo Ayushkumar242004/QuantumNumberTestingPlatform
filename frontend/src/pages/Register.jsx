@@ -1,260 +1,135 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import axios from "axios";
-import "./Register.css"; // We'll use the same CSS as login with minor additions
+import "./Register.css"; // Import the CSS file
+import { supabase } from "../utils/supabaseClient"; // Import Supabase client
 
 export default function Register() {
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        username: "",
-        email: "",
-        password1: "",
-        password2: "",
-    });
+	const navigate = useNavigate(); // Hook to navigate programmatically
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState(null);
-    const [error, setError] = useState(null);
-    const [glitchEffect, setGlitchEffect] = useState(false);
-    const [neonPulse, setNeonPulse] = useState(false);
-    const [passwordMatch, setPasswordMatch] = useState(true);
-    const canvasRef = useRef(null);
-    const particlesRef = useRef([]);
-    const animationRef = useRef(null);
+	const [formData, setFormData] = useState({
+		username: "",
+		email: "",
+		password1: "",
+		password2: "",
+	});
 
-    useEffect(() => {
-        initParticles();
-        
-        const pulseInterval = setInterval(() => {
-            setNeonPulse(prev => !prev);
-        }, 3000);
+	const handleChange = (e) => {
+		setFormData({
+			...formData,
+			[e.target.name]: e.target.value,
+		});
+	};
 
-        return () => {
-            clearInterval(pulseInterval);
-            cancelAnimationFrame(animationRef.current);
-        };
-    }, []);
+	const [isLoading, setIsLoading] = useState(false);
+	const [successMessage, setSuccessMessage] = useState(null);
+	const [error, setError] = useState(null);
 
-    useEffect(() => {
-        if (formData.password1 && formData.password2) {
-            setPasswordMatch(formData.password1 === formData.password2);
-        }
-    }, [formData.password1, formData.password2]);
+	const handleSubmit = async (e) => {
+		localStorage.setItem("username", formData.username);
+		e.preventDefault();
+		if (isLoading) {
+			return;
+		}
 
-    const initParticles = () => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-        
-        particlesRef.current = Array.from({ length: 50 }, () => ({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            size: Math.random() * 3 + 1,
-            speedX: Math.random() * 2 - 1,
-            speedY: Math.random() * 2 - 1,
-            color: `hsl(${Math.random() * 60 + 200}, 100%, 50%)`
-        }));
-        
-        animateParticles();
-    };
+		setIsLoading(true);
 
-    const animateParticles = () => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'rgba(0, 0, 10, 0.1)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        particlesRef.current.forEach(particle => {
-            particle.x += particle.speedX;
-            particle.y += particle.speedY;
-            
-            if (particle.x < 0 || particle.x > canvas.width || 
-                particle.y < 0 || particle.y > canvas.height) {
-                particle.x = Math.random() * canvas.width;
-                particle.y = Math.random() * canvas.height;
-            }
-            
-            ctx.beginPath();
-            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-            ctx.fillStyle = particle.color;
-            ctx.fill();
-        });
-        
-        animationRef.current = requestAnimationFrame(animateParticles);
-    };
+		try {
+			const response = await axios.post("http://127.0.0.1:8000/api/register/", formData);
+			console.log("Success!", response.data);
+			setSuccessMessage("Registration Successful!");
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
+			// Store the username in Supabase
+			console.log("Data to insert:", { username: formData.username });
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!passwordMatch) {
-            setError("PASSWORDS DON'T MATCH");
-            setGlitchEffect(true);
-            setTimeout(() => setGlitchEffect(false), 1000);
-            return;
-        }
+			const { data,error } = await supabase
+			.from("users") // Replace "users" with your Supabase table name
+			.insert([{ username: formData.username }]); // Insert the username
+	  
+		  if (error) {
+			console.error("Error inserting username into Supabase:", error);
+			setError("Failed to store user information. Please try again.");
+			return;
+		  }
+	  
+		  console.log("Username successfully stored in Supabase!");
+	  
+			window.location.href = "/";
+		} catch (error) {
+			console.log("Error during registration!", error.response?.data);
+			if (error.response && error.response.data) {
+				Object.keys(error.response.data).forEach((field) => {
+					const errorMessages = error.response.data[field];
+					if (errorMessages && errorMessages.length > 0) {
+						setError(errorMessages[0]);
+					}
+				});
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-        setGlitchEffect(true);
-        setTimeout(() => setGlitchEffect(false), 500);
-        
-        if (isLoading) return;
-        
-        setIsLoading(true);
-        setError(null);
+	const handleLoginRedirect = () => {
+		navigate("/login"); // Redirect to the login page
+	};
 
-        try {
-            const response = await axios.post("http://127.0.0.1:8000/api/register/", formData);
-            console.log("Success!", response.data);
-            
-            setSuccessMessage("USER CREATED");
-            localStorage.setItem("username", formData.username);
-            
-            setTimeout(() => {
-                document.body.style.animation = "fadeOut 1s forwards";
-                setTimeout(() => window.location.href = "/", 1000);
-            }, 1500);
-            
-        } catch (error) {
-            console.log("Error during registration!", error.response?.data);
-            
-            setGlitchEffect(true);
-            setTimeout(() => setGlitchEffect(false), 1000);
-            
-            if (error.response?.data) {
-                const firstError = Object.values(error.response.data)[0]?.[0];
-                if (firstError) setError(firstError.toUpperCase());
-            } else {
-                setError("REGISTRATION FAILED");
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleLoginRedirect = () => {
-        document.body.style.animation = "slideOutLeft 0.8s forwards";
-        setTimeout(() => window.location.href = "/login", 800);
-    };
-
-    return (
-        <div className={`cyberpunk-container ${glitchEffect ? 'glitch' : ''} ${neonPulse ? 'neon-pulse' : ''}`}>
-            <canvas ref={canvasRef} className="particle-canvas"></canvas>
-            
-            <div className="cyberpunk-overlay">
-                <div className="scanlines"></div>
-                <div className="noise"></div>
-            </div>
-            
-            <div className="cyberpunk-card" style={{ height: 'auto', minHeight: '500px' }}>
-                <div className="cyberpunk-header">
-                    <h2 className="cyberpunk-title" data-text="REGISTER">REGISTER</h2>
-                    <div className="cyberpunk-underline"></div>
-                </div>
-                
-                {error && (
-                    <div className="cyberpunk-error" data-text={error}>
-                        {error}
-                    </div>
-                )}
-                
-                {successMessage && (
-                    <div className="cyberpunk-success" data-text={successMessage}>
-                        {successMessage}
-                    </div>
-                )}
-                
-                <form className="cyberpunk-form">
-                    <div className="cyberpunk-input-group">
-                        <label className="cyberpunk-label">USERNAME</label>
-                        <input
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            placeholder="ENTER YOUR USERNAME"
-                            className="cyberpunk-input"
-                        />
-                        <div className="cyberpunk-input-border"></div>
-                    </div>
-                    
-                    <div className="cyberpunk-input-group">
-                        <label className="cyberpunk-label">EMAIL</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder="USER@DOMAIN.COM"
-                            className="cyberpunk-input"
-                        />
-                        <div className="cyberpunk-input-border"></div>
-                    </div>
-                    
-                    <div className="cyberpunk-input-group">
-                        <label className="cyberpunk-label">PASSWORD</label>
-                        <input
-                            type="password"
-                            name="password1"
-                            value={formData.password1}
-                            onChange={handleChange}
-                            placeholder="********"
-                            className="cyberpunk-input"
-                        />
-                        <div className="cyberpunk-input-border"></div>
-                    </div>
-                    
-                    <div className="cyberpunk-input-group">
-                        <label className="cyberpunk-label">CONFIRM PASSWORD</label>
-                        <input
-                            type="password"
-                            name="password2"
-                            value={formData.password2}
-                            onChange={handleChange}
-                            placeholder="********"
-                            className={`cyberpunk-input ${!passwordMatch && formData.password2 ? 'input-error' : ''}`}
-                        />
-                        <div className={`cyberpunk-input-border ${!passwordMatch && formData.password2 ? 'border-error' : ''}`}></div>
-                        {!passwordMatch && formData.password2 && (
-                            <div className="password-mismatch">PASSWORD MISMATCH</div>
-                        )}
-                    </div>
-                    
-                    <button
-                        type="submit"
-                        disabled={isLoading || !passwordMatch}
-                        onClick={handleSubmit}
-                        className={`cyberpunk-button ${isLoading ? 'loading' : ''}`}
-                    >
-                        <span className="cyberpunk-button-text">
-                            {isLoading ? "CREATING USER..." : "REGISTER USER"}
-                        </span>
-                        <span className="cyberpunk-button-lights"></span>
-                    </button>
-                </form>
-                
-                <div className="cyberpunk-redirect">
-                    <p className="cyberpunk-text">ALREADY HAVE AN ACCOUNT?</p>
-                    <button 
-                        onClick={handleLoginRedirect} 
-                        className="cyberpunk-link"
-                    >
-                        LOGIN PAGE
-                    </button>
-                </div>
-            </div>
-            
-            <div className="cyberpunk-grid"></div>
-            <div className="cyberpunk-corner cyberpunk-corner-tl"></div>
-            <div className="cyberpunk-corner cyberpunk-corner-tr"></div>
-            <div className="cyberpunk-corner cyberpunk-corner-bl"></div>
-            <div className="cyberpunk-corner cyberpunk-corner-br"></div>
-        </div>
-    );
+	return (
+		<div className="register-container">
+			{error && <p className="error-message">{error}</p>}
+			{successMessage && <p className="success-message">{successMessage}</p>}
+			<div className="register-card">
+				<h2 className="register-title">Register</h2>
+				<form className="register-form">
+					<label>Username</label>
+					<input
+						type="text"
+						name="username"
+						value={formData.username}
+						onChange={handleChange}
+						placeholder="Enter your username"
+					/>
+					<label>Email</label>
+					<input
+						type="email"
+						name="email"
+						value={formData.email}
+						onChange={handleChange}
+						placeholder="Enter your email"
+					/>
+					<label>Password</label>
+					<input
+						type="password"
+						name="password1"
+						value={formData.password1}
+						onChange={handleChange}
+						placeholder="Enter your password"
+					/>
+					<label>Confirm Password</label>
+					<input
+						type="password"
+						name="password2"
+						value={formData.password2}
+						onChange={handleChange}
+						placeholder="Re-enter your password"
+					/>
+					<button
+						type="submit"
+						disabled={isLoading}
+						onClick={handleSubmit}
+						className="register-button"
+					>
+						{isLoading ? "Registering..." : "Register"}
+					</button>
+				</form>
+				{/* Add Login Button */}
+				<div className="login-redirect-container">
+					<p >Already have an account?</p>
+					<button onClick={handleLoginRedirect} className="login-button">
+						Login
+					</button>
+				</div>
+			</div>
+		</div>
+	);
 }

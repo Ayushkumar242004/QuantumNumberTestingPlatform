@@ -27,4 +27,4 @@ yarn-error.log*
 *.log.*
 *.bak
 *.tmp
-backend/myproject/logs/
+backend/myproject/logs/django_debug.log

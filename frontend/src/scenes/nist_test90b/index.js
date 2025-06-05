@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
 import { MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { supabase } from '../../utils/supabaseClient';
 
 const MAX_STACK_SIZE_ESTIMATE = 1 * 1024 * 1024;
 
@@ -543,38 +544,66 @@ const Nist_tests90b = () => {
     fileInputRef10.current.click();
   };
 
-  const handleFileChange = (event) => {
+const handleFileChange = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return; // Handle cases where no file is selected
-
+  
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
+      alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
     }
+  
+    // Reset all state variables for line 1
+    setBinaryInput(""); // Clear binary input
+    setScheduledTime(""); // Clear scheduled time
+    setDebouncedScheduledTime(""); // Clear debounced scheduled time
+    setResult(null); // Clear result
+    setFileName(""); // Clear filename
+    setUploadTime(""); // Clear upload time
+    setLoadingProgress(0); // Reset progress bar
+    setTime("");
 
+    // Set the new filename
     setFileName(selectedFile.name);
-
+  
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
       const textData = decoder.decode(byteArray).trim();
-
+  
       // Update binaryInput state with new binary data
       setBinaryInput(textData);
-
+  
       // Store the current time when the file is uploaded
-      const currentTime = new Date().toLocaleTimeString();
+      const currentTime = new Date().toISOString();
       setUploadTime(currentTime); // Update the state with the current time
-
+  
+      // Remove the existing row for the line from Supabase
+      try {
+        localStorage.setItem('resultFetchedFromSupabase', 'false');
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: 1 }); // Replace '1' with the line number for this handler
+        
+        setLoadingProgress(0);
+        if (deleteError) {
+          console.error('Error deleting existing row in Supabase:', deleteError);
+          return;
+        }
+  
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+  
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
   };
+
 
   const handleFileChange2 = (event) => {
     const selectedFile = event.target.files[0];
@@ -837,7 +866,112 @@ const Nist_tests90b = () => {
     reader.readAsArrayBuffer(selectedFile);
   };
 
-  const [loadingProgress, setLoadingProgress] = useState(0);
+    useEffect(() => {
+      const fetchStoredResults = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('results2') // Replace 'results' with your Supabase table name
+            .select('*'); // Fetch all rows
+    
+          if (error) {
+            console.error('Error fetching results from Supabase:', error);
+            return;
+          }
+
+     
+    
+          // Update state with fetched data
+          if (data) {
+            data.forEach((row) => {
+              switch (row.line) {
+                case 1:
+                  setBinaryInput(row.binary_data);
+                  setScheduledTime(row.scheduled_time);
+                  setResult({ final_result: row.result });
+                  setFileName(row.file_name);
+                  setUploadTime(row.upload_time);
+                  break;
+                case 2:
+                  setBinaryInput2(row.binary_data);
+                  setScheduledTime2(row.scheduled_time);
+                  setResult2({ final_result: row.result });
+                  setFileName2(row.file_name);
+                  setUploadTime2(row.upload_time);
+                  break;
+                case 3:
+                  setBinaryInput3(row.binary_data);
+                  setScheduledTime3(row.scheduled_time);
+                  setResult3({ final_result: row.result });
+                  setFileName3(row.file_name);
+                  setUploadTime3(row.upload_time);
+                  break;
+                case 4:
+                  setBinaryInput4(row.binary_data);
+                  setScheduledTime4(row.scheduled_time);
+                  setResult4({ final_result: row.result });
+                  setFileName4(row.file_name);
+                  setUploadTime4(row.upload_time);
+                  break;
+                case 5:
+                  setBinaryInput5(row.binary_data);
+                  setScheduledTime5(row.scheduled_time);
+                  setResult5({ final_result: row.result });
+                  setFileName5(row.file_name);
+                  setUploadTime5(row.upload_time);
+                  break;
+                case 6:
+                  setBinaryInput6(row.binary_data);
+                  setScheduledTime6(row.scheduled_time);
+                  setResult6({ final_result: row.result });
+                  setFileName6(row.file_name);
+                  setUploadTime6(row.upload_time);
+                  break;
+                case 7:
+                  setBinaryInput7(row.binary_data);
+                  setScheduledTime7(row.scheduled_time);
+                  setResult7({ final_result: row.result });
+                  setFileName7(row.file_name);
+                  setUploadTime7(row.upload_time);
+                  break;
+                case 8:
+                  setBinaryInput8(row.binary_data);
+                  setScheduledTime8(row.scheduled_time);
+                  setResult8({ final_result: row.result });
+                  setFileName8(row.file_name);
+                  setUploadTime8(row.upload_time);
+                  break;
+                case 9:
+                  setBinaryInput9(row.binary_data);
+                  setScheduledTime9(row.scheduled_time);
+                  setResult9({ final_result: row.result });
+                  setFileName9(row.file_name);
+                  setUploadTime9(row.upload_time);
+                  break;
+                case 10:
+                  setBinaryInput10(row.binary_data);
+                  setScheduledTime10(row.scheduled_time);
+                  setResult10({ final_result: row.result });
+                  setFileName10(row.file_name);
+                  setUploadTime10(row.upload_time);
+                  break;
+                default:
+                  break;
+              }
+            });
+          }
+        } catch (err) {
+          console.error('Unexpected error fetching results:', err);
+        }
+      };
+    
+      fetchStoredResults();
+    }, []);
+
+  const [loadingProgress, setLoadingProgress] = useState(() => {
+     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase') === 'true';
+     return isFetchedFromSupabase ? 100 : 0;
+   });
+
   const [loadingProgressRep, setLoadingProgressRep] = useState(0);
   const [loadingProgressGr, setLoadingProgressGr] = useState(0);
   const [loadingProgress2, setLoadingProgress2] = useState(0);
@@ -1057,51 +1191,98 @@ const Nist_tests90b = () => {
     };
   }, [scheduledTime10]);
 
-  useEffect(() => {
-    if (!binaryInput || !debouncedScheduledTime) return; // Do not fetch if binaryInput is empty
+   const jobIdRef = useRef(null);
 
-    const fetchResult = async () => {
-      setLoadingProgress(0); // Start loading from 0%
-      const jobId = uuidv4();
-      let progressInterval;
+ useEffect(() => {
+  if (!binaryInput || !debouncedScheduledTime ) {
+      localStorage.setItem('resultFetchedFromSupabase', 'false'); // Store flag in localStorage
+      return;// Do not fetch if binaryInput is empty
+}
+  const currentJobId = uuidv4();
+    jobIdRef.current = currentJobId;
 
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(
-              `http://localhost:8000/get_progress90b/${jobId}`
-            );
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
+  const lineNo=1;
+     if (result) {
+      localStorage.setItem('resultFetchedFromSupabase', 'true'); // Store flag in localStorage
+      setLoadingProgress(100); // Set progress to 100 if result is already present
+      return;
+    }
+    setLoadingProgress(0);
+  let progressInterval;
 
-            setLoadingProgress(percent);
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
+  const upsertProgress = async (progress, result = null) => {
+    const progressPercentage = progress;
+   
+    const { error } = await supabase
+      .from('results2')
+      .upsert({
+        line: 1, // Use simple integer line as the primary key
+        binary_data: binaryInput,
+        scheduled_time: debouncedScheduledTime,
+        result: result,
+        file_name: fileName,
+        upload_time: uploadTime,
+        progress: progressPercentage, // Store as percentage string
+        updated_at: new Date().toISOString() // Add timestamp for tracking updates
+      }, {
+        onConflict: ['line'], // Use line as the conflict key for upsert
+        returning: 'minimal' // Don't return the record to reduce payload
+      });
 
-        const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_nist90b/",
-          {
-            binary_data: binaryInput,
-            scheduled_time: debouncedScheduledTime,
-            job_id: jobId,
-          }
-        );
+    if (error) {
+      console.error('Error storing progress in Supabase:', error);
+    }
+  };
 
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress(100); // Set progress to 100% after response is received
-        setResult(response.data); // Set the result data
-      } catch (error) {
-        console.error("Error executing generating final answer:", error);
-        clearInterval(progressInterval);
-        setLoadingProgress(0); // Reset progress in case of failure
-      }
-    };
+  // Initial database entry with 0% progress
+  upsertProgress(0);
 
-    fetchResult();
-  }, [binaryInput, debouncedScheduledTime]);
+  const fetchResult = async () => {
+    try {
+    
+      progressInterval = setInterval(async () => {
+        try {
+          const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+          const completed = progressRes.data.progress || 0;
+          const percent = Math.round((completed / 17) * 100);
+          setLoadingProgress(prev => (percent > prev ? percent : prev)); 
+          await upsertProgress(percent);
+        } catch (err) {
+          console.error('Progress fetch error:', err);
+        } 
+      }, 1000);
 
+      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+        binary_data: binaryInput,
+        scheduled_time: debouncedScheduledTime,
+        job_id: currentJobId,
+        line: lineNo, // Send the line number for the job
+      });
+
+      clearInterval(progressInterval);
+      setLoadingProgress(100);
+      setResult(response.data);
+      localStorage.setItem('resultFetchedFromSupabase', 'false'); // Store flag in localStorage
+
+
+      await upsertProgress(100, response.data.final_result); // Final update with result
+    } catch (error) {
+      console.error('Processing error:', error);
+      clearInterval(progressInterval);
+      setLoadingProgress(0);
+      await upsertProgress(0); // Reset progress on error
+      alert(`Error: ${error.message}`); // Show user-friendly error
+    }
+  };
+
+  fetchResult();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput, debouncedScheduledTime]); // Added missing dependencies
+
+  
   useEffect(() => {
     if (!binaryInput2 || !debouncedScheduledTime2) return; // Do not fetch if input is invalid
 

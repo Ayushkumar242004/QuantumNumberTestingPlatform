@@ -27,6 +27,31 @@ const Nist_tests = () => {
   const [binaryInput9, setBinaryInput9] = useState("");
   const [binaryInput10, setBinaryInput10] = useState("");
 
+  const fetchUserId = async () => {
+    const username = localStorage.getItem("username"); // Retrieve the username from localStorage
+    if (!username) {
+      console.error("No username found in localStorage.");
+      return null;
+    }
+    console.log("Fetching user ID for username:", username); // Log the username being used to fetch the ID
+    try {
+      const { data, error } = await supabase
+        .from("users") // Replace "users" with your Supabase table name
+        .select("id") // Fetch the user ID
+        .eq("username", username); // Filter by username
+
+      if (error || data.length === 0) {
+        console.error("Error fetching user ID from Supabase:", error);
+        return null;
+      }
+      console.log("Fetched user ID:", data[0].id); // Log the fetched user ID
+      return data[0].id; // Return the user ID
+    } catch (err) {
+      console.error("Unexpected error fetching user ID:", err);
+      return null;
+    }
+  };
+
   useEffect(() => {
     // Reset body styles
     document.body.style.overflow = 'auto';
@@ -800,8 +825,7 @@ const Nist_tests = () => {
     fileInputRef10.current.click();
   };
 
-
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return; // Handle cases where no file is selected
 
@@ -810,11 +834,28 @@ const Nist_tests = () => {
       return;
     }
 
+    const userId = await fetchUserId();
+    if (!userId) {
+      console.error("Failed to fetch user ID. Cannot proceed.");
+      return;
+    }
+
+
+    // Reset all state variables for line 1
+    setBinaryInput(""); // Clear binary input
+    setScheduledTime(""); // Clear scheduled time
+    setDebouncedScheduledTime(""); // Clear debounced scheduled time
+    setResult(null); // Clear result
+    setFileName(""); // Clear filename
+    setUploadTime(""); // Clear upload time
+    setLoadingProgress(0); // Reset progress bar
+    setTime("");
+
+    // Set the new filename
     setFileName(selectedFile.name);
 
-
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
@@ -824,16 +865,26 @@ const Nist_tests = () => {
       setBinaryInput(textData);
 
       // Store the current time when the file is uploaded
-      const currentTime = new Date().toLocaleTimeString();
+      const currentTime = new Date().toISOString();
       setUploadTime(currentTime); // Update the state with the current time
 
-      const existing = JSON.parse(localStorage.getItem('fileUploadLog') || '[]');
-      const newEntry = {
-        filename: selectedFile.name,
-        scheduledTime: currentTime
-      };
-      existing.push(newEntry);
-      localStorage.setItem('fileUploadLog', JSON.stringify(existing));
+      // Remove the existing row for the line from Supabase
+      try {
+        localStorage.setItem('resultFetchedFromSupabase', 'false');
+        const { error: deleteError } = await supabase
+          .from('results')
+          .delete()
+          .match({ line: 1, user_id: userId }); // Replace '1' with the line number for this handler
+
+        setLoadingProgress(0);
+        if (deleteError) {
+          console.error('Error deleting existing row in Supabase:', deleteError);
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
 
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
@@ -1162,105 +1213,119 @@ const Nist_tests = () => {
   };
 
   useEffect(() => {
-      const fetchStoredResults = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('results') // Replace 'results' with your Supabase table name
-            .select('*'); // Fetch all rows
-    
-          if (error) {
-            console.error('Error fetching results from Supabase:', error);
-            return;
-          }
-    
-          // Update state with fetched data
-          if (data) {
-            data.forEach((row) => {
-              switch (row.line) {
-                case 1:
-                  setBinaryInput(row.binary_data);
-                  setScheduledTime(row.scheduled_time);
-                  setResult({ final_result: row.result });
-                  setFileName(row.file_name);
-                  setUploadTime(row.upload_time);
-                  break;
-                case 2:
-                  setBinaryInput2(row.binary_data);
-                  setScheduledTime2(row.scheduled_time);
-                  setResult2({ final_result: row.result });
-                  setFileName2(row.file_name);
-                  setUploadTime2(row.upload_time);
-                  break;
-                case 3:
-                  setBinaryInput3(row.binary_data);
-                  setScheduledTime3(row.scheduled_time);
-                  setResult3({ final_result: row.result });
-                  setFileName3(row.file_name);
-                  setUploadTime3(row.upload_time);
-                  break;
-                case 4:
-                  setBinaryInput4(row.binary_data);
-                  setScheduledTime4(row.scheduled_time);
-                  setResult4({ final_result: row.result });
-                  setFileName4(row.file_name);
-                  setUploadTime4(row.upload_time);
-                  break;
-                case 5:
-                  setBinaryInput5(row.binary_data);
-                  setScheduledTime5(row.scheduled_time);
-                  setResult5({ final_result: row.result });
-                  setFileName5(row.file_name);
-                  setUploadTime5(row.upload_time);
-                  break;
-                case 6:
-                  setBinaryInput6(row.binary_data);
-                  setScheduledTime6(row.scheduled_time);
-                  setResult6({ final_result: row.result });
-                  setFileName6(row.file_name);
-                  setUploadTime6(row.upload_time);
-                  break;
-                case 7:
-                  setBinaryInput7(row.binary_data);
-                  setScheduledTime7(row.scheduled_time);
-                  setResult7({ final_result: row.result });
-                  setFileName7(row.file_name);
-                  setUploadTime7(row.upload_time);
-                  break;
-                case 8:
-                  setBinaryInput8(row.binary_data);
-                  setScheduledTime8(row.scheduled_time);
-                  setResult8({ final_result: row.result });
-                  setFileName8(row.file_name);
-                  setUploadTime8(row.upload_time);
-                  break;
-                case 9:
-                  setBinaryInput9(row.binary_data);
-                  setScheduledTime9(row.scheduled_time);
-                  setResult9({ final_result: row.result });
-                  setFileName9(row.file_name);
-                  setUploadTime9(row.upload_time);
-                  break;
-                case 10:
-                  setBinaryInput10(row.binary_data);
-                  setScheduledTime10(row.scheduled_time);
-                  setResult10({ final_result: row.result });
-                  setFileName10(row.file_name);
-                  setUploadTime10(row.upload_time);
-                  break;
-                default:
-                  break;
-              }
-            });
-          }
-        } catch (err) {
-          console.error('Unexpected error fetching results:', err);
-        }
-      };
-    
-      fetchStoredResults();
-    }, []);
+    const fetchStoredResults = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
+        console.error("Failed to fetch user ID. Cannot proceed.");
+        return;
+      }
 
-  const [loadingProgress, setLoadingProgress] = useState(0);
+      try {
+        const { data, error } = await supabase
+          .from('results') // Replace 'results' with your Supabase table name
+          .select('*') // Fetch all rows
+          .eq("user_id", userId);
+        if (error) {
+          console.error('Error fetching results from Supabase:', error);
+          return;
+        }
+
+
+
+        // Update state with fetched data
+        if (data) {
+          data.forEach((row) => {
+            switch (row.line) {
+              case 1:
+                setBinaryInput(row.binary_data);
+                setScheduledTime(row.scheduled_time);
+                setResult({ final_result: row.result });
+                setFileName(row.file_name);
+                setUploadTime(row.upload_time);
+                break;
+              case 2:
+                setBinaryInput2(row.binary_data);
+                setScheduledTime2(row.scheduled_time);
+                setResult2({ final_result: row.result });
+                setFileName2(row.file_name);
+                setUploadTime2(row.upload_time);
+                break;
+              case 3:
+                setBinaryInput3(row.binary_data);
+                setScheduledTime3(row.scheduled_time);
+                setResult3({ final_result: row.result });
+                setFileName3(row.file_name);
+                setUploadTime3(row.upload_time);
+                break;
+              case 4:
+                setBinaryInput4(row.binary_data);
+                setScheduledTime4(row.scheduled_time);
+                setResult4({ final_result: row.result });
+                setFileName4(row.file_name);
+                setUploadTime4(row.upload_time);
+                break;
+              case 5:
+                setBinaryInput5(row.binary_data);
+                setScheduledTime5(row.scheduled_time);
+                setResult5({ final_result: row.result });
+                setFileName5(row.file_name);
+                setUploadTime5(row.upload_time);
+                break;
+              case 6:
+                setBinaryInput6(row.binary_data);
+                setScheduledTime6(row.scheduled_time);
+                setResult6({ final_result: row.result });
+                setFileName6(row.file_name);
+                setUploadTime6(row.upload_time);
+                break;
+              case 7:
+                setBinaryInput7(row.binary_data);
+                setScheduledTime7(row.scheduled_time);
+                setResult7({ final_result: row.result });
+                setFileName7(row.file_name);
+                setUploadTime7(row.upload_time);
+                break;
+              case 8:
+                setBinaryInput8(row.binary_data);
+                setScheduledTime8(row.scheduled_time);
+                setResult8({ final_result: row.result });
+                setFileName8(row.file_name);
+                setUploadTime8(row.upload_time);
+                break;
+              case 9:
+                setBinaryInput9(row.binary_data);
+                setScheduledTime9(row.scheduled_time);
+                setResult9({ final_result: row.result });
+                setFileName9(row.file_name);
+                setUploadTime9(row.upload_time);
+                break;
+              case 10:
+                setBinaryInput10(row.binary_data);
+                setScheduledTime10(row.scheduled_time);
+                setResult10({ final_result: row.result });
+                setFileName10(row.file_name);
+                setUploadTime10(row.upload_time);
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching results:', err);
+      }
+    };
+
+    fetchStoredResults();
+  }, []);
+
+  const [loadingProgress, setLoadingProgress] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
+
+
+
   const [loadingProgressRep, setLoadingProgressRep] = useState(0);
   const [loadingProgressGr, setLoadingProgressGr] = useState(0);
   const [loadingProgress2, setLoadingProgress2] = useState(0);
@@ -1291,86 +1356,101 @@ const Nist_tests = () => {
   const [loadingProgress10Rep, setLoadingProgress10Rep] = useState(0);
   const [loadingProgress10Gr, setLoadingProgress10Gr] = useState(0);
 
+  const jobIdRefS = useRef(null);
 
-const jobIdRefS = useRef(null);
-
-useEffect(() => {
-  if (!binaryInput || !debouncedScheduledTime) return;
-  const lineNo=1;
-
-  setLoadingProgress(0);
-
-  let progressInterval;
-
-  const upsertProgress = async (progress, result = null) => {
-    const progressPercentage = progress;
-   
-    const { error } = await supabase
-      .from('results')
-      .upsert({
-        line: 1, // Use simple integer line as the primary key
-        binary_data: binaryInput,
-        scheduled_time: debouncedScheduledTime,
-        result: result,
-        file_name: fileName,
-        upload_time: uploadTime,
-        progress: progressPercentage, // Store as percentage string
-        updated_at: new Date().toISOString() // Add timestamp for tracking updates
-      }, {
-        onConflict: ['line'], // Use line as the conflict key for upsert
-        returning: 'minimal' // Don't return the record to reduce payload
-      });
-
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
+  useEffect(() => {
+    if (!binaryInput || !debouncedScheduledTime) {
+      localStorage.setItem('resultFetchedFromSupabase', 'false');
+      return;
     }
-  };
+    const currentJobId = uuidv4();
+    jobIdRef.current = currentJobId;
 
-  // Initial database entry with 0% progress
-  upsertProgress(0);
-
-  const fetchResult = async () => {
-    try {
-      progressInterval = setInterval(async () => {
-        try {
-          const progressRes = await axios.get(`http://localhost:8000/get_progress/${lineNo}`);
-          const completed = progressRes.data.progress || 0;
-          const percent = Math.round((completed / 17) * 100);
-
-          setLoadingProgress(percent);
-          await upsertProgress(percent);
-        } catch (err) {
-          console.error('Progress fetch error:', err);
-        }
-      }, 1000);
-
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-        binary_data: binaryInput,
-        scheduled_time: debouncedScheduledTime,
-        line: lineNo, // Send the line number for the job
-      });
-
-      clearInterval(progressInterval);
+    const lineNo = 1;
+    if (result) {
+      localStorage.setItem('resultFetchedFromSupabase', 'true');
       setLoadingProgress(100);
-      setResult(response.data);
-      await upsertProgress(100, response.data.final_result); // Final update with result
-    } catch (error) {
-      console.error('Processing error:', error);
-      clearInterval(progressInterval);
-      setLoadingProgress(0);
-      await upsertProgress(0); // Reset progress on error
-      alert(`Error: ${error.message}`); // Show user-friendly error
+      return;
     }
-  };
+    setLoadingProgress(0);
+    let progressInterval;
 
-  fetchResult();
+    const upsertProgress = async (progress, userId, result = null) => {
+      const progressPercentage = progress;
+      const { error } = await supabase
+        .from('results')
+        .upsert({
+          user_id: userId,
+          line: 1,
+          binary_data: binaryInput,
+          scheduled_time: debouncedScheduledTime,
+          result: result,
+          file_name: fileName,
+          upload_time: uploadTime,
+          progress: progressPercentage,
+          updated_at: new Date().toISOString()
+        });
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
+      }
+    };
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput, debouncedScheduledTime]); // Added missing dependencies
+    // Fetch userId before calling upsertProgress
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
+        console.error("Failed to fetch user ID. Cannot proceed.");
+        return;
+      }
+      // Initial database entry with 0% progress
+      await upsertProgress(0, userId);
 
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 17) * 100);
+              setLoadingProgress(prev => (percent > prev ? percent : prev));
+              await upsertProgress(percent, userId);
+            } catch (err) {
+              console.error('Progress fetch error:', err);
+            }
+          }, 1000);
 
+          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+            binary_data: binaryInput,
+            scheduled_time: debouncedScheduledTime,
+            job_id: currentJobId,
+            line: lineNo,
+          });
+
+          clearInterval(progressInterval);
+          setLoadingProgress(100);
+          setResult(response.data);
+          localStorage.setItem('resultFetchedFromSupabase', 'false');
+          await upsertProgress(100, userId, response.data.final_result);
+        } catch (error) {
+          console.error('Processing error:', error);
+          clearInterval(progressInterval);
+          setLoadingProgress(0);
+          await upsertProgress(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput, debouncedScheduledTime]);
+
+  const jobIdRef = useRef(null);
   const jobIdRef2 = useRef(null);
   const jobIdRef3 = useRef(null);
   const jobIdRef4 = useRef(null);
@@ -3415,7 +3495,7 @@ useEffect(() => {
                 />
 
                 {/* Time Input */}
-                 <TextField
+                <TextField
                   label="Enter Time (HH:mm:ss)"
                   placeholder="e.g., 14:30:00"
                   value={time3}
@@ -3720,7 +3800,7 @@ useEffect(() => {
                 />
 
                 {/* Time Input */}
-                  <TextField
+                <TextField
                   label="Enter Time (HH:mm:ss)"
                   placeholder="e.g., 14:30:00"
                   value={time4}
@@ -4025,7 +4105,7 @@ useEffect(() => {
                 />
 
                 {/* Time Input */}
-                 <TextField
+                <TextField
                   label="Enter Time (HH:mm:ss)"
                   placeholder="e.g., 14:30:00"
                   value={time5}
@@ -5545,7 +5625,7 @@ useEffect(() => {
                 />
 
                 {/* Time Input */}
-                  <TextField
+                <TextField
                   label="Enter Time (HH:mm:ss)"
                   placeholder="e.g., 14:30:00"
                   value={time10}
