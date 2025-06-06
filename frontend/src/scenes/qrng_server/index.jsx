@@ -258,11 +258,6 @@ const Qrng_Server = () => {
 
   const fetchRandomNumber = async () => {
 
-    if (!ipAddress || !hostNumber) {
-      alert("Please enter vaild IP address and Host number for the selected server.");
-      return;
-    }
-
     // Default values for internal variables
     const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
     const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";

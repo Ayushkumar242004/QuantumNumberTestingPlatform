@@ -457,7 +457,7 @@ const Dashboard = () => {
         setBinaryInput(response.data.random); // Update the state with random binary data
       } 
     } catch (error) {
-      alert(`Error: ${error.message}`);
+      alert(`Error: ${error.message}. Server down`);
       setBinaryInput("Error fetching data"); // Optionally handle the error state
     }
   };

@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { supabase } from '../../utils/supabaseClient';
+import "../dashboard/Dashboard.css";
 
 const MAX_STACK_SIZE_ESTIMATE = 1 * 1024 * 1024;
 
@@ -3307,30 +3308,10 @@ useEffect(() => {
       {/* Header Section */}
       <Header title="NIST Statistical Tests" />
       <Box
-        mt="40px"
-        p="20px"
-        sx={{
-          backgroundColor: colors.primary[400],
-          borderRadius: "8px",
-        }}
+        className="dashboard-card"
+        sx={{ mt: "40px", p: "20px", overflowX: 'auto' }}
       >
-        <Box
-          component="table"
-          sx={{
-            width: "100%",
-            borderCollapse: "collapse",
-            textAlign: "center",
-            "& th": {
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              padding: "12px",
-            },
-            "& td": {
-              padding: "12px",
-              border: `1px solid ${colors.blueAccent[500]}`,
-            },
-          }}
-        >
+        <table className="custom-table">
           <thead>
             <tr>
               <th style={{ width: "10%" }}>Serial No</th>
@@ -3339,263 +3320,90 @@ useEffect(() => {
               <th style={{ width: "10%" }}>Progress Bar</th>
               <th style={{ width: "10%" }}>Uploading Time</th>
               <th style={{ width: "10%" }}>Filename</th>
-              <th style={{ width: "20%" }}>Scheduling Time</th>
+              <th style={{ width: "16%" }}>Scheduling Time</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>1</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick("graph")}
-                        disabled={loadingProgress < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgressGr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgressGr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgressGr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgressGr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgressGr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgressGr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgressGr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick("report")}
-                        disabled={loadingProgress < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgressRep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgressRep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgressRep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgressRep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgressRep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgressRep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgressRep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 1px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileChange} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick("graph")}
+                    disabled={loadingProgress < 100}
+                    sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick("report")}
+                    disabled={loadingProgress < 100}
+                    sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime || ""}</td>
               <td>{fileName || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date}
-                  onChange={handleDateChange}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
+                <TextField label="Select Date" type="date" value={date} onChange={handleDateChange} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
                 <TextField
                   label="Enter Time (HH:mm:ss)"
                   placeholder="e.g., 14:30:00"
@@ -3605,13 +3413,13 @@ useEffect(() => {
                   variant="outlined"
                   size="small"
                   sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
+                    width: "100%",
+                    '& .MuiInputBase-input': {
                       textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
+                      color: "#fff",
+                      '&::placeholder': {
+                        color: "#fff",
+                        opacity: 1,
                       },
                     },
                   }}
@@ -3622,284 +3430,102 @@ useEffect(() => {
                           <IconButton
                             onClick={handleUseCurrentTime}
                             edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
+                            
                           >
                             <AccessTimeIcon
                               sx={{
                                 fontSize: "18px", // Smaller icon
                                 color: "black",   // Black color
                               }}
-                            />
-                          </IconButton>
+                            />                          </IconButton>
                         </Tooltip>
                       </InputAdornment>
                     ),
                   }}
                 />
-
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime || "Not set"}
-                </Typography>
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime || "Not set"}</Typography>
               </td>
-
-
             </tr>
             <tr>
               <td>2</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload2}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef2}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange2}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick2("graph")}
-                        disabled={loadingProgress2 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress2Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress2Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress2Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress2Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress2Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress2Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress2Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick2("report")}
-                        disabled={loadingProgress2 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress2Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress2Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress2Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress2Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress2Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress2Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress2Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload2}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef2} style={{ display: "none" }} onChange={handleFileChange2} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick2("graph")}
+                    disabled={loadingProgress2 < 100}
+                    sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick2("report")}
+                    disabled={loadingProgress2 < 100}
+                    sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult2}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress2} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress2}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress2} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress2}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime2 || ""}</td>
               <td>{fileName2 || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date2}
-                  onChange={handleDateChange2}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
+                <TextField label="Select Date" type="date" value={date2} onChange={handleDateChange2} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
                 <TextField
                   label="Enter Time (HH:mm:ss)"
                   placeholder="e.g., 14:30:00"
@@ -3909,13 +3535,13 @@ useEffect(() => {
                   variant="outlined"
                   size="small"
                   sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
+                    width: "100%",
+                    '& .MuiInputBase-input': {
                       textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
+                      color: "#fff",
+                      '&::placeholder': {
+                        color: "#fff",
+                        opacity: 1,
                       },
                     },
                   }}
@@ -3926,285 +3552,103 @@ useEffect(() => {
                           <IconButton
                             onClick={handleUseCurrentTime2}
                             edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
+                           
                           >
-                            <AccessTimeIcon
+                           <AccessTimeIcon
                               sx={{
                                 fontSize: "18px", // Smaller icon
                                 color: "black",   // Black color
                               }}
-                            />
+                            />   
                           </IconButton>
                         </Tooltip>
                       </InputAdornment>
                     ),
                   }}
                 />
-
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime2 || "Not set"}
-                </Typography>
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime2 || "Not set"}</Typography>
               </td>
-
-
             </tr>
-
             <tr>
               <td>3</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload3}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef3}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange3}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick3("graph")}
-                        disabled={loadingProgress3 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress3Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress3Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress3Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress3Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress3Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress3Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress3Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick3("report")}
-                        disabled={loadingProgress3 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress3Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress3Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress3Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress3Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress3Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress3Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress3Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload3}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef3} style={{ display: "none" }} onChange={handleFileChange3} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick3("graph")}
+                    disabled={loadingProgress3 < 100}
+                    sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick3("report")}
+                    disabled={loadingProgress3 < 100}
+                    sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult3}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress3} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress3}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress3} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress3}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime3 || ""}</td>
               <td>{fileName3 || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date3}
-                  onChange={handleDateChange3}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
+                <TextField label="Select Date" type="date" value={date3} onChange={handleDateChange3} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
                 <TextField
                   label="Enter Time (HH:mm:ss)"
                   placeholder="e.g., 14:30:00"
@@ -4214,13 +3658,13 @@ useEffect(() => {
                   variant="outlined"
                   size="small"
                   sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
+                    width: "100%",
+                    '& .MuiInputBase-input': {
                       textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
+                      color: "#fff",
+                      '&::placeholder': {
+                        color: "#fff",
+                        opacity: 1,
                       },
                     },
                   }}
@@ -4231,2168 +3675,637 @@ useEffect(() => {
                           <IconButton
                             onClick={handleUseCurrentTime3}
                             edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
+                          
                           >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black",   // Black color
-                              }}
-                            />
+                            <AccessTimeIcon sx={{ fontSize: "18px", color: "black" }} />
                           </IconButton>
                         </Tooltip>
                       </InputAdornment>
                     ),
                   }}
                 />
-
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime3 || "Not set"}
-                </Typography>
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime3 || "Not set"}</Typography>
               </td>
-
-
             </tr>
-
             <tr>
               <td>4</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload4}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef4}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange4}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick4("graph")}
-                        disabled={loadingProgress4 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress4Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress4Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress4Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress4Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress4Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress4Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress4Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick4("report")}
-                        disabled={loadingProgress4 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress4Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress4Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress4Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress4Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress4Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress4Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress4Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload4}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 1px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef4} style={{ display: "none" }} onChange={handleFileChange4} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick4("graph")}
+                    disabled={loadingProgress4 < 100}
+                   sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick4("report")}
+                    disabled={loadingProgress4 < 100}
+                     sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult4}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress4} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress4}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress4} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress4}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime4 || ""}</td>
               <td>{fileName4 || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date4}
-                  onChange={handleDateChange4}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
+                <TextField label="Select Date" type="date" value={date4} onChange={handleDateChange4} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
+                <TextField label="Enter Time (HH:mm:ss)" placeholder="e.g., 14:30:00" value={time4} onChange={handleTimeChange4} InputLabelProps={{ shrink: true }} variant="outlined" size="small" 
                   sx={{
-                    "& .MuiInputBase-input": {
+                    width: "100%",
+                    '& .MuiInputBase-input': {
                       textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time4}
-                  onChange={handleTimeChange4}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
+                      color: "#fff",
+                      '&::placeholder': {
+                        color: "#fff",
+                        opacity: 1,
                       },
                     },
                   }}
-                  InputProps={{
+                    InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime4}
                             edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
+
                           >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black",   // Black color
-                              }}
-                            />
+                            <AccessTimeIcon sx={{ fontSize: "18px", color: "black" }} />
                           </IconButton>
                         </Tooltip>
                       </InputAdornment>
                     ),
                   }}
-                />
 
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime4 || "Not set"}
-                </Typography>
+/>
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime4 || "Not set"}</Typography>
               </td>
-
-
             </tr>
-
             <tr>
               <td>5</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload5}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef5}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange5}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick5("graph")}
-                        disabled={loadingProgress5 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress5Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress5Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress5Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress5Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress5Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress5Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress5Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick5("report")}
-                        disabled={loadingProgress5 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress5Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress5Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress5Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress5Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress5Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress5Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress5Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload5}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 1px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef5} style={{ display: "none" }} onChange={handleFileChange5} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick5("graph")}
+                    disabled={loadingProgress5 < 100}
+                   sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick5("report")}
+                    disabled={loadingProgress5 < 100}
+                     sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult5}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress5} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress5}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress5} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress5}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime5 || ""}</td>
               <td>{fileName5 || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date5}
-                  onChange={handleDateChange5}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time5}
-                  onChange={handleTimeChange5}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime5}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black",   // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime5 || "Not set"}
-                </Typography>
+                <TextField label="Select Date" type="date" value={date5} onChange={handleDateChange5} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
+                <TextField label="Enter Time (HH:mm:ss)" placeholder="e.g., 14:30:00" value={time5} onChange={handleTimeChange5} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ width: '100%' }} />
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime5 || "Not set"}</Typography>
               </td>
-
-
             </tr>
-
             <tr>
               <td>6</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload6}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef6}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange6}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick6("graph")}
-                        disabled={loadingProgress6 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress6Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress6Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress6Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress6Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress6Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress6Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress6Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick6("report")}
-                        disabled={loadingProgress6 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress6Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress6Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress6Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress6Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress6Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress6Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress6Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload6}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 1px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef6} style={{ display: "none" }} onChange={handleFileChange6} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick6("graph")}
+                    disabled={loadingProgress6 < 100}
+                   sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick6("report")}
+                    disabled={loadingProgress6 < 100}
+                     sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult6}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress6} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress6}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress6} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress6}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime6 || ""}</td>
               <td>{fileName6 || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date6}
-                  onChange={handleDateChange6}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time6}
-                  onChange={handleTimeChange6}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime6}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black",   // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime6 || "Not set"}
-                </Typography>
+                <TextField label="Select Date" type="date" value={date6} onChange={handleDateChange6} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
+                <TextField label="Enter Time (HH:mm:ss)" placeholder="e.g., 14:30:00" value={time6} onChange={handleTimeChange6} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ width: '100%' }} />
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime6 || "Not set"}</Typography>
               </td>
-
-
             </tr>
-
             <tr>
               <td>7</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload7}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef7}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange7}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick7("graph")}
-                        disabled={loadingProgress7 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress7Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress7Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress7Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress7Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress7Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress7Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress7Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick7("report")}
-                        disabled={loadingProgress7 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress7Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress7Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress7Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress7Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress7Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress7Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress7Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload7}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 1px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef7} style={{ display: "none" }} onChange={handleFileChange7} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick7("graph")}
+                    disabled={loadingProgress7 < 100}
+                   sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick7("report")}
+                    disabled={loadingProgress7 < 100}
+                     sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult7}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress7} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress7}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress7} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress7}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime7 || ""}</td>
               <td>{fileName7 || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date7}
-                  onChange={handleDateChange7}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time7}
-                  onChange={handleTimeChange7}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime7}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black",   // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime7 || "Not set"}
-                </Typography>
+                <TextField label="Select Date" type="date" value={date7} onChange={handleDateChange7} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
+                <TextField label="Enter Time (HH:mm:ss)" placeholder="e.g., 14:30:00" value={time7} onChange={handleTimeChange7} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ width: '100%' }} />
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime7 || "Not set"}</Typography>
               </td>
             </tr>
-
             <tr>
               <td>8</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload8}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef8}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange8}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick8("graph")}
-                        disabled={loadingProgress8 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress8Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress8Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress8Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress8Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress8Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress8Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress8Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick8("report")}
-                        disabled={loadingProgress8 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress8Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress8Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress8Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress8Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress8Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress8Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress8Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload8}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 1px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef8} style={{ display: "none" }} onChange={handleFileChange8} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick8("graph")}
+                    disabled={loadingProgress8 < 100}
+                   sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick8("report")}
+                    disabled={loadingProgress8 < 100}
+                     sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult8}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress8} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress8}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress8} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress8}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime8 || ""}</td>
               <td>{fileName8 || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date8}
-                  onChange={handleDateChange8}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time8}
-                  onChange={handleTimeChange8}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime8}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black",   // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime8 || "Not set"}
-                </Typography>
+                <TextField label="Select Date" type="date" value={date8} onChange={handleDateChange8} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
+                <TextField label="Enter Time (HH:mm:ss)" placeholder="e.g., 14:30:00" value={time8} onChange={handleTimeChange8} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ width: '100%' }} />
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime8 || "Not set"}</Typography>
               </td>
             </tr>
-
             <tr>
               <td>9</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload9}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef_nine}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange9}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick9("graph")}
-                        disabled={loadingProgress9 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress9Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress9Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress9Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress9Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress9Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress9Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress9Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick9("report")}
-                        disabled={loadingProgress9 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress9Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress9Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress9Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress9Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress9Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress9Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress9Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload9}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 1px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef_nine} style={{ display: "none" }} onChange={handleFileChange9} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick9("graph")}
+                    disabled={loadingProgress9 < 100}
+                   sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick9("report")}
+                    disabled={loadingProgress9 < 100}
+                     sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult9}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress9} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress9}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress9} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress9}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime9 || ""}</td>
               <td>{fileName9 || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date9}
-                  onChange={handleDateChange9}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time9}
-                  onChange={handleTimeChange9}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime9}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black",   // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime9 || "Not set"}
-                </Typography>
+                <TextField label="Select Date" type="date" value={date9} onChange={handleDateChange9} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
+                <TextField label="Enter Time (HH:mm:ss)" placeholder="e.g., 14:30:00" value={time9} onChange={handleTimeChange9} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ width: '100%' }} />
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime9 || "Not set"}</Typography>
               </td>
-
-
             </tr>
-
             <tr>
               <td>10</td>
               <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload10}
-
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef10}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange10}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick10("graph")}
-                        disabled={loadingProgress10 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress10Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress10Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress10Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress10Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress10Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress10Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress10Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick10("report")}
-                        disabled={loadingProgress10 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress10Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress10Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress10Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress10Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress10Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress10Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress10Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                <Box display="flex" justifyContent="center" alignItems="center" gap="12px">
+                  <Button
+                    className="custom-button"
+                    onClick={handleFileUpload10}
+                    sx={{
+                      background: 'linear-gradient(135deg, #283e51 0%, #485563 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 1px 0 rgba(40,62,81,0.15)',
+                      border: '1px solid #3a5068',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #485563 0%, #283e51 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(40,62,81,0.25)',
+                      },
+                    }}
+                  >
+                    Upload Binary File
+                  </Button>
+                  <input type="file" ref={fileInputRef10} style={{ display: "none" }} onChange={handleFileChange10} />
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick10("graph")}
+                    disabled={loadingProgress10 < 100}
+                   sx={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(17,153,142,0.15)',
+                      border: '1px solid #11998e',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(17,153,142,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Graph
+                  </Button>
+                  <Button
+                    className="custom-button"
+                    onClick={() => handleButtonClick10("report")}
+                    disabled={loadingProgress10 < 100}
+                     sx={{
+                      background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 12px 0 rgba(142,45,226,0.15)',
+                      border: '1px solid #6a32b7',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                      letterSpacing: '0.03em',
+                      transition: 'all 0.3s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%)',
+                        boxShadow: '0 4px 20px 0 rgba(142,45,226,0.25)',
+                      },
+                    }}
+                  >
+                    Generate Report
+                  </Button>
                 </Box>
               </td>
-              {/* <td>{result}</td> */}
               <td>{finalResult10}</td>
               <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress10} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress10}%
-                  </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%" p="5px">
+                  <CircularProgress variant="determinate" value={loadingProgress10} size={50} thickness={5} sx={{ color: "#43e97b" }} />
+                  <Typography variant="body2" fontWeight="bold" color="#fff" mt="5px">{loadingProgress10}%</Typography>
                 </Box>
               </td>
-
-
               <td>{uploadTime10 || ""}</td>
               <td>{fileName10 || "No file selected"}</td>
               <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date10}
-                  onChange={handleDateChange10}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time10}
-                  onChange={handleTimeChange10}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime10}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black",   // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime10 || "Not set"}
-                </Typography>
+                <TextField label="Select Date" type="date" value={date10} onChange={handleDateChange10} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ mb: 1, width: '100%' }} />
+                <TextField label="Enter Time (HH:mm:ss)" placeholder="e.g., 14:30:00" value={time10} onChange={handleTimeChange10} InputLabelProps={{ shrink: true }} variant="outlined" size="small" sx={{ width: '100%' }} />
+                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>Scheduled Time: {scheduledTime10 || "Not set"}</Typography>
               </td>
-
-
             </tr>
-
           </tbody>
-        </Box>
-
-
+        </table>
       </Box>
-
 
 
       <Box
@@ -6546,6 +4459,7 @@ useEffect(() => {
 
     </Box>
   );
+
 };
 
 export default Nist_tests;

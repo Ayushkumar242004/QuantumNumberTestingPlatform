@@ -1,135 +1,267 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #6a11cb;
+    --secondary-color: #2575fc;
+    --text-color: #fff;
+    --background-color: #1a1a2e;
+    --card-background: rgba(22, 33, 62, 0.5);
+    --error-color: #ff4757;
+    --success-color: #2ed573;
+    --weak-color: #ff4757;
+    --medium-color: #ffa502;
+    --strong-color: #2ed573;
+}
+
 body, html {
-  height: 100%;  /* Ensures the body and html take full height */
-  width:100%;     /* Removes default margin */
-  
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--background-color);
+    color: var(--text-color);
+    overflow: hidden;
 }
 
 .register-container {
-  width: 100%;
-  max-width: 500px;
-  padding: 20px;
-  box-sizing: border-box;
-  
-  /* Positioning it relative to its parent (typically the body) */
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    position: relative;
 }
 
-  
-  .register-card {
-    background: black;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  }
-  
-  .register-title {
-    font-size: 1.8em;
-    margin-bottom: 20px;
+.background-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), #ff4757, #2ed573);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+    filter: blur(50px);
+    opacity: 0.3;
+}
+
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.register-card {
+    background: var(--card-background);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.register-header {
     text-align: center;
-    color: white;
-  }
-  
-  .register-form label {
+    margin-bottom: 2rem;
+}
+
+.register-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.register-subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-size: 1em;
-    color: white;
-  }
-  
-  .register-form input::placeholder {
-    color: white; /* Change placeholder text color to white */
-    opacity: 1;   /* Ensure the placeholder is fully visible */
-  }
-  
-  .register-form input {
-    background-color: #333; /* Optional: Add a dark background to make the white placeholder more visible */
-    color: white;           /* Input text color */
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.form-group input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em;
-    transition: border-color 0.3s ease-in-out;
-  }
-  
-  .register-form input:focus {
-    border-color: #6a11cb;
+    padding: 0.8rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.form-group input:focus {
     outline: none;
-  }
-  
-  .register-button {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.2);
+}
+
+.password-input-container {
+    position: relative;
+}
+
+/* .toggle-password {
+    position: absolute;
+    right: 10rem;
+    top: 50%;
+    width:100%;
+    height:100%;
+    transform: translateY(-50%);
+    border: none;
+    color: rgba(3, 3, 3, 0.7);
+    cursor: pointer;
+    z-index: 100;
+} */
+
+.password-strength {
+    margin-top: 0.75rem;
+}
+
+.strength-meter {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-bar.weak {
+    width: 33%;
+    background-color: var(--weak-color);
+}
+
+.strength-bar.medium {
+    width: 66%;
+    background-color: var(--medium-color);
+}
+
+.strength-bar.strong {
     width: 100%;
-    padding: 10px;
-    background: #6a11cb;
+    background-color: var(--strong-color);
+}
+
+.strength-rules {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.strength-rules li.valid {
+    color: var(--success-color);
+}
+
+.register-button {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
     color: white;
-    font-size: 1em;
-    font-weight: bold;
+    font-size: 1rem;
+    font-weight: 500;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background 0.3s ease-in-out;
-  }
-  
-  
-  
-  .success-message {
-    color: green;
-    font-size: 0.9em;
-    margin-bottom: 15px;
-    text-align: center;
-  }
-  
-  .error-message {
-    color: red;
-    font-size: 0.9em;
-    margin-bottom: 15px;
-    text-align: center;
-  }
-  
-  @media (max-width: 768px) {
-    .register-card {
-      padding: 20px;
-    }
-  
-    .register-title {
-      font-size: 1.5em;
-    }
-  
-    .register-form input {
-      padding: 8px;
-      font-size: 0.9em;
-    }
-  
-    .register-button {
-      padding: 8px;
-      font-size: 0.9em;
-    }
-  }
-  
-  .login-redirect-container {
-    text-align: center;
+    transition: all 0.3s ease;
     margin-top: 1rem;
-  }
-  
-  .login-redirect-container p {
-    color: #ffffff; /* Set text color to white */
-    font-size: 1rem; /* Optional: Adjust the font size */
-  }
-  
-  .login-button {
-    background-color: #007bff;
-    color: #fff;
+}
+
+.register-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(106, 17, 203, 0.4);
+}
+
+.register-button:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: not-allowed;
+}
+
+.button-loader {
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.background-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), #ff4757, #2ed573);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+    filter: blur(50px);
+    opacity: 0.3;
+}
+
+.login-redirect {
+    text-align: center;
+    justify-content: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    flex-direction: row;
+}
+
+
+@media (max-width: 600px) {
+    .register-card {
+        padding: 2rem;
+    }
+}
+
+.sign-in-button{
+    background: transparent;
+    color: var(--secondary-color);
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .login-button:hover {
-    background-color: #0056b3;
-  }
+    margin-left: 0.5rem;
+    transition: color 0.3s ease;
+}
+.sign-in-button:hover{
+    text-decoration: underline;
+}
