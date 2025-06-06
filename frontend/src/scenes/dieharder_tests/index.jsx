@@ -43,7 +43,30 @@ const Dieharder_tests = () => {
   const [binaryInput9, setBinaryInput9] = useState("");
   const [binaryInput10, setBinaryInput10] = useState("");
 
+  const fetchUserId = async () => {
+    const username = localStorage.getItem("username"); // Retrieve the username from localStorage
+    if (!username) {
+   
+      return null;
+    }
+ 
+    try {
+      const { data, error } = await supabase
+        .from("users") // Replace "users" with your Supabase table name
+        .select("id") // Fetch the user ID
+        .eq("username", username); // Filter by username
 
+      if (error || data.length === 0) {
+       
+        return null;
+      }
+    
+      return data[0].id; // Return the user ID
+    } catch (err) {
+    
+      return null;
+    }
+  };
   const fileInputRef = useRef(null);
   const fileInputRef2 = useRef(null);
   const fileInputRef3 = useRef(null);
@@ -747,7 +770,11 @@ const Dieharder_tests = () => {
         alert("Warning: The selected file is too large. Please choose a smaller file.");
         return;
       }
+      const userId = await fetchUserId();
+    if (!userId) {
     
+      return;
+    }
       // Reset all state variables for line 1
       setBinaryInput(""); // Clear binary input
       setScheduledTime(""); // Clear scheduled time
@@ -781,11 +808,11 @@ const Dieharder_tests = () => {
           const { error: deleteError } = await supabase
             .from('results3')
             .delete()
-            .match({ line: 1 }); // Replace '1' with the line number for this handler
+            .match({ line: 1, user_id: userId }); // Replace '1' with the line number for this handler
           
           setLoadingProgress(0);
           if (deleteError) {
-            console.error('Error deleting existing row in Supabase:', deleteError);
+          
             return;
           }
     
@@ -800,281 +827,605 @@ const Dieharder_tests = () => {
     };
    
 
-  const handleFileChange2 = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+ const handleFileChange2 = async (event) => {
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return;
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
-      return;
+  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+    alert("Warning: The selected file is too large. Please choose a smaller file.");
+    return;
+  }
+
+  const userId = await fetchUserId();
+  if (!userId) {
+  
+    return;
+  }
+
+  // Reset all state variables for line 2
+  setBinaryInput2("");
+  setScheduledTime2("");
+  setDebouncedScheduledTime2("");
+  setResult2(null);
+  setFileName2("");
+  setUploadTime2("");
+  setLoadingProgress2(0);
+  setTime2("");
+
+  // Set new filename
+  setFileName2(selectedFile.name);
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const binaryData = e.target.result;
+    const byteArray = new Uint8Array(binaryData);
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(byteArray).trim();
+
+    setBinaryInput2(textData);
+
+    const currentTime = new Date().toISOString();
+    setUploadTime2(currentTime);
+
+    // Remove previous Supabase row for line 2
+    try {
+      localStorage.setItem('resultFetchedFromSupabased2', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 2, user_id: userId });
+
+      setLoadingProgress2(0);
+      if (deleteError) {
+      
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange2:", err);
     }
-    setFileName2(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput2(textData);
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime2(currentTime);
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    reader.readAsArrayBuffer(selectedFile);
+    // Reset the file input
+    event.target.value = "";
   };
 
-  const handleFileChange3 = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+  reader.readAsArrayBuffer(selectedFile);
+};
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
-      return;
+ const handleFileChange3 = async (event) => {
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return;
+
+  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+    alert("Warning: The selected file is too large. Please choose a smaller file.");
+    return;
+  }
+
+  const userId = await fetchUserId();
+  if (!userId) {
+  
+    return;
+  }
+
+  // Reset all state variables for line 3
+  setBinaryInput3("");
+  setScheduledTime3("");
+  setDebouncedScheduledTime3("");
+  setResult3(null);
+  setFileName3("");
+  setUploadTime3("");
+  setLoadingProgress3(0);
+  setTime3("");
+
+  // Set new filename
+  setFileName3(selectedFile.name);
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const binaryData = e.target.result;
+    const byteArray = new Uint8Array(binaryData);
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(byteArray).trim();
+
+    setBinaryInput3(textData);
+
+    const currentTime = new Date().toISOString();
+    setUploadTime3(currentTime);
+
+    // Remove previous Supabase row for line 3
+    try {
+      localStorage.setItem('resultFetchedFromSupabased3', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 3, user_id: userId });
+
+      setLoadingProgress3(0);
+      if (deleteError) {
+    
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange3:", err);
     }
-    setFileName3(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput3(textData);
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime3(currentTime);
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    reader.readAsArrayBuffer(selectedFile);
+    // Reset the file input
+    event.target.value = "";
   };
 
-  const handleFileChange4 = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+  reader.readAsArrayBuffer(selectedFile);
+};
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
-      return;
+
+  const handleFileChange4 = async (event) => {
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return; // Handle cases where no file is selected
+
+  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+    alert("Warning: The selected file is too large. Please choose a smaller file.");
+    return;
+  }
+
+  const userId = await fetchUserId();
+  if (!userId) {
+  
+    return;
+  }
+
+  // Reset all state variables for line 4
+  setBinaryInput4("");
+  setScheduledTime4("");
+  setDebouncedScheduledTime4("");
+  setResult4(null);
+  setFileName4("");
+  setUploadTime4("");
+  setLoadingProgress4(0);
+  setTime4("");
+
+  // Set new filename
+  setFileName4(selectedFile.name);
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const binaryData = e.target.result;
+    const byteArray = new Uint8Array(binaryData);
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(byteArray).trim();
+
+    setBinaryInput4(textData);
+
+    const currentTime = new Date().toISOString();
+    setUploadTime4(currentTime);
+
+    // Remove previous Supabase row for line 4
+    try {
+      localStorage.setItem('resultFetchedFromSupabased4', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 4, user_id: userId });
+
+      setLoadingProgress4(0);
+      if (deleteError) {
+      
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange4:", err);
     }
-    setFileName4(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput4(textData);
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime4(currentTime);
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    reader.readAsArrayBuffer(selectedFile);
+    // Reset the file input
+    event.target.value = "";
   };
 
-  const handleFileChange5 = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+  reader.readAsArrayBuffer(selectedFile);
+};
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
-      return;
+
+ const handleFileChange5 = async (event) => {
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return; // Handle cases where no file is selected
+
+  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+    alert("Warning: The selected file is too large. Please choose a smaller file.");
+    return;
+  }
+
+  const userId = await fetchUserId();
+  if (!userId) {
+  
+    return;
+  }
+
+  // Reset all state variables for line 5
+  setBinaryInput5("");
+  setScheduledTime5("");
+  setDebouncedScheduledTime5("");
+  setResult5(null);
+  setFileName5("");
+  setUploadTime5("");
+  setLoadingProgress5(0);
+  setTime5("");
+
+  // Set new filename
+  setFileName5(selectedFile.name);
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const binaryData = e.target.result;
+    const byteArray = new Uint8Array(binaryData);
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(byteArray).trim();
+
+    setBinaryInput5(textData);
+
+    const currentTime = new Date().toISOString();
+    setUploadTime5(currentTime);
+
+    // Remove previous Supabase row for line 5
+    try {
+      localStorage.setItem('resultFetchedFromSupabased5', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 5, user_id: userId });
+
+      setLoadingProgress5(0);
+      if (deleteError) {
+       
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange5:", err);
     }
-    setFileName5(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput5(textData);
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime5(currentTime);
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    reader.readAsArrayBuffer(selectedFile);
+    // Reset the file input
+    event.target.value = "";
   };
 
-  const handleFileChange6 = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+  reader.readAsArrayBuffer(selectedFile);
+};
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
-      return;
+
+const handleFileChange6 = async (event) => {
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return; // Handle cases where no file is selected
+
+  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+    alert("Warning: The selected file is too large. Please choose a smaller file.");
+    return;
+  }
+
+  const userId = await fetchUserId();
+  if (!userId) {
+  
+    return;
+  }
+
+  // Reset all state variables for line 6
+  setBinaryInput6("");
+  setScheduledTime6("");
+  setDebouncedScheduledTime6("");
+  setResult6(null);
+  setFileName6("");
+  setUploadTime6("");
+  setLoadingProgress6(0);
+  setTime6("");
+
+  // Set new filename
+  setFileName6(selectedFile.name);
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const binaryData = e.target.result;
+    const byteArray = new Uint8Array(binaryData);
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(byteArray).trim();
+
+    setBinaryInput6(textData);
+
+    const currentTime = new Date().toISOString();
+    setUploadTime6(currentTime);
+
+    // Remove previous Supabase row for line 6
+    try {
+      localStorage.setItem('resultFetchedFromSupabased6', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 6, user_id: userId });
+
+      setLoadingProgress6(0);
+      if (deleteError) {
+      
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange6:", err);
     }
-    setFileName6(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput6(textData);
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime6(currentTime);
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    reader.readAsArrayBuffer(selectedFile);
+    // Reset the file input
+    event.target.value = "";
   };
 
-  const handleFileChange7 = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+  reader.readAsArrayBuffer(selectedFile);
+};
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
-      return;
+
+ const handleFileChange7 = async (event) => {
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return; // Handle cases where no file is selected
+
+  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+    alert("Warning: The selected file is too large. Please choose a smaller file.");
+    return;
+  }
+
+  const userId = await fetchUserId();
+  if (!userId) {
+  
+    return;
+  }
+
+  // Reset all state variables for line 7
+  setBinaryInput7("");
+  setScheduledTime7("");
+  setDebouncedScheduledTime7("");
+  setResult7(null);
+  setFileName7("");
+  setUploadTime7("");
+  setLoadingProgress7(0);
+  setTime7("");
+
+  // Set new filename
+  setFileName7(selectedFile.name);
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const binaryData = e.target.result;
+    const byteArray = new Uint8Array(binaryData);
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(byteArray).trim();
+
+    setBinaryInput7(textData);
+
+    const currentTime = new Date().toISOString();
+    setUploadTime7(currentTime);
+
+    // Remove previous Supabase row for line 7
+    try {
+      localStorage.setItem('resultFetchedFromSupabased7', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 7, user_id: userId });
+
+      setLoadingProgress7(0);
+      if (deleteError) {
+   
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange7:", err);
     }
-    setFileName7(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput7(textData);
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime7(currentTime);
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    reader.readAsArrayBuffer(selectedFile);
+    // Reset the file input
+    event.target.value = "";
   };
 
-  const handleFileChange8 = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+  reader.readAsArrayBuffer(selectedFile);
+};
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
-      return;
+
+const handleFileChange8 = async (event) => {
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return; // Handle cases where no file is selected
+
+  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+    alert("Warning: The selected file is too large. Please choose a smaller file.");
+    return;
+  }
+
+  const userId = await fetchUserId();
+  if (!userId) {
+  
+    return;
+  }
+
+  // Reset all state variables for line 8
+  setBinaryInput8("");
+  setScheduledTime8("");
+  setDebouncedScheduledTime8("");
+  setResult8(null);
+  setFileName8("");
+  setUploadTime8("");
+  setLoadingProgress8(0);
+  setTime8("");
+
+  // Set new filename
+  setFileName8(selectedFile.name);
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const binaryData = e.target.result;
+    const byteArray = new Uint8Array(binaryData);
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(byteArray).trim();
+
+    setBinaryInput8(textData);
+
+    const currentTime = new Date().toISOString();
+    setUploadTime8(currentTime);
+
+    // Remove previous Supabase row for line 8
+    try {
+      localStorage.setItem('resultFetchedFromSupabased8', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 8, user_id: userId });
+
+      setLoadingProgress8(0);
+      if (deleteError) {
+       
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange8:", err);
     }
-    setFileName8(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput8(textData);
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime8(currentTime);
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    reader.readAsArrayBuffer(selectedFile);
+    // Reset the file input
+    event.target.value = "";
   };
 
-  const handleFileChange9 = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+  reader.readAsArrayBuffer(selectedFile);
+};
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
-      return;
+
+const handleFileChange9 = async (event) => {
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return; // Handle cases where no file is selected
+
+  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+    alert("Warning: The selected file is too large. Please choose a smaller file.");
+    return;
+  }
+
+  const userId = await fetchUserId();
+  if (!userId) {
+  
+    return;
+  }
+
+  // Reset all state variables for line 9
+  setBinaryInput9("");
+  setScheduledTime9("");
+  setDebouncedScheduledTime9("");
+  setResult9(null);
+  setFileName9("");
+  setUploadTime9("");
+  setLoadingProgress9(0);
+  setTime9("");
+
+  // Set new filename
+  setFileName9(selectedFile.name);
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const binaryData = e.target.result;
+    const byteArray = new Uint8Array(binaryData);
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(byteArray).trim();
+
+    setBinaryInput9(textData);
+
+    const currentTime = new Date().toISOString();
+    setUploadTime9(currentTime);
+
+    // Remove previous Supabase row for line 9
+    try {
+      localStorage.setItem('resultFetchedFromSupabased9', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 9, user_id: userId });
+
+      setLoadingProgress9(0);
+      if (deleteError) {
+    
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange9:", err);
     }
-    setFileName9(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput9(textData);
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime9(currentTime);
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    reader.readAsArrayBuffer(selectedFile);
+    // Reset the file input
+    event.target.value = "";
   };
 
-  const handleFileChange10 = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+  reader.readAsArrayBuffer(selectedFile);
+};
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
-      return;
+
+const handleFileChange10 = async (event) => {
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return; // Handle cases where no file is selected
+
+  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+    alert("Warning: The selected file is too large. Please choose a smaller file.");
+    return;
+  }
+
+  const userId = await fetchUserId();
+  if (!userId) {
+  
+    return;
+  }
+
+  // Reset all state variables for line 10
+  setBinaryInput10("");
+  setScheduledTime10("");
+  setDebouncedScheduledTime10("");
+  setResult10(null);
+  setFileName10("");
+  setUploadTime10("");
+  setLoadingProgress10(0);
+  setTime10("");
+
+  // Set new filename
+  setFileName10(selectedFile.name);
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const binaryData = e.target.result;
+    const byteArray = new Uint8Array(binaryData);
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(byteArray).trim();
+
+    setBinaryInput10(textData);
+
+    const currentTime = new Date().toISOString();
+    setUploadTime10(currentTime);
+
+    // Remove previous Supabase row for line 10
+    try {
+      localStorage.setItem('resultFetchedFromSupabased10', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 10, user_id: userId });
+
+      setLoadingProgress10(0);
+      if (deleteError) {
+     
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange10:", err);
     }
-    setFileName10(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput10(textData);
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime10(currentTime);
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    reader.readAsArrayBuffer(selectedFile);
+    // Reset the file input
+    event.target.value = "";
   };
+
+  reader.readAsArrayBuffer(selectedFile);
+};
 
    useEffect(() => {
         const fetchStoredResults = async () => {
+          const userId = await fetchUserId();
+      if (!userId) {
+      
+        return;
+      }
           try {
             const { data, error } = await supabase
               .from('results3') // Replace 'results' with your Supabase table name
-              .select('*'); // Fetch all rows
-      
+              .select('*') // Fetch all rows
+              .eq("user_id", userId);
             if (error) {
-              console.error('Error fetching results from Supabase:', error);
+           
               return;
             }
-  
-       
-      
             // Update state with fetched data
             if (data) {
               data.forEach((row) => {
@@ -1168,42 +1519,76 @@ const Dieharder_tests = () => {
   });
   const [loadingProgressRep, setLoadingProgressRep] = useState(0);
   const [loadingProgressGr, setLoadingProgressGr] = useState(0);
-  const [loadingProgress2, setLoadingProgress2] = useState(0);
+  
+  const [loadingProgress2, setLoadingProgress2] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased2') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress2Rep, setLoadingProgress2Rep] = useState(0);
   const [loadingProgress2Gr, setLoadingProgress2Gr] = useState(0);
-  const [loadingProgress3, setLoadingProgress3] = useState(0);
+  
+  const [loadingProgress3, setLoadingProgress3] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased3') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress3Rep, setLoadingProgress3Rep] = useState(0);
   const [loadingProgress3Gr, setLoadingProgress3Gr] = useState(0);
-  const [loadingProgress4, setLoadingProgress4] = useState(0);
+  
+  const [loadingProgress4, setLoadingProgress4] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased4') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress4Rep, setLoadingProgress4Rep] = useState(0);
   const [loadingProgress4Gr, setLoadingProgress4Gr] = useState(0);
-  const [loadingProgress5, setLoadingProgress5] = useState(0);
+  
+  const [loadingProgress5, setLoadingProgress5] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased5') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress5Rep, setLoadingProgress5Rep] = useState(0);
   const [loadingProgress5Gr, setLoadingProgress5Gr] = useState(0);
-  const [loadingProgress6, setLoadingProgress6] = useState(0);
+  
+  const [loadingProgress6, setLoadingProgress6] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased6') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress6Rep, setLoadingProgress6Rep] = useState(0);
   const [loadingProgress6Gr, setLoadingProgress6Gr] = useState(0);
-  const [loadingProgress7, setLoadingProgress7] = useState(0);
+  
+ const [loadingProgress7, setLoadingProgress7] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased7') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress7Rep, setLoadingProgress7Rep] = useState(0);
   const [loadingProgress7Gr, setLoadingProgress7Gr] = useState(0);
-  const [loadingProgress8, setLoadingProgress8] = useState(0);
+  
+ const [loadingProgress8, setLoadingProgress8] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased8') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress8Rep, setLoadingProgress8Rep] = useState(0);
   const [loadingProgress8Gr, setLoadingProgress8Gr] = useState(0);
-  const [loadingProgress9, setLoadingProgress9] = useState(0);
+  
+  const [loadingProgress9, setLoadingProgress9] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased9') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress9Rep, setLoadingProgress9Rep] = useState(0);
   const [loadingProgress9Gr, setLoadingProgress9Gr] = useState(0);
-  const [loadingProgress10, setLoadingProgress10] = useState(0);
+  
+ const [loadingProgress10, setLoadingProgress10] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased10') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress10Rep, setLoadingProgress10Rep] = useState(0);
   const [loadingProgress10Gr, setLoadingProgress10Gr] = useState(0);
 
 useEffect(() => {
   if (!binaryInput || !debouncedScheduledTime ) {
-      localStorage.setItem('resultFetchedFromSupabase3', 'false'); // Store flag in localStorage
       return;// Do not fetch if binaryInput is empty
 }
   const currentJobId = uuidv4();
     jobIdRef.current = currentJobId;
-
   const lineNo=1;
      if (result) {
       localStorage.setItem('resultFetchedFromSupabase3', 'true'); // Store flag in localStorage
@@ -1212,13 +1597,13 @@ useEffect(() => {
     }
     setLoadingProgress(0);
   let progressInterval;
-
-  const upsertProgress = async (progress, result = null) => {
+    
+  const upsertProgress = async (progress, userId, result = null) => {
     const progressPercentage = progress;
-   
     const { error } = await supabase
       .from('results3')
       .upsert({
+        user_id: userId,
         line: 1, // Use simple integer line as the primary key
         binary_data: binaryInput,
         scheduled_time: debouncedScheduledTime,
@@ -1227,9 +1612,6 @@ useEffect(() => {
         upload_time: uploadTime,
         progress: progressPercentage, // Store as percentage string
         updated_at: new Date().toISOString() // Add timestamp for tracking updates
-      }, {
-        onConflict: ['line'], // Use line as the conflict key for upsert
-        returning: 'minimal' // Don't return the record to reduce payload
       });
 
     if (error) {
@@ -1238,47 +1620,54 @@ useEffect(() => {
   };
 
   // Initial database entry with 0% progress
-  upsertProgress(0);
-
-  const fetchResult = async () => {
-    try {
-    
-      progressInterval = setInterval(async () => {
-        try {
-          const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
-          const completed = progressRes.data.progress || 0;
-          const percent = Math.round((completed / 17) * 100);
-          setLoadingProgress(prev => (percent > prev ? percent : prev)); 
-          await upsertProgress(percent);
-        } catch (err) {
-          console.error('Progress fetch error:', err);
-        } 
-      }, 1000);
-
-      const response = await axios.post("http://localhost:8000/generate_final_ans_dieharder/", {
-        binary_data: binaryInput,
-        scheduled_time: debouncedScheduledTime,
-        job_id: currentJobId,
-        line: lineNo, // Send the line number for the job
-      });
-
-      clearInterval(progressInterval);
-      setLoadingProgress(100);
-      setResult(response.data);
-      localStorage.setItem('resultFetchedFromSupabase3', 'false'); // Store flag in localStorage
-
-
-      await upsertProgress(100, response.data.final_result); // Final update with result
-    } catch (error) {
-      console.error('Processing error:', error);
-      clearInterval(progressInterval);
-      setLoadingProgress(0);
-      await upsertProgress(0); // Reset progress on error
-      alert(`Error: ${error.message}`); // Show user-friendly error
-    }
-  };
-
-  fetchResult();
+  const startProcess = async () => {
+       const userId = await fetchUserId();
+       if (!userId) {
+       
+         return;
+       }
+       // Initial database entry with 0% progress
+       await upsertProgress(0, userId);
+ 
+       const fetchResult = async () => {
+         try {
+           progressInterval = setInterval(async () => {
+             try {
+               const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+               const completed = progressRes.data.progress || 0;
+               const percent = Math.round((completed / 20) * 100);
+               setLoadingProgress(prev => (percent > prev ? percent : prev));
+               await upsertProgress(percent, userId);
+             } catch (err) {
+               console.error('Progress fetch error:', err);
+             }
+           }, 1000);
+ 
+           const response = await axios.post("http://localhost:8000/generate_final_ans_dieharder/", {
+             binary_data: binaryInput,
+             scheduled_time: debouncedScheduledTime,
+             job_id: currentJobId,
+             line: lineNo,
+           });
+ 
+           clearInterval(progressInterval);
+           setLoadingProgress(100);
+           setResult(response.data);
+           localStorage.setItem('resultFetchedFromSupabase3', 'true');
+           await upsertProgress(100, userId, response.data.final_result);
+         } catch (error) {
+         
+           clearInterval(progressInterval);
+           setLoadingProgress(0);
+           await upsertProgress(0, userId);
+           alert(`Error: ${error.message}`);
+         }
+       };
+ 
+       fetchResult();
+     };
+ 
+     startProcess();
 
   return () => {
     if (progressInterval) clearInterval(progressInterval);
@@ -1287,230 +1676,881 @@ useEffect(() => {
 
 
   const jobIdRef = useRef(null);
+    const jobIdRef2 = useRef(null);
+    const jobIdRef3 = useRef(null);
+    const jobIdRef4 = useRef(null);
+    const jobIdRef5 = useRef(null);
+    const jobIdRef6 = useRef(null);
+    const jobIdRef7 = useRef(null);
+    const jobIdRef8 = useRef(null);
+    const jobIdRef9 = useRef(null);
+    const jobIdRef10 = useRef(null);
 
   useEffect(() => {
-    if (!binaryInput2) return; // Do not fetch if binaryInput is empty
+  if (!binaryInput2 || !debouncedScheduledTime2) return;
+
+  const currentJobId = uuidv4();
+  jobIdRef2.current = currentJobId;
+  const lineNo = 2;
+
+  if (result2) {
+    localStorage.setItem('resultFetchedFromSupabased2', 'true');
+    setLoadingProgress2(100);
+    return;
+  }
+
+  setLoadingProgress2(0);
+  let progressInterval;
+
+  const upsertProgress2 = async (progress, userId, result = null) => {
+    const progressPercentage = progress;
+    const { error } = await supabase
+      .from('results3')
+      .upsert({
+        user_id: userId,
+        line: lineNo,
+        binary_data: binaryInput2,
+        scheduled_time: debouncedScheduledTime2,
+        result: result,
+        file_name: fileName2,
+        upload_time: uploadTime2,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Error storing progress in Supabase (line 2):', error);
+    }
+  };
+
+  const startProcess2 = async () => {
+    const userId = await fetchUserId();
+    if (!userId) {
+    
+      return;
+    }
+
+    await upsertProgress2(0, userId);
 
     const fetchResult = async () => {
-      setLoadingProgress2(0);
       try {
-        let progressInterval = setInterval(() => {
-          setLoadingProgress2((prev) => (prev < 90 ? prev + 10 : prev));
-        }, 500); // Increment progress every 500ms until 90%
+        progressInterval = setInterval(async () => {
+          try {
+            const progressRes = await axios.get(
+              `http://localhost:8000/get_progress_dieharder/${currentJobId}`
+            );
+            const completed = progressRes.data.progress || 0;
+            const percent = Math.round((completed / 20) * 100);
+            setLoadingProgress2(prev => (percent > prev ? percent : prev));
+            await upsertProgress2(percent, userId);
+          } catch (err) {
+            console.error('Progress fetch error (line 2):', err);
+          }
+        }, 1000);
 
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          { binary_data: binaryInput2, scheduled_time: debouncedScheduledTime2 }
+          {
+            binary_data: binaryInput2,
+            scheduled_time: debouncedScheduledTime2,
+            job_id: currentJobId,
+            line: lineNo,
+          }
         );
-        clearInterval(progressInterval); // Stop the interval
+
+        clearInterval(progressInterval);
         setLoadingProgress2(100);
-        setResult2(response.data); // Set the response data
+        setResult2(response.data);
+        localStorage.setItem('resultFetchedFromSupabased2', 'true');
+        await upsertProgress2(100, userId, response.data.final_result);
       } catch (error) {
-        console.error("Error executing generating final answer:", error);
-        setLoadingProgress(0);
+       
+        clearInterval(progressInterval);
+        setLoadingProgress2(0);
+        await upsertProgress2(0, userId);
+        alert(`Error: ${error.message}`);
       }
     };
 
     fetchResult();
-  }, [binaryInput2, debouncedScheduledTime2]);
+  };
+
+  startProcess2();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput2, debouncedScheduledTime2]);
+
 
   useEffect(() => {
-    if (!binaryInput3) return; // Do not fetch if binaryInput is empty
-    setLoadingProgress3(0);
+  if (!binaryInput3 || !debouncedScheduledTime3) return;
+
+  const currentJobId = uuidv4();
+  jobIdRef3.current = currentJobId;
+  const lineNo = 3;
+
+  if (result3) {
+    localStorage.setItem('resultFetchedFromSupabased3', 'true');
+    setLoadingProgress3(100);
+    return;
+  }
+
+  setLoadingProgress3(0);
+  let progressInterval;
+
+  const upsertProgress3 = async (progress, userId, result = null) => {
+    const progressPercentage = progress;
+    const { error } = await supabase
+      .from('results3')
+      .upsert({
+        user_id: userId,
+        line: lineNo,
+        binary_data: binaryInput3,
+        scheduled_time: debouncedScheduledTime3,
+        result: result,
+        file_name: fileName3,
+        upload_time: uploadTime3,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Error storing progress in Supabase (line 3):', error);
+    }
+  };
+
+  const startProcess3 = async () => {
+    const userId = await fetchUserId();
+    if (!userId) {
+    
+      return;
+    }
+
+    await upsertProgress3(0, userId);
+
     const fetchResult = async () => {
       try {
-        let progressInterval = setInterval(() => {
-          setLoadingProgress3((prev) => (prev < 90 ? prev + 10 : prev));
-        }, 500);
+        progressInterval = setInterval(async () => {
+          try {
+            const progressRes = await axios.get(
+              `http://localhost:8000/get_progress_dieharder/${currentJobId}`
+            );
+            const completed = progressRes.data.progress || 0;
+            const percent = Math.round((completed / 20) * 100);
+            setLoadingProgress3(prev => (percent > prev ? percent : prev));
+            await upsertProgress3(percent, userId);
+          } catch (err) {
+            console.error('Progress fetch error (line 3):', err);
+          }
+        }, 1000);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          { binary_data: binaryInput3, scheduled_time: debouncedScheduledTime3 }
+          {
+            binary_data: binaryInput3,
+            scheduled_time: debouncedScheduledTime3,
+            job_id: currentJobId,
+            line: lineNo,
+          }
         );
-        clearInterval(progressInterval); // Stop the interval
+
+        clearInterval(progressInterval);
         setLoadingProgress3(100);
-        setResult3(response.data); // Set the response data
+        setResult3(response.data);
+        localStorage.setItem('resultFetchedFromSupabased3', 'true');
+        await upsertProgress3(100, userId, response.data.final_result);
       } catch (error) {
-        console.error("Error executing generating final answer:", error);
-        setLoadingProgress(0);
+      
+        clearInterval(progressInterval);
+        setLoadingProgress3(0);
+        await upsertProgress3(0, userId);
+        alert(`Error: ${error.message}`);
       }
     };
 
     fetchResult();
-  }, [binaryInput3, debouncedScheduledTime3]);
+  };
 
-  useEffect(() => {
-    if (!binaryInput4) return; // Do not fetch if binaryInput is empty
+  startProcess3();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput3, debouncedScheduledTime3]);
+
+
+
+ useEffect(() => {
+  if (!binaryInput4 || !debouncedScheduledTime4) return;
+
+  const currentJobId = uuidv4();
+  jobIdRef4.current = currentJobId;
+  const lineNo = 4;
+
+  if (result4) {
+    localStorage.setItem('resultFetchedFromSupabased4', 'true');
+    setLoadingProgress4(100);
+    return;
+  }
+
+  setLoadingProgress4(0);
+  let progressInterval;
+
+  const upsertProgress4 = async (progress, userId, result = null) => {
+    const { error } = await supabase
+      .from('results3')
+      .upsert({
+        user_id: userId,
+        line: lineNo,
+        binary_data: binaryInput4,
+        scheduled_time: debouncedScheduledTime4,
+        result: result,
+        file_name: fileName4,
+        upload_time: uploadTime4,
+        progress: progress,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Error storing progress in Supabase (line 4):', error);
+    }
+  };
+
+  const startProcess4 = async () => {
+    const userId = await fetchUserId();
+    if (!userId) {
+    
+      return;
+    }
+
+    await upsertProgress4(0, userId);
 
     const fetchResult = async () => {
-      setLoadingProgress4(0);
       try {
-        let progressInterval = setInterval(() => {
-          setLoadingProgress4((prev) => (prev < 90 ? prev + 10 : prev));
-        }, 500);
+        progressInterval = setInterval(async () => {
+          try {
+            const progressRes = await axios.get(
+              `http://localhost:8000/get_progress_dieharder/${currentJobId}`
+            );
+            const completed = progressRes.data.progress || 0;
+            const percent = Math.round((completed / 20) * 100);
+            setLoadingProgress4(prev => (percent > prev ? percent : prev));
+            await upsertProgress4(percent, userId);
+          } catch (err) {
+            console.error('Progress fetch error (line 4):', err);
+          }
+        }, 1000);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          { binary_data: binaryInput4, scheduled_time: debouncedScheduledTime4 }
+          {
+            binary_data: binaryInput4,
+            scheduled_time: debouncedScheduledTime4,
+            job_id: currentJobId,
+            line: lineNo,
+          }
         );
-        clearInterval(progressInterval); // Stop the interval
+
+        clearInterval(progressInterval);
         setLoadingProgress4(100);
-        setResult4(response.data); // Set the response data
+        setResult4(response.data);
+        localStorage.setItem('resultFetchedFromSupabased4', 'true');
+        await upsertProgress4(100, userId, response.data.final_result);
       } catch (error) {
+        clearInterval(progressInterval);
         setLoadingProgress4(0);
-        console.error("Error executing generating final answer:", error);
+        await upsertProgress4(0, userId);
+      
+        alert(`Error: ${error.message}`);
       }
     };
 
     fetchResult();
-  }, [binaryInput4, debouncedScheduledTime4]);
+  };
 
-  useEffect(() => {
-    if (!binaryInput5) return; // Do not fetch if binaryInput is empty
+  startProcess4();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput4, debouncedScheduledTime4]);
+
+
+useEffect(() => {
+  if (!binaryInput5 || !debouncedScheduledTime5) return;
+
+  const currentJobId = uuidv4();
+  jobIdRef5.current = currentJobId;
+  const lineNo = 5;
+
+  if (result5) {
+    localStorage.setItem('resultFetchedFromSupabased5', 'true');
+    setLoadingProgress5(100);
+    return;
+  }
+
+  setLoadingProgress5(0);
+  let progressInterval;
+
+  const upsertProgress5 = async (progress, userId, result = null) => {
+    const { error } = await supabase
+      .from('results3')
+      .upsert({
+        user_id: userId,
+        line: lineNo,
+        binary_data: binaryInput5,
+        scheduled_time: debouncedScheduledTime5,
+        result: result,
+        file_name: fileName5,
+        upload_time: uploadTime5,
+        progress: progress,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Error storing progress in Supabase (line 5):', error);
+    }
+  };
+
+  const startProcess5 = async () => {
+    const userId = await fetchUserId();
+    if (!userId) {
+    
+      return;
+    }
+
+    await upsertProgress5(0, userId);
 
     const fetchResult = async () => {
-      setLoadingProgress5(0);
       try {
-        let progressInterval = setInterval(() => {
-          setLoadingProgress5((prev) => (prev < 90 ? prev + 10 : prev));
-        }, 500);
+        progressInterval = setInterval(async () => {
+          try {
+            const progressRes = await axios.get(
+              `http://localhost:8000/get_progress_dieharder/${currentJobId}`
+            );
+            const completed = progressRes.data.progress || 0;
+            const percent = Math.round((completed / 20) * 100);
+            setLoadingProgress5(prev => (percent > prev ? percent : prev));
+            await upsertProgress5(percent, userId);
+          } catch (err) {
+            console.error('Progress fetch error (line 5):', err);
+          }
+        }, 1000);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          { binary_data: binaryInput5, scheduled_time: debouncedScheduledTime5 }
+          {
+            binary_data: binaryInput5,
+            scheduled_time: debouncedScheduledTime5,
+            job_id: currentJobId,
+            line: lineNo,
+          }
         );
-        clearInterval(progressInterval); // Stop the interval
+
+        clearInterval(progressInterval);
         setLoadingProgress5(100);
-        setResult5(response.data); // Set the response data
+        setResult5(response.data);
+        localStorage.setItem('resultFetchedFromSupabased5', 'true');
+        await upsertProgress5(100, userId, response.data.final_result);
       } catch (error) {
+        clearInterval(progressInterval);
         setLoadingProgress5(0);
-        console.error("Error executing generating final answer:", error);
+        await upsertProgress5(0, userId);
+       
+        alert(`Error: ${error.message}`);
       }
     };
 
     fetchResult();
-  }, [binaryInput5, debouncedScheduledTime5]);
+  };
+
+  startProcess5();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput5, debouncedScheduledTime5]);
+
 
   useEffect(() => {
-    if (!binaryInput6) return; // Do not fetch if binaryInput is empty
-    setLoadingProgress(0);
+  if (!binaryInput6 || !debouncedScheduledTime6) return;
+
+  const currentJobId = uuidv4();
+  jobIdRef6.current = currentJobId;
+  const lineNo = 6;
+
+  if (result6) {
+    localStorage.setItem('resultFetchedFromSupabased6', 'true');
+    setLoadingProgress6(100);
+    return;
+  }
+
+  setLoadingProgress6(0);
+  let progressInterval;
+
+  const upsertProgress6 = async (progress, userId, result = null) => {
+    const { error } = await supabase
+      .from('results3')
+      .upsert({
+        user_id: userId,
+        line: lineNo,
+        binary_data: binaryInput6,
+        scheduled_time: debouncedScheduledTime6,
+        result: result,
+        file_name: fileName6,
+        upload_time: uploadTime6,
+        progress: progress,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Error storing progress in Supabase (line 6):', error);
+    }
+  };
+
+  const startProcess6 = async () => {
+    const userId = await fetchUserId();
+    if (!userId) {
+    
+      return;
+    }
+
+    await upsertProgress6(0, userId);
+
     const fetchResult = async () => {
       try {
-        let progressInterval = setInterval(() => {
-          setLoadingProgress6((prev) => (prev < 90 ? prev + 10 : prev));
-        }, 500);
+        progressInterval = setInterval(async () => {
+          try {
+            const progressRes = await axios.get(
+              `http://localhost:8000/get_progress_dieharder/${currentJobId}`
+            );
+            const completed = progressRes.data.progress || 0;
+            const percent = Math.round((completed / 20) * 100);
+            setLoadingProgress6(prev => (percent > prev ? percent : prev));
+            await upsertProgress6(percent, userId);
+          } catch (err) {
+            console.error('Progress fetch error (line 6):', err);
+          }
+        }, 1000);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          { binary_data: binaryInput6, scheduled_time: debouncedScheduledTime6 }
+          {
+            binary_data: binaryInput6,
+            scheduled_time: debouncedScheduledTime6,
+            job_id: currentJobId,
+            line: lineNo,
+          }
         );
-        clearInterval(progressInterval); // Stop the interval
+
+        clearInterval(progressInterval);
         setLoadingProgress6(100);
-        setResult6(response.data); // Set the response data
+        setResult6(response.data);
+        localStorage.setItem('resultFetchedFromSupabased6', 'true');
+        await upsertProgress6(100, userId, response.data.final_result);
       } catch (error) {
+        clearInterval(progressInterval);
         setLoadingProgress6(0);
-        console.error("Error executing generating final answer:", error);
+        await upsertProgress6(0, userId);
+       
+        alert(`Error: ${error.message}`);
       }
     };
 
     fetchResult();
-  }, [binaryInput6, debouncedScheduledTime6]);
+  };
 
-  useEffect(() => {
-    if (!binaryInput7) return; // Do not fetch if binaryInput is empty
-    setLoadingProgress7(0);
+  startProcess6();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput6, debouncedScheduledTime6]);
+
+
+ useEffect(() => {
+  if (!binaryInput7 || !debouncedScheduledTime7) return;
+
+  const currentJobId = uuidv4();
+  jobIdRef7.current = currentJobId;
+  const lineNo = 7;
+
+  if (result7) {
+    localStorage.setItem('resultFetchedFromSupabased7', 'true');
+    setLoadingProgress7(100);
+    return;
+  }
+
+  setLoadingProgress7(0);
+  let progressInterval;
+
+  const upsertProgress7 = async (progress, userId, result = null) => {
+    const { error } = await supabase
+      .from('results3')
+      .upsert({
+        user_id: userId,
+        line: lineNo,
+        binary_data: binaryInput7,
+        scheduled_time: debouncedScheduledTime7,
+        result: result,
+        file_name: fileName7,
+        upload_time: uploadTime7,
+        progress: progress,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Error storing progress in Supabase (line 7):', error);
+    }
+  };
+
+  const startProcess7 = async () => {
+    const userId = await fetchUserId();
+    if (!userId) {
+    
+      return;
+    }
+
+    await upsertProgress7(0, userId);
+
     const fetchResult = async () => {
       try {
-        let progressInterval = setInterval(() => {
-          setLoadingProgress7((prev) => (prev < 90 ? prev + 10 : prev));
-        }, 500);
+        progressInterval = setInterval(async () => {
+          try {
+            const progressRes = await axios.get(
+              `http://localhost:8000/get_progress_dieharder/${currentJobId}`
+            );
+            const completed = progressRes.data.progress || 0;
+            const percent = Math.round((completed / 20) * 100);
+            setLoadingProgress7(prev => (percent > prev ? percent : prev));
+            await upsertProgress7(percent, userId);
+          } catch (err) {
+            console.error('Progress fetch error (line 7):', err);
+          }
+        }, 1000);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          { binary_data: binaryInput7, scheduled_time: debouncedScheduledTime7 }
+          {
+            binary_data: binaryInput7,
+            scheduled_time: debouncedScheduledTime7,
+            job_id: currentJobId,
+            line: lineNo,
+          }
         );
-        clearInterval(progressInterval); // Stop the interval
+
+        clearInterval(progressInterval);
         setLoadingProgress7(100);
-        setResult7(response.data); // Set the response data
+        setResult7(response.data);
+        localStorage.setItem('resultFetchedFromSupabased7', 'true');
+        await upsertProgress7(100, userId, response.data.final_result);
       } catch (error) {
+        clearInterval(progressInterval);
         setLoadingProgress7(0);
-        console.error("Error executing generating final answer:", error);
+        await upsertProgress7(0, userId);
+   
+        alert(`Error: ${error.message}`);
       }
     };
 
     fetchResult();
-  }, [binaryInput7, debouncedScheduledTime7]);
+  };
+
+  startProcess7();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput7, debouncedScheduledTime7]);
+
 
   useEffect(() => {
-    if (!binaryInput8) return; // Do not fetch if binaryInput is empty
-    setLoadingProgress8(0);
+  if (!binaryInput8 || !debouncedScheduledTime8) return;
+
+  const currentJobId = uuidv4();
+  jobIdRef8.current = currentJobId;
+  const lineNo = 8;
+
+  if (result8) {
+    localStorage.setItem('resultFetchedFromSupabased8', 'true');
+    setLoadingProgress8(100);
+    return;
+  }
+
+  setLoadingProgress8(0);
+  let progressInterval;
+
+  const upsertProgress8 = async (progress, userId, result = null) => {
+    const { error } = await supabase
+      .from('results3')
+      .upsert({
+        user_id: userId,
+        line: lineNo,
+        binary_data: binaryInput8,
+        scheduled_time: debouncedScheduledTime8,
+        result: result,
+        file_name: fileName8,
+        upload_time: uploadTime8,
+        progress: progress,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Error storing progress in Supabase (line 8):', error);
+    }
+  };
+
+  const startProcess8 = async () => {
+    const userId = await fetchUserId();
+    if (!userId) {
+    
+      return;
+    }
+
+    await upsertProgress8(0, userId);
+
     const fetchResult = async () => {
       try {
-        let progressInterval = setInterval(() => {
-          setLoadingProgress8((prev) => (prev < 90 ? prev + 10 : prev));
-        }, 500);
+        progressInterval = setInterval(async () => {
+          try {
+            const progressRes = await axios.get(
+              `http://localhost:8000/get_progress_dieharder/${currentJobId}`
+            );
+            const completed = progressRes.data.progress || 0;
+            const percent = Math.round((completed / 20) * 100);
+            setLoadingProgress8(prev => (percent > prev ? percent : prev));
+            await upsertProgress8(percent, userId);
+          } catch (err) {
+            console.error('Progress fetch error (line 8):', err);
+          }
+        }, 1000);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          { binary_data: binaryInput8, scheduled_time: debouncedScheduledTime8 }
+          {
+            binary_data: binaryInput8,
+            scheduled_time: debouncedScheduledTime8,
+            job_id: currentJobId,
+            line: lineNo,
+          }
         );
-        clearInterval(progressInterval); // Stop the interval
+
+        clearInterval(progressInterval);
         setLoadingProgress8(100);
-        setResult8(response.data); // Set the response data
+        setResult8(response.data);
+        localStorage.setItem('resultFetchedFromSupabased8', 'true');
+        await upsertProgress8(100, userId, response.data.final_result);
       } catch (error) {
+        clearInterval(progressInterval);
         setLoadingProgress8(0);
-        console.error("Error executing generating final answer:", error);
+        await upsertProgress8(0, userId);
+       
+        alert(`Error: ${error.message}`);
       }
     };
 
     fetchResult();
-  }, [binaryInput8, debouncedScheduledTime8]);
+  };
+
+  startProcess8();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput8, debouncedScheduledTime8]);
+
 
   useEffect(() => {
-    if (!binaryInput9) return; // Do not fetch if binaryInput is empty
+  if (!binaryInput9 || !debouncedScheduledTime9) return;
+
+  const currentJobId = uuidv4();
+  jobIdRef9.current = currentJobId;
+  const lineNo = 9;
+
+  if (result9) {
+    localStorage.setItem('resultFetchedFromSupabased9', 'true');
+    setLoadingProgress9(100);
+    return;
+  }
+
+  setLoadingProgress9(0);
+  let progressInterval;
+
+  const upsertProgress9 = async (progress, userId, result = null) => {
+    const { error } = await supabase
+      .from('results3')
+      .upsert({
+        user_id: userId,
+        line: lineNo,
+        binary_data: binaryInput9,
+        scheduled_time: debouncedScheduledTime9,
+        result: result,
+        file_name: fileName9,
+        upload_time: uploadTime9,
+        progress: progress,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Error storing progress in Supabase (line 9):', error);
+    }
+  };
+
+  const startProcess9 = async () => {
+    const userId = await fetchUserId();
+    if (!userId) {
+    
+      return;
+    }
+
+    await upsertProgress9(0, userId);
 
     const fetchResult = async () => {
-      setLoadingProgress9(0);
       try {
-        let progressInterval = setInterval(() => {
-          setLoadingProgress9((prev) => (prev < 90 ? prev + 10 : prev));
-        }, 500);
+        progressInterval = setInterval(async () => {
+          try {
+            const progressRes = await axios.get(
+              `http://localhost:8000/get_progress_dieharder/${currentJobId}`
+            );
+            const completed = progressRes.data.progress || 0;
+            const percent = Math.round((completed / 20) * 100);
+            setLoadingProgress9(prev => (percent > prev ? percent : prev));
+            await upsertProgress9(percent, userId);
+          } catch (err) {
+            console.error('Progress fetch error (line 9):', err);
+          }
+        }, 1000);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          { binary_data: binaryInput9, scheduled_time: debouncedScheduledTime9 }
+          {
+            binary_data: binaryInput9,
+            scheduled_time: debouncedScheduledTime9,
+            job_id: currentJobId,
+            line: lineNo,
+          }
         );
-        clearInterval(progressInterval); // Stop the interval
+
+        clearInterval(progressInterval);
         setLoadingProgress9(100);
-        setResult9(response.data); // Set the response data
+        setResult9(response.data);
+        localStorage.setItem('resultFetchedFromSupabased9', 'true');
+        await upsertProgress9(100, userId, response.data.final_result);
       } catch (error) {
+        clearInterval(progressInterval);
         setLoadingProgress9(0);
-        console.error("Error executing generating final answer:", error);
+        await upsertProgress9(0, userId);
+       
+        alert(`Error: ${error.message}`);
       }
     };
 
     fetchResult();
-  }, [binaryInput9, debouncedScheduledTime9]);
+  };
 
-  useEffect(() => {
-    if (!binaryInput10) return; // Do not fetch if binaryInput is empty
-    setLoadingProgress10(0);
+  startProcess9();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput9, debouncedScheduledTime9]);
+
+
+useEffect(() => {
+  if (!binaryInput10 || !debouncedScheduledTime10) return;
+
+  const currentJobId = uuidv4();
+  jobIdRef10.current = currentJobId;
+  const lineNo = 10;
+
+  if (result10) {
+    localStorage.setItem('resultFetchedFromSupabased10', 'true');
+    setLoadingProgress10(100);
+    return;
+  }
+
+  setLoadingProgress10(0);
+  let progressInterval;
+
+  const upsertProgress10 = async (progress, userId, result = null) => {
+    const { error } = await supabase
+      .from('results3')
+      .upsert({
+        user_id: userId,
+        line: lineNo,
+        binary_data: binaryInput10,
+        scheduled_time: debouncedScheduledTime10,
+        result: result,
+        file_name: fileName10,
+        upload_time: uploadTime10,
+        progress: progress,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Error storing progress in Supabase (line 10):', error);
+    }
+  };
+
+  const startProcess10 = async () => {
+    const userId = await fetchUserId();
+    if (!userId) {
+    
+      return;
+    }
+
+    await upsertProgress10(0, userId);
+
     const fetchResult = async () => {
       try {
-        let progressInterval = setInterval(() => {
-          setLoadingProgress10((prev) => (prev < 90 ? prev + 10 : prev));
-        }, 500);
+        progressInterval = setInterval(async () => {
+          try {
+            const progressRes = await axios.get(
+              `http://localhost:8000/get_progress_dieharder/${currentJobId}`
+            );
+            const completed = progressRes.data.progress || 0;
+            const percent = Math.round((completed / 20) * 100);
+            setLoadingProgress10(prev => (percent > prev ? percent : prev));
+            await upsertProgress10(percent, userId);
+          } catch (err) {
+            console.error('Progress fetch error (line 10):', err);
+          }
+        }, 1000);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
           {
             binary_data: binaryInput10,
             scheduled_time: debouncedScheduledTime10,
+            job_id: currentJobId,
+            line: lineNo,
           }
         );
-        clearInterval(progressInterval); // Stop the interval
+
+        clearInterval(progressInterval);
         setLoadingProgress10(100);
-        setResult10(response.data); // Set the response data
+        setResult10(response.data);
+        localStorage.setItem('resultFetchedFromSupabased10', 'true');
+        await upsertProgress10(100, userId, response.data.final_result);
       } catch (error) {
-        setLoadingProgress(0);
-        console.error("Error executing generating final answer:", error);
+        clearInterval(progressInterval);
+        setLoadingProgress10(0);
+        await upsertProgress10(0, userId);
+     
+        alert(`Error: ${error.message}`);
       }
     };
 
     fetchResult();
-  }, [binaryInput10, debouncedScheduledTime10]);
+  };
+
+  startProcess10();
+
+  return () => {
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [binaryInput10, debouncedScheduledTime10]);
 
 
 
