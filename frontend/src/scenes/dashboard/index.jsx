@@ -411,7 +411,7 @@ const Dashboard = () => {
   };
   
 
-  // Start fetching binary data
+// Start fetching binary data
   const startFetching = () => {
     if (!isFetching) {
       setIsFetching(true);
@@ -457,8 +457,8 @@ const Dashboard = () => {
         setBinaryInput(response.data.random); // Update the state with random binary data
       } 
     } catch (error) {
-      alert(`Error: ${error.message}. Server down`);
-      setBinaryInput("Error fetching data"); // Optionally handle the error state
+      alert("Error: server down");
+      setBinaryInput("");
     }
   };
 

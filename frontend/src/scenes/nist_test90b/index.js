@@ -2254,7 +2254,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgressRep(0);
+      setLoadingProgressRep(5);
 
       progressInterval = setInterval(async () => {
         try {
@@ -2337,7 +2337,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgress2Rep(0);
+      setLoadingProgress2Rep(5);
 
       progressInterval = setInterval(async () => {
         try {
@@ -2420,7 +2420,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgress3Rep(0);
+      setLoadingProgress3Rep(5);
 
       progressInterval = setInterval(async () => {
         try {
@@ -2503,7 +2503,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgress4Rep(0);
+      setLoadingProgress4Rep(5);
 
       progressInterval = setInterval(async () => {
         try {
@@ -2586,7 +2586,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgress5Rep(0);
+      setLoadingProgress5Rep(5);
 
       progressInterval = setInterval(async () => {
         try {
@@ -2669,7 +2669,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgress6Rep(0);
+      setLoadingProgress6Rep(5);
 
       progressInterval = setInterval(async () => {
         try {
@@ -2752,7 +2752,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgress7Rep(0);
+      setLoadingProgress7Rep(5);
 
       progressInterval = setInterval(async () => {
         try {
@@ -2835,7 +2835,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgress8Rep(0);
+      setLoadingProgress8Rep(5);
 
       progressInterval = setInterval(async () => {
         try {
@@ -2918,7 +2918,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgress9Rep(0);
+      setLoadingProgress9Rep(5);
 
       progressInterval = setInterval(async () => {
         try {
@@ -3001,7 +3001,7 @@ useEffect(() => {
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
-      setLoadingProgress10Rep(0);
+      setLoadingProgress10Rep(5);
 
       progressInterval = setInterval(async () => {
         try {

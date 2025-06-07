@@ -1,3 +1,4 @@
+import numpy as np
 class SqueezeTest:
     @staticmethod
     def SqueezeTest(data, verbose=False):

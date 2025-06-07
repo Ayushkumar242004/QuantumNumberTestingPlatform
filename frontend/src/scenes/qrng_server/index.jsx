@@ -95,7 +95,7 @@ const Qrng_Server = () => {
 
   const startFetching = () => {
     if (!isFetching) {
-     
+
       setIsFetching(true);
       fetchRandomNumber();
     }
@@ -278,8 +278,8 @@ const Qrng_Server = () => {
         console.error("Error in connection:", response.data);
       }
     } catch (error) {
-      alert("Error:", error);
-      setBinaryInput("Error fetching data"); // Optionally handle the error state
+      alert("Error: server down");
+      setBinaryInput(""); // Optionally handle the error state
     }
   };
 
@@ -306,8 +306,8 @@ const Qrng_Server = () => {
         console.error("Invalid response format:", response.data);
       }
     } catch (error) {
-      console.error("Error fetching random binary number:", error);
-      setBinaryInput2("Error fetching data"); // Optionally handle the error state
+      alert("Error: server down");
+      setBinaryInput(""); // Optionally handle the error state
     }
   };
 
@@ -331,8 +331,8 @@ const Qrng_Server = () => {
         console.error("Invalid response format:", response.data);
       }
     } catch (error) {
-      console.error("Error fetching random binary number:", error);
-      setBinaryInput3("Error fetching data"); // Optionally handle the error state
+      alert("Error: server down");
+      setBinaryInput(""); // Optionally handle the error state
     }
 
   };
@@ -358,8 +358,8 @@ const Qrng_Server = () => {
         console.error("Invalid response format:", response.data);
       }
     } catch (error) {
-      console.error("Error fetching random binary number:", error);
-      setBinaryInput4("Error fetching data"); // Optionally handle the error state
+      alert("Error: server down");
+      setBinaryInput(""); // Optionally handle the error state
     }
 
   };
@@ -384,8 +384,8 @@ const Qrng_Server = () => {
         console.error("Invalid response format:", response.data);
       }
     } catch (error) {
-      console.error("Error fetching random binary number:", error);
-      setBinaryInput5("Error fetching data"); // Optionally handle the error state
+      alert("Error: server down");
+      setBinaryInput(""); // Optionally handle the error state
     }
   };
 
@@ -1049,8 +1049,17 @@ const Qrng_Server = () => {
     fetchResult();
   }, [binaryInput5]);
 
+
+  const [isGeneratingReportT, setIsGeneratingReportT] = useState(false);
+  const [isGeneratingReportT2, setIsGeneratingReportT2] = useState(false);
+  const [isGeneratingReportT3, setIsGeneratingReportT3] = useState(false);
+  const [isGeneratingReportT4, setIsGeneratingReportT4] = useState(false);
+  const [isGeneratingReportT5, setIsGeneratingReportT5] = useState(false);
+
+
   const handleButtonClick = (type) => {
     if (type === "report") {
+      setIsGeneratingReportT(true);
       fetch("http://localhost:8000/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1058,6 +1067,7 @@ const Qrng_Server = () => {
       })
         .then((response) => response.blob())
         .then((blob) => {
+          setIsGeneratingReportT(false);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
@@ -1079,6 +1089,7 @@ const Qrng_Server = () => {
 
   const handleButtonClick2 = (type) => {
     if (type === "report") {
+      setIsGeneratingReportT(true);
       fetch("http://localhost:8000/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1086,6 +1097,7 @@ const Qrng_Server = () => {
       })
         .then((response) => response.blob())
         .then((blob) => {
+          setIsGeneratingReportT(false);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
@@ -1107,6 +1119,7 @@ const Qrng_Server = () => {
 
   const handleButtonClick3 = (type) => {
     if (type === "report") {
+      setIsGeneratingReportT(true);
       fetch("http://localhost:8000/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1114,6 +1127,7 @@ const Qrng_Server = () => {
       })
         .then((response) => response.blob())
         .then((blob) => {
+          setIsGeneratingReportT(false);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
@@ -1135,6 +1149,7 @@ const Qrng_Server = () => {
 
   const handleButtonClick4 = (type) => {
     if (type === "report") {
+      setIsGeneratingReportT(true);
       fetch("http://localhost:8000/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1142,6 +1157,7 @@ const Qrng_Server = () => {
       })
         .then((response) => response.blob())
         .then((blob) => {
+          setIsGeneratingReportT(false);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
@@ -1163,6 +1179,7 @@ const Qrng_Server = () => {
 
   const handleButtonClick5 = (type) => {
     if (type === "report") {
+      setIsGeneratingReportT(true);
       fetch("http://localhost:8000/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1170,6 +1187,7 @@ const Qrng_Server = () => {
       })
         .then((response) => response.blob())
         .then((blob) => {
+          setIsGeneratingReportT(false);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
@@ -1277,10 +1295,35 @@ const Qrng_Server = () => {
                       textTransform: "none",
                       padding: "10px 20px",
                       borderRadius: "8px",
-                      "&:hover": { backgroundColor: colors.redAccent[500] },
+                      transition: 'all 0.3s ease',
+                      "&:hover": {
+                        backgroundColor: colors.redAccent[500],
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                      },
+                      "&:disabled": {
+                        backgroundColor: colors.grey[700],
+                        color: colors.grey[500],
+                      },
+                      position: 'relative',
                     }}
                   >
                     Generate Report
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: colors.greenAccent[500],
+                        opacity: isGeneratingReportT ? 1 : 0,
+                        transition: 'opacity 0.3s ease',
+                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
+                        pointerEvents: 'none',
+                      }}
+                    />
                   </Button>
                   {/* New Button for Saving Binary Number */}
                   <button
@@ -1456,10 +1499,35 @@ const Qrng_Server = () => {
                       textTransform: "none",
                       padding: "10px 20px",
                       borderRadius: "8px",
-                      "&:hover": { backgroundColor: colors.redAccent[500] },
+                      transition: 'all 0.3s ease',
+                      "&:hover": {
+                        backgroundColor: colors.redAccent[500],
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                      },
+                      "&:disabled": {
+                        backgroundColor: colors.grey[700],
+                        color: colors.grey[500],
+                      },
+                      position: 'relative',
                     }}
                   >
                     Generate Report
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: colors.greenAccent[500],
+                        opacity: isGeneratingReportT2 ? 1 : 0,
+                        transition: 'opacity 0.3s ease',
+                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
+                        pointerEvents: 'none',
+                      }}
+                    />
                   </Button>
                   {/* New Button for Saving Binary Number */}
                   <button
@@ -1625,7 +1693,7 @@ const Qrng_Server = () => {
                   >
                     Stop Fetching
                   </button>
-                  <Button
+ <Button
                     variant="contained"
                     onClick={() => handleButtonClick3("report")}
                     disabled={loadingProgress3 < 100 || loadingProgress3n < 100}
@@ -1635,10 +1703,35 @@ const Qrng_Server = () => {
                       textTransform: "none",
                       padding: "10px 20px",
                       borderRadius: "8px",
-                      "&:hover": { backgroundColor: colors.redAccent[500] },
+                      transition: 'all 0.3s ease',
+                      "&:hover": {
+                        backgroundColor: colors.redAccent[500],
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                      },
+                      "&:disabled": {
+                        backgroundColor: colors.grey[700],
+                        color: colors.grey[500],
+                      },
+                      position: 'relative',
                     }}
                   >
                     Generate Report
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: colors.greenAccent[500],
+                        opacity: isGeneratingReportT3 ? 1 : 0,
+                        transition: 'opacity 0.3s ease',
+                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
+                        pointerEvents: 'none',
+                      }}
+                    />
                   </Button>
                   {/* New Button for Saving Binary Number */}
                   <button
@@ -1814,10 +1907,35 @@ const Qrng_Server = () => {
                       textTransform: "none",
                       padding: "10px 20px",
                       borderRadius: "8px",
-                      "&:hover": { backgroundColor: colors.redAccent[500] },
+                      transition: 'all 0.3s ease',
+                      "&:hover": {
+                        backgroundColor: colors.redAccent[500],
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                      },
+                      "&:disabled": {
+                        backgroundColor: colors.grey[700],
+                        color: colors.grey[500],
+                      },
+                      position: 'relative',
                     }}
                   >
                     Generate Report
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: colors.greenAccent[500],
+                        opacity: isGeneratingReportT4 ? 1 : 0,
+                        transition: 'opacity 0.3s ease',
+                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
+                        pointerEvents: 'none',
+                      }}
+                    />
                   </Button>
                   {/* New Button for Saving Binary Number */}
                   <button
@@ -1982,7 +2100,7 @@ const Qrng_Server = () => {
                   >
                     Stop Fetching
                   </button>
-                  <Button
+                 <Button
                     variant="contained"
                     onClick={() => handleButtonClick5("report")}
                     disabled={loadingProgress5 < 100 || loadingProgress5n < 100}
@@ -1992,10 +2110,35 @@ const Qrng_Server = () => {
                       textTransform: "none",
                       padding: "10px 20px",
                       borderRadius: "8px",
-                      "&:hover": { backgroundColor: colors.redAccent[500] },
+                      transition: 'all 0.3s ease',
+                      "&:hover": {
+                        backgroundColor: colors.redAccent[500],
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                      },
+                      "&:disabled": {
+                        backgroundColor: colors.grey[700],
+                        color: colors.grey[500],
+                      },
+                      position: 'relative',
                     }}
                   >
                     Generate Report
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: colors.greenAccent[500],
+                        opacity: isGeneratingReportT5 ? 1 : 0,
+                        transition: 'opacity 0.3s ease',
+                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
+                        pointerEvents: 'none',
+                      }}
+                    />
                   </Button>
                   {/* New Button for Saving Binary Number */}
                   <button
