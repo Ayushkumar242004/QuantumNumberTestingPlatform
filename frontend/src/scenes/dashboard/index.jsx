@@ -219,7 +219,7 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgressn(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             alert(`Error: ${err.message}`);
@@ -265,7 +265,7 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgressd(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             alert(`Error: ${err.message}`);
@@ -403,7 +403,14 @@ const Dashboard = () => {
       // Store the current time when the file is uploaded
       const currentTime = new Date().toLocaleTimeString();
       setUploadTime(currentTime); // Update the state with the current time
-  
+
+       const fileUploadLog = JSON.parse(localStorage.getItem("fileUploadLog") || "[]");
+    fileUploadLog.push({
+      filename: selectedFile.name,
+      uploadTime: currentTime,
+      scheduledTime: debouncedScheduledTime // or whatever time info you want to save
+    });
+    localStorage.setItem("fileUploadLog", JSON.stringify(fileUploadLog));
       // Reset the file input to allow the same file to be selected again
       event.target.value = "";
     };
@@ -485,7 +492,7 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${jobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             console.log(percent);
             setLoadingProgress2(percent);
           } catch (err) {
@@ -561,7 +568,7 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress2c(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             alert(`Error: ${err.message}`);
@@ -599,7 +606,7 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${jobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
 
             setLoadingProgress(percent);
           } catch (err) {
@@ -682,7 +689,7 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgressc(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             alert(`Error: ${err.message}`);
@@ -743,7 +750,7 @@ const Dashboard = () => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_server/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 52) * 100);
+          const percent = Math.round((completed / 60) * 100);
           setLoadingProgressRep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err.message}`);
@@ -786,7 +793,7 @@ const Dashboard = () => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_server/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 52) * 100);
+          const percent = Math.round((completed / 60) * 100);
 
           setLoadingProgress2Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {

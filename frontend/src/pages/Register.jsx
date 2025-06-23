@@ -186,6 +186,7 @@ export default function Register() {
   };
 
   const handleSubmit = async (e) => {
+    console.log("1");
     e.preventDefault();
     if (isLoading) return;
     if (!Object.values(passwordStrength).every(Boolean)) {
@@ -202,6 +203,8 @@ export default function Register() {
         "http://127.0.0.1:8000/api/register/",
         formData
       );
+      console.log("2");
+      console.log("response:",response);
       localStorage.setItem("username", formData.username);
       const { error } = await supabase
         .from("users")
@@ -287,34 +290,9 @@ export default function Register() {
                 className="toggle-password"
                 onClick={togglePasswordVisibility}
               >
-                {showPassword ? <FontAwesomeIcon icon="fa-solid fa-eye" style={{ color: "#B197FC" }} /> : <FontAwesomeIcon icon="fa-solid fa-eye-slash" style={{ color: "#B197FC" }} />}
+                {showPassword ? <FontAwesomeIcon icon="fa-solid " style={{ color: "#B197FC" }} /> : <FontAwesomeIcon icon="fa-solid" style={{ color: "#B197FC" }} />}
               </button>
             </div>
-            {/* <div className="password-strength">
-              <div className="strength-meter">
-                <div
-                  className={`strength-bar ${passwordStrength.length && passwordStrength.uppercase && passwordStrength.lowercase && passwordStrength.number && passwordStrength.specialChar ? 'strong' :
-                    passwordStrength.length && (passwordStrength.uppercase || passwordStrength.lowercase || passwordStrength.number || passwordStrength.specialChar) ? 'medium' : 'weak'}`}
-                ></div>
-              </div>
-              <ul className="strength-rules">
-                <li className={passwordStrength.length ? "valid" : "invalid"}>
-                  At least 8 characters
-                </li>
-                <li className={passwordStrength.uppercase ? "valid" : "invalid"}>
-                  Uppercase letter
-                </li>
-                <li className={passwordStrength.lowercase ? "valid" : "invalid"}>
-                  Lowercase letter
-                </li>
-                <li className={passwordStrength.number ? "valid" : "invalid"}>
-                  Number
-                </li>
-                <li className={passwordStrength.specialChar ? "valid" : "invalid"}>
-                  Special character
-                </li>
-              </ul>
-            </div> */}
           </div>
           <div className="form-group">
             <label>Confirm Password</label>

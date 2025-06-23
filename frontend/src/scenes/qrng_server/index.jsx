@@ -640,7 +640,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgressn(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -687,7 +687,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -732,7 +732,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress2n(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -773,7 +773,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress2(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -815,7 +815,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress3n(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -858,7 +858,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress3(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -899,7 +899,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress4n(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -942,7 +942,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress4(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -980,7 +980,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress5n(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -1023,7 +1023,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress5(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);

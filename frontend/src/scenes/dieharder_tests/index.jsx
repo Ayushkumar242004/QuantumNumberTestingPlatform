@@ -1635,7 +1635,7 @@ useEffect(() => {
              try {
                const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
                const completed = progressRes.data.progress || 0;
-               const percent = Math.round((completed / 20) * 100);
+               const percent = Math.round((completed / 22) * 100);
                setLoadingProgress(prev => (percent > prev ? percent : prev));
                await upsertProgress(percent, userId);
              } catch (err) {
@@ -1740,7 +1740,7 @@ useEffect(() => {
               `http://localhost:8000/get_progress_dieharder/${currentJobId}`
             );
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress2(prev => (percent > prev ? percent : prev));
             await upsertProgress2(percent, userId);
           } catch (err) {
@@ -1837,7 +1837,7 @@ useEffect(() => {
               `http://localhost:8000/get_progress_dieharder/${currentJobId}`
             );
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress3(prev => (percent > prev ? percent : prev));
             await upsertProgress3(percent, userId);
           } catch (err) {
@@ -1934,7 +1934,7 @@ useEffect(() => {
               `http://localhost:8000/get_progress_dieharder/${currentJobId}`
             );
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress4(prev => (percent > prev ? percent : prev));
             await upsertProgress4(percent, userId);
           } catch (err) {
@@ -2030,7 +2030,7 @@ useEffect(() => {
               `http://localhost:8000/get_progress_dieharder/${currentJobId}`
             );
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress5(prev => (percent > prev ? percent : prev));
             await upsertProgress5(percent, userId);
           } catch (err) {
@@ -2126,7 +2126,7 @@ useEffect(() => {
               `http://localhost:8000/get_progress_dieharder/${currentJobId}`
             );
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress6(prev => (percent > prev ? percent : prev));
             await upsertProgress6(percent, userId);
           } catch (err) {
@@ -2222,7 +2222,7 @@ useEffect(() => {
               `http://localhost:8000/get_progress_dieharder/${currentJobId}`
             );
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress7(prev => (percent > prev ? percent : prev));
             await upsertProgress7(percent, userId);
           } catch (err) {
@@ -2318,7 +2318,7 @@ useEffect(() => {
               `http://localhost:8000/get_progress_dieharder/${currentJobId}`
             );
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress8(prev => (percent > prev ? percent : prev));
             await upsertProgress8(percent, userId);
           } catch (err) {
@@ -2414,7 +2414,7 @@ useEffect(() => {
               `http://localhost:8000/get_progress_dieharder/${currentJobId}`
             );
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress9(prev => (percent > prev ? percent : prev));
             await upsertProgress9(percent, userId);
           } catch (err) {
@@ -2510,7 +2510,7 @@ useEffect(() => {
               `http://localhost:8000/get_progress_dieharder/${currentJobId}`
             );
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 20) * 100);
+            const percent = Math.round((completed / 22) * 100);
             setLoadingProgress10(prev => (percent > prev ? percent : prev));
             await upsertProgress10(percent, userId);
           } catch (err) {
@@ -2552,8 +2552,6 @@ useEffect(() => {
   };
 }, [binaryInput10, debouncedScheduledTime10]);
 
-
-
   const handleButtonClick = (type) => {
     if (type === "report") {
 
@@ -2566,7 +2564,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgressRep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2601,7 +2599,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgressGr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -2640,7 +2638,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgress2Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2677,7 +2675,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgress2Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -2717,7 +2715,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgress3Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2752,7 +2750,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgress3Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -2792,7 +2790,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgress4Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2827,7 +2825,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgress4Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -2867,7 +2865,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgress5Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2902,7 +2900,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgress5Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -2944,7 +2942,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgress6Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2980,7 +2978,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgress6Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -3021,7 +3019,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgress7Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -3056,7 +3054,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgress7Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -3098,7 +3096,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgress8Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -3133,7 +3131,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgress8Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -3174,7 +3172,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgress9Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -3209,7 +3207,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgress9Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -3249,7 +3247,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 30) * 100);
 
           setLoadingProgress10Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -3284,7 +3282,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 20) * 100);
+          const percent = Math.round((completed / 22) * 100);
           setLoadingProgress10Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 

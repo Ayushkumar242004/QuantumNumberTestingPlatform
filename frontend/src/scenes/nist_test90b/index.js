@@ -2263,7 +2263,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgressRep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2303,7 +2303,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgressGr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
          
@@ -2346,7 +2346,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgress2Rep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2386,7 +2386,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgress2Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
         
@@ -2429,7 +2429,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgress3Rep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2469,7 +2469,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgress3Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
          
@@ -2512,7 +2512,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgress4Rep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2552,7 +2552,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgress4Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
          
@@ -2595,7 +2595,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgress5Rep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2635,7 +2635,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgress5Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
          
@@ -2678,7 +2678,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgress6Rep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2718,7 +2718,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgress6Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
          
@@ -2761,7 +2761,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgress7Rep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2801,7 +2801,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgress7Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
         
@@ -2844,7 +2844,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgress8Rep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2884,7 +2884,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgress8Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
         
@@ -2927,7 +2927,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgress9Rep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2967,7 +2967,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgress9Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
          
@@ -3010,7 +3010,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgress10Rep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -3050,7 +3050,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 11) * 100);
+          const percent = Math.round((completed / 7) * 100);
           setLoadingProgress10Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           

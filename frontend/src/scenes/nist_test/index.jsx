@@ -788,6 +788,7 @@ const Nist_tests = () => {
 
 
 
+
   // Handle file upload
   const handleFileUpload = () => {
     fileInputRef.current.click();
@@ -821,6 +822,7 @@ const Nist_tests = () => {
   };
 
   const handleFileChange = async (event) => {
+    console.log("hi")
     const selectedFile = event.target.files[0];
     if (!selectedFile) return; // Handle cases where no file is selected
 
@@ -1680,9 +1682,9 @@ const handleFileChange5 = async (event) => {
         try {
           progressInterval = setInterval(async () => {
             try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              const progressRes = await axios.get(`http://127.0.0.1:8000/get_progress/${currentJobId}`);
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 17) * 100);
+              const percent = Math.round((completed / 18) * 100);
               setLoadingProgress(prev => (percent > prev ? percent : prev));
               await upsertProgress(percent, userId);
             } catch (err) {
@@ -1775,7 +1777,7 @@ const handleFileChange5 = async (event) => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 17) * 100);
+              const percent = Math.round((completed / 18) * 100);
               setLoadingProgress2(prev => (percent > prev ? percent : prev));
               await upsertProgress(percent, userId);
             } catch (err) {
@@ -1866,7 +1868,7 @@ const handleFileChange5 = async (event) => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress3(prev => (percent > prev ? percent : prev));
             await upsertProgress(percent, userId);
           } catch (err) {
@@ -1957,7 +1959,7 @@ const handleFileChange5 = async (event) => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress4(prev => (percent > prev ? percent : prev));
             await upsertProgress(percent, userId);
           } catch (err) {
@@ -2048,7 +2050,7 @@ const handleFileChange5 = async (event) => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress5(prev => (percent > prev ? percent : prev));
             await upsertProgress(percent, userId);
           } catch (err) {
@@ -2140,7 +2142,7 @@ const handleFileChange5 = async (event) => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress6(prev => (percent > prev ? percent : prev));
             await upsertProgress(percent, userId);
           } catch (err) {
@@ -2231,7 +2233,7 @@ const handleFileChange5 = async (event) => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress7(prev => (percent > prev ? percent : prev));
             await upsertProgress(percent, userId);
           } catch (err) {
@@ -2323,7 +2325,7 @@ useEffect(() => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress8(prev => (percent > prev ? percent : prev));
             await upsertProgress(percent, userId);
           } catch (err) {
@@ -2414,7 +2416,7 @@ useEffect(() => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress9(prev => (percent > prev ? percent : prev));
             await upsertProgress(percent, userId);
           } catch (err) {
@@ -2501,7 +2503,7 @@ useEffect(() => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 17) * 100);
+            const percent = Math.round((completed / 18) * 100);
             setLoadingProgress10(prev => (percent > prev ? percent : prev));
             await upsertProgress(percent, userId);
           } catch (err) {
@@ -2556,7 +2558,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgressRep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2592,13 +2594,12 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 16) * 100);
           setLoadingProgressGr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
         }
       }, 1000);
-
 
       fetch("http://localhost:8000/graph-generation/", {
         method: "POST",
@@ -2631,7 +2632,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgress2Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2668,7 +2669,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed /16) * 100);
           setLoadingProgress2Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
@@ -2708,7 +2709,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgress3Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2743,7 +2744,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 16) * 100);
           setLoadingProgress3Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
@@ -2783,7 +2784,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgress4Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2818,7 +2819,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 16) * 100);
           setLoadingProgress4Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
@@ -2858,7 +2859,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgress5Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2893,7 +2894,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 16) * 100);
           setLoadingProgress5Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
@@ -2935,7 +2936,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgress6Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -2971,7 +2972,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 16) * 100);
           setLoadingProgress6Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
@@ -3012,7 +3013,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgress7Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -3047,7 +3048,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 16) * 100);
           setLoadingProgress7Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
@@ -3089,7 +3090,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgress8Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -3124,7 +3125,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 16) * 100);
           setLoadingProgress8Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
@@ -3165,7 +3166,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgress9Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -3200,7 +3201,7 @@ useEffect(() => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 16) * 100);
           setLoadingProgress9Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
@@ -3237,10 +3238,10 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 25) * 100);
 
           setLoadingProgress10Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
@@ -3272,10 +3273,10 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 18) * 100);
+          const percent = Math.round((completed / 16) * 100);
           setLoadingProgress10Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
