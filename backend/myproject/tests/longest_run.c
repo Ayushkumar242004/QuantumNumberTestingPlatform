@@ -411,9 +411,16 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    for (int i = 0; i < n; i++) {
-        epsilon[i] = atoi(argv[i + 2]);
+    FILE *fp = fopen(argv[2], "r");
+    if (!fp) {
+        fprintf(stderr, "Failed to open input file.\n");
+        free(epsilon);
+        return 1;
     }
+    for (int i = 0; i < n; i++) {
+        fscanf(fp, "%d", &epsilon[i]);
+    }
+    fclose(fp);
 
     LongestRunOfOnes(n);  // Call test function
 

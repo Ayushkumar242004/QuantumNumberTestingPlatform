@@ -43,7 +43,9 @@ LOGGING = {
         },
     },
 }
+# settings.py
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -62,7 +64,7 @@ CORS_ORIGIN_WHITELIST = ['http://localhost:3000',
                        
 ]
 
-
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 INSTALLED_APPS = [
@@ -187,7 +189,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "accounts.CustomUser"
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
@@ -238,6 +240,7 @@ SIMPLE_JWT = {
 }
 
 
-CORS_ALLOW_ALL_ORIGINS = True
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 

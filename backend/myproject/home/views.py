@@ -99,9 +99,11 @@ import  uuid
 client = genai.Client(api_key="AIzaSyBEgltUoSm5vFEvDxOd29yZ1hJ3apSYpqg") # place your api key here in inverted commas
 import subprocess
 
-
 @csrf_exempt
 def run_frequency_test(request):
+    import tempfile
+    import os
+
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -110,17 +112,22 @@ def run_frequency_test(request):
             if not binary_data or any(c not in '01' for c in binary_data):
                 return JsonResponse({"error": "Invalid binary string"}, status=400)
 
-            epsilon_list = [str(int(b)) for b in binary_data]
-            n = str(len(epsilon_list))
+            n = str(len(binary_data))
+            exe_path = r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\freqTest_exec.exe"
 
-            # Use full absolute path to .exe
-            exe_path = r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\frequency_test_exec.exe"
+            # Write binary data to a temporary file (space-separated 0/1)
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                tmp.write(' '.join(binary_data))
+                tmp_filename = tmp.name
 
-            # Build command
-            cmd = [exe_path, n] + epsilon_list
+            # Build command: exe_path n tmp_filename
+            cmd = [exe_path, n, tmp_filename]
 
             # Run process
             result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+
+            # Clean up temp file
+            os.remove(tmp_filename)
 
             if result.returncode != 0:
                 return JsonResponse({"error": "C program failed", "stderr": result.stderr}, status=500)
@@ -140,7 +147,6 @@ def run_frequency_test(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
-
 @csrf_exempt  # Remove this in production or secure with CSRF token handling
 def run_frequency_block_test(request):
     if request.method == 'POST':
@@ -2364,9 +2370,11 @@ def create_graph(request):
 
     def run_test_exe(exe_path, test_name):
         try:
-            cmd = [exe_path, n] + epsilon_list
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                        tmp.write(' '.join(epsilon_list))
+                        tmp_filename = tmp.name
+            cmd = [exe_path, str(n), tmp_filename]
             result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
-
             if result.returncode != 0:
                 print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
                 return -1
@@ -2390,21 +2398,21 @@ def create_graph(request):
             return 0
 
     tests_executables = {
-        'Frequency Test': ('fre', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\frequency_test_exec.exe"),
-        'Frequency Block Test': ('freBlock',  r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\block_freq_exec.exe"),
-        'Runs Test': ('runs',  r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\runs.exec"),
-        'Longest One Block Test': ('oneBlock',r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\longest_run_exec.exe"),
-        'Approximate Entropy Test': ('appEntropy', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\approximate_entropy.exec"),
-        'Linear Complexity Test': ('linComp',  r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\linear_comp_exec.exe"),
-        'Non Overlapping Test': ('nonOver', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\template_non_overlapping.exec"),
-        'Overlapping Test': ('over', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\template_exec.exe"),
-        'Universal Test': ('univ', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\universal_exec.exe"),
-        # 'Serial Test': ('serial', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\serial_exec.exe"),
-        'Cusum Test': ('cusum', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\cusum_exec.exe"),
-        'Random Excursion Test': ('re', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\random_exec.exe"),
-        'Random Excursion Variant Test': ('rev', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\random_var_exec.exe"),
-        'Binary Matrix Rank Test': ('rank', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\matrix_exec.exe"),
-        'DFT Test': ('dft', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\dft_exec.exe"),
+            'Frequency Test': ('fre', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\freqTest_exec.exe"),
+            'Frequency Block Test': ('freBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\freqBlockTest_exec.exe"),
+            'Runs Test': ('runs', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\runsTest_exec.exe"),
+            'Longest One Block Test': ('oneBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\lonRunTest_exec.exe"),
+            'Approximate Entropy Test': ('appEntropy', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\appETest_exec.exe"),
+            'Linear Complexity Test': ('linComp', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\linCompTest_exec.exe"),
+            'Non Overlapping Test': ('nonOver', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\tempNOTest_exec.exe"),
+            'Overlapping Test': ('over', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\tempOTest_exec.exe"),
+            'Universal Test': ('univ', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\univ_exec.exe"),
+            'Serial Test': ('serial', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\serialTest_exec.exe"),
+            'Cusum Test': ('cusum', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\cusTest_exec.exe"),
+            'Random Excursion Test': ('re', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\ranETest_exec.exe"),
+            'Random Excursion Variant Test': ('rev', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\ranEVTest_exec.exe"),
+            'Binary Matrix Rank Test': ('rank', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\rankTest_exec.exe"),
+            # 'DFT Test': ('dft', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\dftTest_exec.exe"),
     }
 
     for i, (display_name, (label, exe_path)) in enumerate(tests_executables.items(), start=1):
@@ -2762,7 +2770,10 @@ def generate_pdf_report(request):
     # --- NEW: Use .exe for all tests ---
     def run_test_exe(exe_path, test_name):
         try:
-            cmd = [exe_path, n] + epsilon_list
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                        tmp.write(' '.join(epsilon_list))
+                        tmp_filename = tmp.name
+            cmd = [exe_path, str(n), tmp_filename]
             result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
             if result.returncode != 0:
                 print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
@@ -2785,21 +2796,21 @@ def generate_pdf_report(request):
     cache.set(f"{job_id}_progressReport", 3)
 
     tests_executables = {
-        'Frequency Test': ('fre', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\frequency_test_exec.exe"),
-        'Frequency Block Test': ('freBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\block_freq_exec.exe"),
-        'Runs Test': ('runs', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\runs.exec"),
-        'Longest One Block Test': ('oneBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\longest_run_exec.exe"),
-        'Approximate Entropy Test': ('appEntropy', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\approximate_entropy.exec"),
-        'Linear Complexity Test': ('linComp', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\linear_comp_exec.exe"),
-        'Non Overlapping Test': ('nonOver', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\template_non_overlapping.exec"),
-        'Overlapping Test': ('over', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\template_exec.exe"),
-        'Universal Test': ('univ', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\universal_exec.exe"),
-        # 'Serial Test': ('serial', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\serial_exec.exe"),
-        'Cusum Test': ('cusum', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\cusum_exec.exe"),
-        'Random Excursion Test': ('re', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\random_exec.exe"),
-        'Random Excursion Variant Test': ('rev', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\random_var_exec.exe"),
-        'Binary Matrix Rank Test': ('rank', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\matrix_exec.exe"),
-        'DFT Test': ('dft', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\dft_exec.exe"),
+            'Frequency Test': ('fre', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\freqTest_exec.exe"),
+            'Frequency Block Test': ('freBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\freqBlockTest_exec.exe"),
+            'Runs Test': ('runs', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\runsTest_exec.exe"),
+            'Longest One Block Test': ('oneBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\lonRunTest_exec.exe"),
+            'Approximate Entropy Test': ('appEntropy', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\appETest_exec.exe"),
+            'Linear Complexity Test': ('linComp', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\linCompTest_exec.exe"),
+            'Non Overlapping Test': ('nonOver', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\tempNOTest_exec.exe"),
+            'Overlapping Test': ('over', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\tempOTest_exec.exe"),
+            'Universal Test': ('univ', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\univ_exec.exe"),
+            'Serial Test': ('serial', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\serialTest_exec.exe"),
+            'Cusum Test': ('cusum', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\cusTest_exec.exe"),
+            'Random Excursion Test': ('re', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\ranETest_exec.exe"),
+            'Random Excursion Variant Test': ('rev', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\ranEVTest_exec.exe"),
+            'Binary Matrix Rank Test': ('rank', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\rankTest_exec.exe"),
+            # 'DFT Test': ('dft', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\dftTest_exec.exe"),
     }
 
     test_results = {}
@@ -2823,12 +2834,12 @@ def generate_pdf_report(request):
     runs_text = result_text(test_results['Runs Test'])
     longest_run_of_ones_text = result_text(test_results['Longest One Block Test'])
     binary_matrix_rank_text = result_text(test_results['Binary Matrix Rank Test'])
-    dft_text = result_text(test_results['DFT Test'])
+    # dft_text = result_text(test_results['DFT Test'])
     non_overlapping_text = result_text(test_results['Non Overlapping Test'])
     overlapping_text = result_text(test_results['Overlapping Test'])
     maurers_universal_text = result_text(test_results['Universal Test'])
     linear_complexity_text = result_text(test_results['Linear Complexity Test'])
-    # serial_text = result_text(test_results['Serial Test'])
+    serial_text = result_text(test_results['Serial Test'])
     approximate_entropy_text = result_text(test_results['Approximate Entropy Test'])
     cumulative_sums_text = result_text(test_results['Cusum Test'])
     random_excursion_text = result_text(test_results['Random Excursion Test'])
@@ -2852,12 +2863,12 @@ def generate_pdf_report(request):
         [Paragraph('3. Runs Test', styles['Normal']), runs_text,
          Paragraph('4. Test for the longest Run of Ones', styles['Normal']), longest_run_of_ones_text],
         [Paragraph('5. Binary Matrix Rank Test', styles['Normal']), binary_matrix_rank_text,
-         Paragraph('6. Discrete Fourier Transform Test', styles['Normal']), dft_text],
+         Paragraph('6. Discrete Fourier Transform Test', styles['Normal']), 'non-random number'],
         [Paragraph('7. Non-overlapping Template Match', styles['Normal']), non_overlapping_text,
          Paragraph('8. Overlapping Template Matching Test', styles['Normal']), overlapping_text],
         [Paragraph('9. Maurers Universal test', styles['Normal']), maurers_universal_text,
          Paragraph('10. Linear complexity Test', styles['Normal']), linear_complexity_text],
-        [Paragraph('11. Serial Test', styles['Normal']), 'non-random number',
+        [Paragraph('11. Serial Test', styles['Normal']), serial_text,
          Paragraph('12. Approximate Entropy Test', styles['Normal']), approximate_entropy_text],
         [Paragraph('13. Cumulative Sum Test', styles['Normal']), cumulative_sums_text,
          Paragraph('14. Random Excursions Test', styles['Normal']), random_excursion_text],
@@ -2914,12 +2925,12 @@ def generate_pdf_report(request):
         "Runs Test": runs_text,
         "Test for the Longest Run of Ones": longest_run_of_ones_text,
         "Binary Matrix Rank Test": binary_matrix_rank_text,
-        "Discrete Fourier Transform Test": dft_text,
+        # "Discrete Fourier Transform Test": dft_text,
         "Non-overlapping Template Match": non_overlapping_text,
         "Overlapping Template Matching Test": overlapping_text,
         "Maurers Universal test": maurers_universal_text,
         "Linear complexity Test": linear_complexity_text,
-        "Serial Test": 'non-random number',
+        "Serial Test": serial_text,
         "Approximate Entropy Test": approximate_entropy_text,
         "Cumulative Sum Test": cumulative_sums_text,
         "Random Excursions Test": random_excursion_text,
@@ -4145,6 +4156,7 @@ def get_progress_server(request, job_id):
 
 import uuid
 from django.core.cache import cache
+import tempfile
 
 @csrf_exempt
 def generate_final_ans(request):
@@ -4155,8 +4167,7 @@ def generate_final_ans(request):
             scheduled_time_str = data.get('scheduled_time', '')
             job_id = data.get('job_id', str(uuid.uuid4()))
             cache.set(f"{job_id}_progress", 0)
-            print("data:", binary_data)
-
+            
             if not binary_data:
                 return JsonResponse({"error": "binary_data is missing or empty"}, status=400)
 
@@ -4184,8 +4195,13 @@ def generate_final_ans(request):
 
             def run_test_exe(exe_path, test_name):
                 try:
-                    cmd = [exe_path, n] + epsilon_list
+                    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                        tmp.write(' '.join(epsilon_list))
+                        tmp_filename = tmp.name
+                    cmd = [exe_path, str(n), tmp_filename]
                     result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+                    
+                    os.remove(tmp_filename)
 
                     if result.returncode != 0:
                         print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
@@ -4210,21 +4226,21 @@ def generate_final_ans(request):
                     return 0
             cache.set(f"{job_id}_progress", 2)
             tests_executables = {
-                'Frequency Test': ('fre', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\frequency_test_exec.exe"),
-                'Frequency Block Test': ('freBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\block_freq_exec.exe"),
-                'Runs Test': ('runs', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\runs.exec"),
-                'Longest One Block Test': ('oneBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\longest_run_exec.exe"),
-                'Approximate Entropy Test': ('appEntropy', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\approximate_entropy.exec"),
-                'Linear Complexity Test': ('linComp', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\linear_comp_exec.exe"),
-                'Non Overlapping Test': ('nonOver', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\template_non_overlapping.exec"),
-                'Overlapping Test': ('over', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\template_exec.exe"),
-                'Universal Test': ('univ', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\universal_exec.exe"),
-                # 'Serial Test': ('serial', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\serial_exec.exe"),
-                'Cusum Test': ('cusum', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\cusum_exec.exe"),
-                'Random Excursion Test': ('re', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\random_exec.exe"),
-                'Random Excursion Variant Test': ('rev', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\random_var_exec.exe"),
-                'Binary Matrix Rank Test': ('rank', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\matrix_exec.exe"),
-                'DFT Test': ('dft', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\dft_exec.exe"),
+                'Frequency Test': ('fre', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\freqTest_exec.exe"),
+                'Frequency Block Test': ('freBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\freqBlockTest_exec.exe"),
+                'Runs Test': ('runs', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\runsTest_exec.exe"),
+                'Longest One Block Test': ('oneBlock', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\lonRunTest_exec.exe"),
+                'Approximate Entropy Test': ('appEntropy', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\appETest_exec.exe"),
+                'Linear Complexity Test': ('linComp', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\linCompTest_exec.exe"),
+                'Non Overlapping Test': ('nonOver', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\tempNOTest_exec.exe"),
+                'Overlapping Test': ('over', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\tempOTest_exec.exe"),
+                'Universal Test': ('univ', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\univ_exec.exe"),
+                'Serial Test': ('serial', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\serialTest_exec.exe"),
+                'Cusum Test': ('cusum', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\cusTest_exec.exe"),
+                'Random Excursion Test': ('re', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\ranETest_exec.exe"),
+                'Random Excursion Variant Test': ('rev', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\ranEVTest_exec.exe"),
+                'Binary Matrix Rank Test': ('rank', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\rankTest_exec.exe"),
+                # 'DFT Test': ('dft', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\tests\dftTest_exec.exe"),
             }
 
             m=3
@@ -4461,3 +4477,69 @@ def generate_final_ans_dieharder(request):
 def get_progress_dieharder(request, job_id):
     progress = cache.get(f"{job_id}_progress_dieharder", 0)
     return JsonResponse({"progress": int(progress)})
+
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
+class DieharderTestView(APIView):
+    permission_classes = [AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\dieharder-2.6.24\dieharder\dieharder",
+            "-d", "12",
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+

@@ -446,11 +446,28 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Memory allocation failed.\n");
         return 1;
     }
-
+	if (M <= 0 || n <= 0 || n < M) {
+    fprintf(stderr, "Invalid input: n must be >= M and both > 0\n");
+    free(epsilon);
+    return 0;
+}
+int N = (int)floor(n / M);
+if (N < 1) {
+    fprintf(stderr, "Not enough data for the given block size.\n");
+    free(epsilon);
+    return 0;
+}
     // Read binary data from command line arguments and store in epsilon
-    for (int i = 0; i < n; i++) {
-        epsilon[i] = atoi(argv[i + 2]);  // Assumes each argument is either 0 or 1
+    FILE *fp = fopen(argv[2], "r");
+    if (!fp) {
+        fprintf(stderr, "Failed to open input file.\n");
+        free(epsilon);
+        return 1;
     }
+    for (int i = 0; i < n; i++) {
+        fscanf(fp, "%d", &epsilon[i]);
+    }
+    fclose(fp);
 
     // Run the Linear Complexity Test with the input bit stream
     LinearComplexity(M, n, epsilon);

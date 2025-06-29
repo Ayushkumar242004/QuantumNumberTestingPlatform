@@ -44,7 +44,7 @@ void Universal(int n, int *epsilon) {
     K = (int)(floor(n / L) - Q);
     p = (int)pow(2, L);
 
-    if (L < 6 || L > 16 || Q < 10 * pow(2, L) || (T = calloc(p, sizeof(long))) == NULL) {
+    if (L < 6 || L > 16 || Q < 10 * pow(2, L) || (T = (long *)calloc(p, sizeof(long))) == NULL) {
         printf("0.000000\n");
         return;
     }
@@ -92,19 +92,27 @@ int main(int argc, char *argv[]) {
     }
 
     int n = atoi(argv[1]);
-    if (argc != n + 2) {
-        fprintf(stderr, "Expected %d bits, got %d.\n", n, argc - 2);
-        return 1;
-    }
+    if (argc != 3) {
+    fprintf(stderr, "Usage: %s <n> <input_file>\n", argv[0]);
+    return 1;
+}
 
-    int *epsilon = malloc(n * sizeof(int));
+    int *epsilon = (int *)malloc(n * sizeof(int));
     if (!epsilon) {
         fprintf(stderr, "Memory allocation failed.\n");
         return 1;
     }
 
-    for (int i = 0; i < n; i++)
-        epsilon[i] = atoi(argv[i + 2]);
+    FILE *fp = fopen(argv[2], "r");
+    if (!fp) {
+        fprintf(stderr, "Failed to open input file.\n");
+        free(epsilon);
+        return 1;
+    }
+    for (int i = 0; i < n; i++) {
+        fscanf(fp, "%d", &epsilon[i]);
+    }
+    fclose(fp);
 
     Universal(n, epsilon);
     free(epsilon);

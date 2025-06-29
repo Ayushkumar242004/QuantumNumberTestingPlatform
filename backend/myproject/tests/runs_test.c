@@ -54,10 +54,10 @@ int main(int argc, char *argv[]) {
 
     int n = atoi(argv[1]);
 
-    if (argc != n + 2) {
-        fprintf(stderr, "Expected %d bits, but got %d arguments.\n", n, argc - 2);
-        return 1;
-    }
+    if (argc != 3) {
+    fprintf(stderr, "Usage: %s <n> <input_file>\n", argv[0]);
+    return 1;
+}
 
     int *epsilon = (int *)malloc(n * sizeof(int));
     if (!epsilon) {
@@ -65,9 +65,16 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    for (int i = 0; i < n; i++) {
-        epsilon[i] = atoi(argv[i + 2]);
+    FILE *fp = fopen(argv[2], "r");
+    if (!fp) {
+        fprintf(stderr, "Failed to open input file.\n");
+        free(epsilon);
+        return 1;
     }
+    for (int i = 0; i < n; i++) {
+        fscanf(fp, "%d", &epsilon[i]);
+    }
+    fclose(fp);
 
     Runs(n, epsilon);
     free(epsilon);

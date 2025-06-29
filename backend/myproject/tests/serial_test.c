@@ -445,15 +445,17 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	for (int i = 0; i < n; i++) {
-		if (argv[i + 2][0] != '0' && argv[i + 2][0] != '1') {
-			fprintf(stderr, "Invalid bit: %s\n", argv[i + 2]);
-			free(epsilon);
-			return 1;
-		}
-		epsilon[i] = (argv[i + 2][0] == '1') ? 1 : 0;
-	}
-
+	FILE *fp = fopen(argv[2], "r");
+    if (!fp) {
+        fprintf(stderr, "Failed to open input file.\n");
+        free(epsilon);
+        return 1;
+    }
+    for (int i = 0; i < n; i++) {
+        fscanf(fp, "%d", &epsilon[i]);
+    }
+    fclose(fp);
+	
 	Serial(m, n);
 	free(epsilon);
 	return 0;

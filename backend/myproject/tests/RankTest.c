@@ -79,10 +79,10 @@ void RankTest(int n, const int *epsilon) {
     double p_value;
     
     if (isZero(N)) {
-        printf("RANK TEST\n");
-        printf("Error: Insufficient # Of Bits To Define A 32x32 Matrix\n");
-        p_value = 0.0;
-    } else {
+    // Print only the p-value (0.0) for Python to parse
+    printf("0.0\n");
+    return;
+} else {
         int r;
         double product, p_32, p_31, p_30;
         double F_32 = 0, F_31 = 0, F_30;
@@ -130,10 +130,10 @@ void RankTest(int n, const int *epsilon) {
         p_value = exp(arg1);
        
         if (isNegative(p_value) || isGreaterThanOne(p_value)) {
-            printf("WARNING:  P_VALUE IS OUT OF RANGE.\n");
+           printf("0.0\n");
         }
         
-        printf("%s\tp_value = %f\n", (p_value < ALPHA) ? "FAILURE" : "SUCCESS", p_value);
+        printf("%f\n", p_value);
         
         // Free matrix
         for (int i = 0; i < 32; i++) free(matrix[i]);
@@ -149,28 +149,30 @@ void RankTest(int n, const int *epsilon);
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <bit_length> <bit1> <bit2> ...\n", argv[0]);
-        return 1;
+        return 0;
     }
     int n = atoi(argv[1]);
-    if (argc != n + 2) {
-        fprintf(stderr, "Expected %d bits, got %d.\n", n, argc - 2);
-        return 1;
-    }
+    if (argc != 3) {
+    fprintf(stderr, "Usage: %s <n> <input_file>\n", argv[0]);
+    return 0;
+}
 
-    int *epsilon = malloc(n * sizeof(int));
+    int *epsilon = (int *)malloc(n * sizeof(int));
     if (!epsilon) {
         fprintf(stderr, "Memory allocation failed.\n");
-        return 1;
+        return 0;
     }
 
-    for (int i = 0; i < n; i++) {
-        epsilon[i] = atoi(argv[i + 2]);
-        if (epsilon[i] != 0 && epsilon[i] != 1) {
-            fprintf(stderr, "Invalid bit value at position %d: %d\n", i, epsilon[i]);
-            free(epsilon);
-            return 1;
-        }
+    FILE *fp = fopen(argv[2], "r");
+    if (!fp) {
+        fprintf(stderr, "Failed to open input file.\n");
+        free(epsilon);
+        return 0;
     }
+    for (int i = 0; i < n; i++) {
+        fscanf(fp, "%d", &epsilon[i]);
+    }
+    fclose(fp);
 
     RankTest(n, epsilon);
     free(epsilon);

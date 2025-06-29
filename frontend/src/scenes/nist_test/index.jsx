@@ -11,7 +11,7 @@ import { MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { supabase } from '../../utils/supabaseClient';
 
-const MAX_STACK_SIZE_ESTIMATE = 1 * 1024 * 1024;
+const MAX_STACK_SIZE_ESTIMATE = 50 * 1024 * 1024;
 
 const Nist_tests = () => {
   const theme = useTheme();

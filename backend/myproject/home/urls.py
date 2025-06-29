@@ -3,7 +3,7 @@
 from django.urls import path
 from . import views
 from .views import sse_binary_view,sse_binary_example_view
-
+from .views import DieharderTestView
 
 urlpatterns = [
     
@@ -23,24 +23,16 @@ urlpatterns = [
     path('run_binary_matrix_rank_text/',views.run_binary_matrix_rank_text, name='run_binary_matrix_rank_test'),
     path('run_universal_test/',views.run_universal_test, name='run_universal_test'),
     path('run_dft_test/',views.run_dft_test, name='run_dft_test'),
-    # path('run_autocorrelation_test/',views.run_autocorrelation_test, name='run_autocorrelation_test'),
-    # path('run_adaptive_statistical_test/',views.run_adaptive_statistical_test, name='adaptive_statistical_test'),   
-
+   
     # # nist sp 800-90b
-    # path('run_chi_square_test/', views.run_chi_square_test, name='run_chi_square_test'),
-    # path('run_mcv_test/', views.run_mcv_test, name='run_mcv_test'),
     path('run_collision_test/', views.run_collision_test, name='run_collision_test'),
     path('run_markov_test/',views.run_markov_test, name='run_markov_test'),
     path('run_compression_test/',views.run_compression_test, name='run_compression_test'),
     path('run_lag_test/',views.run_lag_test, name='run_lag_test'),
     path('run_mcw_test/',views.run_mcw_test, name='run_mcw_test'),
     path('run_mmc_test/',views.run_mmc_test, name='run_mmc_test'),
-    # path('run_t_tuple_test/',views.run_t_tuple_test, name='run_t_tuple_test'),
-    # path('run_multi_block_entropy_test/',views.run_multi_block_entropy_test, name='run_overlapping_test'),
     path('run_lz78y_test/',views.run_lz78y_test, name='run_lz78y_test'),
-    # path('run_min_entropy_test/',views.run_min_entropy_test, name='run_min_entropy_test'),
-    # path('run_predictor_test/',views.run_predictor_test, name='run_predictor_test'),
-
+    
     # # dieharder tests
     path('run_binary_spacings_test/',views.run_birthday_spacings_test, name='binary_spacings_test'),  
     path('run_parking_lot_test/',views.run_parking_lot_test, name='run_parking_lot_test'),  
@@ -95,6 +87,8 @@ urlpatterns = [
 
     path('generate_final_ans_dieharder/', views.generate_final_ans_dieharder, name='generate_final_ans_dieharder'),
     path("get_progress_dieharder/<uuid:job_id>/", views.get_progress_dieharder, name="get_progress_dieharder"),
+
+    path('run-test/', DieharderTestView.as_view()),
 ]
 
 # http://127.0.0.1:8000/sse_binary_example/
