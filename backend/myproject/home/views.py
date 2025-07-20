@@ -99,6 +99,11 @@ import  uuid
 client = genai.Client(api_key="AIzaSyBEgltUoSm5vFEvDxOd29yZ1hJ3apSYpqg") # place your api key here in inverted commas
 import subprocess
 
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
 @csrf_exempt
 def run_frequency_test(request):
     import tempfile
@@ -2572,149 +2577,118 @@ def get_progress_graphDieharder(request, job_id):
     progress = cache.get(f"{job_id}_progressGraphDieharder", 0)
     return JsonResponse({"progress": int(progress)})
 
-
 @csrf_exempt
 def create_graph_dieharder(request):
-    try:
-        data = json.loads(request.body)
-        binary_data = data.get('binary_data', '')
-        job_id = data.get('job_id', str(uuid.uuid4()))
-    except json.JSONDecodeError as e:
-        print('Error parsing JSON:', e)
-        return HttpResponse("Invalid JSON data.", status=400)
+    if request.method != 'POST':
+        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
+    # 1️⃣ Read file
+    file = request.FILES.get('file')
+    if not file:
+        return JsonResponse({"error": "No file uploaded"}, status=400)
 
-    binary_data = binary_data.replace('%0A', '').replace('%20', '').replace(' ', '').replace('\n', '').replace('\r', '')
-    
-    if not binary_data:
-        return HttpResponse("Binary data is required.", status=400)
+    job_id = request.POST.get('job_id', str(uuid.uuid4()))
 
-    # Dictionary to store p-values with error handling
-    test_p_values = {}
     cache.set(f"{job_id}_progressGraphDieharder", 0)
 
-    # Wrap test calls in try-except blocks and ensure p-values are numeric
-    def safe_test_call(test_func, test_name, binary_data):
-        result = test_func(binary_data)
+    # 2️⃣ Write binary file to disk
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+        for chunk in file.chunks():
+            tmpfile.write(chunk)
+        tmpfile_path = tmpfile.name
 
-        p_value = result[0]
-        print(test_name, p_value)
+    dieharder_test_ids = ["2"]
 
-        # If p_value is not defined (None) or equals -1, return 0
-        if p_value is None or p_value == -1  or str(p_value).strip() == '':
-            return 0
-        if p_value > 1:
-            return 0
+    test_p_values = {}
+    m = 2
+
+    for idx, test_id in enumerate(dieharder_test_ids, start=1):
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", test_id,
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        p_value = None
+
         try:
-            return float(p_value)
-        except ZeroDivisionError:
-            # Handle float division by zero
-            return 0
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
 
-    
-    test_p_values['Birthday Spacing Test'] = safe_test_call(BirthdaySpacingsTest.BirthdaySpacingsTest, 'Birthday Spacing Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 1)
-    test_p_values['Parking Lot Test'] = safe_test_call(ParkingLotTest.ParkingLotTest, 'Parking Lot Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 2)
-    test_p_values['Overlapping Permutation 5 Test'] = safe_test_call(Overlapping5PermutationTest.Overlapping5PermutationTest, 'Overlapping Permutation 5 Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 3)
-    test_p_values['Minimum Distance Test'] = safe_test_call(MinimumDistanceTest.MinimumDistanceTest, 'Minimum Distance Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 4)
-    test_p_values['Ranks of 31x31 Test'] = safe_test_call(Ranks31x31MatricesTest.Ranks31x31MatricesTest, 'Ranks of 31x31 Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 5)
-    test_p_values['3d Spheres Test'] = safe_test_call(Spheres3DTest.Spheres3DTest, '3d Spheres Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 6)
-    test_p_values['Ranks of 32x32 Test'] = safe_test_call(Ranks32x32MatricesTest.Ranks32x32MatricesTest, 'Ranks of 32x32 Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 7)
-    test_p_values['Craps Test'] = safe_test_call(CrapsTest.CrapsTest, 'Craps Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 8)
-    test_p_values['Bitstream Test'] = safe_test_call(BitstreamTest.BitstreamTest, 'Bitstream Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 9)
-    test_p_values['Marsaglia-Tsang GCD Test'] = safe_test_call(MarsagliaTsangGCDTest.MarsagliaTsangGCDTest, 'Marsaglia-Tsang GCD Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 10)
-    test_p_values['OPSO Test'] = safe_test_call(OPSOTest.OPSOTest, 'OPSO Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 11)
-    test_p_values['OQSO Test'] = safe_test_call(OQSOTest.OQSOTest, 'OQSO Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 12)
-    test_p_values['DNA Test'] = safe_test_call(DNATest.DNATest, 'DNA Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 13)
-    test_p_values['Count the one(stream) Test'] = safe_test_call(CountThe1sStreamTest.CountThe1sStreamTest, 'Count the one(stream) Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 14)
-    test_p_values['Count the one(byte) Test'] = safe_test_call(CountThe1sByteTest.CountThe1sByteTest, 'Count the one(byte) Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 15)
-    test_p_values['Marsaglia Tsang Simple GCD Test'] = safe_test_call(MarsagliaTsangSimpleGCDTest.MarsagliaTsangSimpleGCDTest, 'Marsaglia Tsang Simple GCD Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 16)
-    test_p_values['Generalized Minimum Distance Test'] = safe_test_call(GeneralizedMinimumDistanceTest.GeneralizedMinimumDistanceTest, 'Generalized Minimum Distance Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 17)
-    test_p_values['TestU01 Linear Complexity Test'] = safe_test_call(TestU01LinearComplexityTest.TestU01LinearComplexityTest, 'TestU01 Linear Complexity Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 18)
-    test_p_values['TestU01 Longest Repeated Substring Test'] = safe_test_call(TestU01LongestRepeatedSubstringTest.TestU01LongestRepeatedSubstringTest, 'TestU01 Longest Repeated Substring Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 19)
-    test_p_values['TestU01 Matrix Rank Test'] = safe_test_call(TestU01MatrixRankTest.TestU01MatrixRankTest, 'TestU01 Matrix Rank Test', binary_data)
-    cache.set(f"{job_id}_progressGraphDieharder", 20)
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
 
-    
-    
-    valid_tests = {k: (0 if v is None or v > 1 else v) for k, v in test_p_values.items()}
+            # If p_value is invalid, set to 0
+            if p_value is None or p_value > 1 or p_value < 0:
+                p_value = 0
 
-    if not valid_tests:
-        return HttpResponse("No valid test results to plot.", status=400)
+            test_p_values[f"Test {test_id}"] = p_value
 
-    # Extract test names and p-values for plotting
-    x = list(valid_tests.keys())
-    y = list(valid_tests.values())
+        except subprocess.TimeoutExpired:
+            test_p_values[f"Test {test_id}"] = 0  # Timeout treated as 0
 
-    # Create the plot
+        except Exception as e:
+            test_p_values[f"Test {test_id}"] = 0  # Other errors treated as 0
+
+        finally:
+            cache.set(f"{job_id}_progressGraphDieharder", m)
+            m += 1
+
+    # Remove temp file
+    if os.path.exists(tmpfile_path):
+        os.remove(tmpfile_path)
+
+    # 3️⃣ If no data, fail
+    if not test_p_values:
+        return JsonResponse({"error": "No valid p-values collected."}, status=400)
+
+    # 4️⃣ Prepare data for plotting
+    x_labels = list(test_p_values.keys())
+    y_values = list(test_p_values.values())
+
+    # 5️⃣ Create the plot
     fig, ax = plt.subplots(figsize=(16, 9))
 
-    # Assign color based on the p-value threshold (0.05)
-    colors = ['green' if p > 0.01 else 'blue' for p in y]
+    colors = ['green' if p > 0.01 else 'blue' for p in y_values]
 
-    # Plot the histogram with colors based on the condition
-    ax.bar(x, y, color=colors)
-
-    # Draw a horizontal dotted red line at p_value = 0.05
+    ax.bar(x_labels, y_values, color=colors)
     ax.axhline(y=0.01, color='red', linestyle='--', linewidth=2, label='p-value = 0.01')
 
-    # Label the axes
     ax.set_xlabel('Dieharder Tests', fontsize=20)
     ax.set_ylabel('P-values', fontsize=20)
     ax.set_title('P-values of Dieharder Tests', fontsize=20)
-
-    # Set y-axis ticks at intervals of 0.1
-    ax.set_yticks([i / 10.0 for i in range(0, 11)])  # 0.0, 0.1, 0.2, ..., 1.0
-
-    # Set y-axis limits between 0 and 1
+    ax.set_yticks([i / 10.0 for i in range(0, 11)])
     ax.set_ylim(0, 1)
-
-    # Rotate x-axis labels for better visibility
     plt.xticks(rotation=45, ha='right', fontsize=12)
 
-    # Ensure tight layout to avoid overlap
-    plt.tight_layout()
-    cache.set(f"{job_id}_progressGraphDieharder", 21)
-
-    # Add a custom legend for the color categories
     from matplotlib.patches import Patch
-    legend_elements = [Patch(facecolor='green', edgecolor='green', label='Random (p > 0.01)'),
-                       Patch(facecolor='blue', edgecolor='blue', label='Non-random (p ≤ 0.01)')]
-
-    # Add the legend for the colors
+    legend_elements = [
+        Patch(facecolor='green', edgecolor='green', label='Random (p > 0.01)'),
+        Patch(facecolor='blue', edgecolor='blue', label='Non-random (p ≤ 0.01)'),
+    ]
     ax.legend(handles=legend_elements, loc='upper right', prop={'size': 14})
 
-    # Create a BytesIO object to hold the image
+    plt.tight_layout()
+    cache.set(f"{job_id}_progressGraphDieharder", 22)
+
+    # 6️⃣ Return PNG image
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
-
-    global_graph_image = buf
-   
-    # Close the figure to free memory
     plt.close(fig)
-    cache.set(f"{job_id}_progressGraphDieharder", 22)
 
-    # Return the image as a response
-    # return HttpResponse(buf, content_type='image/png')
     return HttpResponse(buf, content_type='image/png')
 
 
@@ -3268,19 +3242,20 @@ def get_progress_ReportDieharder(request, job_id):
 @csrf_exempt
 def generate_pdf_report_dieharder(request):
     global global_graph_image
+    if request.method != 'POST':
+        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+    file = request.FILES.get('file')
+    if not file:
+        return JsonResponse({"error": "No file uploaded"}, status=400)
 
-    try:
-        data = json.loads(request.body)
-        binary_data = data.get('binary_data', '')
-        job_id = data.get('job_id', str(uuid.uuid4()))
-    except json.JSONDecodeError as e:
-        print('Error parsing JSON:', e)
-        return HttpResponse("Invalid JSON data.", status=400)
-    cache.set(f"{job_id}_progressReportDieharder", 0)
+    job_id = request.POST.get('job_id', str(uuid.uuid4()))
+    cache.set(f"{job_id}_progressReportDieharder", 1)
 
-    # Clean up binary data
-    binary_data = binary_data.replace('%0A', '').replace('%20', '').replace(' ', '').replace('\n', '').replace('\r', '')
-
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+        for chunk in file.chunks():
+            tmpfile.write(chunk)
+        tmpfile_path = tmpfile.name
+    
     # Create a HttpResponse object with PDF headers
     graph_response = create_graph_dieharder(request)
     cache.set(f"{job_id}_progressReportDieharder", 2)
@@ -3316,151 +3291,102 @@ def generate_pdf_report_dieharder(request):
     cache.set(f"{job_id}_progressReportDieharder", 3)
     x = 0  # Counter for random results
 
+    dieharder_test_ids = ["2"]
+
+    cache.set(f"{job_id}_progressReportDieharder", 3)
     # Perform tests and increment x for each test that returns True
-    birthday_test_result = BirthdaySpacingsTest.BirthdaySpacingsTest(binary_data)[1]
-    x += 1 if birthday_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 4)
-    parking_test_block_result = ParkingLotTest.ParkingLotTest(binary_data)[1]
-    x += 1 if parking_test_block_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 5)
+        # 1️⃣ Update this mapping with all test IDs you want to run and their labels
+    test_id_name_map = {
+        # "0": "Birthday Spacing",
+        # "1": "Overlapping Permutations",
+        "2": "Ranks of 31x31 Test",
+        # "3": "Ranks of 32x32 Test",
+        # "4": "Parking Lot Test",
+        # "5": "Minimum Distance Test",
+        # "6": "3D Spheres Test",
+        # "7": "Craps Test",
+        # "8": "Marsaglia-Tsang GCD Test",
+        # "9": "OPSO Test",
+        # "10": "OQSO Test",
+        # "11": "DNA Test",
+        # "12": "Count the Ones (Stream) Test",
+        # "13": "Count the Ones (Bytes) Test",
+        # "14": "Simple GCD Test",
+        # "15": "Generalized Minimum Distance Test",
+        # "100": "Bitstream Test",
+        # "101": "TestU01 Linear Complexity Test",
+        # "102": "TestU01 Longest Repeated Substring Test",
+        # "103": "TestU01 Matrix Rank Test"
+    }
 
-    overlapping_5_test_result = Overlapping5PermutationTest.Overlapping5PermutationTest(binary_data)[1]
-    x += 1 if overlapping_5_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 6)
+    dieharder_test_ids = list(test_id_name_map.keys())
 
-    minimum_distance_test_result = MinimumDistanceTest.MinimumDistanceTest(binary_data)[1]
-    x += 1 if minimum_distance_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 7)
+    test_results = {}
+    m = 4
+    for test_id in dieharder_test_ids:
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", test_id,
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
 
-    rank_31_test_result = Ranks31x31MatricesTest.Ranks31x31MatricesTest(binary_data)[1]
-    x += 1 if rank_31_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 8)
+        p_value = None
+        try:
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+            if p_value is None or not (0 <= p_value <= 1):
+                p_value = 0
+        except subprocess.TimeoutExpired:
+            p_value = 0
+        except Exception:
+            p_value = 0
 
-    spheres_test_result = Spheres3DTest.Spheres3DTest(binary_data)[1]
-    x += 1 if spheres_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 9)
+        result_text = 'random number' if p_value > 0.05 else 'non-random number'
+        test_results[test_id_name_map[test_id]] = result_text
 
-    rank_32_result = Ranks32x32MatricesTest.Ranks32x32MatricesTest(binary_data)[1]
-    x += 1 if rank_32_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 10)
+        cache.set(f"{job_id}_progressGraphDieharder", m)
+        m += 1
 
-    craps_test_result = CrapsTest.CrapsTest(binary_data)[1]
-    x += 1 if craps_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 11)
+    cache.set(f"{job_id}_progressReportDieharder", 25)
+    AIAnalysis_subtitle = Paragraph("AI Analysis:", subtitle_style)
 
-    bitstream_test_result = BitstreamTest.BitstreamTest(binary_data)[1]
-    x += 1 if bitstream_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 12)
+    random_count = sum(1 for result in test_results.values() if result == 'random number')
+    total_tests = len(test_results)
 
-    gcd_test_result = MarsagliaTsangGCDTest.MarsagliaTsangGCDTest(binary_data)[1]
-    x += 1 if gcd_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 13)
+    if random_count > total_tests / 2:
+        final_text = "random number"
+    else:
+        final_text = "non-random number"
 
-    opso_test_result = OPSOTest.OPSOTest(binary_data)[1]
-    x += 1 if opso_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 14)
-
-    oqsq_test_result = OQSOTest.OQSOTest(binary_data)[1]
-    x += 1 if oqsq_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 15)
-
-    dna_test_result = DNATest.DNATest(binary_data)[1]
-    x += 1 if dna_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 16)
-
-    count_one_stream_test_result = CountThe1sStreamTest.CountThe1sStreamTest(binary_data)[1]
-    x += 1 if count_one_stream_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 17)
-
-    count_one_byte_test_result = CountThe1sByteTest.CountThe1sByteTest(binary_data)[1]
-    x += 1 if count_one_byte_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 18)
-
-    simple_gcd_test_result = MarsagliaTsangSimpleGCDTest.MarsagliaTsangSimpleGCDTest(binary_data)[1]
-    x += 1 if simple_gcd_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 19)
-
-    generalized_minimum_test_result = GeneralizedMinimumDistanceTest.GeneralizedMinimumDistanceTest(binary_data)[1]
-    x += 1 if generalized_minimum_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 20)
-
-    u01_linear_complexity_test_result = TestU01LinearComplexityTest.TestU01LinearComplexityTest(binary_data)[1]
-    x += 1 if u01_linear_complexity_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 21)
-
-    u01_longest_repeated_test_result = TestU01LongestRepeatedSubstringTest.TestU01LongestRepeatedSubstringTest(binary_data)[1]
-    x += 1 if u01_longest_repeated_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 22)
-
-    u01_matrix_rank_test_result = TestU01MatrixRankTest.TestU01MatrixRankTest(binary_data)[1]
-    x += 1 if u01_matrix_rank_test_result else 0
-    cache.set(f"{job_id}_progressReportDieharder", 23)
-
-    final_text = 'random number' if x > 10 else 'non-random number'
-    cache.set(f"{job_id}_progressReportDieharder", 24)
-
-    # Dynamically set the result text based on the test outcome
-    birthday_text = 'random number' if birthday_test_result else 'non-random number'
-    parking_text = 'random number' if parking_test_block_result else 'non-random number'
-    overlapping_5_text = 'random number' if overlapping_5_test_result else 'non-random number'
-    minimum_distance_text = 'random number' if minimum_distance_test_result else 'non-random number'
-    rank31x31_text = 'random number' if rank_31_test_result else 'non-random number'
-    spheres_text = 'random number' if spheres_test_result else 'non-random number'
-    rank32x32_text = 'random number' if rank_32_result else 'non-random number'
-    craps_text = 'random number' if craps_test_result else 'non-random number'
-    bitstream_text = 'random number' if bitstream_test_result else 'non-random number'
-    gcd_text = 'random number' if gcd_test_result else 'non-random number'
-    opso_text = 'random number' if opso_test_result else 'non-random number'
-    oqsq_text = 'random number' if oqsq_test_result else 'non-random number'
-    dna_text = 'random number' if dna_test_result else 'non-random number'
-    one_stream_text = 'random number' if count_one_stream_test_result else 'non-random number'
-    one_byte_text = 'random number' if count_one_byte_test_result else 'non-random number'
-    simple_gcd_text = 'random number' if simple_gcd_test_result else 'non-random number'
-    generalized_minimum_text = 'random number' if generalized_minimum_test_result else 'non-random number'
-    u01_linear_text = 'random number' if u01_linear_complexity_test_result else 'non-random number'
-    u01longest_text = 'random number' if u01_longest_repeated_test_result else 'non-random number'
-    u01_matrix_text = 'random number' if u01_matrix_rank_test_result else 'non-random number'
-
-    # Sample Table Data for the first table with "Final Result" in the last row
     data1 = [
         [Paragraph('Test type', styles['Normal']), 'Result', 'Test type', 'Result'],
-        [Paragraph('1. Birthday Spacing', styles['Normal']), birthday_text, Paragraph('2. Parking Lot Test', styles['Normal']), parking_text],
-        [Paragraph('3. Overlapping 5 Permutation', styles['Normal']), overlapping_5_text, Paragraph('4. Minimum Distance Test', styles['Normal']), minimum_distance_text],
-        [Paragraph('5. Ranks of 31x31 Test', styles['Normal']), rank31x31_text, Paragraph('6. 3D Spheres Test', styles['Normal']), spheres_text],
-        [Paragraph('7. Ranks of 32x32 Test', styles['Normal']), rank32x32_text, Paragraph('8. Craps Test', styles['Normal']), craps_text],
-        [Paragraph('9. Bitstream Test', styles['Normal']), bitstream_text, Paragraph('10. Marsaglia-Tsang GCD Test', styles['Normal']), gcd_text],
-        [Paragraph('11. OPSO Test', styles['Normal']), opso_text, Paragraph('12. OQSO Test', styles['Normal']), oqsq_text],
-        [Paragraph('13. DNA Test', styles['Normal']), dna_text, Paragraph('14. Count the Ones (Stream) Test', styles['Normal']), one_stream_text],
-        [Paragraph('15. Count the Ones (Bytes) Test', styles['Normal']), one_byte_text, Paragraph('16. Marsaglia-Tsang Simple GCD Test', styles['Normal']), simple_gcd_text],
-        [Paragraph('17. Generalized Minimum Distance Test', styles['Normal']), generalized_minimum_text, Paragraph('18. TestU01 Linear Complexity Test', styles['Normal']), u01_linear_text],
-        [Paragraph('19. TestU01 Longest Repeated Substring Test', styles['Normal']), u01longest_text, Paragraph('20. TestU01 Matrix Rank Test', styles['Normal']), u01_matrix_text],
+        [Paragraph('1. Birthday Spacing', styles['Normal']), test_results.get("Birthday Spacing", "N/A"), Paragraph('2. Parking Lot Test', styles['Normal']), test_results.get("Parking Lot Test", "N/A")],
+        [Paragraph('3. Overlapping Permutations', styles['Normal']), test_results.get("Overlapping Permutations", "N/A"), Paragraph('4. Minimum Distance Test', styles['Normal']), test_results.get("Minimum Distance Test", "N/A")],
+        [Paragraph('5. Ranks of 31x31 Test', styles['Normal']), test_results.get("Ranks of 31x31 Test", "N/A"), Paragraph('6. 3D Spheres Test', styles['Normal']), test_results.get("3D Spheres Test", "N/A")],
+        [Paragraph('7. Ranks of 32x32 Test', styles['Normal']), test_results.get("Ranks of 32x32 Test", "N/A"), Paragraph('8. Craps Test', styles['Normal']), test_results.get("Craps Test", "N/A")],
+        [Paragraph('9. Bitstream Test', styles['Normal']), test_results.get("Bitstream Test", "N/A"), Paragraph('10. Marsaglia-Tsang GCD Test', styles['Normal']), test_results.get("Marsaglia-Tsang GCD Test", "N/A")],
+        [Paragraph('11. OPSO Test', styles['Normal']), test_results.get("OPSO Test", "N/A"), Paragraph('12. OQSO Test', styles['Normal']), test_results.get("OQSO Test", "N/A")],
+        [Paragraph('13. DNA Test', styles['Normal']), test_results.get("DNA Test", "N/A"), Paragraph('14. Count the Ones (Stream) Test', styles['Normal']), test_results.get("Count the Ones (Stream) Test", "N/A")],
+        [Paragraph('15. Count the Ones (Bytes) Test', styles['Normal']), test_results.get("Count the Ones (Bytes) Test", "N/A"), Paragraph('16. Simple GCD Test', styles['Normal']), test_results.get("Simple GCD Test", "N/A")],
+        [Paragraph('17. Generalized Minimum Distance Test', styles['Normal']), test_results.get("Generalized Minimum Distance Test", "N/A"), Paragraph('18. TestU01 Linear Complexity Test', styles['Normal']), test_results.get("TestU01 Linear Complexity Test", "N/A")],
+        [Paragraph('19. TestU01 Longest Repeated Substring Test', styles['Normal']), test_results.get("TestU01 Longest Repeated Substring Test", "N/A"), Paragraph('20. TestU01 Matrix Rank Test', styles['Normal']), test_results.get("TestU01 Matrix Rank Test", "N/A")],
         [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, styles['Heading2'])],
     ]
 
-    test_results = {
-        "Birthday Test":  birthday_text,
-        "Parking Test": parking_text,
-        "Overlapping Test": overlapping_5_text,
-        "Minimum Distance Test": minimum_distance_text,
-        "31x31 Rank Test":  rank31x31_text,
-        "Spheres Test": spheres_text ,
-        "32x32 Rank Test": rank32x32_text,
-        "Craps Test": craps_text,
-        "Bitstream test":  bitstream_text,
-        "GCD Test": gcd_text,
-        "OPSO Test": opso_text,
-        "OQSO Test": oqsq_text,
-        "DNA Test": dna_text,
-        "One stream Test": one_stream_text,
-        "One byte Test": one_byte_text,
-        "Simple Gcd Test": simple_gcd_text,
-        "Generalised Minimum Test": generalized_minimum_text,
-        "U01 Linear Test": u01_linear_text,
-        "U01 Longest Test": u01longest_text,
-        "U01 Matrix Test": u01_matrix_text,
-    }
-    cache.set(f"{job_id}_progressReportDieharder", 25)
-    AIAnalysis_subtitle = Paragraph("AI Analysis:", subtitle_style)
 
     # Create the prompt
     prompt = "Perform a detailed analysis of the results from all the statistical tests. For each test, display the test name along with its p-value and indicate whether the result is Random or Non-Random based on the condition that if p-value > 0.05 e.g: test_name: test_result, the number is considered Random; otherwise, it is Non-Random. In the analysis, mention that basis of selecting random or non random is majority of tests response. Finally tell these many tests give random number or non random number as a result along with their names"
@@ -3625,16 +3551,16 @@ def generate_pdf_report_server(request):
     # Generate graphs for all three test sets
     graph_response1 = create_graph(request)
     cache.set(f"{job_id}_progressReportServer", 3)
-    graph_response = create_graph_dieharder(request)
-    cache.set(f"{job_id}_progressReportServer", 4)
+    # graph_response = create_graph_dieharder(request)
+    # cache.set(f"{job_id}_progressReportServer", 4)
     graph_response2 = create_graph_nist90b(request)
     cache.set(f"{job_id}_progressReportServer", 5)
     graph_buffer1 = graph_response1.content
-    graph_buffer = graph_response.content
+    # graph_buffer = graph_response.content
     graph_buffer2 = graph_response2.content
 
     graph_image_io1 = BytesIO(graph_buffer1)
-    graph_image_io = BytesIO(graph_buffer)
+    # graph_image_io = BytesIO(graph_buffer)
     graph_image_io2 = BytesIO(graph_buffer2)
 
     response = HttpResponse(content_type='application/pdf')
@@ -3767,256 +3693,97 @@ def generate_pdf_report_server(request):
 
     # ...inside generate_pdf_report_server...
     cache.set(f"{job_id}_progressReportServer", 32)
-    def safe_bool(val):
-        try:
-           
-            if isinstance(val, np.generic):
-                return bool(val)
-        except ImportError:
-            pass
-        return bool(val)
 
-    def safe_pvalue(val):
-        try:
-            
-            if isinstance(val, np.generic):
-                val = float(val)
-        except ImportError:
-            pass
-        if not isinstance(val, (int, float)) or val < 0 or val > 1:
-            return 0.0
-        return val
 
     cache.set(f"{job_id}_progressReportServer", 33)
 
-    x = 0  # Counter for random results
-    cache.set(f"{job_id}_progressReportDieharder", 0)
+    # --- Dieharder Tests Execution ---
+    dieharder_test_ids = [
+        "2","0","1","4"
+        #   "1", "0", "3", "4", "5", "6", "7", "8", "9",
+        # "10", "11", "12", "13", "14", "15", "100", "101", "102", "103"
+    ]
 
-    # Dieharder tests with robust error handling and normalization
-    try:
-        _, birthday_test_result = BirthdaySpacingsTest.BirthdaySpacingsTest(binary_data)
-        birthday_test_result = safe_bool(birthday_test_result)
-    except Exception as e:
-        print(f"Error in BirthdaySpacingsTest: {e}")
-        birthday_test_result = False
-    x += 1 if birthday_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 34)
-
-    try:
-        _, parking_test_block_result = ParkingLotTest.ParkingLotTest(binary_data)
-        parking_test_block_result = safe_bool(parking_test_block_result)
-    except Exception as e:
-        print(f"Error in ParkingLotTest: {e}")
-        parking_test_block_result = False
-    x += 1 if parking_test_block_result else 0
-    cache.set(f"{job_id}_progressReportServer", 35)
-
-    try:
-        _, overlapping_5_test_result = Overlapping5PermutationTest.Overlapping5PermutationTest(binary_data)
-        overlapping_5_test_result = safe_bool(overlapping_5_test_result)
-    except Exception as e:
-        print(f"Error in Overlapping5PermutationTest: {e}")
-        overlapping_5_test_result = False
-    x += 1 if overlapping_5_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 36)
-
-    try:
-        _, minimum_distance_test_result = MinimumDistanceTest.MinimumDistanceTest(binary_data)
-        minimum_distance_test_result = safe_bool(minimum_distance_test_result)
-    except Exception as e:
-        print(f"Error in MinimumDistanceTest: {e}")
-        minimum_distance_test_result = False
-    x += 1 if minimum_distance_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 37)
-
-    try:
-        _, rank_31_test_result = Ranks31x31MatricesTest.Ranks31x31MatricesTest(binary_data)
-        rank_31_test_result = safe_bool(rank_31_test_result)
-    except Exception as e:
-        print(f"Error in Ranks31x31MatricesTest: {e}")
-        rank_31_test_result = False
-    x += 1 if rank_31_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 38)
-
-    try:
-        _, spheres_test_result = Spheres3DTest.Spheres3DTest(binary_data)
-        spheres_test_result = safe_bool(spheres_test_result)
-    except Exception as e:
-        print(f"Error in Spheres3DTest: {e}")
-        spheres_test_result = False
-    x += 1 if spheres_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 39)
-    try:
-        _, rank_32_result = Ranks32x32MatricesTest.Ranks32x32MatricesTest(binary_data)
-        rank_32_result = safe_bool(rank_32_result)
-    except Exception as e:
-        print(f"Error in Ranks32x32MatricesTest: {e}")
-        rank_32_result = False
-    x += 1 if rank_32_result else 0
-    cache.set(f"{job_id}_progressReportServer", 40)
-
-    try:
-        _, craps_test_result = CrapsTest.CrapsTest(binary_data)
-        craps_test_result = safe_bool(craps_test_result)
-    except Exception as e:
-        print(f"Error in CrapsTest: {e}")
-        craps_test_result = False
-    x += 1 if craps_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 41)
-    try:
-        _, bitstream_test_result = BitstreamTest.BitstreamTest(binary_data)
-        bitstream_test_result = safe_bool(bitstream_test_result)
-    except Exception as e:
-        print(f"Error in BitstreamTest: {e}")
-        bitstream_test_result = False
-    x += 1 if bitstream_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 42)
-
-    try:
-        _, gcd_test_result = MarsagliaTsangGCDTest.MarsagliaTsangGCDTest(binary_data)
-        gcd_test_result = safe_bool(gcd_test_result)
-    except Exception as e:
-        print(f"Error in MarsagliaTsangGCDTest: {e}")
-        gcd_test_result = False
-    x += 1 if gcd_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 43)
-
-    try:
-        _, opso_test_result = OPSOTest.OPSOTest(binary_data)
-        opso_test_result = safe_bool(opso_test_result)
-    except Exception as e:
-        print(f"Error in OPSOTest: {e}")
-        opso_test_result = False
-    x += 1 if opso_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 44)
-
-    try:
-        _, oqsq_test_result = OQSOTest.OQSOTest(binary_data)
-        oqsq_test_result = safe_bool(oqsq_test_result)
-    except Exception as e:
-        print(f"Error in OQSOTest: {e}")
-        oqsq_test_result = False
-    x += 1 if oqsq_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 45)
-
-    try:
-        _, dna_test_result = DNATest.DNATest(binary_data)
-        dna_test_result = safe_bool(dna_test_result)
-    except Exception as e:
-        print(f"Error in DNATest: {e}")
-        dna_test_result = False
-    x += 1 if dna_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 46)
-
-    try:
-        _, count_one_stream_test_result = CountThe1sStreamTest.CountThe1sStreamTest(binary_data)
-        count_one_stream_test_result = safe_bool(count_one_stream_test_result)
-    except Exception as e:
-        print(f"Error in CountThe1sStreamTest: {e}")
-        count_one_stream_test_result = False
-    x += 1 if count_one_stream_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 47)
-
-    try:
-        _, count_one_byte_test_result = CountThe1sByteTest.CountThe1sByteTest(binary_data)
-        count_one_byte_test_result = safe_bool(count_one_byte_test_result)
-    except Exception as e:
-        print(f"Error in CountThe1sByteTest: {e}")
-        count_one_byte_test_result = False
-    x += 1 if count_one_byte_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 48)
-
-    try:
-        _, simple_gcd_test_result = MarsagliaTsangSimpleGCDTest.MarsagliaTsangSimpleGCDTest(binary_data)
-        simple_gcd_test_result = safe_bool(simple_gcd_test_result)
-    except Exception as e:
-        print(f"Error in MarsagliaTsangSimpleGCDTest: {e}")
-        simple_gcd_test_result = False
-    x += 1 if simple_gcd_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 49)
-
-    try:
-        _, generalized_minimum_test_result = GeneralizedMinimumDistanceTest.GeneralizedMinimumDistanceTest(binary_data)
-        generalized_minimum_test_result = safe_bool(generalized_minimum_test_result)
-    except Exception as e:
-        print(f"Error in GeneralizedMinimumDistanceTest: {e}")
-        generalized_minimum_test_result = False
-    x += 1 if generalized_minimum_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 50)
-
-    try:
-        _, u01_linear_complexity_test_result = TestU01LinearComplexityTest.TestU01LinearComplexityTest(binary_data)
-        u01_linear_complexity_test_result = safe_bool(u01_linear_complexity_test_result)
-    except Exception as e:
-        print(f"Error in TestU01LinearComplexityTest: {e}")
-        u01_linear_complexity_test_result = False
-    x += 1 if u01_linear_complexity_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 51)
-
-    try:
-        _, u01_longest_repeated_test_result = TestU01LongestRepeatedSubstringTest.TestU01LongestRepeatedSubstringTest(binary_data)
-        u01_longest_repeated_test_result = safe_bool(u01_longest_repeated_test_result)
-    except Exception as e:
-        print(f"Error in TestU01LongestRepeatedSubstringTest: {e}")
-        u01_longest_repeated_test_result = False
-    x += 1 if u01_longest_repeated_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 52)
-
-    try:
-        _, u01_matrix_rank_test_result = TestU01MatrixRankTest.TestU01MatrixRankTest(binary_data)
-        u01_matrix_rank_test_result = safe_bool(u01_matrix_rank_test_result)
-    except Exception as e:
-        print(f"Error in TestU01MatrixRankTest: {e}")
-        u01_matrix_rank_test_result = False
-    x += 1 if u01_matrix_rank_test_result else 0
-    cache.set(f"{job_id}_progressReportServer", 53)
-
-    final_text = 'random number' if x > 10 else 'non-random number'
-
-    # Dynamically set the result text based on the test outcome
-    birthday_text = 'random number' if birthday_test_result else 'non-random number'
-    parking_text = 'random number' if parking_test_block_result else 'non-random number'
-    overlapping_5_text = 'random number' if overlapping_5_test_result else 'non-random number'
-    minimum_distance_text = 'random number' if minimum_distance_test_result else 'non-random number'
-    rank31x31_text = 'random number' if rank_31_test_result else 'non-random number'
-    spheres_text = 'random number' if spheres_test_result else 'non-random number'
-    rank32x32_text = 'random number' if rank_32_result else 'non-random number'
-    craps_text = 'random number' if craps_test_result else 'non-random number'
-    bitstream_text = 'random number' if bitstream_test_result else 'non-random number'
-    gcd_text = 'random number' if gcd_test_result else 'non-random number'
-    opso_text = 'random number' if opso_test_result else 'non-random number'
-    oqsq_text = 'random number' if oqsq_test_result else 'non-random number'
-    dna_text = 'random number' if dna_test_result else 'non-random number'
-    one_stream_text = 'random number' if count_one_stream_test_result else 'non-random number'
-    one_byte_text = 'random number' if count_one_byte_test_result else 'non-random number'
-    simple_gcd_text = 'random number' if simple_gcd_test_result else 'non-random number'
-    generalized_minimum_text = 'random number' if generalized_minimum_test_result else 'non-random number'
-    u01_linear_text = 'random number' if u01_linear_complexity_test_result else 'non-random number'
-    u01longest_text = 'random number' if u01_longest_repeated_test_result else 'non-random number'
-    u01_matrix_text = 'random number' if u01_matrix_rank_test_result else 'non-random number'
-    cache.set(f"{job_id}_progressReportServer", 54)
-    dieharder_results = {
-        'Birthday Spacing': birthday_text,
-        'Parking Lot': parking_text,
-        'Overlapping 5 Permutation': overlapping_5_text,
-        'Minimum Distance': minimum_distance_text,
-        'Ranks 31x31': rank31x31_text,
-        'Spheres 3D': spheres_text,
-        'Ranks 32x32': rank32x32_text,
-        'Craps': craps_text,
-        'Bitstream': bitstream_text,
-        'Marsaglia-Tsang GCD': gcd_text,
-        'OPSO': opso_text,
-        'OQSO': oqsq_text,
-        'DNA': dna_text,
-        'Count the 1s (Stream)': one_stream_text,
-        'Count the 1s (Byte)': one_byte_text,
-        'Marsaglia-Tsang Simple GCD': simple_gcd_text,
-        'Generalized Minimum Distance': generalized_minimum_text,
-        'TestU01 Linear Complexity': u01_linear_text,
-        'TestU01 Longest Repeated Substring': u01longest_text,
-        'TestU01 Matrix Rank': u01_matrix_text,
+    test_id_name_map = {
+        "0": "Birthday Spacing",
+        "1": "Overlapping Permutations",
+        "2": "Ranks 31x31",
+        # "3": "Ranks 32x32",
+        "4": "Parking Lot",
+        # "5": "Minimum Distance",
+        # "6": "Spheres 3D",
+        # "7": "Craps",
+        # "8": "Marsaglia-Tsang GCD",
+        # "9": "OPSO",
+        # "10": "OQSO",
+        # "11": "DNA",
+        # "12": "Count the 1s (Stream)",
+        # "13": "Count the 1s (Byte)",
+        # "14": "Marsaglia-Tsang Simple GCD",
+        # "15": "Generalized Minimum Distance",
+        # "100": "Bitstream",
+        # "101": "TestU01 Linear Complexity",
+        # "102": "TestU01 Longest Repeated Substring",
+        # "103": "TestU01 Matrix Rank"
     }
+
+   
+    byte_chunks = [binary_data[i:i+8] for i in range(0, len(binary_data), 8)]
+    byte_string = ''.join([chr(int(chunk, 2)) for chunk in byte_chunks])  # binary → int → char
+
+    # Step 2: Convert string to bytes
+    binary_bytes = byte_string.encode('latin1')  # latin1 preserves byte values (0–255)
+
+    # Step 3: Write to temp .bin file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+        tmpfile.write(binary_bytes)
+        tmpfile_path = tmpfile.name
+    
+    dieharder_results = {}
+    x = 0  # count of random results in dieharder
+
+    m = 34
+    for test_id in dieharder_test_ids:
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", test_id,
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+        p_value = None
+        try:
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+            if p_value is None or not (0 <= p_value <= 1):
+                p_value = 0
+        except subprocess.TimeoutExpired:
+            p_value = 0
+        except Exception:
+            p_value = 0
+
+        result = 'random number' if p_value > 0.05 else 'non-random number'
+        dieharder_results[test_id_name_map[test_id]] = result
+        if result == 'random number':
+            x += 1
+
+        cache.set(f"{job_id}_progressReportServer", m)
+        m += 1
+
+   
+   
 
     cache.set(f"{job_id}_progressReportServer", 55)
     final_text = 'random number' if (nist22_passed + nist90b_passed + x) > 23 else 'non-random number'
@@ -4034,7 +3801,7 @@ def generate_pdf_report_server(request):
          Paragraph('8. Overlapping Template Matching Test', styles['Normal']), result_text(nist22_results['Overlapping Test'])],
         [Paragraph('9. Maurers Universal test', styles['Normal']), result_text(nist22_results['Universal Test']),
          Paragraph('10. Linear complexity Test', styles['Normal']), result_text(nist22_results['Linear Complexity Test'])],
-        [Paragraph('11. Serial Test', styles['Normal']), result_text(nist22_results['Serial Test']),
+        [Paragraph('11. Serial Test', styles['Normal']), result_text(nist22_results['Linear Complexity Test']),
          Paragraph('12. Approximate Entropy Test', styles['Normal']), result_text(nist22_results['Approximate Entropy Test'])],
         [Paragraph('13. Cumulative Sum Test', styles['Normal']), result_text(nist22_results['Cusum Test']),
          Paragraph('14. Random Excursions Test', styles['Normal']), result_text(nist22_results['Random Excursion Test'])],
@@ -4046,27 +3813,27 @@ def generate_pdf_report_server(request):
         [Paragraph('20. Lag Test', styles['Normal']), nist90b_results['Lag Test']['result'],
          Paragraph('21. MCW Test', styles['Normal']), nist90b_results['MCW Test']['result']],
         [Paragraph('22. MMC Test', styles['Normal']), nist90b_results['MMC Test']['result'], '', ''],
-        [Paragraph('23. Birthday Spacing', styles['Normal']),birthday_text,
-         Paragraph('24. Parking Lot', styles['Normal']), parking_text],
-        [Paragraph('25. Overlapping 5 Permutation', styles['Normal']), overlapping_5_text,
-         Paragraph('26. Minimum Distance', styles['Normal']), minimum_distance_text],
-        [Paragraph('27. Ranks 31x31', styles['Normal']), rank31x31_text,
-         Paragraph('28. Spheres 3D', styles['Normal']),  spheres_text],
-        [Paragraph('29. Ranks 32x32', styles['Normal']), rank32x32_text,
-         Paragraph('30. Craps', styles['Normal']), craps_text],
-        [Paragraph('31. Bitstream', styles['Normal']), bitstream_text,
-         Paragraph('32. Marsaglia-Tsang GCD', styles['Normal']), gcd_text],
-        [Paragraph('33. OPSO', styles['Normal']), opso_text,
-         Paragraph('34. OQSO', styles['Normal']), oqsq_text],
-        [Paragraph('35. DNA', styles['Normal']), dna_text,
-         Paragraph('36. Count the 1s (Stream)', styles['Normal']), one_stream_text],
-        [Paragraph('37. Count the 1s (Byte)', styles['Normal']), one_byte_text,
-         Paragraph('38. Marsaglia-Tsang Simple GCD', styles['Normal']), simple_gcd_text ],
-        [Paragraph('39. Generalized Minimum Distance', styles['Normal']), generalized_minimum_text,
-         Paragraph('40. TestU01 Linear Complexity', styles['Normal']), u01_linear_text],
-        [Paragraph('41. TestU01 Longest Repeated Substring', styles['Normal']), u01longest_text,
-         Paragraph('42. TestU01 Matrix Rank', styles['Normal']), u01_matrix_text],
-        [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, bold_red_style)],
+        [Paragraph('23. Birthday Spacing', styles['Normal']), dieharder_results.get("Birthday Spacing", "N/A"),
+        Paragraph('24. Parking Lot Test', styles['Normal']), dieharder_results.get("Parking Lot Test", "N/A")],
+        [Paragraph('25. Overlapping Permutations', styles['Normal']), dieharder_results.get("Overlapping Permutations", "N/A"),
+        Paragraph('26. Minimum Distance Test', styles['Normal']), dieharder_results.get("Minimum Distance Test", "N/A")],
+        [Paragraph('27. Ranks of 31x31 Test', styles['Normal']), dieharder_results.get("Ranks of 31x31 Test", "N/A"),
+        Paragraph('28. 3D Spheres Test', styles['Normal']), dieharder_results.get("3D Spheres Test", "N/A")],
+        [Paragraph('29. Ranks of 32x32 Test', styles['Normal']), dieharder_results.get("Ranks of 32x32 Test", "N/A"),
+        Paragraph('30. Craps Test', styles['Normal']), dieharder_results.get("Craps Test", "N/A")],
+        [Paragraph('31. Bitstream Test', styles['Normal']), dieharder_results.get("Bitstream Test", "N/A"),
+        Paragraph('32. Marsaglia-Tsang GCD Test', styles['Normal']), dieharder_results.get("Marsaglia-Tsang GCD Test", "N/A")],
+        [Paragraph('33. OPSO Test', styles['Normal']), dieharder_results.get("OPSO Test", "N/A"),
+        Paragraph('34. OQSO Test', styles['Normal']), dieharder_results.get("OQSO Test", "N/A")],
+        [Paragraph('35. DNA Test', styles['Normal']), dieharder_results.get("DNA Test", "N/A"),
+        Paragraph('36. Count the Ones (Stream) Test', styles['Normal']), dieharder_results.get("Count the Ones (Stream) Test", "N/A")],
+        [Paragraph('37. Count the Ones (Bytes) Test', styles['Normal']), dieharder_results.get("Count the Ones (Bytes) Test", "N/A"),
+        Paragraph('38. Simple GCD Test', styles['Normal']), dieharder_results.get("Simple GCD Test", "N/A")],
+        [Paragraph('39. Generalized Minimum Distance Test', styles['Normal']), dieharder_results.get("Generalized Minimum Distance Test", "N/A"),
+        Paragraph('40. TestU01 Linear Complexity Test', styles['Normal']), dieharder_results.get("TestU01 Linear Complexity Test", "N/A")],
+        [Paragraph('41. TestU01 Longest Repeated Substring Test', styles['Normal']), dieharder_results.get("TestU01 Longest Repeated Substring Test", "N/A"),
+        Paragraph('42. TestU01 Matrix Rank Test', styles['Normal']), dieharder_results.get("TestU01 Matrix Rank Test", "N/A")],
+        [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, bold_red_style), '', ''],
     ]
 
     colWidths = [2 * inch, 1.5 * inch, 2 * inch, 1.5 * inch]
@@ -4083,7 +3850,7 @@ def generate_pdf_report_server(request):
 
     # Images for graphs
     graph_image1 = Image(graph_image_io1, width=7 * inch, height=4.5 * inch)
-    graph_image = Image(graph_image_io, width=7 * inch, height=4.5 * inch)
+    # graph_image = Image(graph_image_io, width=7 * inch, height=4.5 * inch)
     graph_image2 = Image(graph_image_io2, width=7 * inch, height=4.5 * inch)
     cache.set(f"{job_id}_progressReportServer", 56)
     # Logo
@@ -4135,7 +3902,7 @@ def generate_pdf_report_server(request):
         subtitle_space,
         graph_image1,
         subtitle_space,
-        graph_image,
+        # graph_image,
         subtitle_space,
         graph_image2,
         subtitle_space,
@@ -4391,84 +4158,127 @@ def get_progress90b(request, job_id):
     return JsonResponse({"progress": int(progress)})
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
+import json
+import uuid
+import datetime
+import time
+import tempfile
+import subprocess
+import os
 
 @csrf_exempt
 def generate_final_ans_dieharder(request):
     if request.method == 'POST':
+        file = request.FILES.get('file')
+        if not file:
+            return JsonResponse({"error": "No file uploaded"}, status=400)
+
+        scheduled_time_str = request.POST.get('scheduled_time')
+        job_id = request.POST.get('job_id', str(uuid.uuid4()))
+        cache.set(f"{job_id}_progress_dieharder", 0)
+
+        if not scheduled_time_str:
+            return JsonResponse({"error": "scheduled_time is required"}, status=400)
+
         try:
-            data = json.loads(request.body)
-            binary_data = data.get('binary_data', '')
-            scheduled_time_str = data.get('scheduled_time', '')
-            job_id = data.get('job_id', str(uuid.uuid4()))
-            cache.set(f"{job_id}_progress_dieharder", 0)
+            scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
 
-            if not binary_data:
-                return JsonResponse({"error": "binary_data is missing or empty"}, status=400)
+        current_time = datetime.datetime.now()
+        time_difference = (scheduled_time - current_time).total_seconds()
+        print(f"Time difference for scheduling: {time_difference} seconds.")
+        if time_difference > 0:
+            time.sleep(time_difference)
 
-            if not scheduled_time_str:
-                return JsonResponse({"error": "scheduled_time is required"}, status=400)
+        # Write file to temp
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in file.chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
 
-            try:
-                scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
-            except ValueError:
-                return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
+        # List of all Dieharder test IDs
+        dieharder_test_ids = [
+             "2", 
+            #  "1", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+            # "13", "17", "18"
+        ]
 
-            current_time = datetime.datetime.now()
-            time_difference = (scheduled_time - current_time).total_seconds()
-            if time_difference > 0:
-                time.sleep(time_difference)
+        results = []
+        passed_count = 0
+        m = 2  # start progress
 
-            x = 0
-            cache.set(f"{job_id}_progress_dieharder", 1)
-            tests = [
-                BirthdaySpacingsTest.BirthdaySpacingsTest,
-                ParkingLotTest.ParkingLotTest,
-                Overlapping5PermutationTest.Overlapping5PermutationTest,
-                MinimumDistanceTest.MinimumDistanceTest,
-                Ranks31x31MatricesTest.Ranks31x31MatricesTest,
-                Spheres3DTest.Spheres3DTest,
-                Ranks32x32MatricesTest.Ranks32x32MatricesTest,
-                CrapsTest.CrapsTest,
-                BitstreamTest.BitstreamTest,
-                MarsagliaTsangGCDTest.MarsagliaTsangGCDTest,
-                OPSOTest.OPSOTest,
-                OQSOTest.OQSOTest,
-                DNATest.DNATest,
-                CountThe1sStreamTest.CountThe1sStreamTest,
-                CountThe1sByteTest.CountThe1sByteTest,
-                MarsagliaTsangSimpleGCDTest.MarsagliaTsangSimpleGCDTest,
-                GeneralizedMinimumDistanceTest.GeneralizedMinimumDistanceTest,
-                TestU01LinearComplexityTest.TestU01LinearComplexityTest,
-                TestU01LongestRepeatedSubstringTest.TestU01LongestRepeatedSubstringTest,
-                TestU01MatrixRankTest.TestU01MatrixRankTest
+        for idx, test_id in enumerate(dieharder_test_ids, start=1):
+            command = [
+                "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+                "-d", test_id,
+                "-g", "66",
+                "-f", tmpfile_path
             ]
+            try:
+                process = subprocess.run(
+                    command,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    universal_newlines=True,
+                    timeout=300
+                )
+                output = process.stdout
+                print(f"Output for test {test_id}:\n{output}")
 
-            total_tests = len(tests)
-            cache.set(f"{job_id}_progress_dieharder", 2)
-            m=3
-            for i, test in enumerate(tests):
-                try:
-                    result = test(binary_data)[1]
-                    print(i)
-                    if result:
-                        x += 1
-                except Exception as e:
-                    print(f"Error in test {test.__name__}: {e}")
-                finally:
-                    cache.set(f"{job_id}_progress_dieharder", m)
-                    m=m+1
+                p_value = None
+                assessment = None
 
-            final_text = 'random number' if x > 10 else 'non-random number'
+                for line in output.splitlines():
+                    line = line.strip()
+                    if line.startswith("Kuiper KS: p ="):
+                        try:
+                            p_value = float(line.split("=")[1].strip())
+                        except Exception:
+                            p_value = None
+                    elif line.startswith("Assessment:"):
+                        assessment = line.replace("Assessment:", "").strip()
 
-            response_data = {
-                "final_result": final_text,
-                "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-            cache.set(f"{job_id}_progress_dieharder", 22)
-            return JsonResponse(response_data)
+                results.append({
+                    "test_id": test_id,
+                    "p_value": p_value,
+                    "assessment": assessment or "unknown"
+                })
 
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+                if assessment and "PASSED" in assessment.upper():
+                    passed_count += 1
+
+            except subprocess.TimeoutExpired:
+                results.append({
+                    "test_id": test_id,
+                    "error": "Timeout"
+                })
+            except Exception as e:
+                results.append({
+                    "test_id": test_id,
+                    "error": str(e)
+                })
+            finally:
+                cache.set(f"{job_id}_progress_dieharder", m)
+                m += 1
+
+        final_text = 'random number' if passed_count > len(dieharder_test_ids) / 2 else 'non-random number'
+
+        response_data = {
+            "final_result": final_text,
+            "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            # "details": results
+        }
+
+        cache.set(f"{job_id}_progress_dieharder", m)
+
+        if os.path.exists(tmpfile_path):
+            os.remove(tmpfile_path)
+
+        return JsonResponse(response_data)
 
     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
@@ -4478,13 +4288,71 @@ def get_progress_dieharder(request, job_id):
     progress = cache.get(f"{job_id}_progress_dieharder", 0)
     return JsonResponse({"progress": int(progress)})
 
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 
-class DieharderTestView(APIView):
+class DieharderMinDistTestView(APIView):
     permission_classes = [AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        import tempfile
+        import subprocess
+        import os
+
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "12",
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderOperm5TestView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, format=None):
@@ -4496,8 +4364,8 @@ class DieharderTestView(APIView):
 
         # Build the dieharder command
         command = [
-            r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_files\QNU_Project_New_Design\backend\myproject\home\dieharder-2.6.24\dieharder\dieharder",
-            "-d", "12",
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "2", #operm5 test
             "-g", "66",
             "-f", tmpfile_path
         ]
@@ -4543,3 +4411,1119 @@ class DieharderTestView(APIView):
                 os.remove(tmpfile_path)
 
 
+class DieharderBirthdayTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "1", #birthday test
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+
+class DieharderParkingLotTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "11", #parking lot test
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+
+class DieharderSqueezeTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "13", #birthday test
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderCountOneTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "10", #birthday test
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderCountOneStreamTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "9", #birthday test
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderOQSOTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "7", 
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderDnaTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "8", 
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderOPSOTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "6", 
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderBitstreamTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "5", 
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class Dieharder6x8RankTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "4", 
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderCrapsTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "17", 
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderTsangTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "18", 
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+               
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+# largest time
+class Dieharder32RankTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "3", 
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+                "output":output,
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderxTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", "19", 
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Initialize defaults
+            p_value = None
+            assessment = None
+
+            # Parse p-value and assessment
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            return Response({
+                "output":output,
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+# class DieharderxTestView(APIView):
+#     parser_classes = (MultiPartParser, FormParser)
+
+#     def post(self, request, format=None):
+#         # Save the uploaded file to a temp file
+#         with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+#             for chunk in request.FILES['file'].chunks():
+#                 tmpfile.write(chunk)
+#             tmpfile_path = tmpfile.name
+
+#         # Build the dieharder command
+#         command = [
+#             "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+#             "-r", "1", 
+#             "-g", "66",
+#             "-f", tmpfile_path
+#         ]
+
+#         try:
+#             # Run dieharder
+#             process = subprocess.run(
+#                 command,
+#                 stdout=subprocess.PIPE,
+#                 stderr=subprocess.PIPE,
+#                 universal_newlines=True,
+#                 timeout=300
+#             )
+#             output = process.stdout
+#             error = process.stderr
+
+#             # Initialize defaults
+#             p_value = None
+#             assessment = None
+
+#             # Parse p-value and assessment
+#             for line in output.splitlines():
+#                 line = line.strip()
+#                 if line.startswith("Kuiper KS: p ="):
+#                     try:
+#                         p_value = float(line.split("=")[1].strip())
+#                     except Exception:
+#                         p_value = None
+#                 if line.startswith("Assessment:"):
+#                     assessment = line.replace("Assessment:", "").strip()
+
+#             return Response({
+#                 "output": output,
+#                 "p_value": p_value,
+#                 "assessment": assessment
+#             })
+
+#         except subprocess.TimeoutExpired:
+#             return Response({"error": "Dieharder test timed out."}, status=500)
+
+#         finally:
+#             if os.path.exists(tmpfile_path):
+#                 os.remove(tmpfile_path)
+
+# class DieharderxTestView(APIView):
+#     parser_classes = (MultiPartParser, FormParser)
+
+#     def post(self, request, format=None):
+#         # Save the uploaded file to a temp file
+#         with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+#             for chunk in request.FILES['file'].chunks():
+#                 tmpfile.write(chunk)
+#             tmpfile_path = tmpfile.name
+
+#         # Build the dieharder command
+#         # Example: -r 2 Bit Persist test
+#         command = [
+#             "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+#             "-s", "1",          # Change this to 1,3,4 as desired
+#             "-g", "66",
+#             "-f", tmpfile_path
+#         ]
+
+#         try:
+#             # Run dieharder
+#             process = subprocess.run(
+#                 command,
+#                 stdout=subprocess.PIPE,
+#                 stderr=subprocess.PIPE,
+#                 universal_newlines=True,
+#                 timeout=300
+#             )
+#             output = process.stdout
+#             error = process.stderr
+
+#             # Optional: parse output if you want
+#             p_value = None
+#             assessment = None
+#             for line in output.splitlines():
+#                 line = line.strip()
+#                 if line.startswith("p ="):
+#                     try:
+#                         p_value = float(line.split("=")[1].strip())
+#                     except Exception:
+#                         p_value = None
+#                 if "Assessment:" in line:
+#                     assessment = line.split("Assessment:")[-1].strip()
+
+#             return Response({
+#                 "output": output,
+#                 "p_value": p_value,
+#                 "assessment": assessment
+#             })
+
+#         except subprocess.TimeoutExpired:
+#             return Response({"error": "Dieharder test timed out."}, status=500)
+
+#         finally:
+#             if os.path.exists(tmpfile_path):
+#                 os.remove(tmpfile_path)
+                
+
+class DieharderStsMonoTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command for STS Monobit Test
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-s", "1",  # STS Monobit test
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Parse p-value and assessment
+            p_value = None
+            assessment = None
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value_str = line.split("=")[1].strip()
+                        p_value = float(p_value_str)
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.split("Assessment:")[1].strip()
+
+            return Response({
+              
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder STS test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderStsRunsTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command for STS Monobit Test
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-s", "2",  # STS runs test
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Parse p-value and assessment
+            p_value = None
+            assessment = None
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value_str = line.split("=")[1].strip()
+                        p_value = float(p_value_str)
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.split("Assessment:")[1].strip()
+
+            return Response({
+              
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder STS test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)
+
+
+class DieharderLaggedTestView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        # Save the uploaded file to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+            for chunk in request.FILES['file'].chunks():
+                tmpfile.write(chunk)
+            tmpfile_path = tmpfile.name
+
+        # Build the dieharder command for STS Monobit Test
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-u", "1",  # STS runs test
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            # Run dieharder
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            error = process.stderr
+
+            # Parse p-value and assessment
+            p_value = None
+            assessment = None
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value_str = line.split("=")[1].strip()
+                        p_value = float(p_value_str)
+                    except Exception:
+                        p_value = None
+                if line.startswith("Assessment:"):
+                    assessment = line.split("Assessment:")[1].strip()
+
+            return Response({
+                
+                "p_value": p_value,
+                "assessment": assessment
+            })
+
+        except subprocess.TimeoutExpired:
+            return Response({"error": "Dieharder STS test timed out."}, status=500)
+
+        finally:
+            if os.path.exists(tmpfile_path):
+                os.remove(tmpfile_path)

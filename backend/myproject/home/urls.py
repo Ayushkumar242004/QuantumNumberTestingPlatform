@@ -3,10 +3,28 @@
 from django.urls import path
 from . import views
 from .views import sse_binary_view,sse_binary_example_view
-from .views import DieharderTestView
+from .views import DieharderMinDistTestView
+from .views import DieharderBirthdayTestView
+from .views import DieharderOperm5TestView
+from .views import DieharderParkingLotTestView
+from .views import DieharderSqueezeTestView
+from .views import DieharderCountOneTestView
+from .views import DieharderCountOneStreamTestView
+from .views import DieharderOQSOTestView
+from .views import DieharderDnaTestView
+from .views import DieharderOPSOTestView
+from .views import DieharderBitstreamTestView
+from .views import Dieharder6x8RankTestView
+from .views import DieharderTsangTestView
+from .views import DieharderTsangTestView
+from .views import DieharderCrapsTestView
+from .views import DieharderStsRunsTestView
+from .views import DieharderStsMonoTestView
+from .views import DieharderLaggedTestView
+from .views import DieharderxTestView
+from .views import Dieharder32RankTestView
 
 urlpatterns = [
-    
     # nist sp 800-22
     path('run_frequency_test/', views.run_frequency_test, name='run_frequency_test'),
     path('run_frequency_block_test/', views.run_frequency_block_test, name='run_frequency_block_test'),
@@ -33,28 +51,7 @@ urlpatterns = [
     path('run_mmc_test/',views.run_mmc_test, name='run_mmc_test'),
     path('run_lz78y_test/',views.run_lz78y_test, name='run_lz78y_test'),
     
-    # # dieharder tests
-    path('run_binary_spacings_test/',views.run_birthday_spacings_test, name='binary_spacings_test'),  
-    path('run_parking_lot_test/',views.run_parking_lot_test, name='run_parking_lot_test'),  
-    path('run_overlapping_5_test/',views.run_overlapping_5_test, name='run_overlapping_5_test'),  
-    path('run_minimum_distance_test/',views.run_minimum_distance_test, name='run_minimum_distance_test'),  
-    path('run_31matrix_test/',views.run_31matrix_test, name='run_31matrix_test'),  
-    path('run_spheres_test/',views.run_spheres_test, name='run_spheres_test'),  
-    path('run_32matrix_test/',views.run_32matrix_test, name='run_32matrix_test'),  
-    path('run_craps_test/',views.run_craps_test, name='run_craps_test'),  
-    path('run_bitstream_test/',views.run_bitstream_test, name='run_bitstream_test'),  
-    path('run_gcd_test/',views.run_gcd_test, name='run_gcd_test'),  
-    path('run_opso_test/',views.run_opso_test, name='run_opso_test'),  
-    path('run_oqso_test/',views.run_oqso_test, name='run_oqso_test'),  
-    path('run_dna_test/',views.run_dna_test, name='run_dna_test'),  
-    path('run_count_one_test/',views.run_count_one_test, name='run_count_one_test'),  
-    path('run_count_one_byte_test/',views.run_count_one_byte_test, name='run_count_one_byte_test'),  
-    path('run_simple_gcd_test/',views.run_simple_gcd_test, name='run_simple_gcd_test'),  
-    path('run_general_minimum_distance_test/',views.run_general_minimum_distance_test, name='run_general_minimum_distance_test'),  
-    path('run_u01_linear_complexity_test/',views.run_u01_linear_complexity_test, name='run_u01_linear_complexity_test'),  
-    path('run_u01_longest_repeated_substring_test/',views.run_u01_longest_repeated_substring_test, name='run_u01_longest_repeated_substring_test'),  
-    path('run_matrix_rank_test/',views.run_matrix_rank_test, name='run_matrix_rank_test'),  
-    
+ 
     # #report generation
     path('pdf-report/', views.generate_pdf_report, name='generate_pdf_report'),
     path("get_progress_nist/<uuid:job_id>/", views.get_progress_nist, name="get_progress_nist"),
@@ -73,10 +70,10 @@ urlpatterns = [
     path("get_progress_graph/<uuid:job_id>/", views.get_progress_graph, name="get_progress_graph"),
     
     path('graph-generation-nist90b/', views.create_graph_nist90b, name='create_graph_nist90b'),
-    path('get_progress_graph90b/', views.get_progress_graph90b, name='get_progress_graph90b'),
+    path('get_progress_graph90b', views.get_progress_graph90b, name='get_progress_graph90b'),
     
     path('graph-generaion-dieharder/', views.create_graph_dieharder, name='create_graph_dieharder'),
-    path('get_progress_graphDieharder/', views.get_progress_graphDieharder, name='get_progress_graphDieharder'),
+    path('get_progress_graphDieharder/<uuid:job_id>/', views.get_progress_graphDieharder, name='get_progress_graphDieharder'),
     
     # final ans
     path('generate_final_ans/', views.generate_final_ans, name='generate_final_ans'),
@@ -88,7 +85,27 @@ urlpatterns = [
     path('generate_final_ans_dieharder/', views.generate_final_ans_dieharder, name='generate_final_ans_dieharder'),
     path("get_progress_dieharder/<uuid:job_id>/", views.get_progress_dieharder, name="get_progress_dieharder"),
 
-    path('run-test/', DieharderTestView.as_view()),
+    # dieharder tests
+    path('minDist-test/', DieharderMinDistTestView.as_view()),
+    path('operm5-test/', DieharderOperm5TestView.as_view()),
+    path('birthday-test/', DieharderBirthdayTestView.as_view()),
+    path('parking-test/', DieharderParkingLotTestView.as_view()),
+    path('squeeze-test/', DieharderSqueezeTestView.as_view()),
+    path('countOne-test/', DieharderCountOneTestView.as_view()),
+    path('countOneByte-test/', DieharderCountOneStreamTestView.as_view()),
+    path('oqso-test/', DieharderOQSOTestView.as_view()),
+    path('dna-test/', DieharderDnaTestView.as_view()),
+    path('opso-test/', DieharderOPSOTestView.as_view()),
+    path('bitstream-test/', DieharderBitstreamTestView.as_view()),
+    path('6x8rank-test/', Dieharder6x8RankTestView.as_view()),
+    path('tsang-test/', DieharderTsangTestView.as_view()),
+    path('craps-test/', DieharderCrapsTestView.as_view()),
+    path('stsruns-test/', DieharderStsRunsTestView.as_view()),
+    path('stsmonobit-test/', DieharderStsMonoTestView.as_view()),
+    path('laggedSum-test/', DieharderLaggedTestView.as_view()),
+    path('32rank-test/', Dieharder32RankTestView.as_view()),
+    path('x-test/', DieharderxTestView.as_view()),
+   
 ]
 
 # http://127.0.0.1:8000/sse_binary_example/

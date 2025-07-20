@@ -274,6 +274,7 @@ const Qrng_Server = () => {
 
       if (response.data?.random) {
         setBinaryInput(response.data.random); // Update the state with random binary data
+        console.log("binary input", binaryInput);
       } else {
         console.error("Error in connection:", response.data);
       }
@@ -623,6 +624,32 @@ const Qrng_Server = () => {
   const jobIdRef4n = useRef(null);
   const jobIdRef5 = useRef(null);
   const jobIdRef5n = useRef(null);
+///bin file creation
+const [binFile, setBinFile] = useState(null);   // will hold the generated .bin file
+
+useEffect(() => {
+  if (!binaryInput || binaryInput.length % 8 !== 0) {
+    console.warn("Invalid or incomplete binary string");
+    return;
+  }
+
+  // Step 1: Split binaryInput into 8-bit chunks
+  const byteChunks = binaryInput.match(/.{8}/g); // each element is like "01000001"
+
+  // Step 2: Convert chunks to characters using fromCharCode
+  const byteString = byteChunks
+    .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
+    .join("");
+
+  // Step 3: Create a Blob and File from the byteString
+  const blob = new Blob([byteString], { type: "application/octet-stream" });
+  const file = new File([blob], "output.bin", { type: "application/octet-stream" });
+
+  setBinFile(file);
+  console.log("bin file",binFile);
+  
+}, [binaryInput]);
+////
 
   useEffect(() => {
     if (!binaryInput) return; // Do not fetch if binaryInput is empty
@@ -687,23 +714,26 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 22) * 100);
+            const percent = Math.round((completed / 3) * 100);
+            console.log(`Polled progress: ${percent}%`);
             setLoadingProgress(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
           }
         }, 1000);
 
+        const formData = new FormData();
+          formData.append("file", binFile);
+          const formattedScheduledTime = "2024-07-07 11:30:00"
+  
+          formData.append("scheduled_time", formattedScheduledTime);
+          formData.append("job_id", currentJobId);
 
-
-        const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_dieharder/",
-          {
-            binary_data: binaryInput,
-            scheduled_time: scheduledTime,
-            job_id: currentJobId,
-          }
-        );
+          const response = await axios.post(
+            "http://localhost:8000/generate_final_ans_dieharder/",
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
+          );
 
         clearInterval(progressInterval); // Stop the interval
         setLoadingProgress(100); // Set progress to 100% after response is received
