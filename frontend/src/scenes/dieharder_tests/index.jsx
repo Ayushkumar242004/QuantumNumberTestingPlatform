@@ -771,6 +771,15 @@ const Dieharder_tests = () => {
   };
 
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile2, setSelectedFile2] = useState(null);
+  const [selectedFile3, setSelectedFile3] = useState(null);
+  const [selectedFile4, setSelectedFile4] = useState(null);
+  const [selectedFile5, setSelectedFile5] = useState(null);
+  const [selectedFile6, setSelectedFile6] = useState(null);
+  const [selectedFile7, setSelectedFile7] = useState(null);
+  const [selectedFile8, setSelectedFile8] = useState(null);
+  const [selectedFile9, setSelectedFile9] = useState(null);
+  const [selectedFile10, setSelectedFile10] = useState(null);
   const handleFileChange = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return;
@@ -838,11 +847,10 @@ const Dieharder_tests = () => {
 
   };
 
-
   const handleFileChange2 = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return;
-
+    setSelectedFile2(selectedFile);
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -866,41 +874,39 @@ const Dieharder_tests = () => {
 
     // Set new filename
     setFileName2(selectedFile.name);
+    const currentTime = new Date().toISOString();
+    setUploadTime2(currentTime);
+    try {
+      const buffer = await selectedFile.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      const binaryData = Array.from(bytes)
+        .map(byte => byte.toString(2).padStart(8, '0'))
+        .join('');
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
 
-      setBinaryInput2(textData);
+      setBinaryInput2(binaryData);
+    } catch (error) {
+      console.error("❌ Error reading binary file:", error);
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
 
-      const currentTime = new Date().toISOString();
-      setUploadTime2(currentTime);
+    // Supabase cleanup
+    try {
+      localStorage.setItem('resultFetchedFromSupabase3', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 2, user_id: userId });
 
-      // Remove previous Supabase row for line 2
-      try {
-        localStorage.setItem('resultFetchedFromSupabased2', 'false');
-        const { error: deleteError } = await supabase
-          .from('results3')
-          .delete()
-          .match({ line: 2, user_id: userId });
-
-        setLoadingProgress2(0);
-        if (deleteError) {
-
-          return;
-        }
-      } catch (err) {
-        console.error("Unexpected error in handleFileChange2:", err);
+      if (deleteError) {
+       
+        return;
       }
-
-      // Reset the file input
-      event.target.value = "";
-    };
-
-    reader.readAsArrayBuffer(selectedFile);
+    } catch (err) {
+      console.error('Unexpected error:', err);
+    }
+    event.target.value = "";
   };
 
   const handleFileChange3 = async (event) => {
@@ -1599,7 +1605,16 @@ const Dieharder_tests = () => {
 
 
   const binaryInsertedRef = useRef(false); // 🔁 Track binary insert
-
+  const binaryInsertedRef2 = useRef(false); 
+  const binaryInsertedRef3 = useRef(false); 
+  const binaryInsertedRef4 = useRef(false); 
+  const binaryInsertedRef5 = useRef(false); 
+  const binaryInsertedRef6 = useRef(false); 
+  const binaryInsertedRef7 = useRef(false); 
+  const binaryInsertedRef8 = useRef(false); 
+  const binaryInsertedRef9= useRef(false); 
+  const binaryInsertedRef10 = useRef(false); 
+   
   useEffect(() => {
     if (!binaryInput || !debouncedScheduledTime) {
       return;
@@ -1683,7 +1698,7 @@ const Dieharder_tests = () => {
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 3) * 100);
+              const percent = Math.round((completed / 4) * 100);
               console.log(`Polled progress: ${percent}%`);
               setLoadingProgress((prev) => (percent > prev ? percent : prev));
               await upsertProgress(percent, userId);
@@ -1762,25 +1777,53 @@ const Dieharder_tests = () => {
     let progressInterval;
 
     const upsertProgress2 = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
-      const { error } = await supabase
-        .from('results3')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput2,
-          scheduled_time: debouncedScheduledTime2,
-          result: result,
-          file_name: fileName2,
-          upload_time: uploadTime2,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString(),
-        });
-
-      if (error) {
-        console.error('Error storing progress in Supabase (line 2):', error);
-      }
+      let binaryString = null;
+  
+      if (progress === 0 && selectedFile2 && !binaryInsertedRef2.current) {
+        try {
+          const fileReader = new FileReader();
+  
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile2);
+          });
+  
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+  
+          binaryInsertedRef2.current = true; // ✅ Prevent future inserts
+          console.log("binary string", binaryString);
+  
+        } catch (err) {
+          console.error("❌ Error reading binary file:", err);
+          return;
+        }
+    }
+    const progressPercentage = progress;
+    const payload = {
+      user_id: userId,
+      line: lineNo,
+      scheduled_time: debouncedScheduledTime2,
+      result: result,
+      file_name: fileName2,
+      upload_time: uploadTime2,
+      binary_data: binaryInsertedRef2.current ? binaryInput : null, // Only send once
+      progress: progressPercentage,
+      updated_at: new Date().toISOString(),
     };
+
+    const { error: upsertError } = await supabase
+      .from("results3")
+      .upsert(payload);
+
+    if (upsertError) {
+      console.error("❌ Error storing progress in Supabase:", upsertError);
+    } else {
+      console.log(`✅ Progress ${progress}% upserted successfully.`);
+    }
+  };
 
     const startProcess2 = async () => {
       const userId = await fetchUserId();
@@ -1799,7 +1842,7 @@ const Dieharder_tests = () => {
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 22) * 100);
+              const percent = Math.round((completed / 4) * 100);
               setLoadingProgress2(prev => (percent > prev ? percent : prev));
               await upsertProgress2(percent, userId);
             } catch (err) {
@@ -1807,23 +1850,30 @@ const Dieharder_tests = () => {
             }
           }, 1000);
 
+          const formData = new FormData();
+          formData.append("file", selectedFile2);
+          const formattedScheduledTime = new Date(debouncedScheduledTime2)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+  
+          formData.append("scheduled_time", formattedScheduledTime);
+          formData.append("job_id", currentJobId);
+          formData.append("line", lineNo);
+  
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
-            {
-              binary_data: binaryInput2,
-              scheduled_time: debouncedScheduledTime2,
-              job_id: currentJobId,
-              line: lineNo,
-            }
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+  
           clearInterval(progressInterval);
           setLoadingProgress2(100);
           setResult2(response.data);
-          localStorage.setItem('resultFetchedFromSupabased2', 'true');
+          localStorage.setItem("resultFetchedFromSupabase3", "true");
           await upsertProgress2(100, userId, response.data.final_result);
+          console.log("Final progress upserted (100%).");
         } catch (error) {
-
           clearInterval(progressInterval);
           setLoadingProgress2(0);
           await upsertProgress2(0, userId);
@@ -2612,6 +2662,7 @@ const Dieharder_tests = () => {
   }, [binaryInput10, debouncedScheduledTime10]);
 
   const [binFile, setBinFile] = useState(null);   // will hold the generated .bin file
+  const [binFile2, setBinFile2] = useState(null);  
 
   useEffect(() => {
     if (!binaryInput || binaryInput.length % 8 !== 0) {
@@ -2695,7 +2746,7 @@ const Dieharder_tests = () => {
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 3) * 100);
           setLoadingProgressGr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           console.error("Graph progress fetch error:", err);
@@ -2756,24 +2807,30 @@ const Dieharder_tests = () => {
         }
       }, 1000);
 
+      const formData = new FormData();
+      if (selectedFile2) {
+        formData.append("file", selectedFile2);
+      } else if (binFile) {
+        formData.append("file", binFile2);
+      }
+      formData.append("job_id", currentJobId);
+
       fetch("http://localhost:8000/pdf-report-dieharder/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobId }),
+        body: formData,
       })
         .then((response) => response.blob())
         .then((blob) => {
-          setLoadingProgress2Rep(100); // Done
+          setLoadingProgress2Rep(100);
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
         .catch((error) => {
-
+          console.error("Report generation error:", error);
           clearInterval(progressInterval);
           setLoadingProgress2Rep(0);
         });
-
     } else if (type === "graph") {
 
       const currentJobId = uuidv4();
@@ -3799,7 +3856,7 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload Binary File
+                      Upload bin file
                     </Button>
                     <input
                       type="file"
@@ -4110,7 +4167,7 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload Binary File
+                      Upload bin file
                     </Button>
                     <input
                       type="file"
@@ -4421,7 +4478,7 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload Binary File
+                      Upload bin file
                     </Button>
                     <input
                       type="file"
@@ -4732,7 +4789,7 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload Binary File
+                      Upload bin file
                     </Button>
                     <input
                       type="file"
@@ -5043,7 +5100,7 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload Binary File
+                      Upload bin file
                     </Button>
                     <input
                       type="file"
@@ -5354,7 +5411,7 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload Binary File
+                      Upload bin file
                     </Button>
                     <input
                       type="file"
@@ -5664,7 +5721,7 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload Binary File
+                      Upload bin file
                     </Button>
                     <input
                       type="file"
@@ -5975,7 +6032,7 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload Binary File
+                      Upload bin file
                     </Button>
                     <input
                       type="file"
@@ -6286,7 +6343,7 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload Binary File
+                      Upload bin file
                     </Button>
                     <input
                       type="file"

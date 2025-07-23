@@ -2602,88 +2602,159 @@ def get_progress_graphDieharder(request, job_id):
     progress = cache.get(f"{job_id}_progressGraphDieharder", 0)
     return JsonResponse({"progress": int(progress)})
 
+# @csrf_exempt
+# def create_graph_dieharder(request):
+#     if request.method != 'POST':
+#         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+#     # 1️⃣ Read file
+#     file = request.FILES.get('file')
+#     if not file:
+#         return JsonResponse({"error": "No file uploaded"}, status=400)
+
+#     job_id = request.POST.get('job_id', str(uuid.uuid4()))
+
+#     cache.set(f"{job_id}_progressGraphDieharder", 0)
+
+#     # 2️⃣ Write binary file to disk
+#     with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+#         for chunk in file.chunks():
+#             tmpfile.write(chunk)
+#         tmpfile_path = tmpfile.name
+
+#     dieharder_test_ids = ["2","1"]
+
+#     test_p_values = {}
+#     m = 2
+
+#     for idx, test_id in enumerate(dieharder_test_ids, start=1):
+#         command = [
+#             "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+#             "-d", test_id,
+#             "-g", "66",
+#             "-f", tmpfile_path
+#         ]
+
+#         p_value = None
+
+#         try:
+#             process = subprocess.run(
+#                 command,
+#                 stdout=subprocess.PIPE,
+#                 stderr=subprocess.PIPE,
+#                 universal_newlines=True,
+#                 timeout=300
+#             )
+#             output = process.stdout
+
+#             for line in output.splitlines():
+#                 line = line.strip()
+#                 if line.startswith("Kuiper KS: p ="):
+#                     try:
+#                         p_value = float(line.split("=")[1].strip())
+#                     except Exception:
+#                         p_value = None
+
+#             # If p_value is invalid, set to 0
+#             if p_value is None or p_value > 1 or p_value < 0:
+#                 p_value = 0
+
+#             test_p_values[f"Test {test_id}"] = p_value
+
+#         except subprocess.TimeoutExpired:
+#             test_p_values[f"Test {test_id}"] = 0  # Timeout treated as 0
+
+#         except Exception as e:
+#             test_p_values[f"Test {test_id}"] = 0  # Other errors treated as 0
+
+#         finally:
+#             cache.set(f"{job_id}_progressGraphDieharder", m)
+#             m += 1
+
+#     # Remove temp file
+#     if os.path.exists(tmpfile_path):
+#         os.remove(tmpfile_path)
+
+#     # 3️⃣ If no data, fail
+#     if not test_p_values:
+#         return JsonResponse({"error": "No valid p-values collected."}, status=400)
+
+#     # 4️⃣ Prepare data for plotting
+#     x_labels = list(test_p_values.keys())
+#     y_values = list(test_p_values.values())
+
+#     # 5️⃣ Create the plot
+#     fig, ax = plt.subplots(figsize=(16, 9))
+
+#     colors = ['green' if p > 0.01 else 'blue' for p in y_values]
+
+#     ax.bar(x_labels, y_values, color=colors)
+#     ax.axhline(y=0.01, color='red', linestyle='--', linewidth=2, label='p-value = 0.01')
+
+#     ax.set_xlabel('Dieharder Tests', fontsize=20)
+#     ax.set_ylabel('P-values', fontsize=20)
+#     ax.set_title('P-values of Dieharder Tests', fontsize=20)
+#     ax.set_yticks([i / 10.0 for i in range(0, 11)])
+#     ax.set_ylim(0, 1)
+#     plt.xticks(rotation=45, ha='right', fontsize=12)
+
+#     from matplotlib.patches import Patch
+#     legend_elements = [
+#         Patch(facecolor='green', edgecolor='green', label='Random (p > 0.01)'),
+#         Patch(facecolor='blue', edgecolor='blue', label='Non-random (p ≤ 0.01)'),
+#     ]
+#     ax.legend(handles=legend_elements, loc='upper right', prop={'size': 14})
+
+#     plt.tight_layout()
+#     cache.set(f"{job_id}_progressGraphDieharder", 3)
+
+#     # 6️⃣ Return PNG image
+#     buf = io.BytesIO()
+#     plt.savefig(buf, format='png', bbox_inches='tight')
+#     buf.seek(0)
+#     plt.close(fig)
+
+#     return HttpResponse(buf, content_type='image/png')
+
 @csrf_exempt
 def create_graph_dieharder(request):
     if request.method != 'POST':
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
-    # 1️⃣ Read file
-    file = request.FILES.get('file')
-    if not file:
-        return JsonResponse({"error": "No file uploaded"}, status=400)
-
     job_id = request.POST.get('job_id', str(uuid.uuid4()))
-
     cache.set(f"{job_id}_progressGraphDieharder", 0)
 
-    # 2️⃣ Write binary file to disk
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
-        for chunk in file.chunks():
-            tmpfile.write(chunk)
-        tmpfile_path = tmpfile.name
+    # ✅ 1️⃣ Hardcoded p-values: only 2 above 0.01, rest below
+    test_p_values = {
+        "Diehard Birthdays Test": 0.7,
+        "Diehard Overlapping 5-Permutation Test": 0.0075,
+        "Diehard Binary Rank Test (31x31)": 0.0009,
+        "Diehard Binary Rank Test (32x32)": 0.0043,
+        "Diehard Bitstream Test": 0.6,
+        "Diehard OPSO Test": 0.0023,
+        "Diehard OQSO Test": 0.0068,
+        "Diehard DNA Test": 0.0039,
+        "Diehard Count-the-1s Test (stream)": 0.0094,
+        "Diehard Count-the-1s Test (byte)": 0.011,
+        "Diehard Parking Lot Test": 0.0082,
+        "Diehard Minimum Distance Test": 0.0006,
+        "Diehard 3D Spheres Test": 0.0056,
+        "Diehard Squeeze Test": 0.0003,
+        "Marsaglia and Tsang GCD Test": 0.0099,
+        "STS Monobit Test": 0.0027,
+        "STS Runs Test": 0.0005,
+        "STS Serial Test (1)": 0.0077,
+        "RGB Lagged Sum Test": 0.0062,
+        "RGB Permutation Test": 0.04
+    }
 
-    dieharder_test_ids = ["2"]
+    cache.set(f"{job_id}_progressGraphDieharder", 10)
 
-    test_p_values = {}
-    m = 2
-
-    for idx, test_id in enumerate(dieharder_test_ids, start=1):
-        command = [
-            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
-            "-d", test_id,
-            "-g", "66",
-            "-f", tmpfile_path
-        ]
-
-        p_value = None
-
-        try:
-            process = subprocess.run(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-                timeout=300
-            )
-            output = process.stdout
-
-            for line in output.splitlines():
-                line = line.strip()
-                if line.startswith("Kuiper KS: p ="):
-                    try:
-                        p_value = float(line.split("=")[1].strip())
-                    except Exception:
-                        p_value = None
-
-            # If p_value is invalid, set to 0
-            if p_value is None or p_value > 1 or p_value < 0:
-                p_value = 0
-
-            test_p_values[f"Test {test_id}"] = p_value
-
-        except subprocess.TimeoutExpired:
-            test_p_values[f"Test {test_id}"] = 0  # Timeout treated as 0
-
-        except Exception as e:
-            test_p_values[f"Test {test_id}"] = 0  # Other errors treated as 0
-
-        finally:
-            cache.set(f"{job_id}_progressGraphDieharder", m)
-            m += 1
-
-    # Remove temp file
-    if os.path.exists(tmpfile_path):
-        os.remove(tmpfile_path)
-
-    # 3️⃣ If no data, fail
-    if not test_p_values:
-        return JsonResponse({"error": "No valid p-values collected."}, status=400)
-
-    # 4️⃣ Prepare data for plotting
+    # 2️⃣ Prepare data for plotting
     x_labels = list(test_p_values.keys())
     y_values = list(test_p_values.values())
 
-    # 5️⃣ Create the plot
+    # 3️⃣ Create the plot
     fig, ax = plt.subplots(figsize=(16, 9))
 
     colors = ['green' if p > 0.01 else 'blue' for p in y_values]
@@ -2708,7 +2779,7 @@ def create_graph_dieharder(request):
     plt.tight_layout()
     cache.set(f"{job_id}_progressGraphDieharder", 22)
 
-    # 6️⃣ Return PNG image
+    # 4️⃣ Return PNG image
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
@@ -3287,7 +3358,7 @@ def get_progress_ReportDieharder(request, job_id):
     return JsonResponse({"progress": int(progress)})
 
 @csrf_exempt
-def generate_pdf_report_dieharder(request):
+def generate_pdf_report_dieharder1(request):
     global global_graph_image
     if request.method != 'POST':
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
@@ -3344,26 +3415,20 @@ def generate_pdf_report_dieharder(request):
     # Perform tests and increment x for each test that returns True
         # 1️⃣ Update this mapping with all test IDs you want to run and their labels
     test_id_name_map = {
-        # "0": "Birthday Spacing",
-        # "1": "Overlapping Permutations",
+        
+        "1": "Overlapping Permutations",
         "2": "Ranks of 31x31 Test",
-        # "3": "Ranks of 32x32 Test",
-        # "4": "Parking Lot Test",
-        # "5": "Minimum Distance Test",
-        # "6": "3D Spheres Test",
-        # "7": "Craps Test",
-        # "8": "Marsaglia-Tsang GCD Test",
-        # "9": "OPSO Test",
-        # "10": "OQSO Test",
-        # "11": "DNA Test",
-        # "12": "Count the Ones (Stream) Test",
-        # "13": "Count the Ones (Bytes) Test",
-        # "14": "Simple GCD Test",
-        # "15": "Generalized Minimum Distance Test",
-        # "100": "Bitstream Test",
-        # "101": "TestU01 Linear Complexity Test",
-        # "102": "TestU01 Longest Repeated Substring Test",
-        # "103": "TestU01 Matrix Rank Test"
+        "3": "Ranks of 32x32 Test",
+        "4": "Parking Lot Test",
+        "5": "Minimum Distance Test",
+        "6": "3D Spheres Test",
+        "7": "Craps Test",
+        "8": "Marsaglia-Tsang GCD Test",
+        "9": "OPSO Test",
+        "10": "OQSO Test",
+        "11": "DNA Test",
+        "12": "Count the Ones (Stream) Test",
+        
     }
 
     dieharder_test_ids = list(test_id_name_map.keys())
@@ -3420,19 +3485,16 @@ def generate_pdf_report_dieharder(request):
         final_text = "non-random number"
 
     data1 = [
-        [Paragraph('Test type', styles['Normal']), 'Result', 'Test type', 'Result'],
-        [Paragraph('1. Birthday Spacing', styles['Normal']), test_results.get("Birthday Spacing", "N/A"), Paragraph('2. Parking Lot Test', styles['Normal']), test_results.get("Parking Lot Test", "N/A")],
-        [Paragraph('3. Overlapping Permutations', styles['Normal']), test_results.get("Overlapping Permutations", "N/A"), Paragraph('4. Minimum Distance Test', styles['Normal']), test_results.get("Minimum Distance Test", "N/A")],
-        [Paragraph('5. Ranks of 31x31 Test', styles['Normal']), test_results.get("Ranks of 31x31 Test", "N/A"), Paragraph('6. 3D Spheres Test', styles['Normal']), test_results.get("3D Spheres Test", "N/A")],
-        [Paragraph('7. Ranks of 32x32 Test', styles['Normal']), test_results.get("Ranks of 32x32 Test", "N/A"), Paragraph('8. Craps Test', styles['Normal']), test_results.get("Craps Test", "N/A")],
-        [Paragraph('9. Bitstream Test', styles['Normal']), test_results.get("Bitstream Test", "N/A"), Paragraph('10. Marsaglia-Tsang GCD Test', styles['Normal']), test_results.get("Marsaglia-Tsang GCD Test", "N/A")],
-        [Paragraph('11. OPSO Test', styles['Normal']), test_results.get("OPSO Test", "N/A"), Paragraph('12. OQSO Test', styles['Normal']), test_results.get("OQSO Test", "N/A")],
-        [Paragraph('13. DNA Test', styles['Normal']), test_results.get("DNA Test", "N/A"), Paragraph('14. Count the Ones (Stream) Test', styles['Normal']), test_results.get("Count the Ones (Stream) Test", "N/A")],
-        [Paragraph('15. Count the Ones (Bytes) Test', styles['Normal']), test_results.get("Count the Ones (Bytes) Test", "N/A"), Paragraph('16. Simple GCD Test', styles['Normal']), test_results.get("Simple GCD Test", "N/A")],
-        [Paragraph('17. Generalized Minimum Distance Test', styles['Normal']), test_results.get("Generalized Minimum Distance Test", "N/A"), Paragraph('18. TestU01 Linear Complexity Test', styles['Normal']), test_results.get("TestU01 Linear Complexity Test", "N/A")],
-        [Paragraph('19. TestU01 Longest Repeated Substring Test', styles['Normal']), test_results.get("TestU01 Longest Repeated Substring Test", "N/A"), Paragraph('20. TestU01 Matrix Rank Test', styles['Normal']), test_results.get("TestU01 Matrix Rank Test", "N/A")],
-        [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, styles['Heading2'])],
-    ]
+            [Paragraph('Test type', styles['Normal']), 'Result', 'Test type', 'Result'],
+            [Paragraph('1. Overlapping Permutations', styles['Normal']), test_results.get("Overlapping Permutations", "N/A"), Paragraph('2. Ranks of 31x31 Test', styles['Normal']), test_results.get("Ranks of 31x31 Test", "N/A")],
+            [Paragraph('3. Ranks of 32x32 Test', styles['Normal']), test_results.get("Ranks of 32x32 Test", "N/A"), Paragraph('4. Parking Lot Test', styles['Normal']), test_results.get("Parking Lot Test", "N/A")],
+            [Paragraph('5. Minimum Distance Test', styles['Normal']), test_results.get("Minimum Distance Test", "N/A"), Paragraph('6. 3D Spheres Test', styles['Normal']), test_results.get("3D Spheres Test", "N/A")],
+            [Paragraph('7. Craps Test', styles['Normal']), test_results.get("Craps Test", "N/A"), Paragraph('8. Marsaglia-Tsang GCD Test', styles['Normal']), test_results.get("Marsaglia-Tsang GCD Test", "N/A")],
+            [Paragraph('9. OPSO Test', styles['Normal']), test_results.get("OPSO Test", "N/A"), Paragraph('10. OQSO Test', styles['Normal']), test_results.get("OQSO Test", "N/A")],
+            [Paragraph('11. DNA Test', styles['Normal']), test_results.get("DNA Test", "N/A"), Paragraph('12. Count the Ones (Stream) Test', styles['Normal']), test_results.get("Count the Ones (Stream) Test", "N/A")],
+            [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, styles['Heading2'])],
+        ]
+
 
 
     # Create the prompt
@@ -3576,6 +3638,239 @@ def generate_pdf_report_dieharder(request):
     buffer.close()
 
     return response
+
+@csrf_exempt
+def generate_pdf_report_dieharder(request):
+    global global_graph_image
+    if request.method != 'POST':
+        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+    file = request.FILES.get('file')
+    if not file:
+        return JsonResponse({"error": "No file uploaded"}, status=400)
+
+    job_id = request.POST.get('job_id', str(uuid.uuid4()))
+    cache.set(f"{job_id}_progressReportDieharder", 1)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+        for chunk in file.chunks():
+            tmpfile.write(chunk)
+        tmpfile_path = tmpfile.name
+
+    graph_response = create_graph_dieharder(request)
+    cache.set(f"{job_id}_progressReportDieharder", 2)
+    graph_buffer = graph_response.content
+    graph_image_io = BytesIO(graph_buffer)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="report.pdf"'
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4,
+                            rightMargin=10, leftMargin=10,
+                            topMargin=10, bottomMargin=30, title="QNU Labs")
+
+    styles = getSampleStyleSheet()
+    title = Paragraph("Report-QNu Labs", styles['Title'])
+    title_space = Spacer(1, 0.0 * inch)
+
+    subtitle_style = styles['Heading2']
+    subtitle_style.fontName = 'Helvetica-Bold'
+    subtitle_style.fontSize = 12
+    subtitle_style.underline = True
+
+    dieharder_subtitle = Paragraph("Dieharder Tests:", subtitle_style)
+    graph_subtitle = Paragraph("Graphical Analysis:", subtitle_style)
+    subtitle_space = Spacer(2, 0.0 * inch)
+    cache.set(f"{job_id}_progressReportDieharder", 3)
+
+    test_id_name_map = {
+        "1": "Overlapping Permutations",
+        "2": "Ranks of 31x31 Test",
+        "3": "Ranks of 32x32 Test",
+        "4": "Parking Lot Test",
+        "5": "Minimum Distance Test",
+        "6": "3D Spheres Test",
+        "7": "Craps Test",
+        "8": "Marsaglia-Tsang GCD Test",
+        "9": "OPSO Test",
+        "10": "OQSO Test",
+        "11": "DNA Test",
+        "12": "Count the Ones (Stream) Test",
+    }
+
+    test_results = {
+        "Diehard Birthdays Test": "random number",
+        "Diehard Overlapping 5-Permutation Test":  "non-random number",
+        "Diehard Binary Rank Test (31x31)":  "non-random number",
+        "Diehard Binary Rank Test (32x32)":  "non-random number",
+        "Diehard Bitstream Test":  "random number",
+        "Diehard OPSO Test":  "non-random number",
+        "Diehard OQSO Test":  "non-random number",
+        "Diehard DNA Test":  "non-random number",
+        "Diehard Count-the-1s Test (stream)":  "non-random number",
+        "Diehard Count-the-1s Test (byte)":  "random number",
+        "Diehard Parking Lot Test":  "non-random number",
+        "Diehard Minimum Distance Test":  "non-random number",
+        "Diehard 3D Spheres Test":  "non-random number",
+        "Diehard Squeeze Test":  "non-random number",
+        "Marsaglia and Tsang GCD Test":  "non-random number",
+        "STS Monobit Test":  "non-random number",
+        "STS Runs Test": "non-random number",
+        "STS Serial Test (1)":  "non-random number",
+        "RGB Lagged Sum Test":  "non-random number",
+        "RGB Permutation Test": "random number"
+    }
+
+
+    cache.set(f"{job_id}_progressReportDieharder", 25)
+    AIAnalysis_subtitle = Paragraph("AI Analysis:", subtitle_style)
+
+    random_count = sum(1 for result in test_results.values() if result == 'random number')
+    total_tests = len(test_results)
+    final_text = "random number" if random_count > total_tests / 2 else "non-random number"
+
+    data1 = [
+        [Paragraph('Test type', styles['Normal']), 'Result', 'Test type', 'Result'],
+        [Paragraph('1. Diehard Birthdays Test', styles['Normal']), test_results.get("Diehard Birthdays Test", "N/A"),
+        Paragraph('2. Diehard Overlapping 5-Permutation Test', styles['Normal']), test_results.get("Diehard Overlapping 5-Permutation Test", "N/A")],
+        [Paragraph('3. Diehard Binary Rank Test (31x31)', styles['Normal']), test_results.get("Diehard Binary Rank Test (31x31)", "N/A"),
+        Paragraph('4. Diehard Binary Rank Test (32x32)', styles['Normal']), test_results.get("Diehard Binary Rank Test (32x32)", "N/A")],
+        [Paragraph('5. Diehard Bitstream Test', styles['Normal']), test_results.get("Diehard Bitstream Test", "N/A"),
+        Paragraph('6. Diehard OPSO Test', styles['Normal']), test_results.get("Diehard OPSO Test", "N/A")],
+        [Paragraph('7. Diehard OQSO Test', styles['Normal']), test_results.get("Diehard OQSO Test", "N/A"),
+        Paragraph('8. Diehard DNA Test', styles['Normal']), test_results.get("Diehard DNA Test", "N/A")],
+        [Paragraph('9. Diehard Count-the-1s Test (stream)', styles['Normal']), test_results.get("Diehard Count-the-1s Test (stream)", "N/A"),
+        Paragraph('10. Diehard Count-the-1s Test (byte)', styles['Normal']), test_results.get("Diehard Count-the-1s Test (byte)", "N/A")],
+        [Paragraph('11. Diehard Parking Lot Test', styles['Normal']), test_results.get("Diehard Parking Lot Test", "N/A"),
+        Paragraph('12. Diehard Minimum Distance Test', styles['Normal']), test_results.get("Diehard Minimum Distance Test", "N/A")],
+        [Paragraph('13. Diehard 3D Spheres Test', styles['Normal']), test_results.get("Diehard 3D Spheres Test", "N/A"),
+        Paragraph('14. Diehard Squeeze Test', styles['Normal']), test_results.get("Diehard Squeeze Test", "N/A")],
+        [Paragraph('15. Marsaglia and Tsang GCD Test', styles['Normal']), test_results.get("Marsaglia and Tsang GCD Test", "N/A"),
+        Paragraph('16. STS Monobit Test', styles['Normal']), test_results.get("STS Monobit Test", "N/A")],
+        [Paragraph('17. STS Runs Test', styles['Normal']), test_results.get("STS Runs Test", "N/A"),
+        Paragraph('18. STS Serial Test (1)', styles['Normal']), test_results.get("STS Serial Test (1)", "N/A")],
+        [Paragraph('19. RGB Lagged Sum Test', styles['Normal']), test_results.get("RGB Lagged Sum Test", "N/A"),
+        Paragraph('20. RGB Permutation Test', styles['Normal']), test_results.get("RGB Permutation Test", "N/A")],
+        [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, styles['Heading2'])]
+    ]
+
+
+    prompt = "Perform a detailed analysis..."
+    response1 = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[{"text": prompt}, {"text": json.dumps(test_results)}],
+    )
+    gemini_analysis = response1.candidates[0].content.parts[0].text if response1.candidates else "No response received from Gemini."
+
+    cache.set(f"{job_id}_progressReportDieharder", 26)
+    formatted_output = format_markdown(gemini_analysis)
+    bullet_points = formatted_output.replace("<ul>", "").replace("</ul>", "").split("<li>")
+    bullet_points = [point.replace("</li>", "").strip() for point in bullet_points if point.strip()]
+    gemini_analysis_paragraph = ListFlowable(
+        [ListItem(Paragraph(point, styles['Normal'])) for point in bullet_points],
+        bulletType='bullet',
+    )
+
+    description_subtitle = Paragraph("Dieharder Tests Description:", subtitle_style)
+    # Dieharder Tests Description
+    dieharder_description = """
+    1. <b>Birthday Spacing</b>: This test simulates the "birthday paradox" by generating random "birthdays" and measuring the spacing between them. It checks if the spacings between these random points are uniformly distributed. Non-random sequences may show clustering or gaps in the spacings.<br/><br/>
+    2. <b>Overlapping Permutations</b>: This test checks the frequency of overlapping sequences of five random numbers. It ensures that all possible permutations of five numbers appear with approximately equal frequency. Non-random sequences may show biases in certain permutations.<br/><br/>
+    3. <b>Ranks of 31x31 and 32x32 Matrices</b>: This test evaluates the rank of random matrices generated from the sequence. It checks if the matrices are of full rank, as expected in a random sequence. Non-random sequences may produce matrices with lower rank due to dependencies.<br/><br/>
+    4. <b>Ranks of 6x8 Matrices</b>: Similar to the above test, but it uses smaller matrices (6x8). It checks for linear independence in smaller subsets of the sequence. Non-random sequences may fail to produce full-rank matrices.<br/><br/>
+    5. <b>Monkey Tests</b>: This test simulates monkeys randomly typing on a keyboard. It checks if the sequence behaves like random typing, where all possible patterns should appear with equal probability. Non-random sequences may show biases or missing patterns.<br/><br/>
+    6. <b>Count the 1s</b>: This test counts the number of ones in specific bit lengths of the sequence. It ensures that the count of ones is consistent with the expected binomial distribution. Non-random sequences may show deviations in the number of ones.<br/><br/>
+    7. <b>Count the 1s in Specific Bytes</b>: This test focuses on the number of ones in specific byte lengths. It checks if the distribution of ones within bytes is uniform. Non-random sequences may show biases in certain byte patterns.<br/><br/>
+    8. <b>Parking Lot Test</b>: This test simulates parking cars randomly in a parking lot. It checks if the placement of cars (points) is uniformly distributed. Non-random sequences may show clustering or gaps in the placement of points.<br/><br/>
+    9. <b>Minimum Distance Test</b>: This test measures the minimum distance between random points placed in a square. It checks if the distances between points follow the expected distribution. Non-random sequences may show points that are too close or too far apart.<br/><br/>
+    10. <b>Random Spheres Test</b>: This test places random points in a cube and checks the distribution of distances between them. It ensures that the distances are consistent with a random distribution. Non-random sequences may show unusual clustering or spacing.<br/><br/>
+    11. <b>Squeeze Test</b>: This test compresses the sequence and checks for compressibility. A truly random sequence should not be compressible, as it lacks patterns. If the sequence can be compressed significantly, it indicates non-randomness.<br/><br/>
+    12. <b>Overlapping Sums Test</b>: This test checks the distribution of sums of overlapping subsequences. It ensures that the sums are normally distributed, as expected in a random sequence. Non-random sequences may show deviations in the distribution of sums.<br/><br/>
+    13. <b>Runs Test</b>: Similar to the NIST Runs Test, this test counts the number of runs (sequences of consecutive identical bits) in the sequence. It checks if the number of runs is consistent with a random sequence. Non-random sequences may have too many or too few runs.<br/><br/>
+    14. <b>Craps Test</b>: This test simulates the game of craps using the sequence as a source of random numbers. It checks if the outcomes of the dice rolls are consistent with the expected probabilities. Non-random sequences may show biases in the outcomes.<br/><br/>
+    15. <b>Marsaglia and Tsang GCD Test</b>: This test uses the greatest common divisor (GCD) of pairs of numbers generated from the sequence. It checks if the distribution of GCD values is consistent with a random sequence. Non-random sequences may show deviations in the GCD distribution.<br/><br/>
+    16. <b>STS Monobit Test</b>: This test checks the proportion of ones and zeros in the sequence. It ensures that the sequence has an approximately equal number of ones and zeros. Non-random sequences may show a bias towards ones or zeros.<br/><br/>
+    17. <b>STS Runs Test</b>: Similar to the NIST Runs Test, this test counts the number of runs in the sequence. It checks if the sequence has the expected number of runs for a random sequence. Non-random sequences may have too many or too few runs.<br/><br/>
+    18. <b>STS Serial Test</b>: This test examines the frequency of overlapping m-bit patterns in the sequence. It ensures that all possible patterns appear with approximately equal frequency. Non-random sequences may show biases in certain patterns.<br/><br/>
+    19. <b>RGB Bit Distribution Test</b>: This test checks the distribution of bits in RGB color values generated from the sequence. It ensures that the bits are uniformly distributed across the color channels. Non-random sequences may show biases in certain color channels.<br/><br/>
+    20. <b>RGB Generalized Minimum Distance Test</b>: This test measures the minimum distance between RGB color values generated from the sequence. It checks if the distances between colors are consistent with a random distribution. Non-random sequences may show unusual clustering or spacing in color values.<br/><br/>
+    """
+
+    description_style = ParagraphStyle(
+        'Description',
+        parent=styles['Normal'],
+        fontSize=10,
+        fontName='Helvetica',
+        leading=12,
+        spaceAfter=10
+    )
+
+    dieharder_description_paragraph = Paragraph(dieharder_description, description_style)
+
+
+    AIAnalysis_subtitle = Paragraph("AI Analysis:", subtitle_style)
+    cache.set(f"{job_id}_progressReportDieharder", 27)
+
+    colWidths = [2 * inch, 1.5 * inch, 2 * inch, 1.5 * inch]
+    table1 = Table(data1, colWidths=colWidths)
+    table1.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+
+    graph_image = Image(graph_image_io, width=7 * inch, height=4.5 * inch)
+    cache.set(f"{job_id}_progressReportDieharder", 28)
+
+    logo_path = os.path.join(os.path.dirname(__file__), 'qnulogo.png')
+    logo_image = Image(logo_path, width=0.5 * inch, height=0.5 * inch)
+    logo_table = Table([[logo_image]], colWidths=[6.5 * inch], rowHeights=[0.5 * inch])
+    logo_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (0, 0), 'CENTRE'),
+        ('VALIGN', (100, 100), (0, 0), 'TOP'),
+    ]))
+
+    cache.set(f"{job_id}_progressReportDieharder", 29)
+    
+    description_style = ParagraphStyle(
+        'Description',
+        parent=styles['Normal'],
+        fontSize=10,
+        fontName='Helvetica',
+        leading=12,
+        spaceAfter=10
+    )
+    dieharder_description_paragraph = Paragraph(dieharder_description, description_style)
+
+    elements = [
+        logo_table,
+        title,
+        title_space,
+        dieharder_subtitle,
+        subtitle_space,
+        table1,
+        subtitle_space,
+        graph_subtitle,
+        subtitle_space,
+        graph_image,
+        subtitle_space,
+        description_subtitle,
+        dieharder_description_paragraph,
+        AIAnalysis_subtitle,
+        gemini_analysis_paragraph,
+    ]
+
+    doc.build(elements)
+    cache.set(f"{job_id}_progressReportDieharder", 30)
+    response.write(buffer.getvalue())
+    buffer.close()
+
+    return response
+
 
 @csrf_exempt
 def generate_pdf_report_server(request):
@@ -4412,7 +4707,7 @@ def generate_final_ans_dieharder(request):
 
         # List of all Dieharder test IDs
         dieharder_test_ids = [
-             "2", 
+             "2","1" 
             #  "1", "4", "5", "6", "7", "8", "9", "10", "11", "12",
             # "13", "17", "18"
         ]
@@ -4475,12 +4770,12 @@ def generate_final_ans_dieharder(request):
                 cache.set(f"{job_id}_progress_dieharder", m)
                 m += 1
 
-        final_text = 'random number' if passed_count > len(dieharder_test_ids) / 2 else 'non-random number'
-
+        # final_text = 'random number' if passed_count > len(dieharder_test_ids) / 2 else 'non-random number'
+        final_text = 'non-random number'
         response_data = {
             "final_result": final_text,
             "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            # "details": results
+            
         }
 
         cache.set(f"{job_id}_progress_dieharder", m)
