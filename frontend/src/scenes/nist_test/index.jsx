@@ -1691,14 +1691,18 @@ const Nist_tests = () => {
               console.error('Progress fetch error:', err);
             }
           }, 1000);
+          const username = localStorage.getItem("username");
 
           const response = await axios.post("http://localhost:8000/generate_final_ans/", {
             binary_data: binaryInput,
             scheduled_time: debouncedScheduledTime,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName
           });
-
+          
+       
           clearInterval(progressInterval);
           setLoadingProgress(100);
           setResult(response.data);

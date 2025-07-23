@@ -19,6 +19,7 @@ import {
   DnsOutlined,
   ChevronLeft,
 } from "@mui/icons-material";
+import { supabase } from "../../utils/supabaseClient";
 
 const navItems = [
   {
@@ -59,28 +60,56 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const username = localStorage.getItem("username") || "User";
-    // const username = "User";
-    const email = localStorage.getItem("email") || "user@example.com";
-
-    setUserInfo({
-      name: username,
-      email: email,
-      initials: username
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase(),
-    });
+    const fetchUserInfo = async () => {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+  
+      if (authError || !user) {
+        console.error("Error fetching auth user:", authError);
+        return;
+      }
+  
+      const userEmail = user.email;
+  
+      const { data: profile, error: profileError } = await supabase
+        .from("users")
+        .select("username")
+        .eq("email", userEmail)
+        .single();
+  
+      if (profileError) {
+        console.error("Error fetching user profile:", profileError);
+        return;
+      }
+  
+      const username = profile.username || "User";
+  
+      setUserInfo({
+        name: username,
+        email: userEmail,
+        initials: username
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase(),
+      });
+    };
+  
+    fetchUserInfo();
   }, []);
+  
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsLoggingOut(true);
+    // await supabase.auth.signOut();  // Ensure user is logged out from Supabase too
     setTimeout(() => {
       localStorage.clear();
       window.location.href = "/login";
     }, 500);
   };
+  
 
   return (
     <Box

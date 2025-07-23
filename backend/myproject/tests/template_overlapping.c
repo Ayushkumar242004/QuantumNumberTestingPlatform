@@ -424,7 +424,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     for (int i = 0; i < n; i++) {
-        fscanf(fp, "%d", &epsilon[i]);
+        int temp;
+fscanf(fp, "%d", &temp);
+epsilon[i] = (unsigned char)temp;
     }
     fclose(fp);
 

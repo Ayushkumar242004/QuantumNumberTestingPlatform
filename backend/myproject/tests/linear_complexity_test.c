@@ -433,47 +433,73 @@ void LinearComplexity(int M, int n, int *epsilon) {
     free(T);
 }
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+void LinearComplexity(int M, int n, int *epsilon);  // Forward declaration
+
 int main(int argc, char *argv[]) {
     if (argc < 3) {
-        fprintf(stderr, "Usage: %s <block_size> <bit_stream...>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <block_size> <input_file>\n", argv[0]);
         return 1;
     }
 
-    int M = atoi(argv[1]);  // Block size (M) from argument
-    int n = argc - 2;  // Number of bits provided in the bit stream
-    int *epsilon = (int *)malloc(n * sizeof(int));
-    if (epsilon == NULL) {
-        fprintf(stderr, "Memory allocation failed.\n");
+    int M = atoi(argv[1]);  // Block size
+    if (M <= 0) {
+        fprintf(stderr, "Invalid block size: must be > 0\n");
         return 1;
     }
-	if (M <= 0 || n <= 0 || n < M) {
-    fprintf(stderr, "Invalid input: n must be >= M and both > 0\n");
-    free(epsilon);
-    return 0;
-}
-int N = (int)floor(n / M);
-if (N < 1) {
-    fprintf(stderr, "Not enough data for the given block size.\n");
-    free(epsilon);
-    return 0;
-}
-    // Read binary data from command line arguments and store in epsilon
+
     FILE *fp = fopen(argv[2], "r");
     if (!fp) {
         fprintf(stderr, "Failed to open input file.\n");
-        free(epsilon);
         return 1;
     }
+
+    // First pass: count number of bits
+    int bit, n = 0;
+    while (fscanf(fp, "%d", &bit) == 1) {
+        n++;
+    }
+
+    if (n < M) {
+        fprintf(stderr, "Invalid input: n must be >= M and both > 0\n");
+        fclose(fp);
+        return 1;
+    }
+
+    int N = (int)floor((double)n / M);
+    if (N < 1) {
+        fprintf(stderr, "Not enough data for the given block size.\n");
+        fclose(fp);
+        return 1;
+    }
+
+    // Allocate memory
+    int *epsilon = (int *)malloc(n * sizeof(int));
+    if (epsilon == NULL) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        fclose(fp);
+        return 1;
+    }
+
+    // Second pass: read bits into epsilon
+    rewind(fp);
     for (int i = 0; i < n; i++) {
-        fscanf(fp, "%d", &epsilon[i]);
+        if (fscanf(fp, "%d", &epsilon[i]) != 1 || (epsilon[i] != 0 && epsilon[i] != 1)) {
+            fprintf(stderr, "Invalid bit at position %d. Only 0 or 1 are allowed.\n", i);
+            free(epsilon);
+            fclose(fp);
+            return 1;
+        }
     }
     fclose(fp);
 
-    // Run the Linear Complexity Test with the input bit stream
+    // Run the test
     LinearComplexity(M, n, epsilon);
 
-    // Clean up and free allocated memory
+    // Clean up
     free(epsilon);
-
     return 0;
 }

@@ -2,7 +2,7 @@
 
 from django.urls import path
 from . import views
-from .views import sse_binary_view,sse_binary_example_view
+# from .views import sse_binary_view,sse_binary_example_view
 from .views import DieharderMinDistTestView
 from .views import DieharderBirthdayTestView
 from .views import DieharderOperm5TestView
