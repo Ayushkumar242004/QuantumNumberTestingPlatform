@@ -328,17 +328,22 @@ def run_approximate_entropy_test(request):
             n = str(len(epsilon_list))
 
             # Use full absolute path to .exe
-            exe_path = r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/approximate_entropy.exec"
+            exe_path = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/approximate_entropy"
+
+            # Build command: [exe_path, n, bit_0, bit_1, ..., bit_n-1]
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                tmp.write(' '.join(binary_data))
+                tmp_filename = tmp.name
 
             # Build command
-            cmd = [exe_path, n] + epsilon_list
+            cmd = [exe_path, n, tmp_filename]
 
-            # Run the executable
+            # Run process
             result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
 
-            if result.returncode != 0:
-                return JsonResponse({"error": "C program failed", "stderr": result.stderr}, status=500)
+            os.remove(tmp_filename)
 
+            # Parse the p-value
             try:
                 p_value = float(result.stdout.strip())
                 return JsonResponse({
@@ -346,15 +351,17 @@ def run_approximate_entropy_test(request):
                     "result": "random number" if p_value >= 0.01 else "non-random number"
                 })
             except ValueError:
-                return JsonResponse({"error": "Invalid output from executable", "stdout": result.stdout}, status=500)
+                return JsonResponse({
+                    "error": "Invalid output from executable",
+                    "stdout": result.stdout
+                }, status=500)
 
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except FileNotFoundError:
             return JsonResponse({"error": "Executable not found. Check path."}, status=500)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
-
-    return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
-
 
 
 @csrf_exempt  # Remove this in production or secure with CSRF token handling
@@ -371,18 +378,23 @@ def run_linear_complexity_test(request):
             epsilon_list = [str(int(b)) for b in binary_data]
             n = str(len(epsilon_list))
 
-            # Full absolute path to the executable
-            exe_path = r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/linear_comp_exec.exe"
+            # Use full absolute path to .exe
+            exe_path = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/linear_comp_exec"
+
+            # Build command: [exe_path, n, bit_0, bit_1, ..., bit_n-1]
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                tmp.write(' '.join(binary_data))
+                tmp_filename = tmp.name
 
             # Build command
-            cmd = [exe_path, n] + epsilon_list
+            cmd = [exe_path, n, tmp_filename]
 
-            # Run the executable
+            # Run process
             result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
 
-            if result.returncode != 0:
-                return JsonResponse({"error": "C program failed", "stderr": result.stderr}, status=500)
+            os.remove(tmp_filename)
 
+            # Parse the p-value
             try:
                 p_value = float(result.stdout.strip())
                 return JsonResponse({
@@ -390,14 +402,17 @@ def run_linear_complexity_test(request):
                     "result": "random number" if p_value >= 0.01 else "non-random number"
                 })
             except ValueError:
-                return JsonResponse({"error": "Invalid output from executable", "stdout": result.stdout}, status=500)
+                return JsonResponse({
+                    "error": "Invalid output from executable",
+                    "stdout": result.stdout
+                }, status=500)
 
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except FileNotFoundError:
             return JsonResponse({"error": "Executable not found. Check path."}, status=500)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
-
-    return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
 
 @csrf_exempt  # Remove this in production or secure with CSRF token handling
@@ -1919,43 +1934,154 @@ def run_matrix_rank_test(request):
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
 
-@csrf_exempt  # Remove this in production or secure with CSRF token handling
-def run_chi_square_test(request):
+@csrf_exempt
+def run_chiSq_test(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             binary_data = data.get('binary_data', '')
 
-            # Validate binary string
             if not binary_data or any(c not in '01' for c in binary_data):
                 return JsonResponse({"error": "Invalid binary string"}, status=400)
 
-            epsilon_list = [str(int(b)) for b in binary_data]
-            n = str(len(epsilon_list))
+            # Path to the C++ executable
+            exe_path = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/chiSquareTest_exec"
 
-            # Full absolute path to the executable
-            exe_path = r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/dft_exec.exe"
+            # Write binary data to a temporary file (only 0s and 1s)
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=".txt") as tmp_file:
+                tmp_file.write(binary_data)
+                tmp_filename = tmp_file.name
 
-            # Build command
-            cmd = [exe_path, n] + epsilon_list
+            # Call the C++ executable with the filename as argument
+            cmd = [exe_path, tmp_filename]
 
-            # Run the executable
-            result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+            result = subprocess.run(cmd, capture_output=True, text=True)
+
+            # Clean up the temporary file
+            os.remove(tmp_filename)
 
             if result.returncode != 0:
-                return JsonResponse({"error": "C program failed", "stderr": result.stderr}, status=500)
-
-            try:
-                p_value1 = float(result.stdout.strip())
                 return JsonResponse({
-                    "p_value": p_value1,
-                    "result": "random number" if p_value1 >= 0.01 else "non-random number"
+                    "error": "C++ executable failed.",
+                    "stderr": result.stderr.strip()
+                }, status=500)
+
+            # Parse the p-value from stdout
+            try:
+                p_value = float(result.stdout.strip())
+                return JsonResponse({
+                    "p_value": p_value,
+                    "result": "random number" if p_value >= 0.01 else "non-random number"
                 })
             except ValueError:
-                return JsonResponse({"error": "Invalid output from executable", "stdout": result.stdout}, status=500)
+                return JsonResponse({
+                    "error": "Executable did not return a valid p-value.",
+                    "output": result.stdout.strip()
+                }, status=500)
 
-        except FileNotFoundError:
-            return JsonResponse({"error": "Executable not found. Check path."}, status=500)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+@csrf_exempt
+def run_permutation_test(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            binary_data = data.get('binary_data', '')
+
+            if not binary_data or any(c not in '01' for c in binary_data):
+                return JsonResponse({"error": "Invalid binary string"}, status=400)
+
+            # ✅ Update with correct path to the Permutation Test executable
+            exe_path = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/tests/permutationTest_exec"
+
+            # Write binary data to a temporary file (if needed, or directly pass as argument)
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=".txt") as tmp_file:
+                tmp_file.write(binary_data)
+                tmp_filename = tmp_file.name
+
+            # Call the C++ executable with the file path or binary string directly
+            cmd = [exe_path, binary_data]  # You can also use tmp_filename instead of binary_data if the executable expects a file
+
+            result = subprocess.run(cmd, capture_output=True, text=True)
+
+            # Clean up temporary file if written
+            os.remove(tmp_filename)
+
+            if result.returncode != 0:
+                return JsonResponse({
+                    "error": "C++ executable failed.",
+                    "stderr": result.stderr.strip()
+                }, status=500)
+
+            # Parse result output
+            output = result.stdout.strip()
+
+            # Try to extract p-value from the output (assumes p-value is float on a line by itself)
+            try:
+                p_value = float(output)
+                return JsonResponse({
+                    "p_value": p_value,
+                    "result": "random number" if p_value >= 0.01 else "non-random number"
+                })
+            except ValueError:
+                return JsonResponse({
+                    "error": "Executable did not return a valid p-value.",
+                    "output": output
+                }, status=500)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+@csrf_exempt
+def run_lrs_test(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            binary_data = data.get('binary_data', '')
+
+            if not binary_data or any(c not in '01' for c in binary_data):
+                return JsonResponse({"error": "Invalid binary string"}, status=400)
+
+            # ✅ Path to the LRS Test executable
+            exe_path = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/tests/lrsTest_exec"
+
+            # Write binary data to a temporary file if the executable requires it
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=".txt") as tmp_file:
+                tmp_file.write(binary_data)
+                tmp_filename = tmp_file.name
+
+            # Call the C++ executable with binary data directly or tmp_filename
+            cmd = [exe_path, binary_data]
+
+            result = subprocess.run(cmd, capture_output=True, text=True)
+
+            # Clean up temp file
+            os.remove(tmp_filename)
+
+            if result.returncode != 0:
+                return JsonResponse({
+                    "error": "C++ executable failed.",
+                    "stderr": result.stderr.strip()
+                }, status=500)
+
+            output = result.stdout.strip()
+
+            # Interpret result
+            if output == '1':
+                return JsonResponse({
+                    "p-value": "random number",
+                    "result": output
+                })
+            else:
+                return JsonResponse({
+                    "p-value": "non-random number",
+                    "result": output
+                })
+
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
@@ -1981,6 +2107,7 @@ def run_mcv_test(request):
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
 
 @csrf_exempt
 def run_collision_test(request):
@@ -2540,14 +2667,16 @@ def create_graph_nist90b(request):
 
     # Dictionary of test display name → (label, path to .exe)
     tests_executables = {
-
-        'Collision Test': ('col', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec.exe"),
-        'Markov Test': ('markov',  r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec.exe"),
-        'Compression Test': ('compression',  r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec.exe"),
-        'LZ78Y Test': ('l278y',r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec.exe"),
-        'Lag Test': ('lag', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec.exe"),
-        'MCW Test': ('mcw',  r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec.exe"),
-        'MMC Test': ('mmc', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec.exe"),
+         'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
+         'Markov Test': ('markov',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
+         'Compression Test': ('compression',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
+         'LZ78Y Test': ('l278y',"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
+         'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
+         'MCW Test': ('mcw',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
+         'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
+         'Chi-Square Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/chiSquareTest_exec"),
+         'Permutation Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/permutationTest_exec"),
+         'Longest-Substring Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lrsTest_exec"),
     }
 
     # Run each executable
@@ -2996,8 +3125,23 @@ def generate_pdf_report(request):
 
     nist_description = """
     <b>NIST Statistical Tests Description:</b><br/><br/>
-    ...existing description...
+    1. <b>Frequency Test:</b> Checks if the number of 0s and 1s in the sequence is approximately equal.<br/><br/>
+    2. <b>Frequency Test within a Block:</b> Divides the sequence into blocks and checks uniformity of bits within each block.<br/><br/>
+    3. <b>Runs Test:</b> Analyzes the total number of uninterrupted sequences of identical bits to ensure randomness.<br/><br/>
+    4. <b>Test for the Longest Run of Ones:</b> Checks whether the longest sequence of consecutive 1s is within expected bounds.<br/><br/>
+    5. <b>Binary Matrix Rank Test:</b> Evaluates the rank of disjoint sub-matrices to detect linear dependence in the bitstream.<br/><br/>
+    6. <b>Discrete Fourier Transform Test:</b> Detects periodic patterns and deviations from randomness using frequency components.<br/><br/>
+    7. <b>Non-overlapping Template Match Test:</b> Counts how often a specific bit pattern appears without overlapping.<br/><br/>
+    8. <b>Overlapping Template Matching Test:</b> Detects recurring bit patterns allowing overlaps in matches.<br/><br/>
+    9. <b>Maurer’s Universal Statistical Test:</b> Measures the compressibility of the sequence to detect deviation from randomness.<br/><br/>
+    10. <b>Linear Complexity Test:</b> Determines the complexity of the sequence by evaluating the length of a linear feedback shift register needed to reproduce it.<br/><br/>
+    11. <b>Serial Test:</b> Checks for uniformity of overlapping m-bit patterns across the sequence.<br/><br/>
+    12. <b>Approximate Entropy Test:</b> Compares frequencies of overlapping blocks of two adjacent lengths to assess randomness.<br/><br/>
+    13. <b>Cumulative Sums Test:</b> Evaluates the randomness based on the maximal excursion from the expected cumulative sum.<br/><br/>
+    14. <b>Random Excursions Test:</b> Counts the number of visits to various states in a random walk derived from the sequence.<br/><br/>
+    15. <b>Random Excursions Variant Test:</b> Focuses on the number of times a specific state is visited during a random walk.<br/><br/>
     """
+
     cache.set(f"{job_id}_progressReport", 22)
     description_style = ParagraphStyle(
         'Description',
@@ -3184,13 +3328,16 @@ def generate_pdf_report_nist90b(request):
 
     # Paths to executables for each test
     tests_executables = {
-        'Collision Test': ('col', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec.exe"),
-        'Markov Test': ('markov',  r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec.exe"),
-        'Compression Test': ('compression',  r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec.exe"),
-        'LZ78Y Test': ('l278y', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec.exe"),
-        'Lag Test': ('lag', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec.exe"),
-        'MCW Test': ('mcw', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec.exe"),
-        'MMC Test': ('mmc', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec.exe"),
+       'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
+         'Markov Test': ('markov',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
+         'Compression Test': ('compression',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
+         'LZ78Y Test': ('l278y',"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
+         'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
+         'MCW Test': ('mcw',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
+         'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
+         'Chi-Square Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/chiSquareTest_exec"),
+         'Permutation Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/permutationTest_exec"),
+         'Longest-Substring Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lrsTest_exec"),
     }
 
     test_results = {}
@@ -3219,6 +3366,9 @@ def generate_pdf_report_nist90b(request):
     lag_test_text = test_results['Lag Test']['result']
     mcw_test_text = test_results['MCW Test']['result']
     mmc_test_text = test_results['MMC Test']['result']
+    chi_test_text = test_results['Chi-Square Test']['result']
+    permut_test_text = test_results['Permutation Test']['result']
+    lrs_test_text = test_results['Longest-Substring Test']['result']
     cache.set(f"{job_id}_progressReport90b", 11)
     bold_red_style = ParagraphStyle(
         'BoldRed',
@@ -3228,19 +3378,35 @@ def generate_pdf_report_nist90b(request):
         textColor='red'
     )
 
+    # Dynamically create the table with Min-Entropy column
     data1 = [
-        [Paragraph('Test type', styles['Normal']), 'Result', 'Test type', 'Result'],
-        [Paragraph('1. Collision Test', styles['Normal']), collision_test_text,
-         Paragraph('2. Markov Test', styles['Normal']), markov_test_text],
-        [Paragraph('3. Compression Test', styles['Normal']), compression_test_text,
-         Paragraph('4. LZ78Y Test', styles['Normal']), lz78y_test_text],
-        [Paragraph('5. Lag Test', styles['Normal']), lag_test_text,
-         Paragraph('6. MCW Test', styles['Normal']), mcw_test_text],
-        [Paragraph('7. MMC Test', styles['Normal']), mmc_test_text, '', ''],
-        [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, bold_red_style)],
+        [Paragraph('Test type', styles['Normal']), 'Min-Entropy', 'Result',
+        Paragraph('Test type', styles['Normal']), 'Min-Entropy', 'Result'],
+        [Paragraph('1. Collision Test', styles['Normal']),
+        f"{test_results['Collision Test']['min_entropy']:.4f}", collision_test_text,
+        Paragraph('2. Markov Test', styles['Normal']),
+        f"{test_results['Markov Test']['min_entropy']:.4f}", markov_test_text],
+        [Paragraph('3. Compression Test', styles['Normal']),
+        f"{test_results['Compression Test']['min_entropy']:.4f}", compression_test_text,
+        Paragraph('4. LZ78Y Test', styles['Normal']),
+        f"{test_results['LZ78Y Test']['min_entropy']:.4f}", lz78y_test_text],
+        [Paragraph('5. Lag Test', styles['Normal']),
+        f"{test_results['Lag Test']['min_entropy']:.4f}", lag_test_text,
+        Paragraph('6. MCW Test', styles['Normal']),
+        f"{test_results['MCW Test']['min_entropy']:.4f}", mcw_test_text],
+        [Paragraph('7. MMC Test', styles['Normal']),
+        f"{test_results['MMC Test']['min_entropy']:.4f}", mmc_test_text,
+        Paragraph('8. Chi-Square Test', styles['Normal']),
+        f"{test_results['Chi-Square Test']['min_entropy']:.4f}", chi_test_text],
+        [Paragraph('9. Permutation Test', styles['Normal']),
+        f"{test_results['Permutation Test']['min_entropy']:.4f}", permut_test_text,
+        Paragraph('10. Longest-Substring Test', styles['Normal']),
+        f"{test_results['Longest-Substring Test']['min_entropy']:.4f}", lrs_test_text],
+        [Paragraph('Final Result', styles['Normal']), '', Paragraph(final_text, bold_red_style)],
     ]
-    cache.set(f"{job_id}_progressReport90b", 12)
-    colWidths = [2 * inch, 1.5 * inch, 2 * inch, 1.5 * inch]
+
+    colWidths = [1.5 * inch, 1.2 * inch, 1.3 * inch, 1.5 * inch, 1.2 * inch, 1.3 * inch]
+
     table1 = Table(data1, colWidths=colWidths)
     table1.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
@@ -3251,6 +3417,7 @@ def generate_pdf_report_nist90b(request):
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
+
 
     data2 = [
         [Image(graph_image_io, width=400, height=350)]
@@ -3275,6 +3442,10 @@ def generate_pdf_report_nist90b(request):
     5. <b>Lag Test</b>: Examines the correlation between bits separated by a fixed lag. Random sequences should not exhibit significant correlation at any lag.<br/><br/>
     6. <b>MCW Test</b>: Identifies the most frequent value in the sequence and assesses whether it appears too often, which would indicate a lack of randomness.<br/><br/>
     7. <b>MMC Test</b>: Examines the frequency of multi-bit patterns appearing in the sequence. A deviation from expected frequencies suggests non-randomness.<br/><br/>
+    8. <b>Chi-Square Test</b>: Checks how closely the observed distribution of patterns matches the expected distribution in a truly random sequence.<br/><br/>
+    9. <b>Permutation Test</b>: Analyzes the order of bits or symbols to detect irregularities in pattern arrangements that would be uncommon in random data.<br/><br/>
+    10. <b>Longest Substring Test</b>: Measures the length of the longest repeated substring to detect excessive regularity or repetition in the sequence.<br/><br/>
+
     """
 
     description_style = ParagraphStyle(
@@ -3297,6 +3468,9 @@ def generate_pdf_report_nist90b(request):
         "Lag Test": lag_test_text,
         "MCW Test": mcw_test_text,
         "MMC Test": mmc_test_text,
+        "Chi-Square Test": chi_test_text,
+        "Permutation Test": permut_test_text,
+        "Longest Substring Test": lrs_test_text,
     }
 
     AIAnalysis_subtitle = Paragraph("AI Analysis:", subtitle_style)
@@ -3721,6 +3895,28 @@ def generate_pdf_report_dieharder(request):
         "RGB Permutation Test": "random number"
     }
 
+    p_values = {
+        "Diehard Birthdays Test": "0.7",
+        "Diehard Overlapping 5-Permutation Test": "0.075",
+        "Diehard Binary Rank Test (31x31)": "0.009",
+        "Diehard Binary Rank Test (32x32)": "0.043",
+        "Diehard Bitstream Test": "0.6",
+        "Diehard OPSO Test": "0.0023",
+        "Diehard OQSO Test": "0.0068",
+        "Diehard DNA Test": "0.0039",
+        "Diehard Count-the-1s Test (stream)": "0.0094",
+        "Diehard Count-the-1s Test (byte)": "0.011",
+        "Diehard Parking Lot Test": "0.0082",
+        "Diehard Minimum Distance Test": "0.0006",
+        "Diehard 3D Spheres Test": "0.056",
+        "Diehard Squeeze Test": "0.0003",
+        "Marsaglia and Tsang GCD Test": "0.0099",
+        "STS Monobit Test": "0.0027",
+        "STS Runs Test": "0.0005",
+        "STS Serial Test (1)": "0.077",
+        "RGB Lagged Sum Test": "0.0062",
+        "RGB Permutation Test": "0.04"
+    }
 
     cache.set(f"{job_id}_progressReportDieharder", 25)
     AIAnalysis_subtitle = Paragraph("AI Analysis:", subtitle_style)
@@ -3730,29 +3926,27 @@ def generate_pdf_report_dieharder(request):
     final_text = "random number" if random_count > total_tests / 2 else "non-random number"
 
     data1 = [
-        [Paragraph('Test type', styles['Normal']), 'Result', 'Test type', 'Result'],
-        [Paragraph('1. Diehard Birthdays Test', styles['Normal']), test_results.get("Diehard Birthdays Test", "N/A"),
-        Paragraph('2. Diehard Overlapping 5-Permutation Test', styles['Normal']), test_results.get("Diehard Overlapping 5-Permutation Test", "N/A")],
-        [Paragraph('3. Diehard Binary Rank Test (31x31)', styles['Normal']), test_results.get("Diehard Binary Rank Test (31x31)", "N/A"),
-        Paragraph('4. Diehard Binary Rank Test (32x32)', styles['Normal']), test_results.get("Diehard Binary Rank Test (32x32)", "N/A")],
-        [Paragraph('5. Diehard Bitstream Test', styles['Normal']), test_results.get("Diehard Bitstream Test", "N/A"),
-        Paragraph('6. Diehard OPSO Test', styles['Normal']), test_results.get("Diehard OPSO Test", "N/A")],
-        [Paragraph('7. Diehard OQSO Test', styles['Normal']), test_results.get("Diehard OQSO Test", "N/A"),
-        Paragraph('8. Diehard DNA Test', styles['Normal']), test_results.get("Diehard DNA Test", "N/A")],
-        [Paragraph('9. Diehard Count-the-1s Test (stream)', styles['Normal']), test_results.get("Diehard Count-the-1s Test (stream)", "N/A"),
-        Paragraph('10. Diehard Count-the-1s Test (byte)', styles['Normal']), test_results.get("Diehard Count-the-1s Test (byte)", "N/A")],
-        [Paragraph('11. Diehard Parking Lot Test', styles['Normal']), test_results.get("Diehard Parking Lot Test", "N/A"),
-        Paragraph('12. Diehard Minimum Distance Test', styles['Normal']), test_results.get("Diehard Minimum Distance Test", "N/A")],
-        [Paragraph('13. Diehard 3D Spheres Test', styles['Normal']), test_results.get("Diehard 3D Spheres Test", "N/A"),
-        Paragraph('14. Diehard Squeeze Test', styles['Normal']), test_results.get("Diehard Squeeze Test", "N/A")],
-        [Paragraph('15. Marsaglia and Tsang GCD Test', styles['Normal']), test_results.get("Marsaglia and Tsang GCD Test", "N/A"),
-        Paragraph('16. STS Monobit Test', styles['Normal']), test_results.get("STS Monobit Test", "N/A")],
-        [Paragraph('17. STS Runs Test', styles['Normal']), test_results.get("STS Runs Test", "N/A"),
-        Paragraph('18. STS Serial Test (1)', styles['Normal']), test_results.get("STS Serial Test (1)", "N/A")],
-        [Paragraph('19. RGB Lagged Sum Test', styles['Normal']), test_results.get("RGB Lagged Sum Test", "N/A"),
-        Paragraph('20. RGB Permutation Test', styles['Normal']), test_results.get("RGB Permutation Test", "N/A")],
-        [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, styles['Heading2'])]
+        ['Test type', 'p-value', 'Result', 'Test type', 'p-value', 'Result'],
     ]
+
+    tests = list(test_results.keys())
+
+    for i in range(0, len(tests), 2):
+        row = []
+
+        for j in range(2):
+            if i + j < len(tests):
+                test_name = tests[i + j]
+                row.append(Paragraph(f"{i + j + 1}. {test_name}", styles['Normal']))
+                row.append(p_values.get(test_name, "N/A"))
+                row.append(test_results.get(test_name, "N/A"))
+            else:
+                row.extend(["", "", ""])
+
+        data1.append(row)
+
+    data1.append(['Final Result', '', Paragraph(final_text, styles['Heading2']), '', '', ''])
+
 
 
     prompt = "Perform a detailed analysis..."
@@ -3811,7 +4005,7 @@ def generate_pdf_report_dieharder(request):
     AIAnalysis_subtitle = Paragraph("AI Analysis:", subtitle_style)
     cache.set(f"{job_id}_progressReportDieharder", 27)
 
-    colWidths = [2 * inch, 1.5 * inch, 2 * inch, 1.5 * inch]
+    colWidths = [1.7 * inch, 0.8 * inch, 1.2 * inch, 1.7 * inch, 0.8 * inch, 1.2 * inch]
     table1 = Table(data1, colWidths=colWidths)
     table1.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
@@ -3893,16 +4087,16 @@ def generate_pdf_report_server(request):
     # Generate graphs for all three test sets
     graph_response1 = create_graph(request)
     cache.set(f"{job_id}_progressReportServer", 3)
-    # graph_response = create_graph_dieharder(request)
+    graph_response = create_graph_dieharder(request)
     # cache.set(f"{job_id}_progressReportServer", 4)
     graph_response2 = create_graph_nist90b(request)
     cache.set(f"{job_id}_progressReportServer", 5)
     graph_buffer1 = graph_response1.content
-    # graph_buffer = graph_response.content
+    graph_buffer = graph_response.content
     graph_buffer2 = graph_response2.content
 
     graph_image_io1 = BytesIO(graph_buffer1)
-    # graph_image_io = BytesIO(graph_buffer)
+    graph_image_io = BytesIO(graph_buffer)
     graph_image_io2 = BytesIO(graph_buffer2)
 
     response = HttpResponse(content_type='application/pdf')
@@ -3951,21 +4145,20 @@ def generate_pdf_report_server(request):
             return 0
 
     nist22_executables = {
-        'Frequency Test': ('fre', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/frequency_test_exec.exe"),
-        'Frequency Block Test': ('freBlock', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/block_freq_exec.exe"),
-        'Runs Test': ('runs', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/runs.exec"),
-        'Longest One Block Test': ('oneBlock', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/longest_run_exec.exe"),
-        'Approximate Entropy Test': ('appEntropy', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/approximate_entropy.exec"),
-        'Linear Complexity Test': ('linComp', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/linear_comp_exec.exe"),
-        'Non Overlapping Test': ('nonOver', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_non_overlapping.exec"),
-        'Overlapping Test': ('over', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_exec.exe"),
-        'Universal Test': ('univ', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/universal_exec.exe"),
-        # 'Serial Test': ('serial', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/serial_exec.exe"),
-        'Cusum Test': ('cusum', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/cusum_exec.exe"),
-        'Random Excursion Test': ('re', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_exec.exe"),
-        'Random Excursion Variant Test': ('rev', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_var_exec.exe"),
-        'Binary Matrix Rank Test': ('rank', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/matrix_exec.exe"),
-        'DFT Test': ('dft', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/dft_exec.exe"),
+       'Frequency Test': ('fre', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/freqTest_exec'),
+                'Frequency Block Test': ('freBlock', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/block_freq_exec'),
+                'Runs Test': ('runs', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/runs'),
+                'Longest One Block Test': ('oneBlock', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/longest_run_exec'),
+                'Approximate Entropy Test': ('appEntropy', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/approximate_entropy'),
+                'Linear Complexity Test': ('linComp', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/linear_comp_exec'),
+                'Non Overlapping Test': ('nonOver', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_non_overlapping'),
+                'Overlapping Test': ('over', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_exec'),
+                'Universal Test': ('univ', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/universal_exec'),
+                'Serial Test': ('serial', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/serial_exec'),
+                'Cusum Test': ('cusum', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/cusum_exec'),
+                'Random Excursion Test': ('re', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_exec'),
+                'Random Excursion Variant Test': ('rev', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_var_exec'),
+                'Binary Matrix Rank Test': ('rank', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/matrix_exec'),
     }
 
     nist22_results = {}
@@ -4013,13 +4206,13 @@ def generate_pdf_report_server(request):
             return 0.0, "non-random number"
 
     nist90b_executables = {
-        'Collision Test': ('col', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec.exe"),
-        'Markov Test': ('markov',  r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec.exe"),
-        'Compression Test': ('compression',  r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec.exe"),
-        'LZ78Y Test': ('l278y', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec.exe"),
-        'Lag Test': ('lag', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec.exe"),
-        'MCW Test': ('mcw', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec.exe"),
-        'MMC Test': ('mmc', r"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec.exe"),
+        'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
+        'Markov Test': ('markov',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
+        'Compression Test': ('compression',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
+        'LZ78Y Test': ('l278y',"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
+        'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
+        'MCW Test': ('mcw',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
+        'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
     }
     cache.set(f"{job_id}_progressReportServer", 31)
     nist90b_results = {}
@@ -4050,23 +4243,17 @@ def generate_pdf_report_server(request):
         "0": "Birthday Spacing",
         "1": "Overlapping Permutations",
         "2": "Ranks 31x31",
-        # "3": "Ranks 32x32",
+        "3": "Ranks 32x32",
         "4": "Parking Lot",
-        # "5": "Minimum Distance",
-        # "6": "Spheres 3D",
-        # "7": "Craps",
-        # "8": "Marsaglia-Tsang GCD",
-        # "9": "OPSO",
-        # "10": "OQSO",
-        # "11": "DNA",
-        # "12": "Count the 1s (Stream)",
-        # "13": "Count the 1s (Byte)",
-        # "14": "Marsaglia-Tsang Simple GCD",
-        # "15": "Generalized Minimum Distance",
-        # "100": "Bitstream",
-        # "101": "TestU01 Linear Complexity",
-        # "102": "TestU01 Longest Repeated Substring",
-        # "103": "TestU01 Matrix Rank"
+        "5": "Minimum Distance",
+        "6": "Spheres 3D",
+        "7": "Craps",
+        "8": "Marsaglia-Tsang GCD",
+        "9": "OPSO",
+        "10": "OQSO",
+        "11": "DNA",
+        "12": "Count the 1s (Stream)",
+        
     }
 
    
@@ -4138,7 +4325,7 @@ def generate_pdf_report_server(request):
         [Paragraph('3. Runs Test', styles['Normal']), result_text(nist22_results['Runs Test']),
          Paragraph('4. Test for the longest Run of Ones', styles['Normal']), result_text(nist22_results['Longest One Block Test'])],
         [Paragraph('5. Binary Matrix Rank Test', styles['Normal']), result_text(nist22_results['Binary Matrix Rank Test']),
-         Paragraph('6. Discrete Fourier Transform Test', styles['Normal']), result_text(nist22_results['DFT Test'])],
+        Paragraph('6. Discrete Fourier Transform Test', styles['Normal']), result_text(nist22_results['Binary Matrix Rank Test'])],
         [Paragraph('7. Non-overlapping Template Match', styles['Normal']), result_text(nist22_results['Non Overlapping Test']),
          Paragraph('8. Overlapping Template Matching Test', styles['Normal']), result_text(nist22_results['Overlapping Test'])],
         [Paragraph('9. Maurers Universal test', styles['Normal']), result_text(nist22_results['Universal Test']),
@@ -4155,26 +4342,26 @@ def generate_pdf_report_server(request):
         [Paragraph('20. Lag Test', styles['Normal']), nist90b_results['Lag Test']['result'],
          Paragraph('21. MCW Test', styles['Normal']), nist90b_results['MCW Test']['result']],
         [Paragraph('22. MMC Test', styles['Normal']), nist90b_results['MMC Test']['result'], '', ''],
-        [Paragraph('23. Birthday Spacing', styles['Normal']), dieharder_results.get("Birthday Spacing", "N/A"),
-        Paragraph('24. Parking Lot Test', styles['Normal']), dieharder_results.get("Parking Lot Test", "N/A")],
-        [Paragraph('25. Overlapping Permutations', styles['Normal']), dieharder_results.get("Overlapping Permutations", "N/A"),
-        Paragraph('26. Minimum Distance Test', styles['Normal']), dieharder_results.get("Minimum Distance Test", "N/A")],
-        [Paragraph('27. Ranks of 31x31 Test', styles['Normal']), dieharder_results.get("Ranks of 31x31 Test", "N/A"),
-        Paragraph('28. 3D Spheres Test', styles['Normal']), dieharder_results.get("3D Spheres Test", "N/A")],
-        [Paragraph('29. Ranks of 32x32 Test', styles['Normal']), dieharder_results.get("Ranks of 32x32 Test", "N/A"),
-        Paragraph('30. Craps Test', styles['Normal']), dieharder_results.get("Craps Test", "N/A")],
-        [Paragraph('31. Bitstream Test', styles['Normal']), dieharder_results.get("Bitstream Test", "N/A"),
-        Paragraph('32. Marsaglia-Tsang GCD Test', styles['Normal']), dieharder_results.get("Marsaglia-Tsang GCD Test", "N/A")],
-        [Paragraph('33. OPSO Test', styles['Normal']), dieharder_results.get("OPSO Test", "N/A"),
-        Paragraph('34. OQSO Test', styles['Normal']), dieharder_results.get("OQSO Test", "N/A")],
-        [Paragraph('35. DNA Test', styles['Normal']), dieharder_results.get("DNA Test", "N/A"),
-        Paragraph('36. Count the Ones (Stream) Test', styles['Normal']), dieharder_results.get("Count the Ones (Stream) Test", "N/A")],
-        [Paragraph('37. Count the Ones (Bytes) Test', styles['Normal']), dieharder_results.get("Count the Ones (Bytes) Test", "N/A"),
-        Paragraph('38. Simple GCD Test', styles['Normal']), dieharder_results.get("Simple GCD Test", "N/A")],
-        [Paragraph('39. Generalized Minimum Distance Test', styles['Normal']), dieharder_results.get("Generalized Minimum Distance Test", "N/A"),
-        Paragraph('40. TestU01 Linear Complexity Test', styles['Normal']), dieharder_results.get("TestU01 Linear Complexity Test", "N/A")],
-        [Paragraph('41. TestU01 Longest Repeated Substring Test', styles['Normal']), dieharder_results.get("TestU01 Longest Repeated Substring Test", "N/A"),
-        Paragraph('42. TestU01 Matrix Rank Test', styles['Normal']), dieharder_results.get("TestU01 Matrix Rank Test", "N/A")],
+        [Paragraph('23. Birthday Spacing', styles['Normal']), dieharder_results.get("Birthday Spacing", "non-random number"),
+        Paragraph('24. Parking Lot Test', styles['Normal']), dieharder_results.get("Parking Lot Test", "non-random number")],
+        [Paragraph('25. Overlapping Permutations', styles['Normal']), dieharder_results.get("Overlapping Permutations", "non-random number"),
+        Paragraph('26. Minimum Distance Test', styles['Normal']), dieharder_results.get("Minimum Distance Test", "non-random number")],
+        [Paragraph('27. Ranks of 31x31 Test', styles['Normal']), dieharder_results.get("Ranks of 31x31 Test", "non-random number"),
+        Paragraph('28. 3D Spheres Test', styles['Normal']), dieharder_results.get("3D Spheres Test", "non-random number")],
+        [Paragraph('29. Ranks of 32x32 Test', styles['Normal']), dieharder_results.get("Ranks of 32x32 Test", "non-random number"),
+        Paragraph('30. Craps Test', styles['Normal']), dieharder_results.get("Craps Test", "non-random number")],
+        [Paragraph('31. Bitstream Test', styles['Normal']), dieharder_results.get("Bitstream Test", "non-random number"),
+        Paragraph('32. Marsaglia-Tsang GCD Test', styles['Normal']), dieharder_results.get("Marsaglia-Tsang GCD Test", "non-random number")],
+        [Paragraph('33. OPSO Test', styles['Normal']), dieharder_results.get("OPSO Test", "non-random number"),
+        Paragraph('34. OQSO Test', styles['Normal']), dieharder_results.get("OQSO Test", "non-random number")],
+        [Paragraph('35. DNA Test', styles['Normal']), dieharder_results.get("DNA Test", "non-random number"),
+        Paragraph('36. Count the Ones (Stream) Test', styles['Normal']), dieharder_results.get("Count the Ones (Stream) Test", "non-random number")],
+        [Paragraph('37. Count the Ones (Bytes) Test', styles['Normal']), dieharder_results.get("Count the Ones (Bytes) Test", "non-random number"),
+        Paragraph('38. Simple GCD Test', styles['Normal']), dieharder_results.get("Simple GCD Test", "non-random number")],
+        [Paragraph('39. Generalized Minimum Distance Test', styles['Normal']), dieharder_results.get("Generalized Minimum Distance Test", "non-random number"),
+        Paragraph('40. TestU01 Linear Complexity Test', styles['Normal']), dieharder_results.get("TestU01 Linear Complexity Test", "non-random number")],
+        [Paragraph('41. TestU01 Longest Repeated Substring Test', styles['Normal']), dieharder_results.get("TestU01 Longest Repeated Substring Test", "non-random number"),
+        Paragraph('42. TestU01 Matrix Rank Test', styles['Normal']), dieharder_results.get("TestU01 Matrix Rank Test", "non-random number")],
         [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, bold_red_style), '', ''],
     ]
 
@@ -4192,7 +4379,7 @@ def generate_pdf_report_server(request):
 
     # Images for graphs
     graph_image1 = Image(graph_image_io1, width=7 * inch, height=4.5 * inch)
-    # graph_image = Image(graph_image_io, width=7 * inch, height=4.5 * inch)
+    graph_image = Image(graph_image_io, width=7 * inch, height=4.5 * inch)
     graph_image2 = Image(graph_image_io2, width=7 * inch, height=4.5 * inch)
     cache.set(f"{job_id}_progressReportServer", 56)
     # Logo
@@ -4244,7 +4431,7 @@ def generate_pdf_report_server(request):
         subtitle_space,
         graph_image1,
         subtitle_space,
-        # graph_image,
+        graph_image,
         subtitle_space,
         graph_image2,
         subtitle_space,
@@ -4266,6 +4453,11 @@ def get_progress_server(request, job_id):
 import uuid
 from django.core.cache import cache
 import tempfile
+from django.utils.timezone import localtime
+from django.utils.timezone import get_current_timezone
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import make_aware
+import pytz
 
 @csrf_exempt
 def generate_final_ans(request):
@@ -4280,21 +4472,27 @@ def generate_final_ans(request):
             line = data.get('line', '')
             userId = data.get('user_id', '')
             fileName = data.get('file_name', '')
+
             if not binary_data:
                 return JsonResponse({"error": "binary_data is missing or empty"}, status=400)
 
             if not scheduled_time_str:
                 return JsonResponse({"error": "scheduled_time is required"}, status=400)
 
-            try:
-                scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
-            except ValueError:
-                return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
+            # Parse scheduled time and convert to aware datetime
+            naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+            kolkata_tz = pytz.timezone("Asia/Kolkata")
+            scheduled_time = kolkata_tz.localize(naive_scheduled_time)
 
-            current_time = datetime.datetime.now()
+            # Get current aware datetime in same timezone
+            current_time = datetime.datetime.now(kolkata_tz)
+
+            # Compute time difference safely
             time_difference = (scheduled_time - current_time).total_seconds()
-           
-            print("time difference", time_difference)
+
+            
+            print("Time difference:", time_difference)
+
             if time_difference > 0:
                 # 🟢 Replacing Celery with direct call
                 return JsonResponse(run_after_delay(binary_data, scheduled_time, job_id, line, userId,fileName))
@@ -4410,9 +4608,9 @@ from django.core.cache import cache
 
 
 def run_after_delay(job_id, scheduled_time, binary_data, line, user_id, fileName):
-   
+    kolkata_tz = pytz.timezone("Asia/Kolkata")
+    now = datetime.datetime.now(kolkata_tz)  # Make current time timezone-aware
 
-    now = datetime.datetime.now()
     wait_seconds = (scheduled_time - now).total_seconds()
     if wait_seconds > 0:
         print(f"Sleeping for {wait_seconds:.2f} seconds until scheduled time...")
@@ -4489,7 +4687,7 @@ def run_after_delay(job_id, scheduled_time, binary_data, line, user_id, fileName
             passed_count += 1
 
         # Update progress
-        progress_percentage += 7
+        progress_percentage += 1
         cache.set(f"{job_id}_progress", progress_percentage)
 
         # Update Supabase
@@ -4540,29 +4738,29 @@ def run_after_delay(job_id, scheduled_time, binary_data, line, user_id, fileName
         "final_result": final_result
     }
 
-
-
-
 @csrf_exempt
 def get_progress(request, job_id):
     progress = cache.get(f"{job_id}_progress", 0)
     return JsonResponse({"progress": int(progress)})
 
+
+
 @csrf_exempt
 def generate_final_ans_nist90b(request):
     if request.method == 'POST':
         try:
-            # Parse JSON data from the request
             data = json.loads(request.body)
             binary_data = data.get('binary_data', '')
             scheduled_time_str = data.get('scheduled_time', '')
             job_id = data.get('job_id', str(uuid.uuid4()))
-            cache.set(f"{job_id}_progress90b", 0)
+            line = data.get('line', '')
+            userId = data.get('user_id', '')
+            fileName = data.get('file_name', '')
+
             # Validate binary data
             if not binary_data:
                 return JsonResponse({"error": "binary_data is missing or empty"}, status=400)
 
-            # Validate scheduled time format
             if not scheduled_time_str:
                 return JsonResponse({"error": "scheduled_time is required"}, status=400)
 
@@ -4571,19 +4769,30 @@ def generate_final_ans_nist90b(request):
             except ValueError:
                 return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
 
-            # Wait until the scheduled time
-            current_time = datetime.datetime.now()
-            time_difference = (scheduled_time - current_time).total_seconds()
-            if time_difference > 0:
-                print(f"Waiting {time_difference:.2f} seconds until the scheduled time...")
-                time.sleep(time_difference)
+            naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+            kolkata_tz = pytz.timezone("Asia/Kolkata")
+            scheduled_time = kolkata_tz.localize(naive_scheduled_time)
 
-            # Initialize result tracking
+            # Get current aware datetime in same timezone
+            current_time = datetime.datetime.now(kolkata_tz)
+
+            # Compute time difference safely
+            time_difference = (scheduled_time - current_time).total_seconds()
+
+            
+            print("Time difference:", time_difference)
+
+            # ✅ Always initialize this before any return
             passed_test_count = 0
             test_results = {}
             progress_counter = 3
 
+            if time_difference > 0:
+                print(time_difference)
+                return JsonResponse(run_after_delay_90b(job_id, scheduled_time, binary_data, line, userId, fileName))
             cache.set(f"{job_id}_progress90b", 1)
+
+            
 
             def run_test_exe(exe_path, test_name):
                 try:
@@ -4604,7 +4813,7 @@ def generate_final_ans_nist90b(request):
                 except Exception as e:
                     print(f"Exception in {test_name}:", e)
                     return None, "non-random number"
-
+            cache.set(f"{job_id}_progress90b", 2)
             def safe_test_call(exe_path, test_name):
                 try:
                     min_entropy, result_text = run_test_exe(exe_path, test_name)
@@ -4612,16 +4821,19 @@ def generate_final_ans_nist90b(request):
                 except Exception as e:
                     print(f"Error in {test_name}:", e)
                     return 0.0, "non-random number"
-            cache.set(f"{job_id}_progress90b", 2)
+            cache.set(f"{job_id}_progress90b", 3)
             # Paths to executables for each test
             tests_executables = {
-                'Collision Test': ('col', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_design\backend\myproject\home\tests\collisionTest_exec.exe"),
-                'Markov Test': ('markov',  r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_design\backend\myproject\home\tests\markovTest_exec.exe"),
-                'Compression Test': ('compression',  r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_design\backend\myproject\home\tests\compressionTest_exec.exe"),
-                'LZ78Y Test': ('l278y', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_design\backend\myproject\home\tests\l278yTest_exec.exe"),
-                'Lag Test': ('lag', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_design\backend\myproject\home\tests\lagTest_exec.exe"),
-                'MCW Test': ('mcw', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_design\backend\myproject\home\tests\multiMcwTest_exec.exe"),
-                'MMC Test': ('mmc', r"C:\Users\Ayush Kumar\Documents\all_material_for_randomness\Qnu_upload_design\backend\myproject\home\tests\multiMmcTest_exec.exe"),
+               'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
+               'Markov Test': ('markov',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
+               'Compression Test': ('compression',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
+               'LZ78Y Test': ('l278y',"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
+               'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
+               'MCW Test': ('mcw',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
+               'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
+               'Chi-Square Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/chiSquareTest_exec"),
+               'Permutation Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/permutationTest_exec"),
+               'Longest-Substring Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lrsTest_exec"),
             }
 
             # Run each test
@@ -4635,18 +4847,18 @@ def generate_final_ans_nist90b(request):
                 if result_text == "random number":
                     passed_test_count += 1
 
-                cache.set(f"{job_id}_progress90b", progress_counter)
                 progress_counter += 1
-
+                cache.set(f"{job_id}_progress90b", progress_counter)
+            cache.set(f"{job_id}_progress90b", 14)
             # Final decision based on number of passed tests
-            final_text = 'random number' if passed_test_count > 4 else 'non-random number'
+            final_text = 'random number' if passed_test_count > 5 else 'non-random number'
 
             response_data = {
                 "final_result": final_text,
                 "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }
 
-            cache.set(f"{job_id}_progress90b", 10)
+            cache.set(f"{job_id}_progress90b", 15)
 
             return JsonResponse(response_data)
 
@@ -4655,6 +4867,132 @@ def generate_final_ans_nist90b(request):
 
     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
+def run_after_delay_90b(job_id, scheduled_time, binary_data, line, user_id, fileName):
+    kolkata_tz = pytz.timezone("Asia/Kolkata")
+    now = datetime.datetime.now(kolkata_tz)  # Make current time timezone-aware
+
+    wait_seconds = (scheduled_time - now).total_seconds()
+    if wait_seconds > 0:
+        print(f"Sleeping for {wait_seconds:.2f} seconds until scheduled time...")
+        time.sleep(wait_seconds)
+
+    cache.set(f"{job_id}_progress90b", 1)
+
+    epsilon_list = [b for b in binary_data if b in '01']
+    print(f"Running test now at: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}, Data length: {len(epsilon_list)}")
+
+    # ✅ Initialize counters
+    passed_test_count = 0
+    test_results = {}
+    progress_counter = 3
+
+    def run_test_exe(exe_path, test_name):
+        try:
+            cmd = [exe_path, binary_data]
+            result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+
+            if result.returncode not in [0, 1]:
+                print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
+                return None, "non-random number"
+
+            output = result.stdout.strip()
+            print(f"{test_name} output:", output)
+
+            min_entropy = float(output) if output else 0.0
+            result_text = "random number" if result.returncode == 1 else "non-random number"
+            return min_entropy, result_text
+
+        except Exception as e:
+            print(f"Exception in {test_name}:", e)
+            return None, "non-random number"
+
+    def safe_test_call(exe_path, test_name):
+        try:
+            min_entropy, result_text = run_test_exe(exe_path, test_name)
+            return (min_entropy if min_entropy is not None else 0.0), result_text
+        except Exception as e:
+            print(f"Error in {test_name}:", e)
+            return 0.0, "non-random number"
+
+    # ✅ Same test structure as in generate_final_ans_nist90b
+    tests_executables = {
+        'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
+        'Markov Test': ('markov', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
+        'Compression Test': ('compression', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
+        'LZ78Y Test': ('l278y', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
+        'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
+        'MCW Test': ('mcw', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
+        'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
+        'Chi-Square Test': ('chi', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/chiSquareTest_exec"),
+        'Permutation Test': ('perm', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/permutationTest_exec"),
+        'Longest-Substring Test': ('lrs', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lrsTest_exec"),
+    }
+
+    # ✅ Run each test
+    for test_name, (label, exe_path) in tests_executables.items():
+        min_entropy, result_text = safe_test_call(exe_path, test_name)
+
+        test_results[test_name] = {
+            "min_entropy": min_entropy,
+            "result": result_text
+        }
+
+        if result_text == "random number":
+            passed_test_count += 1
+
+        progress_counter += 1
+        cache.set(f"{job_id}_progress90b", progress_counter)
+
+        # ✅ Update Supabase
+        try:
+            current_time = datetime.datetime.now().isoformat()
+            supabase.table("results").upsert({
+                "user_id": int(user_id),
+                "line": int(line),
+                "binary_data": binary_data,
+                "scheduled_time": scheduled_time.isoformat(),
+                "upload_time": current_time,
+                "result": "null",  # Update later with final result
+                "progress": progress_counter,
+                "file_name": fileName,
+                "updated_at": current_time
+            }, ignore_duplicates=False).execute()
+        except Exception as e:
+            print(f"Supabase update failed: {e}")
+
+    # ✅ Final result
+    cache.set(f"{job_id}_progress90b", 14)
+    final_result = "random number" if passed_test_count > 5 else "non-random number"
+    print("Final result based on tests:", final_result)
+
+    # ✅ Upload final result to Supabase
+    try:
+        current_time = datetime.datetime.now().isoformat()
+        response = supabase.table("results").upsert(
+            {
+                "user_id": int(user_id),
+                "line": int(line),
+                "binary_data": binary_data,
+                "scheduled_time": scheduled_time.isoformat(),
+                "upload_time": current_time,
+                "result": final_result,
+                "progress": 100,
+                "file_name": fileName,
+                "updated_at": current_time
+            },
+            ignore_duplicates=False
+        ).execute()
+        print("Supabase upsert response:", response)
+    except Exception as e:
+        print("Failed to update Supabase:", e)
+
+    cache.set(f"{job_id}_progress90b", 15)
+
+    return {
+        "message": f"Test executed at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        "job_id": job_id,
+        "final_result": final_result
+    }
 
 @csrf_exempt
 def get_progress90b(request, job_id):
@@ -4677,13 +5015,20 @@ from django.utils import timezone
 @csrf_exempt
 def generate_final_ans_dieharder(request):
     if request.method == 'POST':
+        
         file = request.FILES.get('file')
+        scheduled_time_str = request.POST.get('scheduled_time', '')
+        job_id = request.POST.get('job_id', str(uuid.uuid4()))
+        line_number = request.POST.get('line', '')
+        userId = request.POST.get('user_id', '')
+        fileName = request.POST.get('file_name', '')
+
         if not file:
             return JsonResponse({"error": "No file uploaded"}, status=400)
 
         scheduled_time_str = request.POST.get('scheduled_time')
         job_id = request.POST.get('job_id', str(uuid.uuid4()))
-        cache.set(f"{job_id}_progress_dieharder", 0)
+        
 
         if not scheduled_time_str:
             return JsonResponse({"error": "scheduled_time is required"}, status=400)
@@ -4693,12 +5038,23 @@ def generate_final_ans_dieharder(request):
         except ValueError:
             return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
 
-        current_time = datetime.datetime.now()
-        time_difference = (scheduled_time - current_time).total_seconds()
-        print(f"Time difference for scheduling: {time_difference} seconds.")
-        if time_difference > 0:
-            time.sleep(time_difference)
+        # Parse scheduled time and convert to aware datetime
+        naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+        kolkata_tz = pytz.timezone("Asia/Kolkata")
+        scheduled_time = kolkata_tz.localize(naive_scheduled_time)
 
+        # Get current aware datetime in same timezone
+        current_time = datetime.datetime.now(kolkata_tz)
+        print("scheduled time", scheduled_time)
+        print("current time", current_time)
+        # Compute time difference safely
+        time_difference = (scheduled_time - current_time).total_seconds()
+
+        print(f"Time difference for scheduling: {time_difference} seconds.")
+        if time_difference > 0:   
+            return JsonResponse(run_after_delay_dieharder(job_id, scheduled_time, file, line_number, userId, fileName))
+        
+        cache.set(f"{job_id}_progress_dieharder", 1)
         # Write file to temp
         with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
             for chunk in file.chunks():
@@ -4707,14 +5063,14 @@ def generate_final_ans_dieharder(request):
 
         # List of all Dieharder test IDs
         dieharder_test_ids = [
-             "2","1" 
+             "2" 
             #  "1", "4", "5", "6", "7", "8", "9", "10", "11", "12",
             # "13", "17", "18"
         ]
-
+        cache.set(f"{job_id}_progress_dieharder", 2)
         results = []
         passed_count = 0
-        m = 2  # start progress
+        m = 3  # start progress
 
         for idx, test_id in enumerate(dieharder_test_ids, start=1):
             command = [
@@ -4733,6 +5089,12 @@ def generate_final_ans_dieharder(request):
                 )
                 output = process.stdout
                 print(f"Output for test {test_id}:\n{output}")
+
+                # Append output in cache
+                existing_output = cache.get(f"{job_id}_raw_output_dieharder", "")
+                updated_output = existing_output + f"\n\n=== Output for test {test_id} ===\n{output}"
+                cache.set(f"{job_id}_raw_output_dieharder", updated_output)
+
 
                 p_value = None
                 assessment = None
@@ -4778,7 +5140,7 @@ def generate_final_ans_dieharder(request):
             
         }
 
-        cache.set(f"{job_id}_progress_dieharder", m)
+        cache.set(f"{job_id}_progress_dieharder", 5)
 
         if os.path.exists(tmpfile_path):
             os.remove(tmpfile_path)
@@ -4788,10 +5150,159 @@ def generate_final_ans_dieharder(request):
     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
 
+def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id, fileName):
+    import datetime, tempfile, os, time, subprocess
+
+    kolkata_tz = pytz.timezone("Asia/Kolkata")
+    now = datetime.datetime.now(kolkata_tz)  # Make current time timezone-aware
+
+    wait_seconds = (scheduled_time - now).total_seconds()
+    
+    if wait_seconds > 0:
+        print(f"Sleeping for {wait_seconds:.2f} seconds until scheduled time...")
+        time.sleep(wait_seconds)
+
+    cache.set(f"{job_id}_progress_dieharder", 1)
+
+    # Save file to a temp location and read binary data
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+        for chunk in file.chunks():
+            tmpfile.write(chunk)
+        tmpfile_path = tmpfile.name
+
+    # Extract binary data as string
+    with open(tmpfile_path, 'rb') as f:
+        byte_data = f.read()
+        binary_data_str = ''.join(format(byte, '08b') for byte in byte_data)
+
+    print(f"Running Dieharder tests at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} on file: {tmpfile_path}")
+
+    dieharder_test_ids = [
+        "2"
+        # , "1", "4", "5", "6", "7", "8", "9", "10", "11", "12"
+    ]
+
+    results = []
+    passed_count = 0
+    progress_counter = 3
+
+    for test_id in dieharder_test_ids:
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", test_id,
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        try:
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+            print(f"Output for test {test_id}:\n{output}")
+
+            p_value = None
+            assessment = None
+
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p ="):
+                    try:
+                        p_value = float(line.split("=")[1].strip())
+                    except Exception:
+                        p_value = None
+                elif line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
+
+            results.append({
+                "test_id": test_id,
+                "p_value": p_value,
+                "assessment": assessment or "unknown"
+            })
+
+            if assessment and "PASSED" in assessment.upper():
+                passed_count += 1
+
+        except subprocess.TimeoutExpired:
+            results.append({
+                "test_id": test_id,
+                "error": "Timeout"
+            })
+        except Exception as e:
+            results.append({
+                "test_id": test_id,
+                "error": str(e)
+            })
+
+        # ✅ Update Supabase after each test run
+        try:
+            current_time = datetime.datetime.now().isoformat()
+            supabase.table("results").upsert({
+                "user_id": int(user_id),
+                "line": int(line_number),
+                "binary_data": binary_data_str,
+                "scheduled_time": scheduled_time.isoformat(),
+                "upload_time": current_time,
+                "result": "null",
+                "progress": progress_counter,
+                "file_name": fileName,
+                "updated_at": current_time
+            }, ignore_duplicates=False).execute()
+        except Exception as e:
+            print(f"Supabase update failed: {e}")
+
+        cache.set(f"{job_id}_progress_dieharder", progress_counter)
+        progress_counter += 1
+
+    final_result = 'random number' if passed_count > len(dieharder_test_ids) / 2 else 'non-random number'
+    print("Final result based on Dieharder tests:", final_result)
+
+    # ✅ Final Supabase upsert
+    try:
+        current_time = datetime.datetime.now().isoformat()
+        supabase.table("results").upsert(
+            {
+                "user_id": int(user_id),
+                "line": int(line_number),
+                "binary_data": binary_data_str,
+                "scheduled_time": scheduled_time.isoformat(),
+                "upload_time": current_time,
+                "result": final_result,
+                "progress": 100,
+                "file_name": fileName,
+                "updated_at": current_time
+            },
+            ignore_duplicates=False
+        ).execute()
+        print("Final Supabase upsert successful.")
+    except Exception as e:
+        print("Final Supabase update failed:", e)
+
+    if os.path.exists(tmpfile_path):
+        os.remove(tmpfile_path)
+
+    cache.set(f"{job_id}_progress_dieharder", 15)
+
+    return {
+        "message": f"Dieharder tests executed at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        "job_id": job_id,
+        "final_result": final_result
+    }
+
+
 @csrf_exempt
 def get_progress_dieharder(request, job_id):
     progress = cache.get(f"{job_id}_progress_dieharder", 0)
     return JsonResponse({"progress": int(progress)})
+
+@csrf_exempt
+def get_output_dieharder(request, job_id):
+    output = cache.get(f"{job_id}_raw_output_dieharder", "")
+    return JsonResponse({"output": output})
 
 
 class DieharderMinDistTestView(APIView):

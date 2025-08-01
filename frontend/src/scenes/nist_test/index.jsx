@@ -11,7 +11,7 @@ import { MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { supabase } from '../../utils/supabaseClient';
 
-const MAX_STACK_SIZE_ESTIMATE = 50 * 1024 * 1024;
+const MAX_STACK_SIZE_ESTIMATE = 150 * 1024 * 1024;
 
 const Nist_tests = () => {
   const theme = useTheme();
@@ -549,7 +549,8 @@ const Nist_tests = () => {
 
   useEffect(() => {
     if (date && time) {
-      setScheduledTime(`${date} ${time}`);
+      const formattedDateTime = `${date} ${time}`; // already in 'YYYY-MM-DD HH:mm:ss'
+      setScheduledTime(formattedDateTime);
     }
   }, [date, time]);
 
@@ -822,71 +823,80 @@ const Nist_tests = () => {
   };
 
   const handleFileChange = async (event) => {
-
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
-
+    if (!selectedFile) return;
+  
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
     }
-
+  
     const userId = await fetchUserId();
-    if (!userId) {
-
-      return;
-    }
-
+    if (!userId) return;
+  
     // Reset all state variables for line 1
-    setBinaryInput(""); // Clear binary input
-    setScheduledTime(""); // Clear scheduled time
-    setDebouncedScheduledTime(""); // Clear debounced scheduled time
-    setResult(null); // Clear result
-    setFileName(""); // Clear filename
-    setUploadTime(""); // Clear upload time
-    setLoadingProgress(0); // Reset progress bar
+    setBinaryInput("");
+    setScheduledTime("");
+    setDebouncedScheduledTime("");
+    setResult(null);
+    setFileName("");
+    setUploadTime("");
+    setLoadingProgress(0);
     setTime("");
-
-    // Set the new filename
+  
     setFileName(selectedFile.name);
-
+  
     const reader = new FileReader();
     reader.onload = async (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      // Update binaryInput state with new binary data
-      setBinaryInput(textData);
-
-      // Store the current time when the file is uploaded
-      const currentTime = new Date().toISOString();
-      setUploadTime(currentTime); // Update the state with the current time
-
+  
+      let binaryString = "";
+  
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
+      
+      // Update binaryInput state with the processed binary string
+      setBinaryInput(binaryString);
+  
+      // Set the upload time in YYYY-MM-DD HH:MM:SS format
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      setUploadTime(currentTime);
+  
       // Remove the existing row for the line from Supabase
       try {
         localStorage.setItem('resultFetchedFromSupabase', 'false');
         const { error: deleteError } = await supabase
           .from('results')
           .delete()
-          .match({ line: 1, user_id: userId }); // Replace '1' with the line number for this handler
-
+          .match({ line: 1, user_id: userId });
+  
         setLoadingProgress(0);
         if (deleteError) {
-
+          console.error('Error deleting from Supabase:', deleteError);
           return;
         }
-
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
-      // Reset the file input value to allow the same file to be uploaded again
+  
+      // Allow reupload of same file
       event.target.value = "";
     };
+  
     reader.readAsArrayBuffer(selectedFile);
   };
+  
 
   const handleFileChange2 = async (event) => {
     const selectedFile = event.target.files[0];
@@ -924,7 +934,7 @@ const Nist_tests = () => {
       // Update binaryInput state with new binary data
       setBinaryInput2(textData);
 
-      const currentTime = new Date().toLocaleTimeString();
+      const currentTime = new Date().toISOString();
       setUploadTime2(currentTime);
 
       try {
@@ -1701,8 +1711,8 @@ const Nist_tests = () => {
             user_id: userId,
             file_name: fileName
           });
-          
-       
+
+
           clearInterval(progressInterval);
           setLoadingProgress(100);
           setResult(response.data);
@@ -1788,12 +1798,14 @@ const Nist_tests = () => {
               console.error('Progress fetch error:', err);
             }
           }, 1000);
-
+          const username = localStorage.getItem("username");
           const response = await axios.post("http://localhost:8000/generate_final_ans/", {
             binary_data: binaryInput2,
             scheduled_time: debouncedScheduledTime2,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName2
           });
 
           clearInterval(progressInterval);

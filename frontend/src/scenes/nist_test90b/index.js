@@ -18,7 +18,7 @@ import { MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { supabase } from '../../utils/supabaseClient';
 
-const MAX_STACK_SIZE_ESTIMATE = 1 * 1024 * 1024;
+const MAX_STACK_SIZE_ESTIMATE = 150 * 1024 * 1024;
 
 const Nist_tests90b = () => {
   const theme = useTheme();
@@ -569,71 +569,77 @@ const Nist_tests90b = () => {
     fileInputRef10.current.click();
   };
 
-const handleFileChange = async (event) => {
+  const handleFileChange = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) return;
   
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
     }
-
-    const userId = await fetchUserId();
-    if (!userId) {
-      
-      return;
-    }
   
-    // Reset all state variables for line 1
-    setBinaryInput(""); // Clear binary input
-    setScheduledTime(""); // Clear scheduled time
-    setDebouncedScheduledTime(""); // Clear debounced scheduled time
-    setResult(null); // Clear result
-    setFileName(""); // Clear filename
-    setUploadTime(""); // Clear upload time
-    setLoadingProgress(0); // Reset progress bar
+    const userId = await fetchUserId();
+    if (!userId) return;
+  
+    // Reset all state variables
+    setBinaryInput("");
+    setScheduledTime("");
+    setDebouncedScheduledTime("");
+    setResult(null);
+    setFileName("");
+    setUploadTime("");
+    setLoadingProgress(0);
     setTime("");
-
-    // Set the new filename
+  
     setFileName(selectedFile.name);
   
     const reader = new FileReader();
     reader.onload = async (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
   
-      // Update binaryInput state with new binary data
-      setBinaryInput(textData);
+      let binaryString = "";
   
-      // Store the current time when the file is uploaded
-      const currentTime = new Date().toISOString();
-      setUploadTime(currentTime); // Update the state with the current time
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
+     
+      setBinaryInput(binaryString);
   
-      // Remove the existing row for the line from Supabase
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      setUploadTime(currentTime);
+  
       try {
         localStorage.setItem('resultFetchedFromSupabase_two', 'false');
         const { error: deleteError } = await supabase
           .from('results2')
           .delete()
-          .match({ line: 1, user_id: userId }); // Replace '1' with the line number for this handler
-        
+          .match({ line: 1, user_id: userId });
+  
         setLoadingProgress(0);
         if (deleteError) {
-         
+          console.error('Error deleting old results:', deleteError);
           return;
         }
-  
       } catch (err) {
         console.error('Unexpected error:', err);
       }
   
-      // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
+  
     reader.readAsArrayBuffer(selectedFile);
   };
+  
 
 
  const handleFileChange2 = async (event) => {
@@ -1362,7 +1368,7 @@ const handleFileChange3 = async (event) => {
     }
     setLoadingProgress(0);
   let progressInterval;
-
+    // console.log("1")
   const upsertProgress = async (progress, userId, result = null) => {
     const progressPercentage = progress;
     const { error } = await supabase
@@ -1391,14 +1397,14 @@ const handleFileChange3 = async (event) => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
-
+      console.log("2")
       const fetchResult = async () => {
         try {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 10) * 100);
+              const percent = Math.round((completed / 15) * 100);
               setLoadingProgress(prev => (percent > prev ? percent : prev));
               await upsertProgress(percent, userId);
             } catch (err) {
@@ -1411,6 +1417,8 @@ const handleFileChange3 = async (event) => {
             scheduled_time: debouncedScheduledTime,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName
           });
 
           clearInterval(progressInterval);
@@ -3328,6 +3336,7 @@ useEffect(() => {
                         </Box>
                       )}
                     </Box>
+                    
                   </Box>
                 </Box>
               </td>

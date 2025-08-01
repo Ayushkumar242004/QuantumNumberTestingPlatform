@@ -15,6 +15,7 @@ double Frequency(int n, int epsilon[]) {
     double p_value = erfc(f);
     return p_value;
 }
+
 int main(int argc, char *argv[]) {
     if (argc < 3) {
         fprintf(stderr, "Insufficient arguments.\n");

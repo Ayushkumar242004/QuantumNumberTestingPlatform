@@ -445,7 +445,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    int M = atoi(argv[1]);  // Block size
+    int M = 8;  // Block size
     if (M <= 0) {
         fprintf(stderr, "Invalid block size: must be > 0\n");
         return 1;

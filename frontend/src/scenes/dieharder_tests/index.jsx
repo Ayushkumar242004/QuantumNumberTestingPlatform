@@ -10,8 +10,9 @@ import { MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '../../utils/supabaseClient';
+import { saveAs } from "file-saver"; // npm install file-saver
 
-const MAX_STACK_SIZE_ESTIMATE = 1 * 1024 * 1024;
+const MAX_STACK_SIZE_ESTIMATE = 150 * 1024 * 1024;
 
 const Dieharder_tests = () => {
   const theme = useTheme();
@@ -578,20 +579,22 @@ const Dieharder_tests = () => {
   };
   useEffect(() => {
     const handler = setTimeout(() => {
+     
       if (scheduledTime) {
-        const formattedScheduledTime = new Date(scheduledTime)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0]; // "YYYY-MM-DD HH:MM:SS"
-
+        const date = new Date(scheduledTime);
+        const pad = (n) => String(n).padStart(2, '0');
+  
+        const formattedScheduledTime = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+       
         setDebouncedScheduledTime(formattedScheduledTime);
       }
     }, 3000);
-
+  
     return () => {
       clearTimeout(handler);
     };
   }, [scheduledTime]);
+  
 
 
   const finalResult2 = result2 ? result2.final_result : " ";
@@ -780,24 +783,32 @@ const Dieharder_tests = () => {
   const [selectedFile8, setSelectedFile8] = useState(null);
   const [selectedFile9, setSelectedFile9] = useState(null);
   const [selectedFile10, setSelectedFile10] = useState(null);
+  
   const handleFileChange = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return;
-
+  
     setSelectedFile(selectedFile);
-    if (!selectedFile.name.endsWith(".bin")) {
-      alert("Please upload a .bin file.");
+  
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+const isBin = fileName.endsWith(".bin");
+const isTxt = fileName.endsWith(".txt");
+
+
+  
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
       return;
     }
-
+  
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
     }
-
+  
     const userId = await fetchUserId();
     if (!userId) return;
-
+  
     // Reset state
     setBinaryInput("");
     setResult(null);
@@ -805,29 +816,40 @@ const Dieharder_tests = () => {
     setUploadTime("");
     setLoadingProgress(0);
     setTime("");
-    setScheduledTime("");           // Clear it
-    setDebouncedScheduledTime(""); // Clear it
-
+    setScheduledTime("");
+    setDebouncedScheduledTime("");
+  
     setFileName(selectedFile.name);
-    const currentTime = new Date().toISOString();
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime(currentTime);
-
-    // Extract binary string from file
+  
     try {
-      const buffer = await selectedFile.arrayBuffer();
-      const bytes = new Uint8Array(buffer);
-      const binaryData = Array.from(bytes)
-        .map(byte => byte.toString(2).padStart(8, '0'))
-        .join('');
-
-
-      setBinaryInput(binaryData);
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
+          return;
+        }
+        setBinaryInput(binaryString);
+      }
     } catch (error) {
-      console.error("❌ Error reading binary file:", error);
+      console.error("❌ Error reading file:", error);
       alert("Failed to extract binary data from the file.");
       return;
     }
-
+  
     // Supabase cleanup
     try {
       localStorage.setItem('resultFetchedFromSupabase3', 'false');
@@ -835,17 +857,17 @@ const Dieharder_tests = () => {
         .from('results3')
         .delete()
         .match({ line: 1, user_id: userId });
-
+  
       if (deleteError) {
-       
         return;
       }
     } catch (err) {
       console.error('Unexpected error:', err);
     }
+  
     event.target.value = "";
-
   };
+  
 
   const handleFileChange2 = async (event) => {
     const selectedFile = event.target.files[0];
@@ -900,7 +922,7 @@ const Dieharder_tests = () => {
         .match({ line: 2, user_id: userId });
 
       if (deleteError) {
-       
+
         return;
       }
     } catch (err) {
@@ -1605,24 +1627,24 @@ const Dieharder_tests = () => {
 
 
   const binaryInsertedRef = useRef(false); // 🔁 Track binary insert
-  const binaryInsertedRef2 = useRef(false); 
-  const binaryInsertedRef3 = useRef(false); 
-  const binaryInsertedRef4 = useRef(false); 
-  const binaryInsertedRef5 = useRef(false); 
-  const binaryInsertedRef6 = useRef(false); 
-  const binaryInsertedRef7 = useRef(false); 
-  const binaryInsertedRef8 = useRef(false); 
-  const binaryInsertedRef9= useRef(false); 
-  const binaryInsertedRef10 = useRef(false); 
-   
+  const binaryInsertedRef2 = useRef(false);
+  const binaryInsertedRef3 = useRef(false);
+  const binaryInsertedRef4 = useRef(false);
+  const binaryInsertedRef5 = useRef(false);
+  const binaryInsertedRef6 = useRef(false);
+  const binaryInsertedRef7 = useRef(false);
+  const binaryInsertedRef8 = useRef(false);
+  const binaryInsertedRef9 = useRef(false);
+  const binaryInsertedRef10 = useRef(false);
+
   useEffect(() => {
     if (!binaryInput || !debouncedScheduledTime) {
       return;
     }
-  
+
     const currentJobId = uuidv4();
     jobIdRef.current = currentJobId;
-  
+
     const lineNo = 1;
     if (result) {
       localStorage.setItem('resultFetchedFromSupabase', 'true');
@@ -1631,33 +1653,33 @@ const Dieharder_tests = () => {
     }
     setLoadingProgress(0);
     let progressInterval;
-  
+
     const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
-  
+
       if (progress === 0 && selectedFile && !binaryInsertedRef.current) {
         try {
           const fileReader = new FileReader();
-  
+
           const fileBuffer = await new Promise((resolve, reject) => {
             fileReader.onload = () => resolve(fileReader.result);
             fileReader.onerror = () => reject(fileReader.error);
             fileReader.readAsBinaryString(selectedFile);
           });
-  
+
           binaryString = Array.from(fileBuffer)
             .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
             .join('');
-  
+
           binaryInsertedRef.current = true; // ✅ Prevent future inserts
           console.log("binary string", binaryString);
-  
+
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
-  
+
       const progressPercentage = progress;
       const payload = {
         user_id: userId,
@@ -1670,27 +1692,27 @@ const Dieharder_tests = () => {
         progress: progressPercentage,
         updated_at: new Date().toISOString(),
       };
-  
+
       const { error: upsertError } = await supabase
         .from("results3")
         .upsert(payload);
-  
+
       if (upsertError) {
         console.error("❌ Error storing progress in Supabase:", upsertError);
       } else {
         console.log(`✅ Progress ${progress}% upserted successfully.`);
       }
     };
-  
+
     const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       await upsertProgress(0, userId);
-  
+
       const fetchResult = async () => {
         console.log("fetchResult() started.");
-  
+
         try {
           progressInterval = setInterval(async () => {
             try {
@@ -1698,7 +1720,7 @@ const Dieharder_tests = () => {
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 4) * 100);
+              const percent = Math.round((completed / 5) * 100);
               console.log(`Polled progress: ${percent}%`);
               setLoadingProgress((prev) => (percent > prev ? percent : prev));
               await upsertProgress(percent, userId);
@@ -1706,24 +1728,26 @@ const Dieharder_tests = () => {
               console.error("Progress fetch error:", err);
             }
           }, 1000);
-  
+
           const formData = new FormData();
           formData.append("file", selectedFile);
           const formattedScheduledTime = new Date(debouncedScheduledTime)
             .toISOString()
             .replace("T", " ")
             .split(".")[0];
-  
-          formData.append("scheduled_time", formattedScheduledTime);
+
+          formData.append("scheduled_time", debouncedScheduledTime);
           formData.append("job_id", currentJobId);
           formData.append("line", lineNo);
-  
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName);
+
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-  
+
           clearInterval(progressInterval);
           setLoadingProgress(100);
           setResult(response.data);
@@ -1737,17 +1761,17 @@ const Dieharder_tests = () => {
           alert(`Error: ${error.message}`);
         }
       };
-  
+
       fetchResult();
     };
-  
+
     startProcess();
-  
+
     return () => {
       if (progressInterval) clearInterval(progressInterval);
     };
   }, [selectedFile, debouncedScheduledTime]);
-  
+
 
   const jobIdRef = useRef(null);
   const jobIdRef2 = useRef(null);
@@ -1778,52 +1802,52 @@ const Dieharder_tests = () => {
 
     const upsertProgress2 = async (progress, userId, result = null) => {
       let binaryString = null;
-  
+
       if (progress === 0 && selectedFile2 && !binaryInsertedRef2.current) {
         try {
           const fileReader = new FileReader();
-  
+
           const fileBuffer = await new Promise((resolve, reject) => {
             fileReader.onload = () => resolve(fileReader.result);
             fileReader.onerror = () => reject(fileReader.error);
             fileReader.readAsBinaryString(selectedFile2);
           });
-  
+
           binaryString = Array.from(fileBuffer)
             .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
             .join('');
-  
+
           binaryInsertedRef2.current = true; // ✅ Prevent future inserts
           console.log("binary string", binaryString);
-  
+
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
-    }
-    const progressPercentage = progress;
-    const payload = {
-      user_id: userId,
-      line: lineNo,
-      scheduled_time: debouncedScheduledTime2,
-      result: result,
-      file_name: fileName2,
-      upload_time: uploadTime2,
-      binary_data: binaryInsertedRef2.current ? binaryInput : null, // Only send once
-      progress: progressPercentage,
-      updated_at: new Date().toISOString(),
+      }
+      const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: lineNo,
+        scheduled_time: debouncedScheduledTime2,
+        result: result,
+        file_name: fileName2,
+        upload_time: uploadTime2,
+        binary_data: binaryInsertedRef2.current ? binaryInput : null, // Only send once
+        progress: progressPercentage,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error: upsertError } = await supabase
+        .from("results3")
+        .upsert(payload);
+
+      if (upsertError) {
+        console.error("❌ Error storing progress in Supabase:", upsertError);
+      } else {
+        console.log(`✅ Progress ${progress}% upserted successfully.`);
+      }
     };
-
-    const { error: upsertError } = await supabase
-      .from("results3")
-      .upsert(payload);
-
-    if (upsertError) {
-      console.error("❌ Error storing progress in Supabase:", upsertError);
-    } else {
-      console.log(`✅ Progress ${progress}% upserted successfully.`);
-    }
-  };
 
     const startProcess2 = async () => {
       const userId = await fetchUserId();
@@ -1856,17 +1880,17 @@ const Dieharder_tests = () => {
             .toISOString()
             .replace("T", " ")
             .split(".")[0];
-  
+
           formData.append("scheduled_time", formattedScheduledTime);
           formData.append("job_id", currentJobId);
           formData.append("line", lineNo);
-  
+
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-  
+
           clearInterval(progressInterval);
           setLoadingProgress2(100);
           setResult2(response.data);
@@ -2662,7 +2686,7 @@ const Dieharder_tests = () => {
   }, [binaryInput10, debouncedScheduledTime10]);
 
   const [binFile, setBinFile] = useState(null);   // will hold the generated .bin file
-  const [binFile2, setBinFile2] = useState(null);  
+  const [binFile2, setBinFile2] = useState(null);
 
   useEffect(() => {
     if (!binaryInput || binaryInput.length % 8 !== 0) {
@@ -2683,8 +2707,8 @@ const Dieharder_tests = () => {
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile(file);
-    console.log("bin file",binFile);
-    
+    console.log("bin file", binFile);
+
   }, [binaryInput]);
 
   const handleButtonClick = (type) => {
@@ -3477,8 +3501,186 @@ const Dieharder_tests = () => {
     }
   };
 
+  const handleDownloadOutput = async () => {
+    const jobId = jobIdRef.current;
 
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
 
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
+  const handleDownloadOutput2 = async () => {
+    const jobId = jobIdRef2.current;
+
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
+
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
+  const handleDownloadOutput3 = async () => {
+    const jobId = jobIdRef3.current;
+
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
+
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
+  const handleDownloadOutput4 = async () => {
+    const jobId = jobIdRef4.current;
+
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
+
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
+  const handleDownloadOutput5 = async () => {
+    const jobId = jobIdRef5.current;
+
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
+
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
+  const handleDownloadOutput6 = async () => {
+    const jobId = jobIdRef6.current;
+
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
+
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
+  const handleDownloadOutput7 = async () => {
+    const jobId = jobIdRef7.current;
+
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
+
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
+  const handleDownloadOutput8 = async () => {
+    const jobId = jobIdRef8.current;
+
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
+
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
+  const handleDownloadOutput9 = async () => {
+    const jobId = jobIdRef9.current;
+
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
+
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
+  const handleDownloadOutput10 = async () => {
+    const jobId = jobIdRef10.current;
+
+    if (!jobId) {
+      console.error("No job ID available for download.");
+      return;
+    }
+    const url = `http://127.0.0.1:8000/get_output_dieharder/${jobId}/`;
+    try {
+      const response = await axios.get(url);
+      const outputText = response.data.output;
+
+      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, `dieharder_output_${jobId}.txt`);
+    } catch (error) {
+      console.error("Failed to fetch or download output:", error);
+    }
+  };
   return (
     <Box m="20px">
       {/* Header Section */}
@@ -3550,7 +3752,6 @@ const Dieharder_tests = () => {
                     </Button>
                     <input
                       type="file"
-                      accept=".bin" // 👈 Only allow binary files
                       ref={fileInputRef}
                       style={{ display: "none" }}
                       onChange={handleFileChange}
@@ -3726,6 +3927,27 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput}
+                      disabled={loadingProgress < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
+
                   </Box>
                 </Box>
               </td>
@@ -3856,10 +4078,11 @@ const Dieharder_tests = () => {
                         },
                       }}
                     >
-                      Upload bin file
+                      Upload file
                     </Button>
                     <input
                       type="file"
+                      accept=".bin,.txt"
                       ref={fileInputRef2}
                       style={{ display: "none" }}
                       onChange={handleFileChange2}
@@ -4038,6 +4261,25 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput2}
+                      disabled={loadingProgress2 < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -4349,6 +4591,25 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput3}
+                      disabled={loadingProgress3 < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -4660,6 +4921,25 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput4}
+                      disabled={loadingProgress4 < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -4971,6 +5251,25 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput5}
+                      disabled={loadingProgress5 < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -5282,6 +5581,25 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput6}
+                      disabled={loadingProgress6 < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -5593,6 +5911,25 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput7}
+                      disabled={loadingProgress7 < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -5903,6 +6240,25 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput8}
+                      disabled={loadingProgress8 < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -6214,6 +6570,25 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput9}
+                      disabled={loadingProgress9 < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -6525,6 +6900,25 @@ const Dieharder_tests = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                      variant="contained"
+                      onClick={handleDownloadOutput10}
+                      disabled={loadingProgress10 < 100}
+                      sx={{
+
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        backgroundColor: colors.blueAccent[500],
+                        "&:hover": {
+                          backgroundColor: colors.blueAccent[600],
+                        }
+
+                      }}
+                    >
+                      Download Original Output
+                    </Button>
                   </Box>
                 </Box>
               </td>

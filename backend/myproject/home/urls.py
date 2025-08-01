@@ -50,7 +50,9 @@ urlpatterns = [
     path('run_mcw_test/',views.run_mcw_test, name='run_mcw_test'),
     path('run_mmc_test/',views.run_mmc_test, name='run_mmc_test'),
     path('run_lz78y_test/',views.run_lz78y_test, name='run_lz78y_test'),
-    
+    path('run_chiSq_test/',views.run_chiSq_test, name='run_chiSq_test'),
+    path('run_permutation_test/',views.run_permutation_test, name='run_permutation_test'),
+    path('run_lrs_test/',views.run_lrs_test, name='run_lrs_test'),
  
     # #report generation
     path('pdf-report/', views.generate_pdf_report, name='generate_pdf_report'),
@@ -84,6 +86,7 @@ urlpatterns = [
 
     path('generate_final_ans_dieharder/', views.generate_final_ans_dieharder, name='generate_final_ans_dieharder'),
     path("get_progress_dieharder/<uuid:job_id>/", views.get_progress_dieharder, name="get_progress_dieharder"),
+    path("get_output_dieharder/<uuid:job_id>/", views.get_output_dieharder, name="get_output_dieharder"),
 
     # dieharder tests
     path('minDist-test/', DieharderMinDistTestView.as_view()),

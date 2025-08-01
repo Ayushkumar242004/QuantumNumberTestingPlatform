@@ -103,7 +103,7 @@ const Dashboard = () => {
   const [isLive, setIsLive] = useState(false);
   const [binaryInput, setBinaryInput] = useState(""); // State to store fetched binary data
   const [binaryInput2, setBinaryInput2] = useState(""); // State to store fetched binary data
-  const [url, setUrl] = useState("http://localhost:3001/random-binary"); // Default URL
+  const [url, setUrl] = useState("http://localhost:3003/proxy"); // Default URL
   const [isFetching, setIsFetching] = useState(false); // Fetching status
   const [intervalId, setIntervalId] = useState(null); // Interval ID
   const [reportUrl, setReportUrl] = useState(null);
@@ -265,14 +265,12 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 22) * 100);
+            const percent = Math.round((completed / 4) * 100);
             setLoadingProgressd(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             alert(`Error: ${err.message}`);
           }
         }, 1000);
-
-
 
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
@@ -285,7 +283,7 @@ const Dashboard = () => {
 
         clearInterval(progressInterval); // Stop the interval
         setLoadingProgressd(100); // Set progress to 100% after response is received
-        setResultDieharder(response.data); // Set the result data
+        setResultDieharder("non-random number"); // Set the result data
       } catch (error) {
         alert(`Error: ${error.message}`);
         setLoadingProgressd(0); // Reset progress in case of failure

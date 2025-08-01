@@ -31,7 +31,7 @@ LOGGING = {
 }
 # settings.py
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 150 * 1024 * 1024 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
