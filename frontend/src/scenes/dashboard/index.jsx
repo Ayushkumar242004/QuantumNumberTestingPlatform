@@ -70,7 +70,7 @@ const BinaryGraphDisplay = ({ binaryInput }) => {
         setReportUrl(graphImageUrl);
         setError("");
       } catch (err) {
-        
+
         setGraphUrl(null);
         alert(`Error: ${err.message}`);
       }
@@ -129,7 +129,7 @@ const Dashboard = () => {
 
 
   const [length, setLength] = useState(8);
-  const MAX_STACK_SIZE_ESTIMATE = 1 * 1024 * 1024;
+  const MAX_STACK_SIZE_ESTIMATE = 150 * 1024 * 1024;
 
   const [resultNIST, setResultNIST] = useState(null);
   const [resultNIST2, setResultNIST2] = useState(null);
@@ -145,6 +145,7 @@ const Dashboard = () => {
   const [loadingProgressb, setLoadingProgressb] = useState(0);
   const [loadingProgressc, setLoadingProgressc] = useState(0);
 
+  const [showRedButton, setShowRedButton] = useState(false);
 
   const [loadingProgressRep, setLoadingProgressRep] = useState(0);
   const [loadingProgress2Rep, setLoadingProgress2Rep] = useState(0);
@@ -259,13 +260,25 @@ const Dashboard = () => {
     let progressInterval;
     const fetchResult = async () => {
       setLoadingProgressd(0); // Start loading from 0%
+      const byteArray = [];
+      for (let i = 0; i < binaryInput.length; i += 8) {
+        const byte = binaryInput.slice(i, i + 8);
+        byteArray.push(parseInt(byte.padEnd(8, "0"), 2)); // pad last byte if < 8 bits
+      }
+      const binFile = new Blob([new Uint8Array(byteArray)], { type: "application/octet-stream" });
+      const selectedFile = new File([binFile], fileName || "output.bin", { type: "application/octet-stream" });
 
+      // Now prepare FormData
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("scheduled_time", scheduledTime);
+      formData.append("job_id", currentJobId);
       try {
         progressInterval = setInterval(async () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 4) * 100);
+            const percent = Math.round((completed / 20) * 100);
             setLoadingProgressd(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             alert(`Error: ${err.message}`);
@@ -274,16 +287,13 @@ const Dashboard = () => {
 
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          {
-            binary_data: binaryInput,
-            scheduled_time: scheduledTime,
-            job_id: currentJobId,
-          }
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
 
         clearInterval(progressInterval); // Stop the interval
         setLoadingProgressd(100); // Set progress to 100% after response is received
-        setResultDieharder("non-random number"); // Set the result data
+        setResultDieharder(response.data); // Set the result data
       } catch (error) {
         alert(`Error: ${error.message}`);
         setLoadingProgressd(0); // Reset progress in case of failure
@@ -306,7 +316,7 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
+            const percent = Math.round((completed / 15) * 100);
 
             setLoadingProgressn2(percent);
           } catch (err) {
@@ -358,65 +368,74 @@ const Dashboard = () => {
   }, [date, time]);
 
   const handleFileUpload = () => {
+    setShowRedButton(true)
     fileInputRef.current.click();
   };
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // No file selected
-  
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton(false);
+      return;
+    }
+
     // Check if the file is a .txt file
     if (!selectedFile.name.endsWith(".txt")) {
       alert("Please select a binary file of .txt format.");
       event.target.value = ""; // Reset file input
       return;
     }
-  
+
     // Check if the file size exceeds the maximum allowed
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       event.target.value = ""; // Reset file input
       return;
     }
-  
+
     setFileName(selectedFile.name);
-  
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-      
-      const isBinary = /^[\s01]+$/.test(textData);
-      if (!isBinary) {
-        alert("Please upload a binary .txt file containing only 0s and 1s.");
-        event.target.value = ""; // Reset file input
-        return;
+      let binaryString = "";
+
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
       }
-      
+
       // Update binaryInput state with new binary data
-      setBinaryInput2(textData);
-  
+      setBinaryInput2(binaryString);
+
       // Store the current time when the file is uploaded
       const currentTime = new Date().toLocaleTimeString();
       setUploadTime(currentTime); // Update the state with the current time
 
-       const fileUploadLog = JSON.parse(localStorage.getItem("fileUploadLog") || "[]");
-    fileUploadLog.push({
-      filename: selectedFile.name,
-      uploadTime: currentTime,
-      scheduledTime: debouncedScheduledTime // or whatever time info you want to save
-    });
-    localStorage.setItem("fileUploadLog", JSON.stringify(fileUploadLog));
+      const fileUploadLog = JSON.parse(localStorage.getItem("fileUploadLog") || "[]");
+      fileUploadLog.push({
+        filename: selectedFile.name,
+        uploadTime: currentTime,
+        scheduledTime: debouncedScheduledTime // or whatever time info you want to save
+      });
+      localStorage.setItem("fileUploadLog", JSON.stringify(fileUploadLog));
       // Reset the file input to allow the same file to be selected again
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
   };
-  
 
-// Start fetching binary data
+
+  // Start fetching binary data
   const startFetching = () => {
     if (!isFetching) {
       setIsFetching(true);
@@ -458,9 +477,10 @@ const Dashboard = () => {
       });
 
       if (response.data?.random) {
-
-        setBinaryInput(response.data.random); // Update the state with random binary data
-      } 
+        const randomValue = response.data.random; // extract random binary
+        setBinaryInput(randomValue);
+        console.log("binary input", binaryInput);
+      }
     } catch (error) {
       alert("Error: server down");
       setBinaryInput("");
@@ -489,6 +509,7 @@ const Dashboard = () => {
         progressInterval = setInterval(async () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress/${jobId}`);
+            setShowRedButton(false);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 18) * 100);
             console.log(percent);
@@ -503,7 +524,7 @@ const Dashboard = () => {
           scheduled_time: debouncedScheduledTime,
           job_id: jobId,
         });
-
+        setShowRedButton(false);
         clearInterval(progressInterval); // Stop the interval
         setLoadingProgress2(100); // Set progress to 100% after response is received
         setResultNIST2(response.data); // Set the result data
@@ -528,6 +549,7 @@ const Dashboard = () => {
         progressInterval = setInterval(async () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${jobId}`);
+            setShowRedButton(false);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 10) * 100);
             setLoadingProgress2b(percent);
@@ -541,12 +563,12 @@ const Dashboard = () => {
           scheduled_time: debouncedScheduledTime,
           job_id: jobId,
         });
-
+        setShowRedButton(false);
         clearInterval(progressInterval); // Stop the interval
         setLoadingProgress2b(100); // Set progress to 100% after response is received
         setResultNIST90B2(response.data); // Set the result data
       } catch (error) {
-        alert(`Error: ${error.message}`); 
+        alert(`Error: ${error.message}`);
         clearInterval(progressInterval);
         setLoadingProgress2b(0); // Reset progress in case of failure
       }
@@ -561,10 +583,25 @@ const Dashboard = () => {
     let progressInterval;
     const fetchResult = async () => {
       setLoadingProgress2c(0); // Start loading from 0%
+      const byteArray = [];
+      for (let i = 0; i < binaryInput2.length; i += 8) {
+        const byte = binaryInput2.slice(i, i + 8);
+        byteArray.push(parseInt(byte.padEnd(8, "0"), 2)); // pad last byte if < 8 bits
+      }
+      const binFile = new Blob([new Uint8Array(byteArray)], { type: "application/octet-stream" });
+      const selectedFile = new File([binFile], fileName || "output.bin", { type: "application/octet-stream" });
+
+      // Now prepare FormData
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("scheduled_time", debouncedScheduledTime);
+      formData.append("job_id", currentJobId);
+
       try {
         progressInterval = setInterval(async () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+            setShowRedButton(false);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 22) * 100);
             setLoadingProgress2c(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -573,12 +610,12 @@ const Dashboard = () => {
           }
         }, 1000);
 
-        const response = await axios.post("http://localhost:8000/generate_final_ans_dieharder/", {
-          binary_data: binaryInput2,
-          scheduled_time: debouncedScheduledTime,
-          job_id: currentJobId,
-        });
-
+        const response = await axios.post(
+          "http://localhost:8000/generate_final_ans_dieharder/",
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        setShowRedButton(false);
         clearInterval(progressInterval); // Stop the interval
         setLoadingProgress2c(100); // Set progress to 100% after response is received
         setResultDieharder2(response.data); // Set the result data
@@ -682,6 +719,20 @@ const Dashboard = () => {
 
     const fetchResult = async () => {
       setLoadingProgressc(0);
+      const byteArray = [];
+      for (let i = 0; i < binaryInput.length; i += 8) {
+        const byte = binaryInput.slice(i, i + 8);
+        byteArray.push(parseInt(byte.padEnd(8, "0"), 2)); // pad last byte if < 8 bits
+      }
+      const binFile = new Blob([new Uint8Array(byteArray)], { type: "application/octet-stream" });
+      const selectedFile = new File([binFile], fileName || "output.bin", { type: "application/octet-stream" });
+
+      // Now prepare FormData
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("scheduled_time", scheduledTime);
+      formData.append("job_id", currentJobId);
+
       try {
         progressInterval = setInterval(async () => {
           try {
@@ -696,11 +747,8 @@ const Dashboard = () => {
 
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          {
-            binary_data: binaryInput,
-            scheduled_time: scheduledTime,
-            job_id: currentJobId,
-          }
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
 
         clearInterval(progressInterval); // Stop the interval
@@ -1368,6 +1416,19 @@ const Dashboard = () => {
                       }}
                     >
                       Upload Binary File
+                      {showRedButton && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"

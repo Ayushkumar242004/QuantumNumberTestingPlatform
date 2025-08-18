@@ -1,6 +1,6 @@
 
 #include "./shared/utils.h"
-
+#include <fstream>
 #define B_len 16
 #define MAX_DICTIONARY_SIZE 65536
 
@@ -213,17 +213,29 @@ vector<uint8_t> bitstring_to_bytes(const string& bitstr) {
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        cerr << "Usage: lagTest_exec <binary_string>\n";
-        return 1;
+        cerr << "Usage: lagTest_exec <file_path>\n";
+        return 0; // return 0 for any errors
     }
 
-    string bit_input = argv[1];
-    vector<uint8_t> bit_data = bitstring_to_bytes(bit_input);
+    ifstream infile(argv[1]);
+    if (!infile) {
+        cerr << "Error opening file\n";
+        return 0; // return 0 for any errors
+    }
 
-    // Assuming binary input → k = 2 (number of unique symbols: 0, 1)
+    string bit_input;
+    infile >> bit_input;
+    infile.close();
+
+    vector<uint8_t> bit_data = bitstring_to_bytes(bit_input);
+    if (bit_data.empty()) {
+        cerr << "Invalid bit string\n";
+        return 0; // return 0 for any errors
+    }
+
+    // k = 2 → number of unique symbols: 0, 1
     double min_entropy = LZ78Y_test(bit_data.data(), bit_data.size(), 2, 0, "l278y");
 
-    // Print ONLY the entropy
     cout << min_entropy << endl;
 
     if (min_entropy >= 0.997)

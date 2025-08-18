@@ -15,6 +15,39 @@
 #include <stdlib.h>
 #include "cephes.h"
 
+
+#include <gsl/gsl_sf_gamma.h>
+
+#define MAX_BITS 120000000  // 25 million bits (for 24MB binary file)
+#define P_THRESHOLD 0.01
+
+
+double chi_square_uniformity(double *p_values, int num_streams, int bins) {
+    int *counts = (int *)calloc(bins, sizeof(int));
+    if (counts == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        int bin = (int)(p_values[i] * bins);
+        if (bin == bins) bin = bins - 1;
+        counts[bin]++;
+    }
+
+    double expected = (double)num_streams / bins;
+    double chi_square = 0.0;
+
+    for (int i = 0; i < bins; i++) {
+        double diff = counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    free(counts);
+    double p_uniform = gsl_sf_gamma_inc_Q((bins - 1) / 2.0, chi_square / 2.0);
+    return p_uniform;
+}
+
 static const double	rel_error = 1E-12;
 
 double MACHEP = 1.11022302462515654042E-16;		// 2**-53
@@ -391,37 +424,78 @@ double CumulativeSums(int n, int* epsilon) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <block_size> <bit_stream...>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <stream_length> <binary_file>\n", argv[0]);
         return 1;
     }
 
-    int n = argc - 2;  // Calculate number of bits
-    int* epsilon = (int *)malloc(n * sizeof(int));  // Allocate memory for epsilon
+    int n = atoi(argv[1]);  // Length of each bitstream
+    char *filename = argv[2];
 
-    if (epsilon == NULL) {
-        fprintf(stderr, "Memory allocation failed.\n");
+    if (n <= 0) {
+        fprintf(stderr, "Invalid stream length: must be > 0\n");
         return 1;
     }
 
-    // Convert input bit stream to integer array
-    FILE *fp = fopen(argv[2], "r");
+    FILE *fp = fopen(filename, "r");
     if (!fp) {
         fprintf(stderr, "Failed to open input file.\n");
-        free(epsilon);
         return 1;
     }
-    for (int i = 0; i < n; i++) {
-        fscanf(fp, "%d", &epsilon[i]);
+
+    int *epsilon = (int *)malloc(MAX_BITS * sizeof(int));
+    if (!epsilon) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        fclose(fp);
+        return 1;
+    }
+
+    int bit, total_bits = 0;
+    while (fscanf(fp, "%1d", &bit) == 1 && total_bits < MAX_BITS) {
+        if (bit != 0 && bit != 1) {
+            fprintf(stderr, "Invalid bit in input file.\n");
+            free(epsilon);
+            fclose(fp);
+            return 1;
+        }
+        epsilon[total_bits++] = bit;
     }
     fclose(fp);
 
-    // Call CumulativeSums with the number of bits and epsilon array
-    double p_value = CumulativeSums(n, epsilon);
+    if (total_bits < n) {
+        fprintf(stderr, "Not enough bits for one complete bitstream.\n");
+        free(epsilon);
+        return 1;
+    }
 
-    // Output p_value for testing
-    printf("%f\n", p_value);
+    int num_streams = total_bits / n;
+    double *p_values = (double *)malloc(num_streams * sizeof(double));
+    if (!p_values) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        free(epsilon);
+        return 1;
+    }
 
-    free(epsilon);  // Free allocated memory
+    int pass_count = 0;
+    for (int i = 0; i < num_streams; i++) {
+        double p = CumulativeSums(n, &epsilon[i * n]);
+        p_values[i] = p;
+        if (p >= P_THRESHOLD) {
+            pass_count++;
+        }
+    }
+
+    double proportion = (double)pass_count / num_streams;
+    int proportion_pass = proportion >= 0.96;
+
+    double chi_p = chi_square_uniformity(p_values, num_streams, 10);
+    int uniformity_pass = chi_p >= P_THRESHOLD;
+
+    int final_pass = (proportion_pass && uniformity_pass) ? 1 : 0;
+
+    printf("%.6f %d\n", chi_p, final_pass);
+
+    free(p_values);
+    free(epsilon);
     return 0;
 }

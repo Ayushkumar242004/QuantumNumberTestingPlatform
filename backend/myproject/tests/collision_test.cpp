@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdint>
 #include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -55,18 +56,25 @@ vector<uint8_t> bitstring_to_bytes(const string& bits) {
     }
     return result;
 }
-
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        cerr << "Usage: collisionTest_exec <binary_string>\n";
-        return 1;
+        cerr << "Usage: collisionTest_exec <file_path>\n";
+        return 0;
     }
 
-    string bit_input = argv[1];
-    vector<uint8_t> bit_data = bitstring_to_bytes(bit_input);
+    std::ifstream infile(argv[1]);
+    if (!infile) {
+        cerr << "Error opening file\n";
+        return 0;
+    }
+
+    std::string bit_input;
+    infile >> bit_input;
+
+    std::vector<uint8_t> bit_data = bitstring_to_bytes(bit_input);
     double min_entropy = collision_test(bit_data.data(), bit_data.size());
 
-    cout << min_entropy << endl;
+    std::cout << min_entropy << std::endl;
 
     if (min_entropy >= 0.997)
         return 1;  // Random

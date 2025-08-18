@@ -123,30 +123,30 @@ const Nist_tests90b = () => {
   const [date10, setDate10] = useState("");
   const [time10, setTime10] = useState("");
 
-    const fetchUserId = async () => {
-      const username = localStorage.getItem("username"); // Retrieve the username from localStorage
-      if (!username) {
-       
+  const fetchUserId = async () => {
+    const username = localStorage.getItem("username"); // Retrieve the username from localStorage
+    if (!username) {
+
+      return null;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("users") // Replace "users" with your Supabase table name
+        .select("id") // Fetch the user ID
+        .eq("username", username); // Filter by username
+
+      if (error || data.length === 0) {
+
         return null;
       }
-     
-      try {
-        const { data, error } = await supabase
-          .from("users") // Replace "users" with your Supabase table name
-          .select("id") // Fetch the user ID
-          .eq("username", username); // Filter by username
-  
-        if (error || data.length === 0) {
-         
-          return null;
-        }
-     
-        return data[0].id; // Return the user ID
-      } catch (err) {
-        
-        return null;
-      }
-    };
+
+      return data[0].id; // Return the user ID
+    } catch (err) {
+
+      return null;
+    }
+  };
 
   const handleDateChange = (event) => {
     const inputDate = event.target.value;
@@ -537,50 +537,76 @@ const Nist_tests90b = () => {
       setScheduledTime10(`${date10} ${time10}`);
     }
   }, [date10, time10]);
+  const [showRedButton, setShowRedButton] = useState(false);
+  const [showRedButton2, setShowRedButton2] = useState(false);
+  const [showRedButton3, setShowRedButton3] = useState(false);
+  const [showRedButton4, setShowRedButton4] = useState(false);
+  const [showRedButton5, setShowRedButton5] = useState(false);
+  const [showRedButton6, setShowRedButton6] = useState(false);
+  const [showRedButton7, setShowRedButton7] = useState(false);
+  const [showRedButton8, setShowRedButton8] = useState(false);
+  const [showRedButton9, setShowRedButton9] = useState(false);
+  const [showRedButton10, setShowRedButton10] = useState(false);
+
+  
 
   const handleFileUpload = () => {
+    setShowRedButton(true)
     fileInputRef.current.click();
   };
   const handleFileUpload2 = () => {
+    setShowRedButton2(true)
     fileInputRef2.current.click();
   };
   const handleFileUpload3 = () => {
+    setShowRedButton3(true)
     fileInputRef3.current.click();
   };
   const handleFileUpload4 = () => {
+    setShowRedButton4(true)
     fileInputRef4.current.click();
   };
   const handleFileUpload5 = () => {
+    setShowRedButton5(true)
     fileInputRef5.current.click();
   };
   const handleFileUpload6 = () => {
+    setShowRedButton6(true)
     fileInputRef6.current.click();
   };
   const handleFileUpload7 = () => {
+    setShowRedButton7(true)
     fileInputRef7.current.click();
   };
   const handleFileUpload8 = () => {
+    setShowRedButton8(true)
     fileInputRef8.current.click();
   };
   const handleFileUpload9 = () => {
+    setShowRedButton9(true)
     fileInputRef_nine.current.click();
   };
   const handleFileUpload10 = () => {
+    setShowRedButton10(true)
     fileInputRef10.current.click();
   };
 
   const handleFileChange = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
-  
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton(false);
+      return;
+    }
+
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
     }
-  
+
     const userId = await fetchUserId();
     if (!userId) return;
-  
+
     // Reset all state variables
     setBinaryInput("");
     setScheduledTime("");
@@ -590,16 +616,16 @@ const Nist_tests90b = () => {
     setUploadTime("");
     setLoadingProgress(0);
     setTime("");
-  
+
     setFileName(selectedFile.name);
-  
+
     const reader = new FileReader();
     reader.onload = async (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-  
+
       let binaryString = "";
-  
+
       if (selectedFile.name.toLowerCase().endsWith(".bin")) {
         // Convert each byte to its binary representation (8 bits)
         for (let i = 0; i < byteArray.length; i++) {
@@ -610,21 +636,21 @@ const Nist_tests90b = () => {
         const decoder = new TextDecoder();
         binaryString = decoder.decode(byteArray).trim();
       }
-     
+
       setBinaryInput(binaryString);
-  
+
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime(currentTime);
-  
+
       try {
         localStorage.setItem('resultFetchedFromSupabase_two', 'false');
         const { error: deleteError } = await supabase
           .from('results2')
           .delete()
           .match({ line: 1, user_id: userId });
-  
+
         setLoadingProgress(0);
         if (deleteError) {
           console.error('Error deleting old results:', deleteError);
@@ -633,180 +659,263 @@ const Nist_tests90b = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-  
+
       event.target.value = "";
     };
-  
+
     reader.readAsArrayBuffer(selectedFile);
   };
-  
 
 
- const handleFileChange2 = async (event) => {
-  const selectedFile = event.target.files[0];
-  if (!selectedFile) return; // Handle cases where no file is selected
 
-  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-    alert("Warning: The selected file is too large. Please choose a smaller file.");
-    return;
-  }
-
-  // Fetch user ID
-  const userId = await fetchUserId();
-  if (!userId) {
-    
-    return;
-  }
-
-  // Reset all state variables for line 2
-  setBinaryInput2(""); // Clear binary input
-  setScheduledTime2(""); // Clear scheduled time
-  setDebouncedScheduledTime2(""); // Clear debounced scheduled time
-  setResult2(null); // Clear result
-  setFileName2(""); // Clear filename
-  setUploadTime2(""); // Clear upload time
-  setLoadingProgress2(0); // Reset progress bar
-
-  // Set the new filename
-  setFileName2(selectedFile.name);
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const binaryData = e.target.result;
-    const byteArray = new Uint8Array(binaryData);
-    const decoder = new TextDecoder();
-    const textData = decoder.decode(byteArray).trim();
-
-    // Update binaryInput state with new binary data
-    setBinaryInput2(textData);
-
-    // Store the current time when the file is uploaded
-    const currentTime = new Date().toLocaleTimeString();
-    setUploadTime2(currentTime); // Update the state with the current time
-
-    // Remove the existing row for line 2 from Supabase
-    try {
-      localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
-      const { error: deleteError } = await supabase
-        .from('results2')
-        .delete()
-        .match({ line: 2, user_id: userId }); // Replace '2' with the line number for this handler
-
-      setLoadingProgress2(0);
-      if (deleteError) {
-       
-        return;
-      }
-
-    } catch (err) {
-      console.error('Unexpected error:', err);
-    }
-
-    // Reset the file input value to allow the same file to be uploaded again
-    event.target.value = "";
-  };
-  reader.readAsArrayBuffer(selectedFile);
-};
-
-
-const handleFileChange3 = async (event) => {
-  const selectedFile = event.target.files[0];
-  if (!selectedFile) return; // Handle cases where no file is selected
-
-  if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-    alert("Warning: The selected file is too large. Please choose a smaller file.");
-    return;
-  }
-
-  // Fetch user ID
-  const userId = await fetchUserId();
-  if (!userId) {
-    
-    return;
-  }
-
-  // Reset all state variables for line 3
-  setBinaryInput3(""); // Clear binary input
-  setScheduledTime3(""); // Clear scheduled time
-  setDebouncedScheduledTime3(""); // Clear debounced scheduled time
-  setResult3(null); // Clear result
-  setFileName3(""); // Clear filename
-  setUploadTime3(""); // Clear upload time
-  setLoadingProgress3(0); // Reset progress bar
-
-  // Set the new filename
-  setFileName3(selectedFile.name);
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const binaryData = e.target.result;
-    const byteArray = new Uint8Array(binaryData);
-    const decoder = new TextDecoder();
-    const textData = decoder.decode(byteArray).trim();
-
-    // Update binaryInput state with new binary data
-    setBinaryInput3(textData);
-
-    // Store the current time when the file is uploaded
-    const currentTime = new Date().toLocaleTimeString();
-    setUploadTime3(currentTime); // Update the state with the current time
-
-    // Remove the existing row for line 3 from Supabase
-    try {
-      localStorage.setItem('resultFetchedFromSupabase90b3', 'false');
-      const { error: deleteError } = await supabase
-        .from('results3')
-        .delete()
-        .match({ line: 3, user_id: userId }); // Replace '3' with the line number for this handler
-
-      setLoadingProgress3(0);
-      if (deleteError) {
-       
-        return;
-      }
-
-    } catch (err) {
-      console.error('Unexpected error:', err);
-    }
-
-    // Reset the file input value to allow the same file to be uploaded again
-    event.target.value = "";
-  };
-  reader.readAsArrayBuffer(selectedFile);
-};
-
-  const handleFileChange4 = (event) => {
+  const handleFileChange2 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
-    setFileName4(selectedFile.name);
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton2(false);
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
+      alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
     }
 
+    // Fetch user ID
+    const userId = await fetchUserId();
+    if (!userId) {
+
+      return;
+    }
+
+    // Reset all state variables for line 2
+    setBinaryInput2(""); // Clear binary input
+    setScheduledTime2(""); // Clear scheduled time
+    setDebouncedScheduledTime2(""); // Clear debounced scheduled time
+    setResult2(null); // Clear result
+    setFileName2(""); // Clear filename
+    setUploadTime2(""); // Clear upload time
+    setLoadingProgress2(0); // Reset progress bar
+
+    // Set the new filename
+    setFileName2(selectedFile.name);
+
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      // Update binaryInput state with new binary data
-      setBinaryInput4(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
-      setUploadTime4(currentTime);
+      setBinaryInput2(binaryString);
+
+      // Store the current time when the file is uploaded
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      setUploadTime2(currentTime);
+
+
+      // Remove the existing row for line 2 from Supabase
+      try {
+        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: 2, user_id: userId }); // Replace '2' with the line number for this handler
+
+        setLoadingProgress2(0);
+        if (deleteError) {
+
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
   };
 
-  const handleFileChange5 = (event) => {
+
+  const handleFileChange3 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton3(false);
+      return;
+    }
+    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+      alert("Warning: The selected file is too large. Please choose a smaller file.");
+      return;
+    }
+
+    // Fetch user ID
+    const userId = await fetchUserId();
+    if (!userId) {
+
+      return;
+    }
+
+    // Reset all state variables for line 3
+    setBinaryInput3(""); // Clear binary input
+    setScheduledTime3(""); // Clear scheduled time
+    setDebouncedScheduledTime3(""); // Clear debounced scheduled time
+    setResult3(null); // Clear result
+    setFileName3(""); // Clear filename
+    setUploadTime3(""); // Clear upload time
+    setLoadingProgress3(0); // Reset progress bar
+
+    // Set the new filename
+    setFileName3(selectedFile.name);
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const binaryData = e.target.result;
+      const byteArray = new Uint8Array(binaryData);
+      let binaryString = "";
+
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
+
+      setBinaryInput3(binaryString);
+      // Update binaryInput state with new binary data
+      
+      // Store the current time when the file is uploaded
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      setUploadTime3(currentTime);
+
+      // Remove the existing row for line 3 from Supabase
+      try {
+        localStorage.setItem('resultFetchedFromSupabase90b3', 'false');
+        const { error: deleteError } = await supabase
+          .from('results3')
+          .delete()
+          .match({ line: 3, user_id: userId }); // Replace '3' with the line number for this handler
+
+        setLoadingProgress3(0);
+        if (deleteError) {
+
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+
+      // Reset the file input value to allow the same file to be uploaded again
+      event.target.value = "";
+    };
+    reader.readAsArrayBuffer(selectedFile);
+  };
+
+  const handleFileChange4 = async(event) => {
+    const selectedFile = event.target.files[0];
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton4(false);
+      return;
+    }
+   
+    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+      alert(
+        "Warning: The selected file is too large. Please choose a smaller file."
+      );
+      return;
+    }
+    const userId = await fetchUserId();
+    if (!userId) {
+
+      return;
+    }
+
+    // Reset all state variables for line 2
+    setBinaryInput4(""); // Clear binary input
+    setScheduledTime4(""); // Clear scheduled time
+    setDebouncedScheduledTime4(""); // Clear debounced scheduled time
+    setResult4(null); // Clear result
+    setFileName4(""); // Clear filename
+    setUploadTime4(""); // Clear upload time
+    setLoadingProgress4(0); // Reset progress bar
+
+    // Set the new filename
+    setFileName4(selectedFile.name);
+    const reader = new FileReader();
+    reader.onload = async(e) => {
+      const binaryData = e.target.result;
+      const byteArray = new Uint8Array(binaryData);
+      let binaryString = "";
+
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
+
+      setBinaryInput4(binaryString);
+      
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      setUploadTime4(currentTime);
+
+      try {
+        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: 4, user_id: userId }); // Replace '2' with the line number for this handler
+
+        setLoadingProgress4(0);
+        if (deleteError) {
+
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+
+      // Reset the file input value to allow the same file to be uploaded again
+      event.target.value = "";
+    };
+    reader.readAsArrayBuffer(selectedFile);
+  };
+
+  const handleFileChange5 = async(event) => {
+    const selectedFile = event.target.files[0];
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton5(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert(
@@ -814,28 +923,76 @@ const handleFileChange3 = async (event) => {
       );
       return;
     }
+    const userId = await fetchUserId();
+    if (!userId) {
+
+      return;
+    }
+
+   // Reset all state variables for line 2
+    setBinaryInput5(""); // Clear binary input
+    setScheduledTime5(""); // Clear scheduled time
+    setDebouncedScheduledTime5(""); // Clear debounced scheduled time
+    setResult5(null); // Clear result
+    setFileName5(""); // Clear filename
+    setUploadTime5(""); // Clear upload time
+    setLoadingProgress5(0); // Reset progress bar
+
+    // Set the new filename
     setFileName5(selectedFile.name);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async(e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      // Update binaryInput state with new binary data
-      setBinaryInput5(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      setBinaryInput5(binaryString);
+     
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime5(currentTime);
+
+      try {
+        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: 5, user_id: userId }); // Replace '2' with the line number for this handler
+
+        setLoadingProgress5(0);
+        if (deleteError) {
+
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
   };
 
-  const handleFileChange6 = (event) => {
+  const handleFileChange6 = async(event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton6(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert(
@@ -843,135 +1000,372 @@ const handleFileChange3 = async (event) => {
       );
       return;
     }
+    const userId = await fetchUserId();
+    if (!userId) {
+
+      return;
+    }
+
+    // Reset all state variables for line 2
+    setBinaryInput6(""); // Clear binary input
+    setScheduledTime6(""); // Clear scheduled time
+    setDebouncedScheduledTime6(""); // Clear debounced scheduled time
+    setResult6(null); // Clear result
+    setFileName6(""); // Clear filename
+    setUploadTime6(""); // Clear upload time
+    setLoadingProgress6(0); // Reset progress bar
+
+    // Set the new filename
     setFileName6(selectedFile.name);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async(e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      // Update binaryInput state with new binary data
-      setBinaryInput6(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      setBinaryInput6(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime6(currentTime);
+
+      try {
+        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: 6, user_id: userId }); // Replace '2' with the line number for this handler
+
+        setLoadingProgress6(0);
+        if (deleteError) {
+
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
   };
 
-  const handleFileChange7 = (event) => {
+  const handleFileChange7 = async(event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
-
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton7(false);
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert(
         "Warning: The selected file is too large. Please choose a smaller file."
       );
       return;
     }
+    const userId = await fetchUserId();
+    if (!userId) {
+
+      return;
+    }
+
+    // Reset all state variables for line 2
+    setBinaryInput7(""); // Clear binary input
+    setScheduledTime7(""); // Clear scheduled time
+    setDebouncedScheduledTime7(""); // Clear debounced scheduled time
+    setResult7(null); // Clear result
+    setFileName7(""); // Clear filename
+    setUploadTime7(""); // Clear upload time
+    setLoadingProgress7(0); // Reset progress bar
+
+    // Set the new filename
     setFileName7(selectedFile.name);
+
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async(e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      // Update binaryInput state with new binary data
-      setBinaryInput7(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      setBinaryInput7(binaryString);
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime7(currentTime);
+
+       try {
+        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: 7, user_id: userId }); // Replace '2' with the line number for this handler
+
+        setLoadingProgress7(0);
+        if (deleteError) {
+
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
   };
 
-  const handleFileChange8 = (event) => {
+  const handleFileChange8 = async(event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
-
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton8(false);
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert(
         "Warning: The selected file is too large. Please choose a smaller file."
       );
       return;
     }
+
+    const userId = await fetchUserId();
+    if (!userId) {
+
+      return;
+    }
+
+    // Reset all state variables for line 2
+    setBinaryInput8(""); // Clear binary input
+    setScheduledTime8(""); // Clear scheduled time
+    setDebouncedScheduledTime8(""); // Clear debounced scheduled time
+    setResult8(null); // Clear result
+    setFileName8(""); // Clear filename
+    setUploadTime8(""); // Clear upload time
+    setLoadingProgress8(0); // Reset progress bar
+
+    // Set the new filename
     setFileName8(selectedFile.name);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async(e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      // Update binaryInput state with new binary data
-      setBinaryInput8(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      setBinaryInput8(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime8(currentTime);
+
+      try {
+        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: 8, user_id: userId }); // Replace '2' with the line number for this handler
+
+        setLoadingProgress8(0);
+        if (deleteError) {
+
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
   };
 
-  const handleFileChange9 = (event) => {
+  const handleFileChange9 = async(event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
-
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton9(false);
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert(
         "Warning: The selected file is too large. Please choose a smaller file."
       );
       return;
     }
+    const userId = await fetchUserId();
+    if (!userId) {
+
+      return;
+    }
+
+    // Reset all state variables for line 2
+    setBinaryInput9(""); // Clear binary input
+    setScheduledTime9(""); // Clear scheduled time
+    setDebouncedScheduledTime9(""); // Clear debounced scheduled time
+    setResult9(null); // Clear result
+    setFileName9(""); // Clear filename
+    setUploadTime9(""); // Clear upload time
+    setLoadingProgress9(0); // Reset progress bar
+
+    // Set the new filename
     setFileName9(selectedFile.name);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async(e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      // Update binaryInput state with new binary data
-      setBinaryInput9(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      setBinaryInput9(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime9(currentTime);
+
+      try {
+        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: 9, user_id: userId }); // Replace '2' with the line number for this handler
+
+        setLoadingProgress9(0);
+        if (deleteError) {
+
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
   };
 
-  const handleFileChange10 = (event) => {
+  const handleFileChange10 = async(event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
-
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton10(false);
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert(
         "Warning: The selected file is too large. Please choose a smaller file."
       );
       return;
     }
+    const userId = await fetchUserId();
+    if (!userId) {
+
+      return;
+    }
+
+    // Reset all state variables for line 2
+    setBinaryInput10(""); // Clear binary input
+    setScheduledTime10(""); // Clear scheduled time
+    setDebouncedScheduledTime10(""); // Clear debounced scheduled time
+    setResult10(null); // Clear result
+    setFileName10(""); // Clear filename
+    setUploadTime10(""); // Clear upload time
+    setLoadingProgress10(0); // Reset progress bar
+
+    // Set the new filename
     setFileName10(selectedFile.name);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async(e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      // Update binaryInput state with new binary data
-      setBinaryInput10(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to its binary representation (8 bits)
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume it's a .txt file containing binary text
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      setBinaryInput10(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime10(currentTime);
+
+      try {
+        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: 10, user_id: userId }); // Replace '2' with the line number for this handler
+
+        setLoadingProgress10(0);
+        if (deleteError) {
+
+          return;
+        }
+
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
@@ -988,178 +1382,188 @@ const handleFileChange3 = async (event) => {
   const jobIdRef9 = useRef(null);
   const jobIdRef10 = useRef(null);
 
-    useEffect(() => {
-      const fetchStoredResults = async () => {
-        const userId = await fetchUserId();
+  useEffect(() => {
+    const fetchStoredResults = async () => {
+      const userId = await fetchUserId();
       if (!userId) {
-        
+
         return;
       }
-        try {
-          const { data, error } = await supabase
-            .from('results2') // Replace 'results' with your Supabase table name
-            .select('*') // Fetch all rows
-            .eq("user_id", userId);
-          if (error) {
-          
-            return;
-          }
-    
-          // Update state with fetched data
-          if (data) {
-            data.forEach((row) => {
-              switch (row.line) {
-                case 1:
-                  setBinaryInput(row.binary_data);
-                  setScheduledTime(row.scheduled_time);
-                  setResult({ final_result: row.result });
-                  setFileName(row.file_name);
-                  setUploadTime(row.upload_time);
-                  break;
-                case 2:
-                  setBinaryInput2(row.binary_data);
-                  setScheduledTime2(row.scheduled_time);
-                  setResult2({ final_result: row.result });
-                  setFileName2(row.file_name);
-                  setUploadTime2(row.upload_time);
-                  break;
-                case 3:
-                  setBinaryInput3(row.binary_data);
-                  setScheduledTime3(row.scheduled_time);
-                  setResult3({ final_result: row.result });
-                  setFileName3(row.file_name);
-                  setUploadTime3(row.upload_time);
-                  break;
-                case 4:
-                  setBinaryInput4(row.binary_data);
-                  setScheduledTime4(row.scheduled_time);
-                  setResult4({ final_result: row.result });
-                  setFileName4(row.file_name);
-                  setUploadTime4(row.upload_time);
-                  break;
-                case 5:
-                  setBinaryInput5(row.binary_data);
-                  setScheduledTime5(row.scheduled_time);
-                  setResult5({ final_result: row.result });
-                  setFileName5(row.file_name);
-                  setUploadTime5(row.upload_time);
-                  break;
-                case 6:
-                  setBinaryInput6(row.binary_data);
-                  setScheduledTime6(row.scheduled_time);
-                  setResult6({ final_result: row.result });
-                  setFileName6(row.file_name);
-                  setUploadTime6(row.upload_time);
-                  break;
-                case 7:
-                  setBinaryInput7(row.binary_data);
-                  setScheduledTime7(row.scheduled_time);
-                  setResult7({ final_result: row.result });
-                  setFileName7(row.file_name);
-                  setUploadTime7(row.upload_time);
-                  break;
-                case 8:
-                  setBinaryInput8(row.binary_data);
-                  setScheduledTime8(row.scheduled_time);
-                  setResult8({ final_result: row.result });
-                  setFileName8(row.file_name);
-                  setUploadTime8(row.upload_time);
-                  break;
-                case 9:
-                  setBinaryInput9(row.binary_data);
-                  setScheduledTime9(row.scheduled_time);
-                  setResult9({ final_result: row.result });
-                  setFileName9(row.file_name);
-                  setUploadTime9(row.upload_time);
-                  break;
-                case 10:
-                  setBinaryInput10(row.binary_data);
-                  setScheduledTime10(row.scheduled_time);
-                  setResult10({ final_result: row.result });
-                  setFileName10(row.file_name);
-                  setUploadTime10(row.upload_time);
-                  break;
-                default:
-                  break;
-              }
-            });
-          }
-        } catch (err) {
-          console.error('Unexpected error fetching results:', err);
+      try {
+        const { data, error } = await supabase
+          .from('results2') // Replace 'results' with your Supabase table name
+          .select('*') // Fetch all rows
+          .eq("user_id", userId);
+        if (error) {
+
+          return;
         }
-      };
-    
-      fetchStoredResults();
-    }, []);
+
+        // Update state with fetched data
+        if (data) {
+          data.forEach((row) => {
+            switch (row.line) {
+              case 1:
+                setBinaryInput(row.binary_data);
+                setScheduledTime(row.scheduled_time);
+                setResult({ final_result: row.result });
+                setFileName(row.file_name);
+                setUploadTime(row.upload_time);
+                setLoadingProgress(row.progress);
+                break;
+              case 2:
+                setBinaryInput2(row.binary_data);
+                setScheduledTime2(row.scheduled_time);
+                setResult2({ final_result: row.result });
+                setFileName2(row.file_name);
+                setUploadTime2(row.upload_time);
+                setLoadingProgress2(row.progress);
+                break;
+              case 3:
+                setBinaryInput3(row.binary_data);
+                setScheduledTime3(row.scheduled_time);
+                setResult3({ final_result: row.result });
+                setFileName3(row.file_name);
+                setUploadTime3(row.upload_time);
+                setLoadingProgress3(row.progress);
+                break;
+              case 4:
+                setBinaryInput4(row.binary_data);
+                setScheduledTime4(row.scheduled_time);
+                setResult4({ final_result: row.result });
+                setFileName4(row.file_name);
+                setUploadTime4(row.upload_time);
+                setLoadingProgress4(row.progress);
+                break;
+              case 5:
+                setBinaryInput5(row.binary_data);
+                setScheduledTime5(row.scheduled_time);
+                setResult5({ final_result: row.result });
+                setFileName5(row.file_name);
+                setUploadTime5(row.upload_time);
+                setLoadingProgress5(row.progress);
+                break;
+              case 6:
+                setBinaryInput6(row.binary_data);
+                setScheduledTime6(row.scheduled_time);
+                setResult6({ final_result: row.result });
+                setFileName6(row.file_name);
+                setUploadTime6(row.upload_time);
+                setLoadingProgress6(row.progress);
+                break;
+              case 7:
+                setBinaryInput7(row.binary_data);
+                setScheduledTime7(row.scheduled_time);
+                setResult7({ final_result: row.result });
+                setFileName7(row.file_name);
+                setUploadTime7(row.upload_time);
+                setLoadingProgress7(row.progress);
+                break;
+              case 8:
+                setBinaryInput8(row.binary_data);
+                setScheduledTime8(row.scheduled_time);
+                setResult8({ final_result: row.result });
+                setFileName8(row.file_name);
+                setUploadTime8(row.upload_time);
+                setLoadingProgress8(row.progress);
+                break;
+              case 9:
+                setBinaryInput9(row.binary_data);
+                setScheduledTime9(row.scheduled_time);
+                setResult9({ final_result: row.result });
+                setFileName9(row.file_name);
+                setUploadTime9(row.upload_time);
+                setLoadingProgress9(row.progress);
+                break;
+              case 10:
+                setBinaryInput10(row.binary_data);
+                setScheduledTime10(row.scheduled_time);
+                setResult10({ final_result: row.result });
+                setFileName10(row.file_name);
+                setUploadTime10(row.upload_time);
+                setLoadingProgress10(row.progress);
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching results:', err);
+      }
+    };
+
+    fetchStoredResults();
+  }, []);
 
   const [loadingProgress, setLoadingProgress] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase_two') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase_two') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
 
   const [loadingProgressRep, setLoadingProgressRep] = useState(0);
   const [loadingProgressGr, setLoadingProgressGr] = useState(0);
 
-    const [loadingProgress2, setLoadingProgress2] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b2') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+  const [loadingProgress2, setLoadingProgress2] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b2') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress2Rep, setLoadingProgress2Rep] = useState(0);
   const [loadingProgress2Gr, setLoadingProgress2Gr] = useState(0);
-  
-    const [loadingProgress3, setLoadingProgress3] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b3') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+
+  const [loadingProgress3, setLoadingProgress3] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b3') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress3Rep, setLoadingProgress3Rep] = useState(0);
   const [loadingProgress3Gr, setLoadingProgress3Gr] = useState(0);
-  
-    const [loadingProgress4, setLoadingProgress4] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b4') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+
+  const [loadingProgress4, setLoadingProgress4] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b4') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress4Rep, setLoadingProgress4Rep] = useState(0);
   const [loadingProgress4Gr, setLoadingProgress4Gr] = useState(0);
-  
-    const [loadingProgress5, setLoadingProgress5] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b5') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+
+  const [loadingProgress5, setLoadingProgress5] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b5') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress5Rep, setLoadingProgress5Rep] = useState(0);
   const [loadingProgress5Gr, setLoadingProgress5Gr] = useState(0);
-  
-   const [loadingProgress6, setLoadingProgress6] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b6') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+
+  const [loadingProgress6, setLoadingProgress6] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b6') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress6Rep, setLoadingProgress6Rep] = useState(0);
   const [loadingProgress6Gr, setLoadingProgress6Gr] = useState(0);
-  
-    const [loadingProgress7, setLoadingProgress7] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b7') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+
+  const [loadingProgress7, setLoadingProgress7] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b7') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress7Rep, setLoadingProgress7Rep] = useState(0);
   const [loadingProgress7Gr, setLoadingProgress7Gr] = useState(0);
-  
-   const [loadingProgress8, setLoadingProgress8] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b8') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+
+  const [loadingProgress8, setLoadingProgress8] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b8') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress8Rep, setLoadingProgress8Rep] = useState(0);
   const [loadingProgress8Gr, setLoadingProgress8Gr] = useState(0);
-  
-    const [loadingProgress9, setLoadingProgress9] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b9') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+
+  const [loadingProgress9, setLoadingProgress9] = useState(() => {
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b9') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress9Rep, setLoadingProgress9Rep] = useState(0);
   const [loadingProgress9Gr, setLoadingProgress9Gr] = useState(0);
-  
+
   const [loadingProgress10, setLoadingProgress10] = useState(() => {
-     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b10') === 'true';
-     return isFetchedFromSupabase ? 100 : 0;
-   });
+    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase90b10') === 'true';
+    return isFetchedFromSupabase ? 100 : 0;
+  });
   const [loadingProgress10Rep, setLoadingProgress10Rep] = useState(0);
   const [loadingProgress10Gr, setLoadingProgress10Gr] = useState(0);
 
@@ -1195,9 +1599,10 @@ const handleFileChange3 = async (event) => {
 
   const finalResult = result ? result.final_result : " ";
 
+  
   const handleScheduledTimeChange = (event) => {
     setScheduledTime(event.target.value);
-    
+
   };
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -1352,47 +1757,68 @@ const handleFileChange3 = async (event) => {
     };
   }, [scheduledTime10]);
 
-   const jobIdRef = useRef(null);
+  const jobIdRef = useRef(null);
 
- useEffect(() => {
-  if (!binaryInput || !debouncedScheduledTime ) {
+  let binaryDataSent = false;
+  let binaryDataSent2 = false;
+  let binaryDataSent3 = false;
+  let binaryDataSent4 = false;
+  let binaryDataSent5 = false;
+  let binaryDataSent6 = false;
+  let binaryDataSent7 = false;
+  let binaryDataSent8 = false;
+  let binaryDataSent9 = false;
+  let binaryDataSent10 = false;
+
+  useEffect(() => {
+    if (!binaryInput || !debouncedScheduledTime) {
       return;// Do not fetch if binaryInput is empty
-}
-  const currentJobId = uuidv4();
+    }
+    const currentJobId = uuidv4();
     jobIdRef.current = currentJobId;
-  const lineNo=1;
-     if (result) {
+    const lineNo = 1;
+    if (result) {
       localStorage.setItem('resultFetchedFromSupabase_two', 'true'); // Store flag in localStorage
       setLoadingProgress(100); // Set progress to 100 if result is already present
       return;
     }
     setLoadingProgress(0);
-  let progressInterval;
+    let progressInterval;
     // console.log("1")
-  const upsertProgress = async (progress, userId, result = null) => {
-    const progressPercentage = progress;
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    const upsertProgress = async (progress, userId, result = null) => {
+      const progressPercentage = progress;
+      
+      // Create the base payload
+      const payload = {
         user_id: userId,
-        line: 1, // Use simple integer line as the primary key
-        binary_data: binaryInput,
+        line: 1,
         scheduled_time: debouncedScheduledTime,
         result: result,
         file_name: fileName,
         upload_time: uploadTime,
-        progress: progressPercentage, // Store as percentage string
-        updated_at: new Date().toISOString() // Add timestamp for tracking updates
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent) {
+        payload.binary_data = binaryInput;
+        binaryDataSent = true; // Mark as sent
+      }
+
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
+
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
+      }
+    };
 
     const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
-        
+
         return;
       }
       // Initial database entry with 0% progress
@@ -1403,6 +1829,7 @@ const handleFileChange3 = async (event) => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 15) * 100);
               setLoadingProgress(prev => (percent > prev ? percent : prev));
@@ -1420,14 +1847,14 @@ const handleFileChange3 = async (event) => {
             user_id: userId,
             file_name: fileName
           });
-
+          setShowRedButton(false);
           clearInterval(progressInterval);
           setLoadingProgress(100);
           setResult(response.data);
           localStorage.setItem('resultFetchedFromSupabase_two', 'true');
           await upsertProgress(100, userId, response.data.final_result);
         } catch (error) {
-         
+
           clearInterval(progressInterval);
           setLoadingProgress(0);
           await upsertProgress(0, userId);
@@ -1438,824 +1865,946 @@ const handleFileChange3 = async (event) => {
       fetchResult();
     };
 
-     startProcess();
+    startProcess();
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput, debouncedScheduledTime]); // Added missing dependencies
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput, debouncedScheduledTime]); // Added missing dependencies
 
-  
- useEffect(() => {
-  if (!binaryInput2 || !debouncedScheduledTime2) return;
 
-  const currentJobId = uuidv4();
-  jobIdRef2.current = currentJobId;
-  const lineNo = 2;
+  useEffect(() => {
+    if (!binaryInput2 || !debouncedScheduledTime2) return;
 
-  if (result2) {
-    localStorage.setItem('resultFetchedFromSupabase90b2', 'true'); // Flag if already fetched
-    setLoadingProgress2(100);
-    return;
-  }
+    const currentJobId = uuidv4();
+    jobIdRef2.current = currentJobId;
+    const lineNo = 2;
 
-  setLoadingProgress2(0);
-  let progressInterval;
+    if (result2) {
+      localStorage.setItem('resultFetchedFromSupabase90b2', 'true'); // Flag if already fetched
+      setLoadingProgress2(100);
+      return;
+    }
 
-  const upsertProgress2 = async (progress, userId, result = null) => {
-    const progressPercentage = progress;
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    setLoadingProgress2(0);
+    let progressInterval;
+
+    const upsertProgress2 = async (progress, userId, result = null) => {
+      const progressPercentage = progress;
+      const payload = {
         user_id: userId,
-        line: lineNo,
-        binary_data: binaryInput2,
+        line: 2,
         scheduled_time: debouncedScheduledTime2,
         result: result,
         file_name: fileName2,
         upload_time: uploadTime2,
         progress: progressPercentage,
         updated_at: new Date().toISOString()
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+      };
 
-  const startProcess = async () => {
-    const userId = await fetchUserId();
-    if (!userId) {
-      
-      return;
-    }
+      // Only send binary_data once
+      if (!binaryDataSent2) {
+        payload.binary_data = binaryInput2;
+        binaryDataSent2 = true; // Mark as sent
+      }
 
-    await upsertProgress2(0, userId); // Initial entry with 0%
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
 
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
-            setLoadingProgress2(prev => (percent > prev ? percent : prev));
-            await upsertProgress2(percent, userId);
-          } catch (err) {
-            console.warn("Progress fetch error:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
-          binary_data: binaryInput2,
-          scheduled_time: debouncedScheduledTime2,
-          job_id: currentJobId,
-          line: lineNo,
-        });
-
-        clearInterval(progressInterval);
-        setLoadingProgress2(100);
-        setResult2(response.data);
-        localStorage.setItem('resultFetchedFromSupabase90b2', 'true');
-        await upsertProgress2(100, userId, response.data.final_result);
-      } catch (error) {
-       
-        clearInterval(progressInterval);
-        setLoadingProgress2(0);
-        await upsertProgress2(0, userId);
-        alert(`Error: ${error.message}`);
+     
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
       }
     };
 
-    fetchResult();
-  };
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
 
-  startProcess();
+        return;
+      }
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput2, debouncedScheduledTime2]);
+      await upsertProgress2(0, userId); // Initial entry with 0%
+
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton2(false);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 15) * 100);
+              setLoadingProgress2(prev => (percent > prev ? percent : prev));
+              await upsertProgress2(percent, userId);
+            } catch (err) {
+              console.warn("Progress fetch error:", err);
+            }
+          }, 1000);
+
+          const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+            binary_data: binaryInput2,
+            scheduled_time: debouncedScheduledTime2,
+            job_id: currentJobId,
+            line: lineNo,
+            user_id: userId,
+            file_name: fileName2
+          });
+          setShowRedButton2(false);
+          clearInterval(progressInterval);
+          setLoadingProgress2(100);
+          setResult2(response.data);
+          localStorage.setItem('resultFetchedFromSupabase90b2', 'true');
+          await upsertProgress2(100, userId, response.data.final_result);
+        } catch (error) {
+
+          clearInterval(progressInterval);
+          setLoadingProgress2(0);
+          await upsertProgress2(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput2, debouncedScheduledTime2]);
 
 
- useEffect(() => {
-  if (!binaryInput3 || !debouncedScheduledTime3) return;
+  useEffect(() => {
+    if (!binaryInput3 || !debouncedScheduledTime3) return;
 
-  const currentJobId = uuidv4();
-  jobIdRef3.current = currentJobId;
-  const lineNo = 3;
+    const currentJobId = uuidv4();
+    jobIdRef3.current = currentJobId;
+    const lineNo = 3;
 
-  if (result3) {
-    localStorage.setItem('resultFetchedFromSupabase90b3', 'true');
-    setLoadingProgress3(100);
-    return;
-  }
+    if (result3) {
+      localStorage.setItem('resultFetchedFromSupabase90b3', 'true');
+      setLoadingProgress3(100);
+      return;
+    }
 
-  setLoadingProgress3(0);
-  let progressInterval;
+    setLoadingProgress3(0);
+    let progressInterval;
 
-  const upsertProgress3 = async (progress, userId, result = null) => {
-    const progressPercentage = progress;
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    const upsertProgress3 = async (progress, userId, result = null) => {
+      const progressPercentage = progress;
+      const payload = {
         user_id: userId,
-        line: lineNo,
-        binary_data: binaryInput3,
+        line: 3,
         scheduled_time: debouncedScheduledTime3,
         result: result,
         file_name: fileName3,
         upload_time: uploadTime3,
         progress: progressPercentage,
         updated_at: new Date().toISOString()
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+      };
 
-  const startProcess = async () => {
-    const userId = await fetchUserId();
-    if (!userId) {
-      
-      return;
-    }
+      // Only send binary_data once
+      if (!binaryDataSent3) {
+        payload.binary_data = binaryInput3;
+        binaryDataSent3 = true; // Mark as sent
+      }
 
-    await upsertProgress3(0, userId); // Initial log
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
 
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
-            setLoadingProgress3(prev => (percent > prev ? percent : prev));
-            await upsertProgress3(percent, userId);
-          } catch (err) {
-            console.warn("Progress fetch error:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
-          binary_data: binaryInput3,
-          scheduled_time: debouncedScheduledTime3,
-          job_id: currentJobId,
-          line: lineNo,
-        });
-
-        clearInterval(progressInterval);
-        setLoadingProgress3(100);
-        setResult3(response.data);
-        localStorage.setItem('resultFetchedFromSupabase90b3', 'true');
-        await upsertProgress3(100, userId, response.data.final_result);
-      } catch (error) {
-        
-        clearInterval(progressInterval);
-        setLoadingProgress3(0);
-        await upsertProgress3(0, userId);
-        alert(`Error: ${error.message}`);
+     
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
       }
     };
 
-    fetchResult();
-  };
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
 
-  startProcess();
+        return;
+      }
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput3, debouncedScheduledTime3]);
+      await upsertProgress3(0, userId); // Initial log
+
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton3(false);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 15) * 100);
+              setLoadingProgress3(prev => (percent > prev ? percent : prev));
+              await upsertProgress3(percent, userId);
+            } catch (err) {
+              console.warn("Progress fetch error:", err);
+            }
+          }, 1000);
+
+          const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+            binary_data: binaryInput3,
+            scheduled_time: debouncedScheduledTime3,
+            job_id: currentJobId,
+            line: lineNo,
+            user_id: userId,
+            file_name: fileName3
+          });
+          setShowRedButton3(false);
+          clearInterval(progressInterval);
+          setLoadingProgress3(100);
+          setResult3(response.data);
+          localStorage.setItem('resultFetchedFromSupabase90b3', 'true');
+          await upsertProgress3(100, userId, response.data.final_result);
+        } catch (error) {
+
+          clearInterval(progressInterval);
+          setLoadingProgress3(0);
+          await upsertProgress3(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput3, debouncedScheduledTime3]);
 
 
- useEffect(() => {
-  if (!binaryInput4 || !debouncedScheduledTime4) return;
+  useEffect(() => {
+    if (!binaryInput4 || !debouncedScheduledTime4) return;
 
-  const currentJobId = uuidv4();
-  jobIdRef4.current = currentJobId;
-  const lineNo = 4;
+    const currentJobId = uuidv4();
+    jobIdRef4.current = currentJobId;
+    const lineNo = 4;
 
-  if (result4) {
-    localStorage.setItem('resultFetchedFromSupabase90b4', 'true');
-    setLoadingProgress4(100);
-    return;
-  }
+    if (result4) {
+      localStorage.setItem('resultFetchedFromSupabase90b4', 'true');
+      setLoadingProgress4(100);
+      return;
+    }
 
-  setLoadingProgress4(0);
-  let progressInterval;
+    setLoadingProgress4(0);
+    let progressInterval;
 
-  const upsertProgress4 = async (progress, userId, result = null) => {
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    const upsertProgress4 = async (progress, userId, result = null) => {
+      const progressPercentage = progress;
+      const payload = {
         user_id: userId,
-        line: lineNo,
-        binary_data: binaryInput4,
+        line: 4,
         scheduled_time: debouncedScheduledTime4,
         result: result,
         file_name: fileName4,
         upload_time: uploadTime4,
-        progress: progress,
+        progress: progressPercentage,
         updated_at: new Date().toISOString()
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+      };
 
-  const startProcess = async () => {
-    const userId = await fetchUserId();
-    if (!userId) {
-      
-      return;
-    }
+      // Only send binary_data once
+      if (!binaryDataSent4) {
+        payload.binary_data = binaryInput4;
+        binaryDataSent4 = true; // Mark as sent
+      }
 
-    await upsertProgress4(0, userId);
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
 
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
-            setLoadingProgress4(prev => (percent > prev ? percent : prev));
-            await upsertProgress4(percent, userId);
-          } catch (err) {
-            console.warn("Progress fetch error:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
-          binary_data: binaryInput4,
-          scheduled_time: debouncedScheduledTime4,
-          job_id: currentJobId,
-          line: lineNo,
-        });
-
-        clearInterval(progressInterval);
-        setLoadingProgress4(100);
-        setResult4(response.data);
-        localStorage.setItem('resultFetchedFromSupabase90b4', 'true');
-        await upsertProgress4(100, userId, response.data.final_result);
-      } catch (error) {
-        
-        clearInterval(progressInterval);
-        setLoadingProgress4(0);
-        await upsertProgress4(0, userId);
-        alert(`Error: ${error.message}`);
+    
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
       }
     };
 
-    fetchResult();
-  };
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
 
-  startProcess();
+        return;
+      }
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput4, debouncedScheduledTime4]);
+      await upsertProgress4(0, userId);
+
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton4(false);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 15) * 100);
+              setLoadingProgress4(prev => (percent > prev ? percent : prev));
+              await upsertProgress4(percent, userId);
+            } catch (err) {
+              console.warn("Progress fetch error:", err);
+            }
+          }, 1000);
+
+          const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+            binary_data: binaryInput4,
+            scheduled_time: debouncedScheduledTime4,
+            job_id: currentJobId,
+            line: lineNo,
+            user_id: userId,
+            file_name: fileName4
+          });
+          setShowRedButton4(false);
+          clearInterval(progressInterval);
+          setLoadingProgress4(100);
+          setResult4(response.data);
+          localStorage.setItem('resultFetchedFromSupabase90b4', 'true');
+          await upsertProgress4(100, userId, response.data.final_result);
+        } catch (error) {
+
+          clearInterval(progressInterval);
+          setLoadingProgress4(0);
+          await upsertProgress4(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput4, debouncedScheduledTime4]);
 
 
- useEffect(() => {
-  if (!binaryInput5 || !debouncedScheduledTime5) return;
+  useEffect(() => {
+    if (!binaryInput5 || !debouncedScheduledTime5) return;
 
-  const currentJobId = uuidv4();
-  jobIdRef5.current = currentJobId;
-  const lineNo = 5;
+    const currentJobId = uuidv4();
+    jobIdRef5.current = currentJobId;
+    const lineNo = 5;
 
-  if (result5) {
-    localStorage.setItem('resultFetchedFromSupabase90b5', 'true');
-    setLoadingProgress5(100);
-    return;
-  }
+    if (result5) {
+      localStorage.setItem('resultFetchedFromSupabase90b5', 'true');
+      setLoadingProgress5(100);
+      return;
+    }
 
-  setLoadingProgress5(0);
-  let progressInterval;
+    setLoadingProgress5(0);
+    let progressInterval;
 
-  const upsertProgress5 = async (progress, userId, result = null) => {
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    const upsertProgress5 = async (progress, userId, result = null) => {
+     
+      const progressPercentage = progress;
+      const payload = {
         user_id: userId,
-        line: lineNo,
-        binary_data: binaryInput5,
+        line: 5,
         scheduled_time: debouncedScheduledTime5,
         result: result,
         file_name: fileName5,
         upload_time: uploadTime5,
-        progress: progress,
+        progress: progressPercentage,
         updated_at: new Date().toISOString()
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+      };
 
-  const startProcess = async () => {
-    const userId = await fetchUserId();
-    if (!userId) {
-      
-      return;
-    }
+      // Only send binary_data once
+      if (!binaryDataSent5) {
+        payload.binary_data = binaryInput5;
+        binaryDataSent5 = true; // Mark as sent
+      }
 
-    await upsertProgress5(0, userId);
-
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
-            setLoadingProgress5(prev => (percent > prev ? percent : prev));
-            await upsertProgress5(percent, userId);
-          } catch (err) {
-            console.warn("Progress fetch error:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
-          binary_data: binaryInput5,
-          scheduled_time: debouncedScheduledTime5,
-          job_id: currentJobId,
-          line: lineNo,
-        });
-
-        clearInterval(progressInterval);
-        setLoadingProgress5(100);
-        setResult5(response.data);
-        localStorage.setItem('resultFetchedFromSupabase90b5', 'true');
-        await upsertProgress5(100, userId, response.data.final_result);
-      } catch (error) {
-        
-        clearInterval(progressInterval);
-        setLoadingProgress5(0);
-        await upsertProgress5(0, userId);
-        alert(`Error: ${error.message}`);
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
+     
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
       }
     };
 
-    fetchResult();
-  };
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
 
-  startProcess();
+        return;
+      }
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput5, debouncedScheduledTime5]);
+      await upsertProgress5(0, userId);
+
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton5(false);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 15) * 100);
+              setLoadingProgress5(prev => (percent > prev ? percent : prev));
+              await upsertProgress5(percent, userId);
+            } catch (err) {
+              console.warn("Progress fetch error:", err);
+            }
+          }, 1000);
+
+          const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+            binary_data: binaryInput5,
+            scheduled_time: debouncedScheduledTime5,
+            job_id: currentJobId,
+            line: lineNo,
+            user_id: userId,
+            file_name: fileName5
+          });
+          setShowRedButton5(false);
+          clearInterval(progressInterval);
+          setLoadingProgress5(100);
+          setResult5(response.data);
+          localStorage.setItem('resultFetchedFromSupabase90b5', 'true');
+          await upsertProgress5(100, userId, response.data.final_result);
+        } catch (error) {
+
+          clearInterval(progressInterval);
+          setLoadingProgress5(0);
+          await upsertProgress5(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput5, debouncedScheduledTime5]);
 
 
   useEffect(() => {
-  if (!binaryInput6 || !debouncedScheduledTime6) return;
+    if (!binaryInput6 || !debouncedScheduledTime6) return;
 
-  const currentJobId = uuidv4();
-  jobIdRef6.current = currentJobId;
-  const lineNo = 6;
+    const currentJobId = uuidv4();
+    jobIdRef6.current = currentJobId;
+    const lineNo = 6;
 
-  if (result6) {
-    localStorage.setItem('resultFetchedFromSupabase90b6', 'true');
-    setLoadingProgress6(100);
-    return;
-  }
+    if (result6) {
+      localStorage.setItem('resultFetchedFromSupabase90b6', 'true');
+      setLoadingProgress6(100);
+      return;
+    }
 
-  setLoadingProgress6(0);
-  let progressInterval;
+    setLoadingProgress6(0);
+    let progressInterval;
 
-  const upsertProgress6 = async (progress, userId, result = null) => {
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    const upsertProgress6 = async (progress, userId, result = null) => {
+      
+      const progressPercentage = progress;
+      
+      // Create the base payload
+      const payload = {
         user_id: userId,
-        line: lineNo,
-        binary_data: binaryInput6,
+        line: 6,
         scheduled_time: debouncedScheduledTime6,
         result: result,
         file_name: fileName6,
         upload_time: uploadTime6,
-        progress: progress,
+        progress: progressPercentage,
         updated_at: new Date().toISOString()
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+      };
 
-  const startProcess = async () => {
-    const userId = await fetchUserId();
-    if (!userId) {
+      // Only send binary_data once
+      if (!binaryDataSent6) {
+        payload.binary_data = binaryInput6;
+        binaryDataSent6 = true; // Mark as sent
+      }
+
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
       
-      return;
-    }
-
-    await upsertProgress6(0, userId);
-
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
-            setLoadingProgress6(prev => (percent > prev ? percent : prev));
-            await upsertProgress6(percent, userId);
-          } catch (err) {
-            console.warn("Progress fetch error:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
-          binary_data: binaryInput6,
-          scheduled_time: debouncedScheduledTime6,
-          job_id: currentJobId,
-          line: lineNo,
-        });
-
-        clearInterval(progressInterval);
-        setLoadingProgress6(100);
-        setResult6(response.data);
-        localStorage.setItem('resultFetchedFromSupabase90b6', 'true');
-        await upsertProgress6(100, userId, response.data.final_result);
-      } catch (error) {
-        
-        clearInterval(progressInterval);
-        setLoadingProgress6(0);
-        await upsertProgress6(0, userId);
-        alert(`Error: ${error.message}`);
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
       }
     };
 
-    fetchResult();
-  };
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
 
-  startProcess();
+        return;
+      }
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput6, debouncedScheduledTime6]);
+      await upsertProgress6(0, userId);
+
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton6(false);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 15) * 100);
+              setLoadingProgress6(prev => (percent > prev ? percent : prev));
+              await upsertProgress6(percent, userId);
+            } catch (err) {
+              console.warn("Progress fetch error:", err);
+            }
+          }, 1000);
+
+          const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+            binary_data: binaryInput6,
+            scheduled_time: debouncedScheduledTime6,
+            job_id: currentJobId,
+            line: lineNo,
+            user_id: userId,
+            file_name: fileName6
+          });
+          setShowRedButton6(false);
+          clearInterval(progressInterval);
+          setLoadingProgress6(100);
+          setResult6(response.data);
+          localStorage.setItem('resultFetchedFromSupabase90b6', 'true');
+          await upsertProgress6(100, userId, response.data.final_result);
+        } catch (error) {
+
+          clearInterval(progressInterval);
+          setLoadingProgress6(0);
+          await upsertProgress6(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput6, debouncedScheduledTime6]);
 
 
- useEffect(() => {
-  if (!binaryInput7 || !debouncedScheduledTime7) return;
+  useEffect(() => {
+    if (!binaryInput7 || !debouncedScheduledTime7) return;
 
-  const currentJobId = uuidv4();
-  jobIdRef7.current = currentJobId;
-  const lineNo = 7;
+    const currentJobId = uuidv4();
+    jobIdRef7.current = currentJobId;
+    const lineNo = 7;
 
-  if (result7) {
-    localStorage.setItem('resultFetchedFromSupabase90b7', 'true');
-    setLoadingProgress7(100);
-    return;
-  }
+    if (result7) {
+      localStorage.setItem('resultFetchedFromSupabase90b7', 'true');
+      setLoadingProgress7(100);
+      return;
+    }
 
-  setLoadingProgress7(0);
-  let progressInterval;
+    setLoadingProgress7(0);
+    let progressInterval;
 
-  const upsertProgress7 = async (progress, userId, result = null) => {
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    const upsertProgress7 = async (progress, userId, result = null) => {
+      
+      const progressPercentage = progress;
+      
+      // Create the base payload
+      const payload = {
         user_id: userId,
-        line: lineNo,
-        binary_data: binaryInput7,
+        line: 7,
         scheduled_time: debouncedScheduledTime7,
         result: result,
         file_name: fileName7,
         upload_time: uploadTime7,
-        progress: progress,
+        progress: progressPercentage,
         updated_at: new Date().toISOString()
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+      };
 
-  const startProcess = async () => {
-    const userId = await fetchUserId();
-    if (!userId) {
-      
-      return;
-    }
+      // Only send binary_data once
+      if (!binaryDataSent7) {
+        payload.binary_data = setBinaryInput7;
+        binaryDataSent7 = true; // Mark as sent
+      }
 
-    await upsertProgress7(0, userId);
-
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
-            setLoadingProgress7(prev => (percent > prev ? percent : prev));
-            await upsertProgress7(percent, userId);
-          } catch (err) {
-            console.warn("Progress fetch error:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
-          binary_data: binaryInput7,
-          scheduled_time: debouncedScheduledTime7,
-          job_id: currentJobId,
-          line: lineNo,
-        });
-
-        clearInterval(progressInterval);
-        setLoadingProgress7(100);
-        setResult7(response.data);
-        localStorage.setItem('resultFetchedFromSupabase90b7', 'true');
-        await upsertProgress7(100, userId, response.data.final_result);
-      } catch (error) {
-        
-        clearInterval(progressInterval);
-        setLoadingProgress7(0);
-        await upsertProgress7(0, userId);
-        alert(`Error: ${error.message}`);
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
+     
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
       }
     };
 
-    fetchResult();
-  };
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
 
-  startProcess();
+        return;
+      }
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput7, debouncedScheduledTime7]);
+      await upsertProgress7(0, userId);
+
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton7(false);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 15) * 100);
+              setLoadingProgress7(prev => (percent > prev ? percent : prev));
+              await upsertProgress7(percent, userId);
+            } catch (err) {
+              console.warn("Progress fetch error:", err);
+            }
+          }, 1000);
+
+          const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+            binary_data: binaryInput7,
+            scheduled_time: debouncedScheduledTime7,
+            job_id: currentJobId,
+            line: lineNo,
+            user_id: userId,
+            file_name: fileName7
+          });
+          setShowRedButton7(false);
+          clearInterval(progressInterval);
+          setLoadingProgress7(100);
+          setResult7(response.data);
+          localStorage.setItem('resultFetchedFromSupabase90b7', 'true');
+          await upsertProgress7(100, userId, response.data.final_result);
+        } catch (error) {
+
+          clearInterval(progressInterval);
+          setLoadingProgress7(0);
+          await upsertProgress7(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput7, debouncedScheduledTime7]);
 
 
-useEffect(() => {
-  if (!binaryInput8 || !debouncedScheduledTime8) return;
+  useEffect(() => {
+    if (!binaryInput8 || !debouncedScheduledTime8) return;
 
-  const currentJobId = uuidv4();
-  jobIdRef8.current = currentJobId;
-  const lineNo = 8;
+    const currentJobId = uuidv4();
+    jobIdRef8.current = currentJobId;
+    const lineNo = 8;
 
-  if (result8) {
-    localStorage.setItem('resultFetchedFromSupabase90b8', 'true');
-    setLoadingProgress8(100);
-    return;
-  }
+    if (result8) {
+      localStorage.setItem('resultFetchedFromSupabase90b8', 'true');
+      setLoadingProgress8(100);
+      return;
+    }
 
-  setLoadingProgress8(0);
-  let progressInterval;
+    setLoadingProgress8(0);
+    let progressInterval;
 
-  const upsertProgress8 = async (progress, userId, result = null) => {
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    const upsertProgress8 = async (progress, userId, result = null) => {
+      const progressPercentage = progress;
+      
+      // Create the base payload
+      const payload = {
         user_id: userId,
-        line: lineNo,
-        binary_data: binaryInput8,
+        line: 8,
         scheduled_time: debouncedScheduledTime8,
         result: result,
         file_name: fileName8,
         upload_time: uploadTime8,
-        progress: progress,
+        progress: progressPercentage,
         updated_at: new Date().toISOString()
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+      };
 
-  const startProcess = async () => {
-    const userId = await fetchUserId();
-    if (!userId) {
+      // Only send binary_data once
+      if (!binaryDataSent8) {
+        payload.binary_data = binaryInput8;
+        binaryDataSent8 = true; // Mark as sent
+      }
+
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
       
-      return;
-    }
-
-    await upsertProgress8(0, userId);
-
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
-            setLoadingProgress8(prev => (percent > prev ? percent : prev));
-            await upsertProgress8(percent, userId);
-          } catch (err) {
-            console.warn("Progress fetch error:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
-          binary_data: binaryInput8,
-          scheduled_time: debouncedScheduledTime8,
-          job_id: currentJobId,
-          line: lineNo,
-        });
-
-        clearInterval(progressInterval);
-        setLoadingProgress8(100);
-        setResult8(response.data);
-        localStorage.setItem('resultFetchedFromSupabase90b8', 'true');
-        await upsertProgress8(100, userId, response.data.final_result);
-      } catch (error) {
-        
-        clearInterval(progressInterval);
-        setLoadingProgress8(0);
-        await upsertProgress8(0, userId);
-        alert(`Error: ${error.message}`);
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
       }
     };
 
-    fetchResult();
-  };
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
 
-  startProcess();
+        return;
+      }
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput8, debouncedScheduledTime8]);
+      await upsertProgress8(0, userId);
+
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton8(false);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 15) * 100);
+              setLoadingProgress8(prev => (percent > prev ? percent : prev));
+              await upsertProgress8(percent, userId);
+            } catch (err) {
+              console.warn("Progress fetch error:", err);
+            }
+          }, 1000);
+
+          const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+            binary_data: binaryInput8,
+            scheduled_time: debouncedScheduledTime8,
+            job_id: currentJobId,
+            line: lineNo,
+            user_id: userId,
+            file_name: fileName8
+          });
+          setShowRedButton8(false);
+          clearInterval(progressInterval);
+          setLoadingProgress8(100);
+          setResult8(response.data);
+          localStorage.setItem('resultFetchedFromSupabase90b8', 'true');
+          await upsertProgress8(100, userId, response.data.final_result);
+        } catch (error) {
+
+          clearInterval(progressInterval);
+          setLoadingProgress8(0);
+          await upsertProgress8(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput8, debouncedScheduledTime8]);
 
 
- useEffect(() => {
-  if (!binaryInput9 || !debouncedScheduledTime9) return;
+  useEffect(() => {
+    if (!binaryInput9 || !debouncedScheduledTime9) return;
 
-  const currentJobId = uuidv4();
-  jobIdRef9.current = currentJobId;
-  const lineNo = 9;
+    const currentJobId = uuidv4();
+    jobIdRef9.current = currentJobId;
+    const lineNo = 9;
 
-  if (result9) {
-    localStorage.setItem('resultFetchedFromSupabase90b9', 'true');
-    setLoadingProgress9(100);
-    return;
-  }
+    if (result9) {
+      localStorage.setItem('resultFetchedFromSupabase90b9', 'true');
+      setLoadingProgress9(100);
+      return;
+    }
 
-  setLoadingProgress9(0);
-  let progressInterval;
+    setLoadingProgress9(0);
+    let progressInterval;
 
-  const upsertProgress9 = async (progress, userId, result = null) => {
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    const upsertProgress9 = async (progress, userId, result = null) => {
+      const progressPercentage = progress;
+      
+      // Create the base payload
+      const payload = {
         user_id: userId,
-        line: lineNo,
-        binary_data: binaryInput9,
+        line: 9,
         scheduled_time: debouncedScheduledTime9,
         result: result,
         file_name: fileName9,
         upload_time: uploadTime9,
-        progress: progress,
+        progress: progressPercentage,
         updated_at: new Date().toISOString()
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+      };
 
-  const startProcess = async () => {
-    const userId = await fetchUserId();
-    if (!userId) {
-      
-      return;
-    }
+      // Only send binary_data once
+      if (!binaryDataSent9) {
+        payload.binary_data = binaryInput9;
+        binaryDataSent9 = true; // Mark as sent
+      }
 
-    await upsertProgress9(0, userId);
-
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
-            setLoadingProgress9(prev => (percent > prev ? percent : prev));
-            await upsertProgress9(percent, userId);
-          } catch (err) {
-            console.warn("Progress fetch error:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
-          binary_data: binaryInput9,
-          scheduled_time: debouncedScheduledTime9,
-          job_id: currentJobId,
-          line: lineNo,
-        });
-
-        clearInterval(progressInterval);
-        setLoadingProgress9(100);
-        setResult9(response.data);
-        localStorage.setItem('resultFetchedFromSupabase90b9', 'true');
-        await upsertProgress9(100, userId, response.data.final_result);
-      } catch (error) {
-        
-        clearInterval(progressInterval);
-        setLoadingProgress9(0);
-        await upsertProgress9(0, userId);
-        alert(`Error: ${error.message}`);
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
+     
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
       }
     };
 
-    fetchResult();
-  };
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
 
-  startProcess();
+        return;
+      }
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput9, debouncedScheduledTime9]);
+      await upsertProgress9(0, userId);
+
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton9(false);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 15) * 100);
+              setLoadingProgress9(prev => (percent > prev ? percent : prev));
+              await upsertProgress9(percent, userId);
+            } catch (err) {
+              console.warn("Progress fetch error:", err);
+            }
+          }, 1000);
+
+          const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+            binary_data: binaryInput9,
+            scheduled_time: debouncedScheduledTime9,
+            job_id: currentJobId,
+            line: lineNo,
+            user_id: userId,
+            file_name: fileName9
+          });
+          setShowRedButton9(false);
+          clearInterval(progressInterval);
+          setLoadingProgress9(100);
+          setResult9(response.data);
+          localStorage.setItem('resultFetchedFromSupabase90b9', 'true');
+          await upsertProgress9(100, userId, response.data.final_result);
+        } catch (error) {
+
+          clearInterval(progressInterval);
+          setLoadingProgress9(0);
+          await upsertProgress9(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput9, debouncedScheduledTime9]);
 
 
-useEffect(() => {
-  if (!binaryInput10 || !debouncedScheduledTime10) return;
+  useEffect(() => {
+    if (!binaryInput10 || !debouncedScheduledTime10) return;
 
-  const currentJobId = uuidv4();
-  jobIdRef10.current = currentJobId;
-  const lineNo = 10;
+    const currentJobId = uuidv4();
+    jobIdRef10.current = currentJobId;
+    const lineNo = 10;
 
-  if (result10) {
-    localStorage.setItem('resultFetchedFromSupabase90b10', 'true');
-    setLoadingProgress10(100);
-    return;
-  }
+    if (result10) {
+      localStorage.setItem('resultFetchedFromSupabase90b10', 'true');
+      setLoadingProgress10(100);
+      return;
+    }
 
-  setLoadingProgress10(0);
-  let progressInterval;
+    setLoadingProgress10(0);
+    let progressInterval;
 
-  const upsertProgress10 = async (progress, userId, result = null) => {
-    const { error } = await supabase
-      .from('results2')
-      .upsert({
+    const upsertProgress10 = async (progress, userId, result = null) => {
+      const progressPercentage = progress;
+      
+      // Create the base payload
+      const payload = {
         user_id: userId,
-        line: lineNo,
-        binary_data: binaryInput10,
+        line: 10,
         scheduled_time: debouncedScheduledTime10,
         result: result,
         file_name: fileName10,
         upload_time: uploadTime10,
-        progress: progress,
+        progress: progressPercentage,
         updated_at: new Date().toISOString()
-      });
-    if (error) {
-      console.error('Error storing progress in Supabase:', error);
-    }
-  };
+      };
 
-  const startProcess = async () => {
-    const userId = await fetchUserId();
-    if (!userId) {
-      
-      return;
-    }
+      // Only send binary_data once
+      if (!binaryDataSent10) {
+        payload.binary_data = binaryInput10;
+        binaryDataSent10 = true; // Mark as sent
+      }
 
-    await upsertProgress10(0, userId);
-
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
-            setLoadingProgress10(prev => (percent > prev ? percent : prev));
-            await upsertProgress10(percent, userId);
-          } catch (err) {
-            console.warn("Progress fetch error:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
-          binary_data: binaryInput10,
-          scheduled_time: debouncedScheduledTime10,
-          job_id: currentJobId,
-          line: lineNo,
-        });
-
-        clearInterval(progressInterval);
-        setLoadingProgress10(100);
-        setResult10(response.data);
-        localStorage.setItem('resultFetchedFromSupabase90b10', 'true');
-        await upsertProgress10(100, userId, response.data.final_result);
-      } catch (error) {
-        
-        clearInterval(progressInterval);
-        setLoadingProgress10(0);
-        await upsertProgress10(0, userId);
-        alert(`Error: ${error.message}`);
+      const { error } = await supabase
+        .from('results2')
+        .upsert(payload);
+     
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
       }
     };
 
-    fetchResult();
-  };
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
 
-  startProcess();
+        return;
+      }
 
-  return () => {
-    if (progressInterval) clearInterval(progressInterval);
-  };
-}, [binaryInput10, debouncedScheduledTime10]);
+      await upsertProgress10(0, userId);
+
+      const fetchResult = async () => {
+        try {
+          progressInterval = setInterval(async () => {
+            try {
+              const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+              setShowRedButton10(false);
+              const completed = progressRes.data.progress || 0;
+              const percent = Math.round((completed / 15) * 100);
+              setLoadingProgress10(prev => (percent > prev ? percent : prev));
+              await upsertProgress10(percent, userId);
+            } catch (err) {
+              console.warn("Progress fetch error:", err);
+            }
+          }, 1000);
+
+          const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+            binary_data: binaryInput10,
+            scheduled_time: debouncedScheduledTime10,
+            job_id: currentJobId,
+            line: lineNo,
+            user_id: userId,
+            file_name: fileName10
+          });
+          setShowRedButton10(false);
+          clearInterval(progressInterval);
+          setLoadingProgress10(100);
+          setResult10(response.data);
+          localStorage.setItem('resultFetchedFromSupabase90b10', 'true');
+          await upsertProgress10(100, userId, response.data.final_result);
+        } catch (error) {
+
+          clearInterval(progressInterval);
+          setLoadingProgress10(0);
+          await upsertProgress10(0, userId);
+          alert(`Error: ${error.message}`);
+        }
+      };
+
+      fetchResult();
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [binaryInput10, debouncedScheduledTime10]);
 
 
   const handleButtonClick = (type) => {
@@ -2271,6 +2820,7 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
+          console.log("completed", completed);
           const percent = Math.round((completed / 15) * 100);
 
           setLoadingProgressRep((prev) => (percent > prev ? percent : prev)); // Prevent regress
@@ -2295,7 +2845,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-         alert(`Error: ${error}`);
+          alert(`Error: ${error}`);
           clearInterval(progressInterval);
           setLoadingProgressRep(0);
         });
@@ -2311,10 +2861,11 @@ useEffect(() => {
           );
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 7) * 100);
+          console.log("completed", completed);
+          const percent = Math.round((completed / 15) * 100);
           setLoadingProgressGr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-         
+
         }
       }, 1000);
 
@@ -2334,7 +2885,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-          
+
           clearInterval(progressInterval);
           setLoadingProgressGr(0);
         });
@@ -2397,7 +2948,7 @@ useEffect(() => {
           const percent = Math.round((completed / 7) * 100);
           setLoadingProgress2Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-        
+
         }
       }, 1000);
 
@@ -2417,7 +2968,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-         
+
           clearInterval(progressInterval);
           setLoadingProgress2Gr(0);
         });
@@ -2480,7 +3031,7 @@ useEffect(() => {
           const percent = Math.round((completed / 7) * 100);
           setLoadingProgress3Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-         
+
         }
       }, 1000);
 
@@ -2500,7 +3051,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-        
+
           clearInterval(progressInterval);
           setLoadingProgress3Gr(0);
         });
@@ -2563,7 +3114,7 @@ useEffect(() => {
           const percent = Math.round((completed / 7) * 100);
           setLoadingProgress4Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-         
+
         }
       }, 1000);
 
@@ -2583,7 +3134,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-        
+
           clearInterval(progressInterval);
           setLoadingProgress4Gr(0);
         });
@@ -2646,7 +3197,7 @@ useEffect(() => {
           const percent = Math.round((completed / 7) * 100);
           setLoadingProgress5Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-         
+
         }
       }, 1000);
 
@@ -2666,7 +3217,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-         
+
           clearInterval(progressInterval);
           setLoadingProgress5Gr(0);
         });
@@ -2729,7 +3280,7 @@ useEffect(() => {
           const percent = Math.round((completed / 7) * 100);
           setLoadingProgress6Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-         
+
         }
       }, 1000);
 
@@ -2749,7 +3300,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-         
+
           clearInterval(progressInterval);
           setLoadingProgress6Gr(0);
         });
@@ -2812,7 +3363,7 @@ useEffect(() => {
           const percent = Math.round((completed / 7) * 100);
           setLoadingProgress7Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-        
+
         }
       }, 1000);
 
@@ -2832,7 +3383,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-      
+
           clearInterval(progressInterval);
           setLoadingProgress7Gr(0);
         });
@@ -2895,7 +3446,7 @@ useEffect(() => {
           const percent = Math.round((completed / 7) * 100);
           setLoadingProgress8Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-        
+
         }
       }, 1000);
 
@@ -2915,7 +3466,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-       
+
           clearInterval(progressInterval);
           setLoadingProgress8Gr(0);
         });
@@ -2978,7 +3529,7 @@ useEffect(() => {
           const percent = Math.round((completed / 7) * 100);
           setLoadingProgress9Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-         
+
         }
       }, 1000);
 
@@ -2998,7 +3549,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-       
+
           clearInterval(progressInterval);
           setLoadingProgress9Gr(0);
         });
@@ -3061,7 +3612,7 @@ useEffect(() => {
           const percent = Math.round((completed / 7) * 100);
           setLoadingProgress10Gr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-          
+
         }
       }, 1000);
 
@@ -3081,7 +3632,7 @@ useEffect(() => {
           window.open(url, "_blank");
         })
         .catch((error) => {
-        
+
           clearInterval(progressInterval);
           setLoadingProgress10Gr(0);
         });
@@ -3145,17 +3696,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -3336,7 +3900,7 @@ useEffect(() => {
                         </Box>
                       )}
                     </Box>
-                    
+
                   </Box>
                 </Box>
               </td>
@@ -3457,17 +4021,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload2}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton2 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -3767,17 +4344,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload3}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton3 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -4076,17 +4666,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload4}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton4 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -4386,17 +4989,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload5}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton5 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -4697,17 +5313,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload6}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton6 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5007,17 +5636,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload7}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton7 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5317,17 +5959,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload8}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton8 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5627,17 +6282,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload9}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton9 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5936,17 +6604,30 @@ useEffect(() => {
                       variant="contained"
                       onClick={handleFileUpload10}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton10 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"

@@ -4,6 +4,7 @@
 #include "./shared/TestCase.h"
 #include <assert.h>
 #include <unistd.h>
+#include <fstream>
 
 // The tests used
 const unsigned int num_tests = 19;
@@ -620,27 +621,34 @@ bool permutation_tests(const data_t *dp, const double rawmean, const double medi
     }
     return true;
 }
-
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        cerr << "Usage: " << argv[0] << " <binary_string>" << endl;
-        return 1;
+        cerr << "Usage: " << argv[0] << " <file_path>\n";
+        return 0;  // return 0 on any error
     }
 
-    string binary_input = argv[1];
-    size_t len = binary_input.length();
+    ifstream infile(argv[1]);
+    if (!infile) {
+        cerr << "Error opening file\n";
+        return 0;  // return 0 on any error
+    }
 
-    // Validate input
+    string binary_input;
+    infile >> binary_input;
+    infile.close();
+
+    // Validate input: only '0' and '1'
     for (char c : binary_input) {
         if (c != '0' && c != '1') {
-            cerr << "Invalid binary string. Only 0 and 1 allowed." << endl;
-            return 1;
+            cerr << "Invalid binary string. Only 0 and 1 allowed.\n";
+            return 0;  // return 0 on any error
         }
     }
 
-    if (len < 16) {  // Assuming p = 16 is used in periodicity()
-        cerr << "Error: Input length must be at least 16 bits." << endl;
-        return 1;
+    size_t len = binary_input.length();
+    if (len < 16) {  // minimum length check
+        cerr << "Error: Input length must be at least 16 bits.\n";
+        return 0;  // return 0 on any error
     }
 
     // Initialize data structure
@@ -667,14 +675,14 @@ int main(int argc, char* argv[]) {
     calc_stats(&data, rawmean, median);
 
     IidTestCase tc;
-    bool result = permutation_tests(&data, rawmean, median, /*p=*/min(16, static_cast<int>(len)), tc);
+    bool result = permutation_tests(&data, rawmean, median, min(16, static_cast<int>(len)), tc);
 
     // Cleanup
     delete[] data.symbols;
     delete[] data.rawsymbols;
     delete[] data.bsymbols;
 
-    cout<<result<<endl;
-    // cout << (result ? "Passed" : "Failed ") << endl;
+    cout << result << endl;
+
     return result ? 1 : 0;
 }

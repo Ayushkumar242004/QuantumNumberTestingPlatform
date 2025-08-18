@@ -8,6 +8,38 @@
 
 
 
+#include <gsl/gsl_sf_gamma.h>
+
+#define MAX_BITS 120000000  // 25 million bits (for 24MB binary file)
+#define P_THRESHOLD 0.01
+
+
+double chi_square_uniformity(double *p_values, int num_streams, int bins) {
+    int *counts = (int *)calloc(bins, sizeof(int));
+    if (counts == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        int bin = (int)(p_values[i] * bins);
+        if (bin == bins) bin = bins - 1;
+        counts[bin]++;
+    }
+
+    double expected = (double)num_streams / bins;
+    double chi_square = 0.0;
+
+    for (int i = 0; i < bins; i++) {
+        double diff = counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    free(counts);
+    double p_uniform = gsl_sf_gamma_inc_Q((bins - 1) / 2.0, chi_square / 2.0);
+    return p_uniform;
+}
+
 unsigned char *epsilon;
 
 static const double	rel_error = 1E-12;
@@ -337,127 +369,172 @@ cephes_normal(double x)
 	return( result);
 }
 
-void RandomExcursions(int n)
+double RandomExcursions(int n, unsigned char *epsilon)
 {
-	int		b, i, j, k, J, x;
-	int		cycleStart, cycleStop, *cycle = NULL, *S_k = NULL;
-	int		stateX[8] = { -4, -3, -2, -1, 1, 2, 3, 4 };
-	int		counter[8] = { 0 };
-	double	p_value, sum, constraint, nu[6][8];
-	double	pi[5][6] = {
-		{0, 0, 0, 0, 0, 0},
-		{0.5, 0.25, 0.125, 0.0625, 0.03125, 0.03125},
-		{0.75, 0.0625, 0.046875, 0.03515625, 0.0263671875, 0.0791015625},
-		{0.8333333333, 0.02777777778, 0.02314814815, 0.01929012346, 0.01607510288, 0.0803755143},
-		{0.875, 0.015625, 0.013671875, 0.01196289063, 0.0104675293, 0.0732727051}
-	};
+    int b, i, j, k, J, x;
+    int cycleStart, cycleStop, *cycle = NULL, *S_k = NULL;
+    int stateX[8] = { -4, -3, -2, -1, 1, 2, 3, 4 };
+    int counter[8] = { 0 };
+    double p_value, sum, constraint, nu[6][8];
+    double pi[5][6] = {
+        {0, 0, 0, 0, 0, 0},
+        {0.5, 0.25, 0.125, 0.0625, 0.03125, 0.03125},
+        {0.75, 0.0625, 0.046875, 0.03515625, 0.0263671875, 0.0791015625},
+        {0.8333333333, 0.02777777778, 0.02314814815, 0.01929012346, 0.01607510288, 0.0803755143},
+        {0.875, 0.015625, 0.013671875, 0.01196289063, 0.0104675293, 0.0732727051}
+    };
 
-	if (((S_k = (int *)calloc(n, sizeof(int))) == NULL) ||
-		((cycle = (int *)calloc(MAX(1000, n/100), sizeof(int))) == NULL)) {
-		if (S_k) free(S_k);
-		if (cycle) free(cycle);
-		return;
-	}
+    if (((S_k = (int *)calloc(n, sizeof(int))) == NULL) ||
+        ((cycle = (int *)calloc(MAX(1000, n/100), sizeof(int))) == NULL)) {
+        if (S_k) free(S_k);
+        if (cycle) free(cycle);
+        return 0.0;
+    }
 
-	J = 0;
-	S_k[0] = 2 * (int)epsilon[0] - 1;
-	for (i = 1; i < n; i++) {
-		S_k[i] = S_k[i-1] + 2 * epsilon[i] - 1;
-		if (S_k[i] == 0) {
-			J++;
-			if (J > MAX(1000, n/100)) {
-				free(S_k);
-				free(cycle);
-				return;
-			}
-			cycle[J] = i;
-		}
-	}
-	if (S_k[n-1] != 0)
-		J++;
-	cycle[J] = n;
+    J = 0;
+    S_k[0] = 2 * (int)epsilon[0] - 1;
+    for (i = 1; i < n; i++) {
+        S_k[i] = S_k[i-1] + 2 * epsilon[i] - 1;
+        if (S_k[i] == 0) {
+            J++;
+            if (J > MAX(1000, n/100)) {
+                free(S_k);
+                free(cycle);
+                return 0.0;
+            }
+            cycle[J] = i;
+        }
+    }
+    if (S_k[n-1] != 0)
+        J++;
+    cycle[J] = n;
 
-	constraint = MAX(0.005 * pow(n, 0.5), 500);
-	if (J < constraint) {
-		free(S_k);
-		free(cycle);
-		printf("%f\n", 0.0); // fallback value
-		return;
-	}
+    constraint = MAX(0.005 * pow(n, 0.5), 500);
+    if (J < constraint) {
+        free(S_k);
+        free(cycle);
+        return 0.0;
+    }
 
-	cycleStart = 0;
-	cycleStop = cycle[1];
-	for (k = 0; k < 6; k++)
-		for (i = 0; i < 8; i++)
-			nu[k][i] = 0.;
+    cycleStart = 0;
+    cycleStop = cycle[1];
+    for (k = 0; k < 6; k++)
+        for (i = 0; i < 8; i++)
+            nu[k][i] = 0.0;
 
-	for (j = 1; j <= J; j++) {
-		for (i = 0; i < 8; i++)
-			counter[i] = 0;
-		for (i = cycleStart; i < cycleStop; i++) {
-			if ((S_k[i] >= 1 && S_k[i] <= 4) || (S_k[i] >= -4 && S_k[i] <= -1)) {
-				b = (S_k[i] < 0) ? 4 : 3;
-				counter[S_k[i] + b]++;
-			}
-		}
-		cycleStart = cycle[j] + 1;
-		if (j < J)
-			cycleStop = cycle[j+1];
+    for (j = 1; j <= J; j++) {
+        for (i = 0; i < 8; i++)
+            counter[i] = 0;
+        for (i = cycleStart; i < cycleStop; i++) {
+            if ((S_k[i] >= 1 && S_k[i] <= 4) || (S_k[i] >= -4 && S_k[i] <= -1)) {
+                b = (S_k[i] < 0) ? 4 : 3;
+                counter[S_k[i] + b]++;
+            }
+        }
+        cycleStart = cycle[j] + 1;
+        if (j < J)
+            cycleStop = cycle[j+1];
 
-		for (i = 0; i < 8; i++) {
-			if (counter[i] >= 0 && counter[i] <= 4)
-				nu[counter[i]][i]++;
-			else if (counter[i] >= 5)
-				nu[5][i]++;
-		}
-	}
+        for (i = 0; i < 8; i++) {
+            if (counter[i] >= 0 && counter[i] <= 4)
+                nu[counter[i]][i]++;
+            else if (counter[i] >= 5)
+                nu[5][i]++;
+        }
+    }
 
-	double best_p = 0.0;
-	for (i = 0; i < 8; i++) {
-		x = stateX[i];
-		sum = 0.;
-		for (k = 0; k < 6; k++)
-			sum += pow(nu[k][i] - J * pi[(int)fabs(x)][k], 2) / (J * pi[(int)fabs(x)][k]);
-		p_value = cephes_igamc(2.5, sum / 2.0);
-		if (!isNegative(p_value) && !isGreaterThanOne(p_value)) {
-			if (p_value > best_p)
-				best_p = p_value;
-		}
-	}
+    double best_p = 0.0;
+    for (i = 0; i < 8; i++) {
+        x = stateX[i];
+        sum = 0.0;
+        for (k = 0; k < 6; k++)
+            sum += pow(nu[k][i] - J * pi[(int)fabs(x)][k], 2) / (J * pi[(int)fabs(x)][k]);
+        p_value = cephes_igamc(2.5, sum / 2.0);
+        if (!isNegative(p_value) && !isGreaterThanOne(p_value)) {
+            if (p_value > best_p)
+                best_p = p_value;
+        }
+    }
 
-	printf("%f\n", best_p);
-	free(S_k);
-	free(cycle);
+    free(S_k);
+    free(cycle);
+    return best_p;
 }
+
 // Add this at the end of random_excursion.c
-
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <n> <bit_stream...>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <stream_length> <binary_file>\n", argv[0]);
         return 1;
     }
 
-    int n = atoi(argv[1]);
-    epsilon = (unsigned char *)malloc(n * sizeof(unsigned char));
-    if (epsilon == NULL) {
-        fprintf(stderr, "Memory allocation failed.\n");
+    int n = atoi(argv[1]);  // Length of each bitstream
+    char *filename = argv[2];
+
+    if (n <= 0) {
+        fprintf(stderr, "Invalid stream length: must be > 0\n");
         return 1;
     }
-    FILE *fp = fopen(argv[2], "r");
+
+    FILE *fp = fopen(filename, "r");
     if (!fp) {
         fprintf(stderr, "Failed to open input file.\n");
-        free(epsilon);
         return 1;
     }
-    for (int i = 0; i < n; i++) {
-          int temp;
-fscanf(fp, "%d", &temp);
-epsilon[i] = (unsigned char)temp;
+
+    unsigned char *epsilon = (unsigned char *)malloc(MAX_BITS * sizeof(unsigned char));
+    if (!epsilon) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        fclose(fp);
+        return 1;
+    }
+
+    int bit, total_bits = 0;
+    while (fscanf(fp, "%1d", &bit) == 1 && total_bits < MAX_BITS) {
+        if (bit != 0 && bit != 1) {
+            fprintf(stderr, "Invalid bit in input file.\n");
+            free(epsilon);
+            fclose(fp);
+            return 1;
+        }
+        epsilon[total_bits++] = (unsigned char)bit;
     }
     fclose(fp);
 
-    RandomExcursions(n);
+    if (total_bits < n) {
+        fprintf(stderr, "Not enough bits for one complete bitstream.\n");
+        free(epsilon);
+        return 1;
+    }
 
+    int num_streams = total_bits / n;
+    double *p_values = (double *)malloc(num_streams * sizeof(double));
+    if (!p_values) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        free(epsilon);
+        return 1;
+    }
+
+    int pass_count = 0;
+    for (int i = 0; i < num_streams; i++) {
+        double p = RandomExcursions(n, &epsilon[i * n]);  // Assuming RandomExcursions returns a p-value
+        p_values[i] = p;
+        if (p >= P_THRESHOLD) {
+            pass_count++;
+        }
+    }
+
+    double proportion = (double)pass_count / num_streams;
+    int proportion_pass = proportion >= 0.96;
+
+    double chi_p = chi_square_uniformity(p_values, num_streams, 10);
+    int uniformity_pass = chi_p >= P_THRESHOLD;
+
+    int final_pass = (proportion_pass && uniformity_pass) ? 1 : 0;
+
+    printf("%.6f %d\n", chi_p, final_pass);
+
+    free(p_values);
     free(epsilon);
     return 0;
 }

@@ -257,13 +257,13 @@ const Qrng_Server = () => {
   }, []);
 
   const fetchRandomNumber = async () => {
-
+    console.log("1");
     // Default values for internal variables
     const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
     const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
     const Rand_type = 1; // Request binary data
     const Length = length || 8; // If length is not provided, use the passed value or default to 64
-
+    console.log("2");
     try {
       const response = await axios.post("http://localhost:3003/proxy", {
         API_Key,
@@ -271,10 +271,12 @@ const Qrng_Server = () => {
         Rand_type,
         Length,
       });
-
+      console.log("response",response);
       if (response.data?.random) {
-        setBinaryInput(response.data.random); // Update the state with random binary data
-        console.log("binary input", binaryInput);
+        const randomValue = response.data.random; // extract random binary
+      setBinaryInput(randomValue);
+      console.log("binary input (from API):", randomValue);
+
       } else {
         console.error("Error in connection:", response.data);
       }
@@ -282,6 +284,7 @@ const Qrng_Server = () => {
       alert("Error: server down");
       setBinaryInput(""); // Optionally handle the error state
     }
+    console.log("3");
   };
 
   const fetchRandomNumber2 = async () => {

@@ -7,7 +7,42 @@
 
 typedef unsigned char BitSequence;
 
-double psi2(int m, int n);
+#define P_THRESHOLD 0.01
+
+#include <gsl/gsl_sf_gamma.h>
+
+#define MAX_BITS 120000000  // 25 million bits (for 24MB binary file)
+
+
+
+double chi_square_uniformity(double *p_values, int num_streams, int bins) {
+    int *counts = (int *)calloc(bins, sizeof(int));
+    if (counts == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        int bin = (int)(p_values[i] * bins);
+        if (bin == bins) bin = bins - 1;
+        counts[bin]++;
+    }
+
+    double expected = (double)num_streams / bins;
+    double chi_square = 0.0;
+
+    for (int i = 0; i < bins; i++) {
+        double diff = counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    free(counts);
+    double p_uniform = gsl_sf_gamma_inc_Q((bins - 1) / 2.0, chi_square / 2.0);
+    return p_uniform;
+}
+
+
+double psi2(int m, int n, unsigned char *epsilon);
 
 // Global epsilon array
 BitSequence *epsilon;
@@ -368,97 +403,153 @@ void BlockFrequency(int M, int n, int epsilon[])
     printf("%f\n", p_value);
 }
 
-
-void Serial(int m, int n)
+void Serial(int m, int n, unsigned char *epsilon, double *p_value1, double *p_value2)
 {
-	double p_value1, p_value2, psim0, psim1, psim2, del1, del2;
-	
-	psim0 = psi2(m, n);
-	psim1 = psi2(m - 1, n);
-	psim2 = psi2(m - 2, n);
-	del1 = psim0 - psim1;
-	del2 = psim0 - 2.0 * psim1 + psim2;
+    double psim0, psim1, psim2, del1, del2;
 
-	p_value1 = cephes_igamc(pow(2, m - 1) / 2.0, del1 / 2.0);
-	p_value2 = cephes_igamc(pow(2, m - 2) / 2.0, del2 / 2.0);
+    // Calculate psi2 for the given m and n using epsilon
+    // Note: You will need to implement psi2 to use epsilon bitstream
+    psim0 = psi2(m, n, epsilon);
+    psim1 = psi2(m - 1, n, epsilon);
+    psim2 = psi2(m - 2, n, epsilon);
 
-	// ✅ Only print p-values
-	printf("%f\n", p_value1);
+    del1 = psim0 - psim1;
+    del2 = psim0 - 2.0 * psim1 + psim2;
+
+    *p_value1 = cephes_igamc(pow(2, m - 1) / 2.0, del1 / 2.0);
+    *p_value2 = cephes_igamc(pow(2, m - 2) / 2.0, del2 / 2.0);
 }
 
-double psi2(int m, int n)
+double psi2(int m, int n, unsigned char *epsilon)
 {
-	int i, j, k, powLen;
-	double sum, numOfBlocks;
-	unsigned int *P;
+    int i, j, k, powLen;
+    double sum, numOfBlocks;
+    unsigned int *P;
 
-	if ((m == 0) || (m == -1))
-		return 0.0;
+    if ((m == 0) || (m == -1))
+        return 0.0;
 
-	numOfBlocks = n - m + 1;
-	if (numOfBlocks <= 0)
-    return 0.0;
+    numOfBlocks = n - m + 1;
+    if (numOfBlocks <= 0)
+        return 0.0;
 
-	powLen = (int)pow(2, m + 1) - 1;
+    powLen = (int)pow(2, m + 1) - 1;
 
-	P = (unsigned int *)calloc(powLen, sizeof(unsigned int));
-	if (P == NULL)
-		return 0.0;
+    P = (unsigned int *)calloc(powLen, sizeof(unsigned int));
+    if (P == NULL)
+        return 0.0;
 
-	for (i = 1; i < powLen - 1; i++)
-		P[i] = 0;
+    // Initialize counts to zero (calloc already zeros memory)
+    // for (i = 1; i < powLen - 1; i++)
+    //     P[i] = 0;   // not necessary due to calloc
 
-	for (i = 0; i < numOfBlocks; i++) {
-		k = 1;
-		for (j = 0; j < m; j++) {
-			if (epsilon[(i + j) % n] == 0)
-				k *= 2;
-			else
-				k = 2 * k + 1;
-		}
-		P[k - 1]++;
-	}
+    for (i = 0; i < numOfBlocks; i++) {
+        k = 1;
+        for (j = 0; j < m; j++) {
+            if (epsilon[(i + j) % n] == 0)
+                k *= 2;
+            else
+                k = 2 * k + 1;
+        }
+        P[k - 1]++;
+    }
 
-	sum = 0.0;
-	for (i = (int)pow(2, m) - 1; i < (int)pow(2, m + 1) - 1; i++)
-		sum += pow(P[i], 2);
+    sum = 0.0;
+    for (i = (int)pow(2, m) - 1; i < (int)pow(2, m + 1) - 1; i++)
+        sum += pow(P[i], 2);
 
-	sum = (sum * pow(2, m) / (double)n) - (double)n;
+    sum = (sum * pow(2, m) / (double)n) - (double)n;
 
-	free(P);
-	return sum;
+    free(P);
+    return sum;
 }
 
-int main(int argc, char *argv[])
-{
-	if (argc < 3) {
-		fprintf(stderr, "Usage: %s <block_size> <bit_stream...>\n", argv[0]);
-		return 1;
-	}
 
-	int m = atoi(argv[1]);
-	int n = argc - 2;
+int main(int argc, char *argv[]) {
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <stream_length> <binary_file>\n", argv[0]);
+        return 1;
+    }
 
-	epsilon = (BitSequence *)malloc(n * sizeof(BitSequence));
-	if (epsilon == NULL) {
-		fprintf(stderr, "Memory allocation failed.\n");
-		return 1;
-	}
+    int n = atoi(argv[1]);  // length of each bitstream
+    if (n <= 0) {
+        fprintf(stderr, "Invalid stream length: must be > 0\n");
+        return 1;
+    }
 
-	FILE *fp = fopen(argv[2], "r");
+    char *filename = argv[2];
+    FILE *fp = fopen(filename, "r");
     if (!fp) {
         fprintf(stderr, "Failed to open input file.\n");
+        return 1;
+    }
+
+    unsigned char *epsilon = (unsigned char *)malloc(MAX_BITS * sizeof(unsigned char));
+    if (!epsilon) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        fclose(fp);
+        return 1;
+    }
+
+    int bit, total_bits = 0;
+    while (fscanf(fp, "%1d", &bit) == 1 && total_bits < MAX_BITS) {
+        if (bit != 0 && bit != 1) {
+            fprintf(stderr, "Invalid bit in input file.\n");
+            free(epsilon);
+            fclose(fp);
+            return 1;
+        }
+        epsilon[total_bits++] = (unsigned char)bit;
+    }
+    fclose(fp);
+
+    if (total_bits < n) {
+        fprintf(stderr, "Not enough bits for one complete bitstream.\n");
         free(epsilon);
         return 1;
     }
-    for (int i = 0; i < n; i++) {
-        int temp;
-fscanf(fp, "%d", &temp);
-epsilon[i] = (unsigned char)temp;
+
+    int num_streams = total_bits / n;
+    double *p_values1 = (double *)malloc(num_streams * sizeof(double));
+    double *p_values2 = (double *)malloc(num_streams * sizeof(double));
+    if (!p_values1 || !p_values2) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        free(epsilon);
+        free(p_values1);
+        free(p_values2);
+        return 1;
     }
-    fclose(fp);
-	
-	Serial(m, n);
-	free(epsilon);
-	return 0;
+
+    int pass_count1 = 0, pass_count2 = 0;
+    for (int i = 0; i < num_streams; i++) {
+        double p1 = 0.0, p2 = 0.0;
+        Serial(atoi(argv[1]), n, &epsilon[i * n], &p1, &p2);
+        p_values1[i] = p1;
+        p_values2[i] = p2;
+        if (p1 >= P_THRESHOLD) pass_count1++;
+        if (p2 >= P_THRESHOLD) pass_count2++;
+    }
+
+    double proportion1 = (double)pass_count1 / num_streams;
+    double proportion2 = (double)pass_count2 / num_streams;
+    int proportion_pass1 = proportion1 >= 0.96;
+    int proportion_pass2 = proportion2 >= 0.96;
+
+    double chi_p1 = chi_square_uniformity(p_values1, num_streams, 10);
+    double chi_p2 = chi_square_uniformity(p_values2, num_streams, 10);
+    int uniformity_pass1 = chi_p1 >= P_THRESHOLD;
+    int uniformity_pass2 = chi_p2 >= P_THRESHOLD;
+
+    int final_pass = (proportion_pass1 && uniformity_pass1 && proportion_pass2 && uniformity_pass2) ? 1 : 0;
+
+    // Final p_value: take minimum p-value from both tests for conservative estimate
+    double final_p_value = (chi_p1 < chi_p2) ? chi_p1 : chi_p2;
+
+    printf("%.6f %d\n", final_p_value, final_pass);
+
+    free(p_values1);
+    free(p_values2);
+    free(epsilon);
+
+    return 0;
 }

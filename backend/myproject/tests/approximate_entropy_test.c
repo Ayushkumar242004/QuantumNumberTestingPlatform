@@ -3,8 +3,39 @@
 #include <stdlib.h>
 #include "./externs.h"
 #include "./cephes.h"
+#include <gsl/gsl_sf_gamma.h>
 
-void ApproximateEntropy(int m, int n, int *epsilon) {
+#define MAX_BITS 120000000  // 25 million bits (for 24MB binary file)
+#define P_THRESHOLD 0.01
+
+
+double chi_square_uniformity(double *p_values, int num_streams, int bins) {
+    int *counts = (int *)calloc(bins, sizeof(int));
+    if (counts == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        int bin = (int)(p_values[i] * bins);
+        if (bin == bins) bin = bins - 1;
+        counts[bin]++;
+    }
+
+    double expected = (double)num_streams / bins;
+    double chi_square = 0.0;
+
+    for (int i = 0; i < bins; i++) {
+        double diff = counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    free(counts);
+    double p_uniform = gsl_sf_gamma_inc_Q((bins - 1) / 2.0, chi_square / 2.0);
+    return p_uniform;
+}
+
+double ApproximateEntropy(int m, int n, int *epsilon) {
     int i, j, k, r, blockSize, seqLength, powLen, index;
     double sum, numOfBlocks, ApEn[2], apen, chi_squared, p_value;
     unsigned int *P;
@@ -22,7 +53,7 @@ void ApproximateEntropy(int m, int n, int *epsilon) {
             P = (unsigned int *)calloc(powLen, sizeof(unsigned int));
             if (P == NULL) {
                 fprintf(stderr, "ApEn: Insufficient memory available.\n");
-                return;
+                return 0;
             }
 
             for (i = 0; i < numOfBlocks; i++) {
@@ -52,7 +83,7 @@ void ApproximateEntropy(int m, int n, int *epsilon) {
     apen = ApEn[0] - ApEn[1];
     chi_squared = 2.0 * seqLength * (log(2) - apen);
     p_value = cephes_igamc(pow(2, m - 1), chi_squared / 2.0);
-    printf("%f\n", p_value); // print only p-value
+    return p_value;
 }
 
 #include <stdio.h>
@@ -393,36 +424,68 @@ cephes_normal(double x)
 
 #define ALPHA 0.01
 
-void ApproximateEntropy(int m, int n, int *epsilon); // forward declaration
-
+double ApproximateEntropy(int m, int n, int *epsilon); // forward declaration
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <n> <bit1> <bit2> ...>\n", argv[0]);
-        return 1;
-    }
-    int n = atoi(argv[1]);
-    int *epsilon = (int *)malloc(n * sizeof(int));  // Make sure epsilon is declared as int *
-    if (epsilon == NULL) {
-        fprintf(stderr, "Memory allocation failed.\n");
-        return 1;
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <stream_length> <binary_file>\n", argv[0]);
+        return 0;
     }
 
-    FILE *fp = fopen(argv[2], "r");
+    int n = atoi(argv[1]);      // length of each bitstream
+    int m = 2;                  // fixed block length for Approximate Entropy
+    char *filename = argv[2];   // binary file path
+
+    FILE *fp = fopen(filename, "r");
     if (!fp) {
-        fprintf(stderr, "Failed to open input file.\n");
-        free(epsilon);
-        return 1;
+        perror("File open error");
+        return 0;
     }
-    for (int i = 0; i < n; i++) {
-        fscanf(fp, "%d", &epsilon[i]);
+
+    int *epsilon = (int *)malloc(MAX_BITS * sizeof(int));
+    if (!epsilon) {
+        fprintf(stderr, "Memory allocation error.\n");
+        fclose(fp);
+        return 0;
+    }
+
+    int bit, total_bits = 0;
+    while (fscanf(fp, "%1d", &bit) == 1 && total_bits < MAX_BITS) {
+        epsilon[total_bits++] = bit;
     }
     fclose(fp);
 
-    int m = 2; // Block length for approximate entropy
-    ApproximateEntropy(m, n, epsilon);
+    if (total_bits < n) {
+        fprintf(stderr, "Not enough bits for one complete bitstream.\n");
+        free(epsilon);
+        return 1;
+    }
 
+    int num_streams = total_bits / n;
+    double *p_values = (double *)malloc(num_streams * sizeof(double));
+    if (!p_values) {
+        fprintf(stderr, "Memory allocation error.\n");
+        free(epsilon);
+        return 0;
+    }
+
+    int pass_count = 0;
+    for (int i = 0; i < num_streams; i++) {
+        double p = ApproximateEntropy(m, n, &epsilon[i * n]);
+        p_values[i] = p;
+        if (p >= P_THRESHOLD) pass_count++;
+    }
+
+    double proportion = (double)pass_count / num_streams;
+    int proportion_pass = proportion >= 0.96;
+
+    double chi_p = chi_square_uniformity(p_values, num_streams, 10);
+    int uniformity_pass = chi_p >= P_THRESHOLD;
+
+    int final_pass = (proportion_pass && uniformity_pass) ? 1 : 0;
+
+    printf("%.6f %d\n", chi_p, final_pass);
+
+    free(p_values);
     free(epsilon);
     return 0;
 }
-
-

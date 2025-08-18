@@ -4,19 +4,51 @@
 #include <string.h>
 #include "cephes.h"
 
+#include <gsl/gsl_sf_gamma.h>
+
+#define MAX_BITS 120000000  // 25 million bits (for 24MB binary file)
+#define P_THRESHOLD 0.01
+
+
+double chi_square_uniformity(double *p_values, int num_streams, int bins) {
+    int *counts = (int *)calloc(bins, sizeof(int));
+    if (counts == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        int bin = (int)(p_values[i] * bins);
+        if (bin == bins) bin = bins - 1;
+        counts[bin]++;
+    }
+
+    double expected = (double)num_streams / bins;
+    double chi_square = 0.0;
+
+    for (int i = 0; i < bins; i++) {
+        double diff = counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    free(counts);
+    double p_uniform = gsl_sf_gamma_inc_Q((bins - 1) / 2.0, chi_square / 2.0);
+    return p_uniform;
+}
+
 #define MAXNUMOFTEMPLATES 148
 
 int *epsilon;  // Global for simplicity like in NIST
 double ALPHA = 0.01;
 
-double NonOverlappingTemplateMatchings(int m, int n) {
+double NonOverlappingTemplateMatchings(int m, int n, int *epsilon) {
     int numOfTemplates[100] = {0, 0, 2, 4, 6, 12, 20, 40, 74, 148, 284, 568, 1116,
                                2232, 4424, 8848, 17622, 35244, 70340, 140680, 281076, 562152};
 
     unsigned int bit, W_obs, *Wj = NULL;
     FILE *fp = NULL;
     double sum, chi2, p_value, lambda, pi[6], varWj;
-    int i, j, jj, k, match, SKIP, M, N, K = 5;
+    int i, j, k, match, SKIP, M, N, K = 5;
     char directory[100];
     int *sequence = NULL;
 
@@ -37,54 +69,60 @@ double NonOverlappingTemplateMatchings(int m, int n) {
     }
 
     SKIP = 1;
-    numOfTemplates[m] = (int)numOfTemplates[m] / SKIP;
+    // numOfTemplates[m] = numOfTemplates[m] / SKIP; // Not used anywhere so can omit
 
-    for (i = 0, sum = 0.0; i < 2; i++) {
+    // Fix probability distribution pi initialization:
+    sum = 0.0;
+    for (i = 0; i < K; i++) {
         pi[i] = exp(-lambda + i * log(lambda) - cephes_lgam(i + 1));
         sum += pi[i];
     }
-    pi[0] = sum;
-    for (i = 2; i <= K; i++) {
-        pi[i - 1] = exp(-lambda + i * log(lambda) - cephes_lgam(i + 1));
-        sum += pi[i - 1];
-    }
-    pi[K] = 1 - sum;
+    pi[K] = 1.0 - sum;
 
-    // Only one template (first one)
+    // Read the template bits
     for (k = 0; k < m; k++) {
-        fscanf(fp, "%d", &bit);
+        if (fscanf(fp, "%d", &bit) != 1) {
+            fprintf(stderr, "Error reading template bits.\n");
+            free(sequence);
+            free(Wj);
+            fclose(fp);
+            return -1;
+        }
         sequence[k] = bit;
     }
+
+    fclose(fp);
 
     for (i = 0; i < N; i++) {
         W_obs = 0;
         for (j = 0; j < M - m + 1; j++) {
             match = 1;
             for (k = 0; k < m; k++) {
-                if ((int)sequence[k] != (int)epsilon[i * M + j + k]) {
+                if (sequence[k] != epsilon[i * M + j + k]) {
                     match = 0;
                     break;
                 }
             }
             if (match == 1) {
                 W_obs++;
-                j += m - 1;
+                j += m - 1;  // move forward m bits to ensure non-overlapping
             }
         }
         Wj[i] = W_obs;
     }
 
-    for (i = 0, chi2 = 0.0; i < N; i++) {
+    chi2 = 0.0;
+    for (i = 0; i < N; i++) {
         chi2 += pow(((double)Wj[i] - lambda) / sqrt(varWj), 2);
     }
     p_value = cephes_igamc(N / 2.0, chi2 / 2.0);
 
-    if (sequence != NULL) free(sequence);
-    if (Wj != NULL) free(Wj);
-    if (fp != NULL) fclose(fp);
+    free(sequence);
+    free(Wj);
 
     return p_value;
 }
+
 
 #include <stdio.h>
 #include <math.h>
@@ -422,38 +460,80 @@ cephes_normal(double x)
 #include <stdlib.h>
 
 extern int *epsilon;
-extern double NonOverlappingTemplateMatchings(int m, int n);
-
-
+extern double NonOverlappingTemplateMatchings(int m, int n,int *epsilon);
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <n> <bit1> <bit2> ...\n", argv[0]);
-        return 1;
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <stream_length> <binary_file>\n", argv[0]);
+        return 0;
     }
 
-    int n = atoi(argv[1]);
-    epsilon = (int *)malloc(n * sizeof(int));
-    if (epsilon == NULL) {
-        fprintf(stderr, "Memory allocation failed.\n");
-        return 1;
+    int n = atoi(argv[1]);  // Length of each bitstream
+    int m = 9;              // Template length — modify if needed
+    char *filename = argv[2];
+
+    if (n <= 0 || m <= 0) {
+        fprintf(stderr, "Invalid parameters: n and m must be > 0\n");
+        return 0;
     }
 
-    FILE *fp = fopen(argv[2], "r");
+    FILE *fp = fopen(filename, "r");
     if (!fp) {
         fprintf(stderr, "Failed to open input file.\n");
-        free(epsilon);
-        return 1;
+        return 0;
     }
-    for (int i = 0; i < n; i++) {
-        fscanf(fp, "%d", &epsilon[i]);
+
+    int *epsilon = (int *)malloc(MAX_BITS * sizeof(int));
+    if (!epsilon) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        fclose(fp);
+        return 0;
+    }
+
+    int bit, total_bits = 0;
+    while (fscanf(fp, "%1d", &bit) == 1 && total_bits < MAX_BITS) {
+        if (bit != 0 && bit != 1) {
+            fprintf(stderr, "Invalid bit in input file.\n");
+            free(epsilon);
+            fclose(fp);
+            return 0;
+        }
+        epsilon[total_bits++] = bit;
     }
     fclose(fp);
 
-    int m = 9; // template length (modify if needed)
-    double p_value = NonOverlappingTemplateMatchings(m, n);
-    printf("%f\n", p_value);
+    if (total_bits < n) {
+        fprintf(stderr, "Not enough bits for one complete bitstream.\n");
+        free(epsilon);
+        return 0;
+    }
 
+    int num_streams = total_bits / n;
+    double *p_values = (double *)malloc(num_streams * sizeof(double));
+    if (!p_values) {
+        fprintf(stderr, "Memory allocation error.\n");
+        free(epsilon);
+        return 0;
+    }
+
+    int pass_count = 0;
+    for (int i = 0; i < num_streams; i++) {
+        double p = NonOverlappingTemplateMatchings(m, n, &epsilon[i * n]);
+        p_values[i] = p;
+        if (p >= P_THRESHOLD) pass_count++;
+    }
+
+    double proportion = (double)pass_count / num_streams;
+    int proportion_pass = proportion >= 0.96;
+
+    double chi_p = chi_square_uniformity(p_values, num_streams, 10);
+    int uniformity_pass = chi_p >= P_THRESHOLD;
+
+    int final_pass = (proportion_pass && uniformity_pass) ? 1 : 0;
+
+    printf("%.6f %d\n", chi_p, final_pass);
+
+    free(p_values);
     free(epsilon);
     return 0;
 }

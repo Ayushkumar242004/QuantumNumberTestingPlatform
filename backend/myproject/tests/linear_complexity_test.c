@@ -4,7 +4,37 @@
 #include <string.h>
 #include "./externs.h"
 #include "./cephes.h"  
+#include <gsl/gsl_sf_gamma.h>
 
+#define MAX_BITS 120000000  // 25 million bits (for 24MB binary file)
+#define P_THRESHOLD 0.01
+
+
+double chi_square_uniformity(double *p_values, int num_streams, int bins) {
+    int *counts = (int *)calloc(bins, sizeof(int));
+    if (counts == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        int bin = (int)(p_values[i] * bins);
+        if (bin == bins) bin = bins - 1;
+        counts[bin]++;
+    }
+
+    double expected = (double)num_streams / bins;
+    double chi_square = 0.0;
+
+    for (int i = 0; i < bins; i++) {
+        double diff = counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    free(counts);
+    double p_uniform = gsl_sf_gamma_inc_Q((bins - 1) / 2.0, chi_square / 2.0);
+    return p_uniform;
+}
 typedef unsigned char BitSequence;
 
 static const double	rel_error = 1E-12;
@@ -334,7 +364,7 @@ cephes_normal(double x)
 	return( result);
 }
 
-void LinearComplexity(int M, int n, int *epsilon) {
+double LinearComplexity(int M, int n, int *epsilon) {
     int i, ii, j, d, N, L, m, N_, parity, sign, K = 6;
     double p_value, T_, mean, nu[7], chi2;
     double pi[7] = { 0.01047, 0.03125, 0.12500, 0.50000, 0.25000, 0.06250, 0.020833 };
@@ -350,7 +380,7 @@ void LinearComplexity(int M, int n, int *epsilon) {
         if (C != NULL)  free(C);
         if (P != NULL)  free(P);
         if (T != NULL)  free(T);
-        return;
+        return 0;
     }
 
     for (i = 0; i < K + 1; i++)
@@ -425,7 +455,7 @@ void LinearComplexity(int M, int n, int *epsilon) {
     p_value = cephes_igamc(K / 2.0, chi2 / 2.0);
 
     // Print only the p-value
-    printf("%f\n", p_value);
+    return p_value;
 
     free(B_);
     free(P);
@@ -437,69 +467,79 @@ void LinearComplexity(int M, int n, int *epsilon) {
 #include <stdlib.h>
 #include <math.h>
 
-void LinearComplexity(int M, int n, int *epsilon);  // Forward declaration
-
+double LinearComplexity(int M, int n, int *epsilon);  // Forward declaration
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <block_size> <input_file>\n", argv[0]);
-        return 1;
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <stream_length> <binary_file>\n", argv[0]);
+        return 0;
     }
 
-    int M = 8;  // Block size
-    if (M <= 0) {
-        fprintf(stderr, "Invalid block size: must be > 0\n");
-        return 1;
+    int n = atoi(argv[1]);  // length of each bitstream
+    int M = 8;              // fixed block size for Linear Complexity test
+    char *filename = argv[2];
+
+    if (n <= 0 || M <= 0) {
+        fprintf(stderr, "Invalid parameters: n and M must be > 0\n");
+        return 0;
     }
 
-    FILE *fp = fopen(argv[2], "r");
+    FILE *fp = fopen(filename, "r");
     if (!fp) {
         fprintf(stderr, "Failed to open input file.\n");
-        return 1;
+        return 0;
     }
 
-    // First pass: count number of bits
-    int bit, n = 0;
-    while (fscanf(fp, "%d", &bit) == 1) {
-        n++;
-    }
-
-    if (n < M) {
-        fprintf(stderr, "Invalid input: n must be >= M and both > 0\n");
-        fclose(fp);
-        return 1;
-    }
-
-    int N = (int)floor((double)n / M);
-    if (N < 1) {
-        fprintf(stderr, "Not enough data for the given block size.\n");
-        fclose(fp);
-        return 1;
-    }
-
-    // Allocate memory
-    int *epsilon = (int *)malloc(n * sizeof(int));
-    if (epsilon == NULL) {
+    int *epsilon = (int *)malloc(MAX_BITS * sizeof(int));
+    if (!epsilon) {
         fprintf(stderr, "Memory allocation failed.\n");
         fclose(fp);
-        return 1;
+        return 0;
     }
 
-    // Second pass: read bits into epsilon
-    rewind(fp);
-    for (int i = 0; i < n; i++) {
-        if (fscanf(fp, "%d", &epsilon[i]) != 1 || (epsilon[i] != 0 && epsilon[i] != 1)) {
-            fprintf(stderr, "Invalid bit at position %d. Only 0 or 1 are allowed.\n", i);
+    int bit, total_bits = 0;
+    while (fscanf(fp, "%1d", &bit) == 1 && total_bits < MAX_BITS) {
+        if (bit != 0 && bit != 1) {
+            fprintf(stderr, "Invalid bit in input file.\n");
             free(epsilon);
             fclose(fp);
-            return 1;
+            return 0;
         }
+        epsilon[total_bits++] = bit;
     }
     fclose(fp);
 
-    // Run the test
-    LinearComplexity(M, n, epsilon);
+    if (total_bits < n) {
+        fprintf(stderr, "Not enough bits for one complete bitstream.\n");
+        free(epsilon);
+        return 0;
+    }
 
-    // Clean up
+    int num_streams = total_bits / n;
+    double *p_values = (double *)malloc(num_streams * sizeof(double));
+    if (!p_values) {
+        fprintf(stderr, "Memory allocation error.\n");
+        free(epsilon);
+        return 0;
+    }
+
+    int pass_count = 0;
+    for (int i = 0; i < num_streams; i++) {
+        double p = LinearComplexity(M, n, &epsilon[i * n]);
+        p_values[i] = p;
+        if (p >= P_THRESHOLD) pass_count++;
+    }
+
+    double proportion = (double)pass_count / num_streams;
+    int proportion_pass = proportion >= 0.96;
+
+    double chi_p = chi_square_uniformity(p_values, num_streams, 10);
+    int uniformity_pass = chi_p >= P_THRESHOLD;
+
+    int final_pass = (proportion_pass && uniformity_pass) ? 1 : 0;
+
+    printf("%.6f %d\n", chi_p, final_pass);
+
+    free(p_values);
     free(epsilon);
     return 0;
 }

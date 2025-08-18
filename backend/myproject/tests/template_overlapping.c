@@ -5,7 +5,37 @@
 #include "./externs.h"
 #include "./utilities.h"
 #include "./cephes.h"
+#include <gsl/gsl_sf_gamma.h>
 
+#define MAX_BITS 120000000  // 25 million bits (for 24MB binary file)
+#define P_THRESHOLD 0.01
+
+
+double chi_square_uniformity(double *p_values, int num_streams, int bins) {
+    int *counts = (int *)calloc(bins, sizeof(int));
+    if (counts == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        int bin = (int)(p_values[i] * bins);
+        if (bin == bins) bin = bins - 1;
+        counts[bin]++;
+    }
+
+    double expected = (double)num_streams / bins;
+    double chi_square = 0.0;
+
+    for (int i = 0; i < bins; i++) {
+        double diff = counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    free(counts);
+    double p_uniform = gsl_sf_gamma_inc_Q((bins - 1) / 2.0, chi_square / 2.0);
+    return p_uniform;
+}
 typedef unsigned char BitSequence;
 
 double Pr(int u, double eta);
@@ -323,30 +353,27 @@ double cephes_normal(double x)
     return( result);
 }
 
-void OverlappingTemplateMatchings(int m, int n)
-{
+double OverlappingTemplateMatchings(int m, int n, unsigned char *epsilon) {
     int i, k, match;
     double W_obs, eta, sum, chi2, p_value, lambda;
     int M, N, j, K = 5;
     unsigned int nu[6] = { 0, 0, 0, 0, 0, 0 };
     double pi[6] = { 0.364091, 0.185659, 0.139381, 0.100571, 0.0704323, 0.139865 };
-    BitSequence *sequence;
+    unsigned char *sequence;
 
     M = 1032;
     N = n / M;
 
     if (N == 0) {
-        printf("%f\n", 0.0);
-        return;
+        return 0.0;
     }
 
-    if ((sequence = (BitSequence *)calloc(m, sizeof(BitSequence))) == NULL) {
-        printf("%f\n", 0.0);
-        return;
-    } else {
-        for (i = 0; i < m; i++)
-            sequence[i] = 1;
+    sequence = (unsigned char *)calloc(m, sizeof(unsigned char));
+    if (sequence == NULL) {
+        return 0.0;
     }
+    for (i = 0; i < m; i++)
+        sequence[i] = 1;
 
     lambda = (double)(M - m + 1) / pow(2, m);
     eta = lambda / 2.0;
@@ -373,20 +400,19 @@ void OverlappingTemplateMatchings(int m, int n)
         else
             nu[K]++;
     }
-    sum = 0;
+
     chi2 = 0.0; /* Compute Chi Square */
     for (i = 0; i < K + 1; i++) {
         double denom = (double)N * pi[i];
         if (denom > 0)
             chi2 += pow((double)nu[i] - denom, 2) / denom;
-        sum += nu[i];
     }
     p_value = cephes_igamc(K / 2.0, chi2 / 2.0);
 
-    printf("%f\n", p_value);
-
     free(sequence);
+    return p_value;
 }
+
 
 double Pr(int u, double eta)
 {
@@ -403,35 +429,78 @@ double Pr(int u, double eta)
     }
     return p;
 }
-
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <m> <bit_stream...>\n", argv[0]);
-        return 1;
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <stream_length> <binary_file>\n", argv[0]);
+        return 0;
     }
 
-    int m = atoi(argv[1]);
-    int n = argc - 2;
-    epsilon = (unsigned char *)malloc(n * sizeof(unsigned char));
-    if (epsilon == NULL) {
-        fprintf(stderr, "Memory allocation failed.\n");
-        return 1;
+    int n = atoi(argv[1]);           // Length of each bitstream
+    int m = 9;                       // Template length (can be changed if needed)
+    char *filename = argv[2];
+
+    if (n <= 0 || m <= 0) {
+        fprintf(stderr, "Invalid parameters: n and m must be > 0\n");
+        return 0;
     }
-    FILE *fp = fopen(argv[2], "r");
+
+    FILE *fp = fopen(filename, "r");
     if (!fp) {
         fprintf(stderr, "Failed to open input file.\n");
-        free(epsilon);
-        return 1;
+        return 0;
     }
-    for (int i = 0; i < n; i++) {
-        int temp;
-fscanf(fp, "%d", &temp);
-epsilon[i] = (unsigned char)temp;
+
+    unsigned char *epsilon = (unsigned char *)malloc(MAX_BITS * sizeof(unsigned char));
+    if (!epsilon) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        fclose(fp);
+        return 0;
+    }
+
+    int bit, total_bits = 0;
+    while (fscanf(fp, "%1d", &bit) == 1 && total_bits < MAX_BITS) {
+        if (bit != 0 && bit != 1) {
+            fprintf(stderr, "Invalid bit in input file.\n");
+            free(epsilon);
+            fclose(fp);
+            return 0;
+        }
+        epsilon[total_bits++] = (unsigned char)bit;
     }
     fclose(fp);
 
-    OverlappingTemplateMatchings(m, n);
+    if (total_bits < n) {
+        fprintf(stderr, "Not enough bits for one complete bitstream.\n");
+        free(epsilon);
+        return 0;
+    }
 
+    int num_streams = total_bits / n;
+    double *p_values = (double *)malloc(num_streams * sizeof(double));
+    if (!p_values) {
+        fprintf(stderr, "Memory allocation error.\n");
+        free(epsilon);
+        return 0;
+    }
+
+    int pass_count = 0;
+    for (int i = 0; i < num_streams; i++) {
+        double p = OverlappingTemplateMatchings(m, n, &epsilon[i * n]);
+        p_values[i] = p;
+        if (p >= P_THRESHOLD) pass_count++;
+    }
+
+    double proportion = (double)pass_count / num_streams;
+    int proportion_pass = proportion >= 0.96;
+
+    double chi_p = chi_square_uniformity(p_values, num_streams, 10);
+    int uniformity_pass = chi_p >= P_THRESHOLD;
+
+    int final_pass = (proportion_pass && uniformity_pass) ? 1 : 0;
+
+    printf("%.6f %d\n", chi_p, final_pass);
+
+    free(p_values);
     free(epsilon);
     return 0;
 }

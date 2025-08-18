@@ -2,7 +2,7 @@
 #include <climits>
 #include <divsufsort.h>
 #include <divsufsort64.h>
-
+#include <fstream>
 #define SAINDEX_MAX INT32_MAX
 #define SAINDEX64_MAX INT64_MAX
 
@@ -708,26 +708,36 @@ assert(p_col >= 1.0L / ((long double) k));
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        cerr << "Usage: " << argv[0] << " <binary_string>" << endl;
-        return 1;
+        cerr << "Usage: " << argv[0] << " <file_path>\n";
+        return 0;  // return 0 on error
     }
 
-    string binary_input = argv[1];
+    ifstream infile(argv[1]);
+    if (!infile) {
+        cerr << "Error opening file\n";
+        return 0;  // return 0 on error
+    }
+
+    string binary_input;
+    infile >> binary_input;
+    infile.close();
+
     size_t len = binary_input.length();
 
+    // Validate input: only '0' and '1'
     for (char c : binary_input) {
         if (c != '0' && c != '1') {
-            cerr << "Invalid binary string. Only 0 and 1 allowed." << endl;
-            return 0;
+            cerr << "Invalid binary string. Only 0 and 1 allowed.\n";
+            return 0;  // return 0 on error
         }
     }
 
     if (len < 16) {
-        cerr << "Error: Input length must be at least 16 bits." << endl;
-        return 0;
+        cerr << "Error: Input length must be at least 16 bits.\n";
+        return 0;  // return 0 on error
     }
 
-    // Set up data
+    // Setup data struct
     data_t data;
     memset(&data, 0, sizeof(data));
     data.len = static_cast<int>(len);
@@ -748,12 +758,12 @@ int main(int argc, char* argv[]) {
     bool verbose = true;
     bool passed = len_LRS_test(data.symbols, data.len, data.alph_size, verbose, "Literal");
 
-    // cout << (passed ? "LRS Test Passed" : "LRS Test Failed") << endl;
-
     // Cleanup
     delete[] data.symbols;
     delete[] data.rawsymbols;
     delete[] data.bsymbols;
 
-    cout<< passed ? 1 : 0;
+    cout << (passed ? 1 : 0) << endl;
+
+    return passed ? 1 : 0;
 }

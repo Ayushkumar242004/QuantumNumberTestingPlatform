@@ -4,6 +4,38 @@
 
 #define ALPHA 0.01
 
+#include <gsl/gsl_sf_gamma.h>
+
+#define MAX_BITS 120000000  // 25 million bits (for 24MB binary file)
+#define P_THRESHOLD 0.01
+
+
+double chi_square_uniformity(double *p_values, int num_streams, int bins) {
+    int *counts = (int *)calloc(bins, sizeof(int));
+    if (counts == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        int bin = (int)(p_values[i] * bins);
+        if (bin == bins) bin = bins - 1;
+        counts[bin]++;
+    }
+
+    double expected = (double)num_streams / bins;
+    double chi_square = 0.0;
+
+    for (int i = 0; i < bins; i++) {
+        double diff = counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    free(counts);
+    double p_uniform = gsl_sf_gamma_inc_Q((bins - 1) / 2.0, chi_square / 2.0);
+    return p_uniform;
+}
+
 int isNegative(double x) {
     return x < 0.0;
 }
@@ -23,7 +55,7 @@ double variance[17] = {
     3.356, 3.384, 3.401, 3.410, 3.416, 3.419, 3.421
 };
 
-void Universal(int n, int *epsilon) {
+double Universal(int n, int *epsilon) {
     int i, j, p, L = 5, Q, K;
     double arg, sqrt2, sigma, phi, sum, p_value, c;
     long *T, decRep;
@@ -45,8 +77,8 @@ void Universal(int n, int *epsilon) {
     p = (int)pow(2, L);
 
     if (L < 6 || L > 16 || Q < 10 * pow(2, L) || (T = (long *)calloc(p, sizeof(long))) == NULL) {
-        printf("0.000000\n");
-        return;
+        // Error case - return 0 p-value (fail)
+        return 0.0;
     }
 
     c = 0.7 - 0.8 / L + (4 + 32 / (double)L) * pow(K, -3.0 / L) / 15.0;
@@ -76,46 +108,90 @@ void Universal(int n, int *epsilon) {
     arg = fabs(phi - expected_value[L]) / (sqrt2 * sigma);
     p_value = erfc(arg);
 
-    printf("%f\n", p_value);
     free(T);
+    return p_value;
 }
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
 
-void Universal(int n, int *epsilon);
+double Universal(int n, int *epsilon);
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <n> <bit1> <bit2> ...\n", argv[0]);
-        return 1;
-    }
-
-    int n = atoi(argv[1]);
     if (argc != 3) {
-    fprintf(stderr, "Usage: %s <n> <input_file>\n", argv[0]);
-    return 1;
-}
-
-    int *epsilon = (int *)malloc(n * sizeof(int));
-    if (!epsilon) {
-        fprintf(stderr, "Memory allocation failed.\n");
+        fprintf(stderr, "Usage: %s <stream_length> <binary_file>\n", argv[0]);
         return 1;
     }
 
-    FILE *fp = fopen(argv[2], "r");
+    int n = atoi(argv[1]);  // Length of each bitstream
+    char *filename = argv[2];
+
+    if (n <= 0) {
+        fprintf(stderr, "Invalid stream length: must be > 0\n");
+        return 1;
+    }
+
+    FILE *fp = fopen(filename, "r");
     if (!fp) {
         fprintf(stderr, "Failed to open input file.\n");
-        free(epsilon);
         return 1;
     }
-    for (int i = 0; i < n; i++) {
-        fscanf(fp, "%d", &epsilon[i]);
+
+    int *epsilon = (int *)malloc(MAX_BITS * sizeof(int));
+    if (!epsilon) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        fclose(fp);
+        return 1;
+    }
+
+    int bit, total_bits = 0;
+    while (fscanf(fp, "%1d", &bit) == 1 && total_bits < MAX_BITS) {
+        if (bit != 0 && bit != 1) {
+            fprintf(stderr, "Invalid bit in input file.\n");
+            free(epsilon);
+            fclose(fp);
+            return 1;
+        }
+        epsilon[total_bits++] = bit;
     }
     fclose(fp);
 
-    Universal(n, epsilon);
+    if (total_bits < n) {
+        fprintf(stderr, "Not enough bits for one complete bitstream.\n");
+        free(epsilon);
+        return 1;
+    }
+
+    int num_streams = total_bits / n;
+    double *p_values = (double *)malloc(num_streams * sizeof(double));
+    if (!p_values) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        free(epsilon);
+        return 1;
+    }
+
+    int pass_count = 0;
+    for (int i = 0; i < num_streams; i++) {
+        double p = Universal(n, &epsilon[i * n]);
+        p_values[i] = p;
+        if (p >= P_THRESHOLD) {
+            pass_count++;
+        }
+    }
+
+    double proportion = (double)pass_count / num_streams;
+    int proportion_pass = proportion >= 0.96;
+
+    double chi_p = chi_square_uniformity(p_values, num_streams, 10);
+    int uniformity_pass = chi_p >= P_THRESHOLD;
+
+    int final_pass = (proportion_pass && uniformity_pass) ? 1 : 0;
+
+    printf("%.6f %d\n", chi_p, final_pass);
+
+    free(p_values);
     free(epsilon);
     return 0;
 }
-

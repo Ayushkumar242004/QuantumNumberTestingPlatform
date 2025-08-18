@@ -1,6 +1,6 @@
 #include "./shared/utils.h"
 #include <cmath>  // for isnan
-
+#include <fstream>
 #define NUM_WINS 4
 
 // Section 6.3.7 - Multi Most Common in Window (MCW) Prediction Estimate
@@ -97,23 +97,34 @@ vector<uint8_t> bitstring_to_bytes(const string& bitstr, bool& valid) {
     }
     return result;
 }
-
 int main(int argc, char* argv[]) {
-    if (argc != 2) return 1;
+    if (argc != 2) {
+        cerr << "Usage: multiMmcTest_exec <file_path>\n";
+        return 0;  // Return 0 on any error
+    }
 
-    string bit_input = argv[1];
+    ifstream infile(argv[1]);
+    if (!infile) {
+        cerr << "Error opening file\n";
+        return 0;  // Return 0 on any error
+    }
+
+    string bit_input;
+    infile >> bit_input;
+    infile.close();
+
     bool is_valid = true;
     vector<uint8_t> bit_data = bitstring_to_bytes(bit_input, is_valid);
     if (!is_valid || bit_data.size() <= 1) {
         cout << -1.0 << endl;
-        return -1;
+        return 0;  // Return 0 on any error
     }
 
     double min_entropy = multi_mcw_test(bit_data.data(), bit_data.size(), 2, 0, "mcw");
 
     if (std::isnan(min_entropy) || min_entropy == -1.0) {
         cout << -1.0 << endl;
-        return -1;
+        return 0;  // Return 0 on any error
     }
 
     cout << min_entropy << endl;

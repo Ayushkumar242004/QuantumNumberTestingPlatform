@@ -144,7 +144,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
             </Box>
           </Box>
         )}
-        <IconButton
+        {/* <IconButton
           onClick={() => setIsCollapsed(!isCollapsed)}
           sx={{
             color: "rgba(255, 255, 255, 0.7)",
@@ -154,7 +154,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
           }}
         >
           {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
-        </IconButton>
+        </IconButton> */}
       </Box>
 
       {/* Navigation */}
@@ -218,21 +218,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
           );
         })}
         
-        {!isCollapsed && (
-          <>
-            <Divider sx={{ my: 2, bgcolor: "rgba(255, 255, 255, 0.1)" }} />
-            <Typography
-              variant="overline"
-              sx={{
-                px: 3,
-                color: "rgba(255, 255, 255, 0.5)",
-                display: "block",
-              }}
-            >
-              Test Suites
-            </Typography>
-          </>
-        )}
+       
       </Box>
 
       {/* User Profile */}

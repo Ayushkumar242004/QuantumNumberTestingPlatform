@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { supabase } from '../../utils/supabaseClient';
-
+import CloseIcon from "@mui/icons-material/Close";
 const MAX_STACK_SIZE_ESTIMATE = 150 * 1024 * 1024;
 
 const Nist_tests = () => {
@@ -551,6 +551,7 @@ const Nist_tests = () => {
     if (date && time) {
       const formattedDateTime = `${date} ${time}`; // already in 'YYYY-MM-DD HH:mm:ss'
       setScheduledTime(formattedDateTime);
+      
     }
   }, [date, time]);
 
@@ -788,52 +789,75 @@ const Nist_tests = () => {
   }, [scheduledTime10]);
 
 
-
+  const [showRedButton, setShowRedButton] = useState(false);
+  const [showRedButton2, setShowRedButton2] = useState(false);
+  const [showRedButton3, setShowRedButton3] = useState(false);
+  const [showRedButton4, setShowRedButton4] = useState(false);
+  const [showRedButton5, setShowRedButton5] = useState(false);
+  const [showRedButton6, setShowRedButton6] = useState(false);
+  const [showRedButton7, setShowRedButton7] = useState(false);
+  const [showRedButton8, setShowRedButton8] = useState(false);
+  const [showRedButton9, setShowRedButton9] = useState(false);
+  const [showRedButton10, setShowRedButton10] = useState(false);
 
   // Handle file upload
   const handleFileUpload = () => {
+    setShowRedButton(true)
     fileInputRef.current.click();
   };
   const handleFileUpload2 = () => {
+    setShowRedButton2(true)
     fileInputRef2.current.click();
   };
   const handleFileUpload3 = () => {
+    setShowRedButton3(true)
     fileInputRef3.current.click();
   };
   const handleFileUpload4 = () => {
+    setShowRedButton4(true)
     fileInputRef4.current.click();
   };
   const handleFileUpload5 = () => {
+    setShowRedButton5(true)
     fileInputRef5.current.click();
   };
   const handleFileUpload6 = () => {
+    setShowRedButton6(true)
     fileInputRef6.current.click();
   };
   const handleFileUpload7 = () => {
+    setShowRedButton7(true)
     fileInputRef7.current.click();
   };
   const handleFileUpload8 = () => {
+    setShowRedButton8(true)
     fileInputRef8.current.click();
   };
   const handleFileUpload9 = () => {
+    setShowRedButton9(true)
     fileInputRef_nine.current.click();
   };
   const handleFileUpload10 = () => {
+    setShowRedButton10(true)
     fileInputRef10.current.click();
   };
 
   const handleFileChange = async (event) => {
+   
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
-  
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton(false);
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
     }
-  
+
     const userId = await fetchUserId();
     if (!userId) return;
-  
+
     // Reset all state variables for line 1
     setBinaryInput("");
     setScheduledTime("");
@@ -843,16 +867,16 @@ const Nist_tests = () => {
     setUploadTime("");
     setLoadingProgress(0);
     setTime("");
-  
+
     setFileName(selectedFile.name);
-  
+
     const reader = new FileReader();
     reader.onload = async (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
-  
+
       let binaryString = "";
-  
+
       if (selectedFile.name.toLowerCase().endsWith(".bin")) {
         // Convert each byte to binary string
         for (let i = 0; i < byteArray.length; i++) {
@@ -863,16 +887,16 @@ const Nist_tests = () => {
         const decoder = new TextDecoder();
         binaryString = decoder.decode(byteArray).trim();
       }
-      
+
       // Update binaryInput state with the processed binary string
       setBinaryInput(binaryString);
-  
+
       // Set the upload time in YYYY-MM-DD HH:MM:SS format
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime(currentTime);
-  
+
       // Remove the existing row for the line from Supabase
       try {
         localStorage.setItem('resultFetchedFromSupabase', 'false');
@@ -880,7 +904,7 @@ const Nist_tests = () => {
           .from('results')
           .delete()
           .match({ line: 1, user_id: userId });
-  
+
         setLoadingProgress(0);
         if (deleteError) {
           console.error('Error deleting from Supabase:', deleteError);
@@ -889,18 +913,22 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-  
+
       // Allow reupload of same file
       event.target.value = "";
     };
-  
+
     reader.readAsArrayBuffer(selectedFile);
   };
-  
+
 
   const handleFileChange2 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton2(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
@@ -929,14 +957,26 @@ const Nist_tests = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      // Update binaryInput state with new binary data
-      setBinaryInput2(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toISOString();
+      // Update binaryInput state with the processed binary string
+      setBinaryInput2(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime2(currentTime);
-
       try {
         localStorage.setItem('resultFetchedFromSupabase22b2', 'false');
         const { error: deleteError } = await supabase
@@ -962,8 +1002,11 @@ const Nist_tests = () => {
 
   const handleFileChange3 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
-
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton3(false);
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -991,12 +1034,25 @@ const Nist_tests = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      // Update binaryInput state with new binary data
-      setBinaryInput3(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      // Update binaryInput state with the processed binary string
+      setBinaryInput3(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime3(currentTime);
 
       try {
@@ -1025,7 +1081,11 @@ const Nist_tests = () => {
 
   const handleFileChange4 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton4(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
@@ -1055,11 +1115,25 @@ const Nist_tests = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      setBinaryInput4(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      // Update binaryInput state with the processed binary string
+      setBinaryInput4(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime4(currentTime);
 
       try {
@@ -1087,7 +1161,11 @@ const Nist_tests = () => {
 
   const handleFileChange5 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton5(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
@@ -1117,11 +1195,25 @@ const Nist_tests = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      setBinaryInput5(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      // Update binaryInput state with the processed binary string
+      setBinaryInput5(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime5(currentTime);
 
       try {
@@ -1149,7 +1241,11 @@ const Nist_tests = () => {
 
   const handleFileChange6 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton6(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
@@ -1179,11 +1275,24 @@ const Nist_tests = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      setBinaryInput6(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      // Update binaryInput state with the processed binary string
+      setBinaryInput6(binaryString);
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime6(currentTime);
 
       try {
@@ -1211,7 +1320,11 @@ const Nist_tests = () => {
 
   const handleFileChange7 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton7(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
@@ -1241,11 +1354,25 @@ const Nist_tests = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      setBinaryInput7(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      // Update binaryInput state with the processed binary string
+      setBinaryInput7(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime7(currentTime);
 
       try {
@@ -1272,7 +1399,11 @@ const Nist_tests = () => {
 
   const handleFileChange8 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton8(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
@@ -1302,11 +1433,25 @@ const Nist_tests = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      setBinaryInput8(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      // Update binaryInput state with the processed binary string
+      setBinaryInput8(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime8(currentTime);
 
       try {
@@ -1333,7 +1478,11 @@ const Nist_tests = () => {
 
   const handleFileChange9 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton9(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
@@ -1363,13 +1512,26 @@ const Nist_tests = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      setBinaryInput9(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      // Update binaryInput state with the processed binary string
+      setBinaryInput9(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime9(currentTime);
-
       try {
         localStorage.setItem('resultFetchedFromSupabase22b9', 'false');
         const { error: deleteError } = await supabase
@@ -1394,7 +1556,11 @@ const Nist_tests = () => {
 
   const handleFileChange10 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton10(false);
+      return;
+    }
 
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
@@ -1424,11 +1590,25 @@ const Nist_tests = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+      let binaryString = "";
 
-      setBinaryInput10(textData);
+      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+        // Convert each byte to binary string
+        for (let i = 0; i < byteArray.length; i++) {
+          binaryString += byteArray[i].toString(2).padStart(8, '0');
+        }
+      } else {
+        // Assume .txt file
+        const decoder = new TextDecoder();
+        binaryString = decoder.decode(byteArray).trim();
+      }
 
-      const currentTime = new Date().toLocaleTimeString();
+      // Update binaryInput state with the processed binary string
+      setBinaryInput10(binaryString);
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime10(currentTime);
 
       try {
@@ -1481,6 +1661,7 @@ const Nist_tests = () => {
                 setResult({ final_result: row.result });
                 setFileName(row.file_name);
                 setUploadTime(row.upload_time);
+                setLoadingProgress(row.progress);
                 break;
               case 2:
                 setBinaryInput2(row.binary_data);
@@ -1488,6 +1669,7 @@ const Nist_tests = () => {
                 setResult2({ final_result: row.result });
                 setFileName2(row.file_name);
                 setUploadTime2(row.upload_time);
+                setLoadingProgress2(row.progress);
                 break;
               case 3:
                 setBinaryInput3(row.binary_data);
@@ -1495,6 +1677,7 @@ const Nist_tests = () => {
                 setResult3({ final_result: row.result });
                 setFileName3(row.file_name);
                 setUploadTime3(row.upload_time);
+                setLoadingProgress3(row.progress);
                 break;
               case 4:
                 setBinaryInput4(row.binary_data);
@@ -1502,6 +1685,7 @@ const Nist_tests = () => {
                 setResult4({ final_result: row.result });
                 setFileName4(row.file_name);
                 setUploadTime4(row.upload_time);
+                setLoadingProgress4(row.progress);
                 break;
               case 5:
                 setBinaryInput5(row.binary_data);
@@ -1509,6 +1693,7 @@ const Nist_tests = () => {
                 setResult5({ final_result: row.result });
                 setFileName5(row.file_name);
                 setUploadTime5(row.upload_time);
+                setLoadingProgress5(row.progress);
                 break;
               case 6:
                 setBinaryInput6(row.binary_data);
@@ -1516,6 +1701,7 @@ const Nist_tests = () => {
                 setResult6({ final_result: row.result });
                 setFileName6(row.file_name);
                 setUploadTime6(row.upload_time);
+                setLoadingProgress6(row.progress);
                 break;
               case 7:
                 setBinaryInput7(row.binary_data);
@@ -1523,6 +1709,7 @@ const Nist_tests = () => {
                 setResult7({ final_result: row.result });
                 setFileName7(row.file_name);
                 setUploadTime7(row.upload_time);
+                setLoadingProgress7(row.progress);
                 break;
               case 8:
                 setBinaryInput8(row.binary_data);
@@ -1530,6 +1717,7 @@ const Nist_tests = () => {
                 setResult8({ final_result: row.result });
                 setFileName8(row.file_name);
                 setUploadTime8(row.upload_time);
+                setLoadingProgress8(row.progress);
                 break;
               case 9:
                 setBinaryInput9(row.binary_data);
@@ -1537,6 +1725,7 @@ const Nist_tests = () => {
                 setResult9({ final_result: row.result });
                 setFileName9(row.file_name);
                 setUploadTime9(row.upload_time);
+                setLoadingProgress9(row.progress);
                 break;
               case 10:
                 setBinaryInput10(row.binary_data);
@@ -1544,6 +1733,7 @@ const Nist_tests = () => {
                 setResult10({ final_result: row.result });
                 setFileName10(row.file_name);
                 setUploadTime10(row.upload_time);
+                setLoadingProgress10(row.progress);
                 break;
               default:
                 break;
@@ -1643,10 +1833,34 @@ const Nist_tests = () => {
   const jobIdRef8 = useRef(null);
   const jobIdRef9 = useRef(null);
   const jobIdRef10 = useRef(null);
+
+  let binaryDataSent = false;
+  let binaryDataSent2 = false;
+  let binaryDataSent3 = false;
+  let binaryDataSent4 = false;
+  let binaryDataSent5 = false;
+  let binaryDataSent6 = false;
+  let binaryDataSent7 = false;
+  let binaryDataSent8 = false;
+  let binaryDataSent9 = false;
+  let binaryDataSent10 = false;
+  
+  const [showUploadAlert, setShowUploadAlert] = useState(false);
+const [hasShownAlert, setHasShownAlert] = useState(false); // track first-time show
+
+useEffect(() => {
+  if (showUploadAlert && !hasShownAlert) {
+    alert("File Uploaded successfully");
+    setHasShownAlert(true); // mark as shown
+    setShowUploadAlert(false); // reset state
+  }
+}, [showUploadAlert, hasShownAlert]);
+
   useEffect(() => {
     if (!binaryInput || !debouncedScheduledTime) {
       return;
     }
+
     const currentJobId = uuidv4();
     jobIdRef.current = currentJobId;
     const lineNo = 1;
@@ -1660,26 +1874,38 @@ const Nist_tests = () => {
 
     const upsertProgress = async (progress, userId, result = null) => {
       const progressPercentage = progress;
+
+      // Create the base payload
+      const payload = {
+        user_id: userId,
+        line: 1,
+        scheduled_time: debouncedScheduledTime,
+        result: result,
+        file_name: fileName,
+        upload_time: uploadTime,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent) {
+        payload.binary_data = binaryInput;
+        binaryDataSent = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: 1,
-          binary_data: binaryInput,
-          scheduled_time: debouncedScheduledTime,
-          result: result,
-          file_name: fileName,
-          upload_time: uploadTime,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
+
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
     };
 
+    
     // Fetch userId before calling upsertProgress
     const startProcess = async () => {
+
       const userId = await fetchUserId();
       if (!userId) {
 
@@ -1690,11 +1916,17 @@ const Nist_tests = () => {
 
       const fetchResult = async () => {
         try {
+
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://127.0.0.1:8000/get_progress/${currentJobId}`);
+              setShowRedButton(false);
+              setShowUploadAlert(true);
               const completed = progressRes.data.progress || 0;
+              console.log("completed", completed);
+             
               const percent = Math.round((completed / 18) * 100);
+              console.log("percent", percent);
               setLoadingProgress(prev => (percent > prev ? percent : prev));
               await upsertProgress(percent, userId);
             } catch (err) {
@@ -1711,7 +1943,7 @@ const Nist_tests = () => {
             user_id: userId,
             file_name: fileName
           });
-
+          setShowRedButton(false);
 
           clearInterval(progressInterval);
           setLoadingProgress(100);
@@ -1757,19 +1989,27 @@ const Nist_tests = () => {
 
     const upsertProgress = async (progress, userId, result = null) => {
       const progressPercentage = progress;
+
+      const payload = {
+        user_id: userId,
+        line: 2,
+        scheduled_time: debouncedScheduledTime2,
+        result: result,
+        file_name: fileName2,
+        upload_time: uploadTime2,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent2) {
+        payload.binary_data = binaryInput2;
+        binaryDataSent2 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: 2,
-          binary_data: binaryInput2,
-          scheduled_time: debouncedScheduledTime2,
-          result: result,
-          file_name: fileName2,
-          upload_time: uploadTime2,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
@@ -1790,6 +2030,7 @@ const Nist_tests = () => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              setShowRedButton2(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 18) * 100);
               setLoadingProgress2(prev => (percent > prev ? percent : prev));
@@ -1807,7 +2048,7 @@ const Nist_tests = () => {
             user_id: userId,
             file_name: fileName2
           });
-
+          setShowRedButton2(false);
           clearInterval(progressInterval);
           setLoadingProgress2(100);
           setResult2(response.data);
@@ -1851,19 +2092,27 @@ const Nist_tests = () => {
 
     const upsertProgress = async (progress, userId, result = null) => {
       const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 3,
+        scheduled_time: debouncedScheduledTime3,
+        result: result,
+        file_name: fileName3,
+        upload_time: uploadTime3,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent3) {
+        payload.binary_data = binaryInput3;
+        binaryDataSent3 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: 3,
-          binary_data: binaryInput3,
-          scheduled_time: debouncedScheduledTime3,
-          result: result,
-          file_name: fileName3,
-          upload_time: uploadTime3,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
+
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
@@ -1883,6 +2132,7 @@ const Nist_tests = () => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              setShowRedButton3(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 18) * 100);
               setLoadingProgress3(prev => (percent > prev ? percent : prev));
@@ -1897,8 +2147,10 @@ const Nist_tests = () => {
             scheduled_time: debouncedScheduledTime3,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName3
           });
-
+          setShowRedButton3(false);
           clearInterval(progressInterval);
           setLoadingProgress3(100);
           setResult3(response.data);
@@ -1942,19 +2194,28 @@ const Nist_tests = () => {
 
     const upsertProgress = async (progress, userId, result = null) => {
       const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 4,
+        scheduled_time: debouncedScheduledTime4,
+        result: result,
+        file_name: fileName4,
+        upload_time: uploadTime4,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent4) {
+        payload.binary_data = binaryInput4;
+        binaryDataSent4 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: 4,
-          binary_data: binaryInput4,
-          scheduled_time: debouncedScheduledTime4,
-          result: result,
-          file_name: fileName4,
-          upload_time: uploadTime4,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
+
+      
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
@@ -1974,6 +2235,7 @@ const Nist_tests = () => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              setShowRedButton4(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 18) * 100);
               setLoadingProgress4(prev => (percent > prev ? percent : prev));
@@ -1988,8 +2250,10 @@ const Nist_tests = () => {
             scheduled_time: debouncedScheduledTime4,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName4
           });
-
+          setShowRedButton4(false);
           clearInterval(progressInterval);
           setLoadingProgress4(100);
           setResult4(response.data);
@@ -2033,19 +2297,28 @@ const Nist_tests = () => {
 
     const upsertProgress = async (progress, userId, result = null) => {
       const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 5,
+        scheduled_time: debouncedScheduledTime5,
+        result: result,
+        file_name: fileName5,
+        upload_time: uploadTime5,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent5) {
+        payload.binary_data = binaryInput5;
+        binaryDataSent5 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: 5,
-          binary_data: binaryInput5,
-          scheduled_time: debouncedScheduledTime5,
-          result: result,
-          file_name: fileName5,
-          upload_time: uploadTime5,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
+
+     
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
@@ -2065,6 +2338,7 @@ const Nist_tests = () => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              setShowRedButton5(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 18) * 100);
               setLoadingProgress5(prev => (percent > prev ? percent : prev));
@@ -2079,8 +2353,10 @@ const Nist_tests = () => {
             scheduled_time: debouncedScheduledTime5,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName5
           });
-
+          setShowRedButton5(false);
           clearInterval(progressInterval);
           setLoadingProgress5(100);
           setResult5(response.data);
@@ -2125,19 +2401,28 @@ const Nist_tests = () => {
 
     const upsertProgress = async (progress, userId, result = null) => {
       const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 6,
+        scheduled_time: debouncedScheduledTime6,
+        result: result,
+        file_name: fileName6,
+        upload_time: uploadTime,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent6) {
+        payload.binary_data = binaryInput6;
+        binaryDataSent6 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: 6,
-          binary_data: binaryInput6,
-          scheduled_time: debouncedScheduledTime6,
-          result: result,
-          file_name: fileName6,
-          upload_time: uploadTime6,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
+
+     
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
@@ -2157,6 +2442,7 @@ const Nist_tests = () => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              setShowRedButton6(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 18) * 100);
               setLoadingProgress6(prev => (percent > prev ? percent : prev));
@@ -2171,8 +2457,10 @@ const Nist_tests = () => {
             scheduled_time: debouncedScheduledTime6,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName6
           });
-
+          setShowRedButton6(false);
           clearInterval(progressInterval);
           setLoadingProgress6(100);
           setResult6(response.data);
@@ -2216,19 +2504,28 @@ const Nist_tests = () => {
 
     const upsertProgress = async (progress, userId, result = null) => {
       const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 7,
+        scheduled_time: debouncedScheduledTime7,
+        result: result,
+        file_name: fileName7,
+        upload_time: uploadTime7,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent7) {
+        payload.binary_data = binaryInput7;
+        binaryDataSent7 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: 7,
-          binary_data: binaryInput7,
-          scheduled_time: debouncedScheduledTime7,
-          result: result,
-          file_name: fileName7,
-          upload_time: uploadTime7,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
+
+      
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
@@ -2248,6 +2545,7 @@ const Nist_tests = () => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              setShowRedButton7(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 18) * 100);
               setLoadingProgress7(prev => (percent > prev ? percent : prev));
@@ -2262,8 +2560,10 @@ const Nist_tests = () => {
             scheduled_time: debouncedScheduledTime7,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName7
           });
-
+          setShowRedButton7(false);
           clearInterval(progressInterval);
           setLoadingProgress7(100);
           setResult7(response.data);
@@ -2308,19 +2608,28 @@ const Nist_tests = () => {
 
     const upsertProgress = async (progress, userId, result = null) => {
       const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 8,
+        scheduled_time: debouncedScheduledTime8,
+        result: result,
+        file_name: fileName8,
+        upload_time: uploadTime8,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent8) {
+        payload.binary_data = binaryInput8;
+        binaryDataSent8 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: 8,
-          binary_data: binaryInput8,
-          scheduled_time: debouncedScheduledTime8,
-          result: result,
-          file_name: fileName8,
-          upload_time: uploadTime8,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
+
+     
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
@@ -2340,6 +2649,7 @@ const Nist_tests = () => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              setShowRedButton8(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 18) * 100);
               setLoadingProgress8(prev => (percent > prev ? percent : prev));
@@ -2354,8 +2664,10 @@ const Nist_tests = () => {
             scheduled_time: debouncedScheduledTime8,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName8
           });
-
+          setShowRedButton8(false);
           clearInterval(progressInterval);
           setLoadingProgress8(100);
           setResult8(response.data);
@@ -2399,19 +2711,27 @@ const Nist_tests = () => {
 
     const upsertProgress = async (progress, userId, result = null) => {
       const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 9,
+        scheduled_time: debouncedScheduledTime9,
+        result: result,
+        file_name: fileName9,
+        upload_time: uploadTime9,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent9) {
+        payload.binary_data = binaryInput9;
+        binaryDataSent9 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: 9,
-          binary_data: binaryInput9,
-          scheduled_time: debouncedScheduledTime9,
-          result: result,
-          file_name: fileName9,
-          upload_time: uploadTime9,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
+
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
@@ -2431,6 +2751,7 @@ const Nist_tests = () => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              setShowRedButton9(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 18) * 100);
               setLoadingProgress9(prev => (percent > prev ? percent : prev));
@@ -2445,8 +2766,10 @@ const Nist_tests = () => {
             scheduled_time: debouncedScheduledTime9,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName9
           });
-
+          setShowRedButton9(false);
           clearInterval(progressInterval);
           setLoadingProgress9(100);
           setResult9(response.data);
@@ -2488,19 +2811,29 @@ const Nist_tests = () => {
     let progressInterval;
 
     const upsertProgress = async (progress, userId, result = null) => {
+      const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 10,
+        scheduled_time: debouncedScheduledTime10,
+        result: result,
+        file_name: fileName10,
+        upload_time: uploadTime10,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent10) {
+        payload.binary_data = binaryInput10;
+        binaryDataSent10 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput10,
-          scheduled_time: debouncedScheduledTime10,
-          result: result,
-          file_name: fileName10,
-          upload_time: uploadTime10,
-          progress: progress,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(payload);
+
+      
       if (error) console.error('Error upserting progress in Supabase:', error);
     };
 
@@ -2518,6 +2851,7 @@ const Nist_tests = () => {
           progressInterval = setInterval(async () => {
             try {
               const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+              setShowRedButton10(false);
               const completed = progressRes.data.progress || 0;
               const percent = Math.round((completed / 18) * 100);
               setLoadingProgress10(prev => (percent > prev ? percent : prev));
@@ -2532,8 +2866,10 @@ const Nist_tests = () => {
             scheduled_time: debouncedScheduledTime10,
             job_id: currentJobId,
             line: lineNo,
+            user_id: userId,
+            file_name: fileName10
           });
-
+          setShowRedButton10(false);
           clearInterval(progressInterval);
           setLoadingProgress10(100);
           setResult10(response.data);
@@ -3371,18 +3707,33 @@ const Nist_tests = () => {
                       onClick={handleFileUpload}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
+                        position: "relative",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
+
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -3675,17 +4026,30 @@ const Nist_tests = () => {
                       onClick={handleFileUpload2}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton2 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -3980,17 +4344,30 @@ const Nist_tests = () => {
                       onClick={handleFileUpload3}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton3 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -4285,17 +4662,30 @@ const Nist_tests = () => {
                       onClick={handleFileUpload4}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton4 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -4590,17 +4980,30 @@ const Nist_tests = () => {
                       onClick={handleFileUpload5}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton5 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -4895,17 +5298,30 @@ const Nist_tests = () => {
                       onClick={handleFileUpload6}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton6 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5200,17 +5616,30 @@ const Nist_tests = () => {
                       onClick={handleFileUpload7}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton7 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5502,17 +5931,30 @@ const Nist_tests = () => {
                       onClick={handleFileUpload8}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton8 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5805,17 +6247,30 @@ const Nist_tests = () => {
                       onClick={handleFileUpload9}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton9 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -6110,17 +6565,30 @@ const Nist_tests = () => {
                       onClick={handleFileUpload10}
 
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
                       Upload Binary File
+                      {showRedButton10 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"

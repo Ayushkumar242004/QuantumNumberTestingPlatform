@@ -740,36 +740,55 @@ const Dieharder_tests = () => {
     };
   }, [scheduledTime10]);
 
-
+  const [showRedButton, setShowRedButton] = useState(false);
+  const [showRedButton2, setShowRedButton2] = useState(false);
+  const [showRedButton3, setShowRedButton3] = useState(false);
+  const [showRedButton4, setShowRedButton4] = useState(false);
+  const [showRedButton5, setShowRedButton5] = useState(false);
+  const [showRedButton6, setShowRedButton6] = useState(false);
+  const [showRedButton7, setShowRedButton7] = useState(false);
+  const [showRedButton8, setShowRedButton8] = useState(false);
+  const [showRedButton9, setShowRedButton9] = useState(false);
+  const [showRedButton10, setShowRedButton10] = useState(false);
 
   const handleFileUpload = () => {
+    setShowRedButton(true)
     fileInputRef.current.click();
   };
   const handleFileUpload2 = () => {
+    setShowRedButton2(true)
     fileInputRef2.current.click();
   };
   const handleFileUpload3 = () => {
+    setShowRedButton3(true)
     fileInputRef3.current.click();
   };
   const handleFileUpload4 = () => {
+    setShowRedButton4(true)
     fileInputRef4.current.click();
   };
   const handleFileUpload5 = () => {
+    setShowRedButton5(true)
     fileInputRef5.current.click();
   };
   const handleFileUpload6 = () => {
+    setShowRedButton6(true)
     fileInputRef6.current.click();
   };
   const handleFileUpload7 = () => {
+    setShowRedButton7(true)
     fileInputRef7.current.click();
   };
   const handleFileUpload8 = () => {
+    setShowRedButton8(true)
     fileInputRef8.current.click();
   };
   const handleFileUpload9 = () => {
+    setShowRedButton9(true)
     fileInputRef_nine.current.click();
   };
   const handleFileUpload10 = () => {
+    setShowRedButton10(true)
     fileInputRef10.current.click();
   };
 
@@ -786,7 +805,11 @@ const Dieharder_tests = () => {
   
   const handleFileChange = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton(false);
+      return;
+    }
   
     setSelectedFile(selectedFile);
   
@@ -871,8 +894,23 @@ const isTxt = fileName.endsWith(".txt");
 
   const handleFileChange2 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton2(false);
+      return;
+    }
     setSelectedFile2(selectedFile);
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+const isBin = fileName.endsWith(".bin");
+const isTxt = fileName.endsWith(".txt");
+
+
+  
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
+      return;
+    }
+  
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -896,23 +934,36 @@ const isTxt = fileName.endsWith(".txt");
 
     // Set new filename
     setFileName2(selectedFile.name);
-    const currentTime = new Date().toISOString();
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime2(currentTime);
+    
     try {
-      const buffer = await selectedFile.arrayBuffer();
-      const bytes = new Uint8Array(buffer);
-      const binaryData = Array.from(bytes)
-        .map(byte => byte.toString(2).padStart(8, '0'))
-        .join('');
-
-
-      setBinaryInput2(binaryData);
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput2(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
+          return;
+        }
+        setBinaryInput2(binaryString);
+      }
     } catch (error) {
-      console.error("❌ Error reading binary file:", error);
+      console.error("❌ Error reading file:", error);
       alert("Failed to extract binary data from the file.");
       return;
     }
-
+   
     // Supabase cleanup
     try {
       localStorage.setItem('resultFetchedFromSupabase3', 'false');
@@ -933,8 +984,29 @@ const isTxt = fileName.endsWith(".txt");
 
   const handleFileChange3 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton3(false);
+      return;
+    }
+    setSelectedFile3(selectedFile);
+  
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+const isBin = fileName.endsWith(".bin");
+const isTxt = fileName.endsWith(".txt");
 
+
+  
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
+      return;
+    }
+  
+    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+      alert("Warning: The selected file is too large. Please choose a smaller file.");
+      return;
+    }
+  
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -959,17 +1031,36 @@ const isTxt = fileName.endsWith(".txt");
     // Set new filename
     setFileName3(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    setUploadTime3(currentTime);
 
-      setBinaryInput3(textData);
-
-      const currentTime = new Date().toISOString();
-      setUploadTime3(currentTime);
+    try {
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput3(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
+          return;
+        }
+        setBinaryInput3(binaryString);
+      }
+    } catch (error) {
+      console.error("❌ Error reading file:", error);
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
+  
 
       // Remove previous Supabase row for line 3
       try {
@@ -990,16 +1081,29 @@ const isTxt = fileName.endsWith(".txt");
 
       // Reset the file input
       event.target.value = "";
-    };
-
-    reader.readAsArrayBuffer(selectedFile);
   };
 
 
   const handleFileChange4 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton4(false);
+      return;
+    }
+    setSelectedFile4(selectedFile);
+  
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+const isBin = fileName.endsWith(".bin");
+const isTxt = fileName.endsWith(".txt");
 
+
+  
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
+      return;
+    }
+  
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1024,18 +1128,35 @@ const isTxt = fileName.endsWith(".txt");
     // Set new filename
     setFileName4(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    setUploadTime4(currentTime);
 
-      setBinaryInput4(textData);
-
-      const currentTime = new Date().toISOString();
-      setUploadTime4(currentTime);
-
+    try {
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput4(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
+          return;
+        }
+        setBinaryInput4(binaryString);
+      }
+    } catch (error) {
+      console.error("❌ Error reading file:", error);
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
       // Remove previous Supabase row for line 4
       try {
         localStorage.setItem('resultFetchedFromSupabased4', 'false');
@@ -1055,16 +1176,29 @@ const isTxt = fileName.endsWith(".txt");
 
       // Reset the file input
       event.target.value = "";
-    };
-
-    reader.readAsArrayBuffer(selectedFile);
   };
 
 
   const handleFileChange5 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton5(false);
+      return;
+    }
+    setSelectedFile5(selectedFile);
+  
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+const isBin = fileName.endsWith(".bin");
+const isTxt = fileName.endsWith(".txt");
 
+
+  
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
+      return;
+    }
+  
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1089,17 +1223,35 @@ const isTxt = fileName.endsWith(".txt");
     // Set new filename
     setFileName5(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    setUploadTime5(currentTime);
 
-      setBinaryInput5(textData);
-
-      const currentTime = new Date().toISOString();
-      setUploadTime5(currentTime);
+    try {
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput5(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
+          return;
+        }
+        setBinaryInput5(binaryString);
+      }
+    } catch (error) {
+      console.error("❌ Error reading file:", error);
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
 
       // Remove previous Supabase row for line 5
       try {
@@ -1120,16 +1272,28 @@ const isTxt = fileName.endsWith(".txt");
 
       // Reset the file input
       event.target.value = "";
-    };
-
-    reader.readAsArrayBuffer(selectedFile);
   };
 
 
   const handleFileChange6 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton6(false);
+      return;
+    }
+    setSelectedFile6(selectedFile);
+  
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+const isBin = fileName.endsWith(".bin");
+const isTxt = fileName.endsWith(".txt");
 
+
+  
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1154,17 +1318,35 @@ const isTxt = fileName.endsWith(".txt");
     // Set new filename
     setFileName6(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    setUploadTime6(currentTime);
 
-      setBinaryInput6(textData);
-
-      const currentTime = new Date().toISOString();
-      setUploadTime6(currentTime);
+    try {
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput6(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
+          return;
+        }
+        setBinaryInput6(binaryString);
+      }
+    } catch (error) {
+      console.error("❌ Error reading file:", error);
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
 
       // Remove previous Supabase row for line 6
       try {
@@ -1185,16 +1367,28 @@ const isTxt = fileName.endsWith(".txt");
 
       // Reset the file input
       event.target.value = "";
-    };
-
-    reader.readAsArrayBuffer(selectedFile);
   };
 
 
   const handleFileChange7 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton7(false);
+      return;
+    }
+    setSelectedFile7(selectedFile);
+  
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+const isBin = fileName.endsWith(".bin");
+const isTxt = fileName.endsWith(".txt");
 
+
+  
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1219,18 +1413,35 @@ const isTxt = fileName.endsWith(".txt");
     // Set new filename
     setFileName7(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    setUploadTime7(currentTime);
 
-      setBinaryInput7(textData);
-
-      const currentTime = new Date().toISOString();
-      setUploadTime7(currentTime);
-
+    try {
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput7(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
+          return;
+        }
+        setBinaryInput7(binaryString);
+      }
+    } catch (error) {
+      console.error("❌ Error reading file:", error);
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
       // Remove previous Supabase row for line 7
       try {
         localStorage.setItem('resultFetchedFromSupabased7', 'false');
@@ -1250,16 +1461,28 @@ const isTxt = fileName.endsWith(".txt");
 
       // Reset the file input
       event.target.value = "";
-    };
-
-    reader.readAsArrayBuffer(selectedFile);
   };
 
 
   const handleFileChange8 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton8(false);
+      return;
+    }
+    setSelectedFile8(selectedFile);
+  
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+const isBin = fileName.endsWith(".bin");
+const isTxt = fileName.endsWith(".txt");
 
+
+  
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1284,47 +1507,75 @@ const isTxt = fileName.endsWith(".txt");
     // Set new filename
     setFileName8(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      setBinaryInput8(textData);
-
-      const currentTime = new Date().toISOString();
-      setUploadTime8(currentTime);
-
-      // Remove previous Supabase row for line 8
-      try {
-        localStorage.setItem('resultFetchedFromSupabased8', 'false');
-        const { error: deleteError } = await supabase
-          .from('results3')
-          .delete()
-          .match({ line: 8, user_id: userId });
-
-        setLoadingProgress8(0);
-        if (deleteError) {
-
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    setUploadTime8(currentTime);
+    try {
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput8(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
           return;
         }
-      } catch (err) {
-        console.error("Unexpected error in handleFileChange8:", err);
+        setBinaryInput8(binaryString);
       }
+    } catch (error) {
+      console.error("❌ Error reading file:", error);
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
+  
+    try {
+      localStorage.setItem('resultFetchedFromSupabased8', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 8, user_id: userId });
 
-      // Reset the file input
-      event.target.value = "";
-    };
+      setLoadingProgress8(0);
+      if (deleteError) {
 
-    reader.readAsArrayBuffer(selectedFile);
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleFileChange8:", err);
+    }
+
+    event.target.value = "";
+
   };
 
 
   const handleFileChange9 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton9(false);
+      return;
+    }
+    setSelectedFile9(selectedFile);
+  
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+const isBin = fileName.endsWith(".bin");
+const isTxt = fileName.endsWith(".txt");
 
+
+  
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
+      return;
+    }
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1349,47 +1600,73 @@ const isTxt = fileName.endsWith(".txt");
     // Set new filename
     setFileName9(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      setBinaryInput9(textData);
-
-      const currentTime = new Date().toISOString();
-      setUploadTime9(currentTime);
-
-      // Remove previous Supabase row for line 9
-      try {
-        localStorage.setItem('resultFetchedFromSupabased9', 'false');
-        const { error: deleteError } = await supabase
-          .from('results3')
-          .delete()
-          .match({ line: 9, user_id: userId });
-
-        setLoadingProgress9(0);
-        if (deleteError) {
-
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    setUploadTime9(currentTime);
+  
+    try {
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput9(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
           return;
         }
-      } catch (err) {
-        console.error("Unexpected error in handleFileChange9:", err);
+        setBinaryInput9(binaryString);
       }
-
-      // Reset the file input
-      event.target.value = "";
-    };
-
-    reader.readAsArrayBuffer(selectedFile);
+    } catch (error) {
+      console.error("❌ Error reading file:", error);
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
+  
+    // Supabase cleanup
+    try {
+      localStorage.setItem('resultFetchedFromSupabase3', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 9, user_id: userId });
+  
+      if (deleteError) {
+        return;
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+    }
+  
+    event.target.value = "";
   };
 
 
   const handleFileChange10 = async (event) => {
     const selectedFile = event.target.files[0];
-    if (!selectedFile) return; // Handle cases where no file is selected
+    if (!selectedFile) {
+      // User closed the file picker without choosing a file
+      setShowRedButton10(false);
+      return;
+    }
+    setSelectedFile10(selectedFile);
+  
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
 
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
+      return;
+    }
+  
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1414,40 +1691,52 @@ const isTxt = fileName.endsWith(".txt");
     // Set new filename
     setFileName10(selectedFile.name);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      const decoder = new TextDecoder();
-      const textData = decoder.decode(byteArray).trim();
-
-      setBinaryInput10(textData);
-
-      const currentTime = new Date().toISOString();
-      setUploadTime10(currentTime);
-
-      // Remove previous Supabase row for line 10
-      try {
-        localStorage.setItem('resultFetchedFromSupabased10', 'false');
-        const { error: deleteError } = await supabase
-          .from('results3')
-          .delete()
-          .match({ line: 10, user_id: userId });
-
-        setLoadingProgress10(0);
-        if (deleteError) {
-
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    setUploadTime10(currentTime);
+  
+    try {
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput10(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
           return;
         }
-      } catch (err) {
-        console.error("Unexpected error in handleFileChange10:", err);
+        setBinaryInput10(binaryString);
       }
-
-      // Reset the file input
-      event.target.value = "";
-    };
-
-    reader.readAsArrayBuffer(selectedFile);
+    } catch (error) {
+      console.error("❌ Error reading file:", error);
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
+  
+    // Supabase cleanup
+    try {
+      localStorage.setItem('resultFetchedFromSupabase3', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 10, user_id: userId });
+  
+      if (deleteError) {
+        return;
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+    }
+  
+    event.target.value = "";
   };
 
   useEffect(() => {
@@ -1476,6 +1765,7 @@ const isTxt = fileName.endsWith(".txt");
                 setResult({ final_result: row.result });
                 setFileName(row.file_name);
                 setUploadTime(row.upload_time);
+                setLoadingProgress(row.progress);
                 break;
               case 2:
                 setBinaryInput2(row.binary_data);
@@ -1483,6 +1773,7 @@ const isTxt = fileName.endsWith(".txt");
                 setResult2({ final_result: row.result });
                 setFileName2(row.file_name);
                 setUploadTime2(row.upload_time);
+                setLoadingProgress2(row.progress);
                 break;
               case 3:
                 setBinaryInput3(row.binary_data);
@@ -1497,6 +1788,7 @@ const isTxt = fileName.endsWith(".txt");
                 setResult4({ final_result: row.result });
                 setFileName4(row.file_name);
                 setUploadTime4(row.upload_time);
+                setLoadingProgress3(row.progress);
                 break;
               case 5:
                 setBinaryInput5(row.binary_data);
@@ -1504,6 +1796,7 @@ const isTxt = fileName.endsWith(".txt");
                 setResult5({ final_result: row.result });
                 setFileName5(row.file_name);
                 setUploadTime5(row.upload_time);
+                setLoadingProgress4(row.progress);
                 break;
               case 6:
                 setBinaryInput6(row.binary_data);
@@ -1511,6 +1804,7 @@ const isTxt = fileName.endsWith(".txt");
                 setResult6({ final_result: row.result });
                 setFileName6(row.file_name);
                 setUploadTime6(row.upload_time);
+                setLoadingProgress6(row.progress);
                 break;
               case 7:
                 setBinaryInput7(row.binary_data);
@@ -1518,6 +1812,7 @@ const isTxt = fileName.endsWith(".txt");
                 setResult7({ final_result: row.result });
                 setFileName7(row.file_name);
                 setUploadTime7(row.upload_time);
+                setLoadingProgress7(row.progress);
                 break;
               case 8:
                 setBinaryInput8(row.binary_data);
@@ -1525,6 +1820,7 @@ const isTxt = fileName.endsWith(".txt");
                 setResult8({ final_result: row.result });
                 setFileName8(row.file_name);
                 setUploadTime8(row.upload_time);
+                setLoadingProgress8(row.progress);
                 break;
               case 9:
                 setBinaryInput9(row.binary_data);
@@ -1532,6 +1828,7 @@ const isTxt = fileName.endsWith(".txt");
                 setResult9({ final_result: row.result });
                 setFileName9(row.file_name);
                 setUploadTime9(row.upload_time);
+                setLoadingProgress9(row.progress);
                 break;
               case 10:
                 setBinaryInput10(row.binary_data);
@@ -1539,6 +1836,7 @@ const isTxt = fileName.endsWith(".txt");
                 setResult10({ final_result: row.result });
                 setFileName10(row.file_name);
                 setUploadTime10(row.upload_time);
+                setLoadingProgress10(row.progress);
                 break;
               default:
                 break;
@@ -1637,6 +1935,18 @@ const isTxt = fileName.endsWith(".txt");
   const binaryInsertedRef9 = useRef(false);
   const binaryInsertedRef10 = useRef(false);
 
+
+  let binaryDataSent = false;
+  let binaryDataSent2 = false;
+  let binaryDataSent3 = false;
+  let binaryDataSent4 = false;
+  let binaryDataSent5 = false;
+  let binaryDataSent6 = false;
+  let binaryDataSent7 = false;
+  let binaryDataSent8 = false;
+  let binaryDataSent9 = false;
+  let binaryDataSent10 = false;
+
   useEffect(() => {
     if (!binaryInput || !debouncedScheduledTime) {
       return;
@@ -1681,27 +1991,32 @@ const isTxt = fileName.endsWith(".txt");
       }
 
       const progressPercentage = progress;
+
       const payload = {
         user_id: userId,
-        line: lineNo,
+        line: 1,
         scheduled_time: debouncedScheduledTime,
         result: result,
         file_name: fileName,
         upload_time: uploadTime,
-        binary_data: binaryInsertedRef.current ? binaryInput : null, // Only send once
         progress: progressPercentage,
-        updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      const { error: upsertError } = await supabase
-        .from("results3")
+      // Only send binary_data once
+      if (!binaryDataSent) {
+        payload.binary_data = binaryInput;
+        binaryDataSent = true; // Mark as sent
+      }
+
+      const { error } = await supabase
+        .from('results3')
         .upsert(payload);
 
-      if (upsertError) {
-        console.error("❌ Error storing progress in Supabase:", upsertError);
-      } else {
-        console.log(`✅ Progress ${progress}% upserted successfully.`);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
     };
 
     const startProcess = async () => {
@@ -1720,7 +2035,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 5) * 100);
+              setShowRedButton(false);
+              const percent = Math.round((completed / 20) * 100);
               console.log(`Polled progress: ${percent}%`);
               setLoadingProgress((prev) => (percent > prev ? percent : prev));
               await upsertProgress(percent, userId);
@@ -1747,7 +2063,7 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+          setShowRedButton(false);
           clearInterval(progressInterval);
           setLoadingProgress(100);
           setResult(response.data);
@@ -1826,27 +2142,32 @@ const isTxt = fileName.endsWith(".txt");
         }
       }
       const progressPercentage = progress;
+
       const payload = {
         user_id: userId,
-        line: lineNo,
+        line: 2,
         scheduled_time: debouncedScheduledTime2,
         result: result,
         file_name: fileName2,
         upload_time: uploadTime2,
-        binary_data: binaryInsertedRef2.current ? binaryInput : null, // Only send once
         progress: progressPercentage,
-        updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      const { error: upsertError } = await supabase
-        .from("results3")
+      // Only send binary_data once
+      if (!binaryDataSent2) {
+        payload.binary_data = binaryInput2;
+        binaryDataSent2 = true; // Mark as sent
+      }
+
+      const { error } = await supabase
+        .from('results3')
         .upsert(payload);
 
-      if (upsertError) {
-        console.error("❌ Error storing progress in Supabase:", upsertError);
-      } else {
-        console.log(`✅ Progress ${progress}% upserted successfully.`);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
     };
 
     const startProcess2 = async () => {
@@ -1866,7 +2187,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 4) * 100);
+              setShowRedButton2(false);
+              const percent = Math.round((completed / 20) * 100);
               setLoadingProgress2(prev => (percent > prev ? percent : prev));
               await upsertProgress2(percent, userId);
             } catch (err) {
@@ -1881,16 +2203,17 @@ const isTxt = fileName.endsWith(".txt");
             .replace("T", " ")
             .split(".")[0];
 
-          formData.append("scheduled_time", formattedScheduledTime);
+          formData.append("scheduled_time", debouncedScheduledTime2);
           formData.append("job_id", currentJobId);
           formData.append("line", lineNo);
-
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName2);
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+          setShowRedButton2(false);
           clearInterval(progressInterval);
           setLoadingProgress2(100);
           setResult2(response.data);
@@ -1933,24 +2256,59 @@ const isTxt = fileName.endsWith(".txt");
     let progressInterval;
 
     const upsertProgress3 = async (progress, userId, result = null) => {
+      
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile3 && !binaryInsertedRef3.current) {
+        try {
+          const fileReader = new FileReader();
+
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile3);
+          });
+
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+
+          binaryInsertedRef3.current = true; // ✅ Prevent future inserts
+          console.log("binary string", binaryString);
+
+        } catch (err) {
+          console.error("❌ Error reading binary file:", err);
+          return;
+        }
+      }
+      
       const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 3,
+        scheduled_time: debouncedScheduledTime3,
+        result: result,
+        file_name: fileName3,
+        upload_time: uploadTime3,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent3) {
+        payload.binary_data = binaryInput3;
+        binaryDataSent3 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results3')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput3,
-          scheduled_time: debouncedScheduledTime3,
-          result: result,
-          file_name: fileName3,
-          upload_time: uploadTime3,
-          progress: progressPercentage,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(payload);
 
-      if (error) {
-        console.error('Error storing progress in Supabase (line 3):', error);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
+    
     };
 
     const startProcess3 = async () => {
@@ -1970,7 +2328,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 22) * 100);
+              setShowRedButton3(false);
+              const percent = Math.round((completed / 20) * 100);
               setLoadingProgress3(prev => (percent > prev ? percent : prev));
               await upsertProgress3(percent, userId);
             } catch (err) {
@@ -1978,15 +2337,25 @@ const isTxt = fileName.endsWith(".txt");
             }
           }, 1000);
 
+          const formData = new FormData();
+          formData.append("file", selectedFile3);
+          const formattedScheduledTime = new Date(debouncedScheduledTime3)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+
+          formData.append("scheduled_time", debouncedScheduledTime3);
+          formData.append("job_id", currentJobId);
+          formData.append("line", lineNo);
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName3);
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
-            {
-              binary_data: binaryInput3,
-              scheduled_time: debouncedScheduledTime3,
-              job_id: currentJobId,
-              line: lineNo,
-            }
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
+          setShowRedButton3(false);
+         
 
           clearInterval(progressInterval);
           setLoadingProgress3(100);
@@ -2031,23 +2400,57 @@ const isTxt = fileName.endsWith(".txt");
     let progressInterval;
 
     const upsertProgress4 = async (progress, userId, result = null) => {
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile4 && !binaryInsertedRef4.current) {
+        try {
+          const fileReader = new FileReader();
+
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile4);
+          });
+
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+
+          binaryInsertedRef4.current = true; // ✅ Prevent future inserts
+          console.log("binary string", binaryString);
+
+        } catch (err) {
+          console.error("❌ Error reading binary file:", err);
+          return;
+        }
+      }
+      const progressPercentage = progress;
+
+      const payload = {
+        user_id: userId,
+        line: 4,
+        scheduled_time: debouncedScheduledTime4,
+        result: result,
+        file_name: fileName4,
+        upload_time: uploadTime4,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent4) {
+        payload.binary_data = binaryInput4;
+        binaryDataSent4 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results3')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput4,
-          scheduled_time: debouncedScheduledTime4,
-          result: result,
-          file_name: fileName4,
-          upload_time: uploadTime4,
-          progress: progress,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(payload);
 
-      if (error) {
-        console.error('Error storing progress in Supabase (line 4):', error);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
     };
 
     const startProcess4 = async () => {
@@ -2067,7 +2470,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 22) * 100);
+              setShowRedButton4(false);
+              const percent = Math.round((completed / 20) * 100);
               setLoadingProgress4(prev => (percent > prev ? percent : prev));
               await upsertProgress4(percent, userId);
             } catch (err) {
@@ -2075,16 +2479,24 @@ const isTxt = fileName.endsWith(".txt");
             }
           }, 1000);
 
+          const formData = new FormData();
+          formData.append("file", selectedFile4);
+          const formattedScheduledTime = new Date(debouncedScheduledTime4)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+
+          formData.append("scheduled_time", debouncedScheduledTime4);
+          formData.append("job_id", currentJobId);
+          formData.append("line", lineNo);
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName4);
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
-            {
-              binary_data: binaryInput4,
-              scheduled_time: debouncedScheduledTime4,
-              job_id: currentJobId,
-              line: lineNo,
-            }
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+          setShowRedButton4(false);
           clearInterval(progressInterval);
           setLoadingProgress4(100);
           setResult4(response.data);
@@ -2127,23 +2539,58 @@ const isTxt = fileName.endsWith(".txt");
     let progressInterval;
 
     const upsertProgress5 = async (progress, userId, result = null) => {
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile5 && !binaryInsertedRef5.current) {
+        try {
+          const fileReader = new FileReader();
+
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile5);
+          });
+
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+
+          binaryInsertedRef5.current = true; // ✅ Prevent future inserts
+          console.log("binary string", binaryString);
+
+        } catch (err) {
+          console.error("❌ Error reading binary file:", err);
+          return;
+        }
+      }
+
+      const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 5,
+        scheduled_time: debouncedScheduledTime5,
+        result: result,
+        file_name: fileName5,
+        upload_time: uploadTime5,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent5) {
+        payload.binary_data = binaryInput5;
+        binaryDataSent5 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results3')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput5,
-          scheduled_time: debouncedScheduledTime5,
-          result: result,
-          file_name: fileName5,
-          upload_time: uploadTime5,
-          progress: progress,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(payload);
 
-      if (error) {
-        console.error('Error storing progress in Supabase (line 5):', error);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
+     
     };
 
     const startProcess5 = async () => {
@@ -2163,7 +2610,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 22) * 100);
+              setShowRedButton5(false);
+              const percent = Math.round((completed / 20) * 100);
               setLoadingProgress5(prev => (percent > prev ? percent : prev));
               await upsertProgress5(percent, userId);
             } catch (err) {
@@ -2171,16 +2619,24 @@ const isTxt = fileName.endsWith(".txt");
             }
           }, 1000);
 
+          const formData = new FormData();
+          formData.append("file", selectedFile5);
+          const formattedScheduledTime = new Date(debouncedScheduledTime5)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+
+          formData.append("scheduled_time", debouncedScheduledTime5);
+          formData.append("job_id", currentJobId);
+          formData.append("line", lineNo);
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName5);
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
-            {
-              binary_data: binaryInput5,
-              scheduled_time: debouncedScheduledTime5,
-              job_id: currentJobId,
-              line: lineNo,
-            }
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+          setShowRedButton5(false);
           clearInterval(progressInterval);
           setLoadingProgress5(100);
           setResult5(response.data);
@@ -2223,23 +2679,58 @@ const isTxt = fileName.endsWith(".txt");
     let progressInterval;
 
     const upsertProgress6 = async (progress, userId, result = null) => {
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile6 && !binaryInsertedRef6.current) {
+        try {
+          const fileReader = new FileReader();
+
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile6);
+          });
+
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+
+          binaryInsertedRef6.current = true; // ✅ Prevent future inserts
+          console.log("binary string", binaryString);
+
+        } catch (err) {
+          console.error("❌ Error reading binary file:", err);
+          return;
+        }
+      }
+
+      const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 6,
+        scheduled_time: debouncedScheduledTime6,
+        result: result,
+        file_name: fileName6,
+        upload_time: uploadTime6,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent6) {
+        payload.binary_data = binaryInput6;
+        binaryDataSent6 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results3')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput6,
-          scheduled_time: debouncedScheduledTime6,
-          result: result,
-          file_name: fileName6,
-          upload_time: uploadTime6,
-          progress: progress,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(payload);
 
-      if (error) {
-        console.error('Error storing progress in Supabase (line 6):', error);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
+
     };
 
     const startProcess6 = async () => {
@@ -2259,7 +2750,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 22) * 100);
+              setShowRedButton6(false);
+              const percent = Math.round((completed / 20) * 100);
               setLoadingProgress6(prev => (percent > prev ? percent : prev));
               await upsertProgress6(percent, userId);
             } catch (err) {
@@ -2267,16 +2759,24 @@ const isTxt = fileName.endsWith(".txt");
             }
           }, 1000);
 
+          const formData = new FormData();
+          formData.append("file", selectedFile6);
+          const formattedScheduledTime = new Date(debouncedScheduledTime6)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+
+          formData.append("scheduled_time", debouncedScheduledTime6);
+          formData.append("job_id", currentJobId);
+          formData.append("line", lineNo);
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName6);
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
-            {
-              binary_data: binaryInput6,
-              scheduled_time: debouncedScheduledTime6,
-              job_id: currentJobId,
-              line: lineNo,
-            }
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+          setShowRedButton6(false);
           clearInterval(progressInterval);
           setLoadingProgress6(100);
           setResult6(response.data);
@@ -2319,23 +2819,58 @@ const isTxt = fileName.endsWith(".txt");
     let progressInterval;
 
     const upsertProgress7 = async (progress, userId, result = null) => {
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile7 && !binaryInsertedRef7.current) {
+        try {
+          const fileReader = new FileReader();
+
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile7);
+          });
+
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+
+          binaryInsertedRef7.current = true; // ✅ Prevent future inserts
+          console.log("binary string", binaryString);
+
+        } catch (err) {
+          console.error("❌ Error reading binary file:", err);
+          return;
+        }
+      }
+
+      const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 7,
+        scheduled_time: debouncedScheduledTime7,
+        result: result,
+        file_name: fileName7,
+        upload_time: uploadTime7,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent7) {
+        payload.binary_data = binaryInput7;
+        binaryDataSent7 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results3')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput7,
-          scheduled_time: debouncedScheduledTime7,
-          result: result,
-          file_name: fileName7,
-          upload_time: uploadTime7,
-          progress: progress,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(payload);
 
-      if (error) {
-        console.error('Error storing progress in Supabase (line 7):', error);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
+      
     };
 
     const startProcess7 = async () => {
@@ -2355,7 +2890,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 22) * 100);
+              setShowRedButton7(false);
+              const percent = Math.round((completed / 20) * 100);
               setLoadingProgress7(prev => (percent > prev ? percent : prev));
               await upsertProgress7(percent, userId);
             } catch (err) {
@@ -2363,16 +2899,24 @@ const isTxt = fileName.endsWith(".txt");
             }
           }, 1000);
 
+          const formData = new FormData();
+          formData.append("file", selectedFile7);
+          const formattedScheduledTime = new Date(debouncedScheduledTime7)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+
+          formData.append("scheduled_time", debouncedScheduledTime7);
+          formData.append("job_id", currentJobId);
+          formData.append("line", lineNo);
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName7);
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
-            {
-              binary_data: binaryInput7,
-              scheduled_time: debouncedScheduledTime7,
-              job_id: currentJobId,
-              line: lineNo,
-            }
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+          setShowRedButton7(false);
           clearInterval(progressInterval);
           setLoadingProgress7(100);
           setResult7(response.data);
@@ -2415,23 +2959,58 @@ const isTxt = fileName.endsWith(".txt");
     let progressInterval;
 
     const upsertProgress8 = async (progress, userId, result = null) => {
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile8 && !binaryInsertedRef8.current) {
+        try {
+          const fileReader = new FileReader();
+
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile8);
+          });
+
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+
+          binaryInsertedRef8.current = true; // ✅ Prevent future inserts
+          console.log("binary string", binaryString);
+
+        } catch (err) {
+          console.error("❌ Error reading binary file:", err);
+          return;
+        }
+      }
+
+      const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 8,
+        scheduled_time: debouncedScheduledTime8,
+        result: result,
+        file_name: fileName8,
+        upload_time: uploadTime8,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent8) {
+        payload.binary_data = binaryInput8;
+        binaryDataSent8 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results3')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput8,
-          scheduled_time: debouncedScheduledTime8,
-          result: result,
-          file_name: fileName8,
-          upload_time: uploadTime8,
-          progress: progress,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(payload);
 
-      if (error) {
-        console.error('Error storing progress in Supabase (line 8):', error);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
+     
     };
 
     const startProcess8 = async () => {
@@ -2451,7 +3030,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 22) * 100);
+              setShowRedButton8(false);
+              const percent = Math.round((completed / 20) * 100);
               setLoadingProgress8(prev => (percent > prev ? percent : prev));
               await upsertProgress8(percent, userId);
             } catch (err) {
@@ -2459,16 +3039,24 @@ const isTxt = fileName.endsWith(".txt");
             }
           }, 1000);
 
+          const formData = new FormData();
+          formData.append("file", selectedFile8);
+          const formattedScheduledTime = new Date(debouncedScheduledTime8)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+
+          formData.append("scheduled_time", debouncedScheduledTime8);
+          formData.append("job_id", currentJobId);
+          formData.append("line", lineNo);
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName8);
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
-            {
-              binary_data: binaryInput8,
-              scheduled_time: debouncedScheduledTime8,
-              job_id: currentJobId,
-              line: lineNo,
-            }
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+          setShowRedButton8(false);
           clearInterval(progressInterval);
           setLoadingProgress8(100);
           setResult8(response.data);
@@ -2511,23 +3099,57 @@ const isTxt = fileName.endsWith(".txt");
     let progressInterval;
 
     const upsertProgress9 = async (progress, userId, result = null) => {
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile9 && !binaryInsertedRef9.current) {
+        try {
+          const fileReader = new FileReader();
+
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile9);
+          });
+
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+
+          binaryInsertedRef9.current = true; // ✅ Prevent future inserts
+          console.log("binary string", binaryString);
+
+        } catch (err) {
+          console.error("❌ Error reading binary file:", err);
+          return;
+        }
+      }
+
+      const progressPercentage = progress;
+      const payload = {
+        user_id: userId,
+        line: 9,
+        scheduled_time: debouncedScheduledTime9,
+        result: result,
+        file_name: fileName9,
+        upload_time: uploadTime9,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent9) {
+        payload.binary_data = binaryInput9;
+        binaryDataSent9 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results3')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput9,
-          scheduled_time: debouncedScheduledTime9,
-          result: result,
-          file_name: fileName9,
-          upload_time: uploadTime9,
-          progress: progress,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(payload);
 
-      if (error) {
-        console.error('Error storing progress in Supabase (line 9):', error);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
     };
 
     const startProcess9 = async () => {
@@ -2547,7 +3169,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 22) * 100);
+              setShowRedButton9(false);
+              const percent = Math.round((completed / 20) * 100);
               setLoadingProgress9(prev => (percent > prev ? percent : prev));
               await upsertProgress9(percent, userId);
             } catch (err) {
@@ -2555,16 +3178,24 @@ const isTxt = fileName.endsWith(".txt");
             }
           }, 1000);
 
+          const formData = new FormData();
+          formData.append("file", selectedFile9);
+          const formattedScheduledTime = new Date(debouncedScheduledTime9)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+
+          formData.append("scheduled_time", debouncedScheduledTime9);
+          formData.append("job_id", currentJobId);
+          formData.append("line", lineNo);
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName9);
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
-            {
-              binary_data: binaryInput9,
-              scheduled_time: debouncedScheduledTime9,
-              job_id: currentJobId,
-              line: lineNo,
-            }
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+          setShowRedButton9(false);
           clearInterval(progressInterval);
           setLoadingProgress9(100);
           setResult9(response.data);
@@ -2607,23 +3238,59 @@ const isTxt = fileName.endsWith(".txt");
     let progressInterval;
 
     const upsertProgress10 = async (progress, userId, result = null) => {
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile10 && !binaryInsertedRef10.current) {
+        try {
+          const fileReader = new FileReader();
+
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile10);
+          });
+
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+
+          binaryInsertedRef10.current = true; // ✅ Prevent future inserts
+          console.log("binary string", binaryString);
+
+        } catch (err) {
+          console.error("❌ Error reading binary file:", err);
+          return;
+        }
+      }
+
+      const progressPercentage = progress;
+
+      const payload = {
+        user_id: userId,
+        line: 10,
+        scheduled_time: debouncedScheduledTime10,
+        result: result,
+        file_name: fileName10,
+        upload_time: uploadTime10,
+        progress: progressPercentage,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only send binary_data once
+      if (!binaryDataSent10) {
+        payload.binary_data = binaryInput10;
+        binaryDataSent10 = true; // Mark as sent
+      }
+
       const { error } = await supabase
         .from('results3')
-        .upsert({
-          user_id: userId,
-          line: lineNo,
-          binary_data: binaryInput10,
-          scheduled_time: debouncedScheduledTime10,
-          result: result,
-          file_name: fileName10,
-          upload_time: uploadTime10,
-          progress: progress,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(payload);
 
-      if (error) {
-        console.error('Error storing progress in Supabase (line 10):', error);
-      }
+
+        if (error) {
+          console.error('Error storing progress in Supabase:', error);
+        }
+     
     };
 
     const startProcess10 = async () => {
@@ -2643,7 +3310,8 @@ const isTxt = fileName.endsWith(".txt");
                 `http://localhost:8000/get_progress_dieharder/${currentJobId}`
               );
               const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 22) * 100);
+              setShowRedButton10(false);
+              const percent = Math.round((completed / 20) * 100);
               setLoadingProgress10(prev => (percent > prev ? percent : prev));
               await upsertProgress10(percent, userId);
             } catch (err) {
@@ -2651,16 +3319,26 @@ const isTxt = fileName.endsWith(".txt");
             }
           }, 1000);
 
+          const formData = new FormData();
+          formData.append("file", selectedFile10);
+          const formattedScheduledTime = new Date(debouncedScheduledTime10)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+
+          formData.append("scheduled_time", debouncedScheduledTime10);
+          formData.append("job_id", currentJobId);
+      
+          formData.append("line", lineNo);
+          formData.append("user_id", userId);
+          formData.append("file_name", fileName10);
+          
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
-            {
-              binary_data: binaryInput10,
-              scheduled_time: debouncedScheduledTime10,
-              job_id: currentJobId,
-              line: lineNo,
-            }
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
-
+          setShowRedButton10(false);
           clearInterval(progressInterval);
           setLoadingProgress10(100);
           setResult10(response.data);
@@ -2770,7 +3448,7 @@ const isTxt = fileName.endsWith(".txt");
           const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 3) * 100);
+          const percent = Math.round((completed / 20) * 100);
           setLoadingProgressGr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           console.error("Graph progress fetch error:", err);
@@ -3738,17 +4416,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload .bin File
+                      Upload binary file
+                      {showRedButton && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -4068,17 +4759,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload2}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload file
+                      Upload binary file
+                      {showRedButton2 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -4399,17 +5103,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload3}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload bin file
+                      Upload binary file
+                      {showRedButton3 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -4729,17 +5446,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload4}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload bin file
+                      Upload binary file
+                      {showRedButton4 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5059,17 +5789,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload5}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload bin file
+                      Upload binary file
+                      {showRedButton5 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5389,17 +6132,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload6}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload bin file
+                      Upload binary file
+                      {showRedButton6 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -5719,17 +6475,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload7}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload bin file
+                      Upload binary file
+                      {showRedButton7 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -6048,17 +6817,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload8}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload bin file
+                      Upload binary file
+                      {showRedButton8 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -6378,17 +7160,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload9}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload bin file
+                      Upload binary file
+                      {showRedButton9 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"
@@ -6708,17 +7503,30 @@ const isTxt = fileName.endsWith(".txt");
                       variant="contained"
                       onClick={handleFileUpload10}
                       sx={{
-                        backgroundColor: colors.greenAccent[400],
+                        backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
                         "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
+                          backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload bin file
+                      Upload binary file
+                      {showRedButton10 && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
                     </Button>
                     <input
                       type="file"

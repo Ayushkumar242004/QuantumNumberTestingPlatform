@@ -8,6 +8,40 @@
 
 unsigned char *epsilon;
 
+
+
+#include <gsl/gsl_sf_gamma.h>
+
+#define MAX_BITS 120000000  // 25 million bits (for 24MB binary file)
+#define P_THRESHOLD 0.01
+
+
+double chi_square_uniformity(double *p_values, int num_streams, int bins) {
+    int *counts = (int *)calloc(bins, sizeof(int));
+    if (counts == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        int bin = (int)(p_values[i] * bins);
+        if (bin == bins) bin = bins - 1;
+        counts[bin]++;
+    }
+
+    double expected = (double)num_streams / bins;
+    double chi_square = 0.0;
+
+    for (int i = 0; i < bins; i++) {
+        double diff = counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    free(counts);
+    double p_uniform = gsl_sf_gamma_inc_Q((bins - 1) / 2.0, chi_square / 2.0);
+    return p_uniform;
+}
+
 static const double	rel_error = 1E-12;
 
 double MACHEP = 1.11022302462515654042E-16;		// 2**-53
@@ -334,16 +368,17 @@ cephes_normal(double x)
 
 	return( result);
 }
-
-void RandomExcursionsVariant(int n)
+double RandomExcursionsVariant(int n, unsigned char *epsilon)
 {
-    int i, p, J, x, constraint, count, *S_k;
+    int i, p, J, x, constraint, count;
+    int *S_k;
     int stateX[18] = { -9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     double p_value, best_p = 0.0;
 
     if ((S_k = (int *)calloc(n, sizeof(int))) == NULL) {
-        return;
+        return 0;
     }
+
     J = 0;
     S_k[0] = 2 * (int)epsilon[0] - 1;
     for (i = 1; i < n; i++) {
@@ -358,7 +393,7 @@ void RandomExcursionsVariant(int n)
     if (J < constraint) {
         printf("%f\n", 0.0);
         free(S_k);
-        return;
+        return 0;
     } else {
         for (p = 0; p <= 17; p++) {
             x = stateX[p];
@@ -373,36 +408,82 @@ void RandomExcursionsVariant(int n)
             }
         }
     }
-    printf("%f\n", best_p);
+    return best_p;
     free(S_k);
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <n> <bit_stream...>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <stream_length> <binary_file>\n", argv[0]);
         return 1;
     }
 
-    int n = atoi(argv[1]);
-    epsilon = (unsigned char *)malloc(n * sizeof(unsigned char));
-    if (epsilon == NULL) {
-        fprintf(stderr, "Memory allocation failed.\n");
+    int n = atoi(argv[1]);  // length of each bitstream
+    if (n <= 0) {
+        fprintf(stderr, "Invalid stream length: must be > 0\n");
         return 1;
     }
-    FILE *fp = fopen(argv[2], "r");
+
+    char *filename = argv[2];
+    FILE *fp = fopen(filename, "r");
     if (!fp) {
         fprintf(stderr, "Failed to open input file.\n");
+        return 1;
+    }
+
+    unsigned char *epsilon = (unsigned char *)malloc(MAX_BITS * sizeof(unsigned char));
+    if (!epsilon) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        fclose(fp);
+        return 1;
+    }
+
+    int bit, total_bits = 0;
+    while (fscanf(fp, "%1d", &bit) == 1 && total_bits < MAX_BITS) {
+        if (bit != 0 && bit != 1) {
+            fprintf(stderr, "Invalid bit in input file.\n");
+            free(epsilon);
+            fclose(fp);
+            return 1;
+        }
+        epsilon[total_bits++] = (unsigned char)bit;
+    }
+    fclose(fp);
+
+    if (total_bits < n) {
+        fprintf(stderr, "Not enough bits for one complete bitstream.\n");
         free(epsilon);
         return 1;
     }
-    for (int i = 0; i < n; i++) {
-            int temp;
-fscanf(fp, "%d", &temp);
-epsilon[i] = (unsigned char)temp;
-    }
-    fclose(fp);
-    RandomExcursionsVariant(n);
 
+    int num_streams = total_bits / n;
+    double *p_values = (double *)malloc(num_streams * sizeof(double));
+    if (!p_values) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        free(epsilon);
+        return 1;
+    }
+
+    int pass_count = 0;
+    for (int i = 0; i < num_streams; i++) {
+        double p = RandomExcursionsVariant(n, &epsilon[i * n]);
+        p_values[i] = p;
+        if (p >= P_THRESHOLD) {
+            pass_count++;
+        }
+    }
+
+    double proportion = (double)pass_count / num_streams;
+    int proportion_pass = proportion >= 0.96;
+
+    double chi_p = chi_square_uniformity(p_values, num_streams, 10);
+    int uniformity_pass = chi_p >= P_THRESHOLD;
+
+    int final_pass = (proportion_pass && uniformity_pass) ? 1 : 0;
+
+    printf("%.6f %d\n", chi_p, final_pass);
+
+    free(p_values);
     free(epsilon);
     return 0;
 }

@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -81,16 +82,33 @@ vector<uint8_t> bitstring_to_bytes(const string& bitstr, bool& valid) {
     }
     return result;
 }
-
 int main(int argc, char* argv[]) {
-    if (argc != 2) return 1;
+    if (argc != 2) {
+        cerr << "Usage: markovTest_exec <file_path>\n";
+        return 0;
+    }
 
-    string bit_input = argv[1];
+    string file_path = argv[1];
+
+    // Read file content
+    ifstream infile(file_path);
+    if (!infile) {
+        cerr << "Error: Could not open file " << file_path << "\n";
+        return 0;
+    }
+
+    string bit_input;
+    infile >> bit_input;  // Reads as one continuous string (0s and 1s)
+    infile.close();
+
     bool is_valid = true;
     vector<uint8_t> bit_data = bitstring_to_bytes(bit_input, is_valid);
-    if (!is_valid || bit_data.size() <= 1) {
-        cout << -1.0 << endl;
-        return 1;
+
+    int n = (int)bit_data.size(); // Compute n from data length
+
+    if (!is_valid || n <= 1) {
+      
+        return 0;
     }
 
     double min_entropy = markov_test(bit_data.data(), bit_data.size(), 1, "markov");

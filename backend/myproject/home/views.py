@@ -103,6 +103,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+import tempfile
+import os
+import re
+
 
 @csrf_exempt
 def run_frequency_test(request):
@@ -152,6 +156,7 @@ def run_frequency_test(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
 @csrf_exempt  # Remove this in production or secure with CSRF token handling
 def run_frequency_block_test(request):
     if request.method == 'POST':
@@ -167,7 +172,7 @@ def run_frequency_block_test(request):
             epsilon_list = [str(int(b)) for b in binary_data]
             n = str(len(epsilon_list))
 
-            exe_path = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/block_freq_exec"
+            exe_path = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/block_freq_exec1"
             
             with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
                 tmp.write(' '.join(binary_data))
@@ -184,14 +189,22 @@ def run_frequency_block_test(request):
             if result.returncode != 0:
                 return JsonResponse({"error": "C program failed", "stderr": result.stderr}, status=500)
 
+            stdout_text = result.stdout.strip()
+            parts = stdout_text.split()
+
+            if len(parts) != 2:
+                return JsonResponse({"error": "Unexpected output format", "stdout": stdout_text}, status=500)
+
             try:
-                p_value = float(result.stdout.strip())
-                return JsonResponse({
-                    "p_value": p_value,
-                    "result": "random number" if p_value >= 0.01 else "non-random number"
-                })
+                p_value = float(parts[0])
+                passed_flag = int(parts[1])
             except ValueError:
-                return JsonResponse({"error": "Invalid output from executable", "stdout": result.stdout}, status=500)
+                return JsonResponse({"error": "Invalid numeric output", "stdout": stdout_text}, status=500)
+
+            return JsonResponse({
+                "p_value": p_value,
+                "result": "random-number" if passed_flag == 1 else "non-random number"
+            })
 
         except FileNotFoundError:
             return JsonResponse({"error": "Executable not found. Check path."}, status=500)
@@ -217,7 +230,7 @@ def run_runs_test(request):
             n = str(len(epsilon_list))
 
             # Absolute path to the compiled executable (.exe)
-            exe_path = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/runs"
+            exe_path = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/runs1"
 
             # Build the command line arguments: ./runs_test_exec.exe <n> <bit_0> <bit_1> ... <bit_n-1>
             with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
@@ -2622,7 +2635,6 @@ def get_progress_graph(request, job_id):
 import subprocess
 from matplotlib.patches import Patch
 
-
 @csrf_exempt
 def create_graph_nist90b(request):
     # Parse incoming JSON
@@ -2634,59 +2646,86 @@ def create_graph_nist90b(request):
         print('Error parsing JSON:', e)
         return HttpResponse("Invalid JSON data.", status=400)
 
+    cache.set(f"{job_id}_progressGraph90b", 1)
     if not binary_data:
         return HttpResponse("Binary data is required.", status=400)
 
     test_p_values = {}
-    cache.set(f"{job_id}_progressGraph90b", 0)
 
-    def run_test_exe(exe_path, binary_data):
-        try:
-            result = subprocess.run([exe_path, binary_data], capture_output=True, text=True, shell=False)
-            if result.returncode != 0:
-                print(f"Error in {exe_path}, Return Code: {result.returncode}")
-                return -1
-            output = result.stdout.strip()
-            print(f"{exe_path} output:", output)
-            if not output:
-                return -1
-            p_value = float(output)
-            return p_value if 0 <= p_value <= 1 else -1
-        except Exception as e:
-            print(f"Exception in {exe_path}:", e)
-            return -1
+    epsilon_list = [b for b in binary_data if b in '01']  # keep only bits
+    n = len(epsilon_list)  # correct length from filtered data
 
-    def safe_test_call(exe_path, test_name, binary_data):
-        try:
-            p_value = run_test_exe(exe_path, binary_data)
-            print(f'{test_name} p_value:', p_value)
-            return 0 if p_value in [-1, None] else p_value
-        except Exception as e:
-            print(f'Error in {test_name}:', e)
-            return 0
+    def run_test_exe(exe_path, test_name):
+                tmp_filename = None
+                try:
+                    if not os.path.isfile(exe_path):
+                        print(f"Executable for {test_name} not found at {exe_path}")
+                        return -1, "non-random number"
+                    if not os.access(exe_path, os.X_OK):
+                        print(f"Executable for {test_name} is not executable.")
+                        return -1, "non-random number"
 
+                    # Write binary data exactly as expected by the executable
+                    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                        tmp.write(''.join(epsilon_list))  # no spaces unless required
+                        tmp_filename = tmp.name
+
+                    # Pass n and file path to executable
+                    cmd = [exe_path, tmp_filename]
+                    result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+
+                    os.remove(tmp_filename)
+
+                    if result.returncode not in [0, 1]:
+                        print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
+                        return None, "non-random number"
+
+                    output = result.stdout.strip()
+                    print(f"{test_name} output:", output)
+
+                    min_entropy = float(output) if output else 0.0
+                    result_text = "random number" if result.returncode == 1 else "non-random number"
+                    return min_entropy, result_text
+
+                except Exception as e:
+                    print(f"Exception in {test_name}:", e)
+                    return None, "non-random number"
+
+    cache.set(f"{job_id}_progressGraph90b", 2)
+    def safe_test_call(exe_path, test_name):
+                try:
+                    min_entropy, result_text = run_test_exe(exe_path, test_name)
+                    return (min_entropy if min_entropy is not None else 0.0), result_text
+                except Exception as e:
+                    print(f"Error in {test_name}:", e)
+                    return 0.0, "non-random number"
+
+    cache.set(f"{job_id}_progressGraph90b", 3)
     # Dictionary of test display name → (label, path to .exe)
     tests_executables = {
-         'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
-         'Markov Test': ('markov',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
-         'Compression Test': ('compression',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
-         'LZ78Y Test': ('l278y',"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
-         'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
-         'MCW Test': ('mcw',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
-         'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
-         'Chi-Square Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/chiSquareTest_exec"),
-         'Permutation Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/permutationTest_exec"),
-         'Longest-Substring Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lrsTest_exec"),
-    }
+                'Collision Test': ('col', os.path.join(TESTS_DIR, "collisionTest_exec")),
+                'Markov Test': ('markov', os.path.join(TESTS_DIR, "markovTest_exec")),
+                'Compression Test': ('compression', os.path.join(TESTS_DIR, "compressionTest_exec")),
+                'LZ78Y Test': ('l278y', os.path.join(TESTS_DIR, "l278yTest_exec1")),
+                'Lag Test': ('lag', os.path.join(TESTS_DIR, "lagTest_exec")),
+                'MCW Test': ('mcw', os.path.join(TESTS_DIR, "multiMcwTest_exec")),
+                'MMC Test': ('mmc', os.path.join(TESTS_DIR, "multiMmcTest_exec")),
+                'Chi-Square Test': ('chi', os.path.join(TESTS_DIR, "chiSquareTest_exec")),
+                'Permutation Test': ('perm', os.path.join(TESTS_DIR, "permutationTest_exec")),
+                'Longest-Substring Test': ('lrs', os.path.join(TESTS_DIR, "lrsTest_exec")),
+            }
 
     # Run each executable
     for i, (display_name, (label, exe_path)) in enumerate(tests_executables.items(), start=1):
-        test_p_values[display_name] = safe_test_call(exe_path, label, binary_data)
-        cache.set(f"{job_id}_progressGraph90b", i)
+        min_entropy, result_text = safe_test_call(exe_path, display_name)
+        test_p_values[display_name] = min_entropy
+        cache.set(f"{job_id}_progressGraph90b", i+4)
 
     # Filter valid p-values
     valid_tests = {k: (0 if v is None or v > 1 else v) for k, v in test_p_values.items()}
     print('Valid tests:', valid_tests)
+
+    cache.set(f"{job_id}_progressGraph90b", 14)
 
     if not valid_tests:
         return HttpResponse("No valid test results to plot.", status=400)
@@ -2716,7 +2755,7 @@ def create_graph_nist90b(request):
     plt.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
     plt.close(fig)
-    cache.set(f"{job_id}_progressGraph90b", 7)
+    cache.set(f"{job_id}_progressGraph90b", 15)
     
     return HttpResponse(buf, content_type='image/png')
 
@@ -2731,122 +2770,132 @@ def get_progress_graphDieharder(request, job_id):
     progress = cache.get(f"{job_id}_progressGraphDieharder", 0)
     return JsonResponse({"progress": int(progress)})
 
-# @csrf_exempt
-# def create_graph_dieharder(request):
-#     if request.method != 'POST':
-#         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
-
-#     # 1️⃣ Read file
-#     file = request.FILES.get('file')
-#     if not file:
-#         return JsonResponse({"error": "No file uploaded"}, status=400)
-
-#     job_id = request.POST.get('job_id', str(uuid.uuid4()))
-
-#     cache.set(f"{job_id}_progressGraphDieharder", 0)
-
-#     # 2️⃣ Write binary file to disk
-#     with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
-#         for chunk in file.chunks():
-#             tmpfile.write(chunk)
-#         tmpfile_path = tmpfile.name
-
-#     dieharder_test_ids = ["2","1"]
-
-#     test_p_values = {}
-#     m = 2
-
-#     for idx, test_id in enumerate(dieharder_test_ids, start=1):
-#         command = [
-#             "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
-#             "-d", test_id,
-#             "-g", "66",
-#             "-f", tmpfile_path
-#         ]
-
-#         p_value = None
-
-#         try:
-#             process = subprocess.run(
-#                 command,
-#                 stdout=subprocess.PIPE,
-#                 stderr=subprocess.PIPE,
-#                 universal_newlines=True,
-#                 timeout=300
-#             )
-#             output = process.stdout
-
-#             for line in output.splitlines():
-#                 line = line.strip()
-#                 if line.startswith("Kuiper KS: p ="):
-#                     try:
-#                         p_value = float(line.split("=")[1].strip())
-#                     except Exception:
-#                         p_value = None
-
-#             # If p_value is invalid, set to 0
-#             if p_value is None or p_value > 1 or p_value < 0:
-#                 p_value = 0
-
-#             test_p_values[f"Test {test_id}"] = p_value
-
-#         except subprocess.TimeoutExpired:
-#             test_p_values[f"Test {test_id}"] = 0  # Timeout treated as 0
-
-#         except Exception as e:
-#             test_p_values[f"Test {test_id}"] = 0  # Other errors treated as 0
-
-#         finally:
-#             cache.set(f"{job_id}_progressGraphDieharder", m)
-#             m += 1
-
-#     # Remove temp file
-#     if os.path.exists(tmpfile_path):
-#         os.remove(tmpfile_path)
-
-#     # 3️⃣ If no data, fail
-#     if not test_p_values:
-#         return JsonResponse({"error": "No valid p-values collected."}, status=400)
-
-#     # 4️⃣ Prepare data for plotting
-#     x_labels = list(test_p_values.keys())
-#     y_values = list(test_p_values.values())
-
-#     # 5️⃣ Create the plot
-#     fig, ax = plt.subplots(figsize=(16, 9))
-
-#     colors = ['green' if p > 0.01 else 'blue' for p in y_values]
-
-#     ax.bar(x_labels, y_values, color=colors)
-#     ax.axhline(y=0.01, color='red', linestyle='--', linewidth=2, label='p-value = 0.01')
-
-#     ax.set_xlabel('Dieharder Tests', fontsize=20)
-#     ax.set_ylabel('P-values', fontsize=20)
-#     ax.set_title('P-values of Dieharder Tests', fontsize=20)
-#     ax.set_yticks([i / 10.0 for i in range(0, 11)])
-#     ax.set_ylim(0, 1)
-#     plt.xticks(rotation=45, ha='right', fontsize=12)
-
-#     from matplotlib.patches import Patch
-#     legend_elements = [
-#         Patch(facecolor='green', edgecolor='green', label='Random (p > 0.01)'),
-#         Patch(facecolor='blue', edgecolor='blue', label='Non-random (p ≤ 0.01)'),
-#     ]
-#     ax.legend(handles=legend_elements, loc='upper right', prop={'size': 14})
-
-#     plt.tight_layout()
-#     cache.set(f"{job_id}_progressGraphDieharder", 3)
-
-#     # 6️⃣ Return PNG image
-#     buf = io.BytesIO()
-#     plt.savefig(buf, format='png', bbox_inches='tight')
-#     buf.seek(0)
-#     plt.close(fig)
-
-#     return HttpResponse(buf, content_type='image/png')
-
 @csrf_exempt
 def create_graph_dieharder(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+    # 1️⃣ Read file
+    file = request.FILES.get('file')
+    if not file:
+        return JsonResponse({"error": "No file uploaded"}, status=400)
+
+    job_id = request.POST.get('job_id', str(uuid.uuid4()))
+
+    cache.set(f"{job_id}_progressGraphDieharder", 1)
+
+    # 2️⃣ Write binary file to disk
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
+        for chunk in file.chunks():
+            tmpfile.write(chunk)
+        tmpfile_path = tmpfile.name
+
+    # ✅ Full list of Dieharder test IDs
+    dieharder_test_ids = [
+        "2","1","4","5","6","7","8","9","10","11","12",
+        "13","14","15","16","17"
+    ]
+
+    test_p_values = {}
+    m = 2
+
+    for idx, test_id in enumerate(dieharder_test_ids, start=1):
+        
+        command = [
+            "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
+            "-d", test_id,
+            "-g", "66",
+            "-f", tmpfile_path
+        ]
+
+        p_value = None
+
+        try:
+            process = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                timeout=300
+            )
+            output = process.stdout
+
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("Kuiper KS: p"):
+                    match = re.search(r"p\s*=\s*([^\s]+)", line)
+                    if match:
+                        val = match.group(1)
+                        try:
+                            p_value = float(val) if val.lower() != "nan" else 0.0
+                        except ValueError:
+                            p_value = 0.0
+
+            # If p_value is invalid, set to 0
+            if p_value is None or p_value > 1 or p_value < 0:
+                p_value = 0
+
+            test_p_values[f"Test id {test_id}"] = p_value
+
+        except subprocess.TimeoutExpired:
+            test_p_values[f"Test {test_id}"] = 0
+
+        except Exception as e:
+            test_p_values[f"Test {test_id}"] = 0
+
+        finally:
+            cache.set(f"{job_id}_progressGraphDieharder", m)
+            m += 1
+    
+    # Remove temp file
+    if os.path.exists(tmpfile_path):
+        os.remove(tmpfile_path)
+
+    # 3️⃣ If no data, fail
+    if not test_p_values:
+        return JsonResponse({"error": "No valid p-values collected."}, status=400)
+
+    cache.set(f"{job_id}_progressGraphDieharder", 19)
+    # 4️⃣ Prepare data for plotting
+    x_labels = list(test_p_values.keys())
+    y_values = list(test_p_values.values())
+
+    # 5️⃣ Create the plot
+    fig, ax = plt.subplots(figsize=(16, 9))
+
+    colors = ['green' if p > 0.01 else 'blue' for p in y_values]
+
+    ax.bar(x_labels, y_values, color=colors)
+    ax.axhline(y=0.01, color='red', linestyle='--', linewidth=2, label='p-value = 0.01')
+    
+    ax.set_xlabel('Dieharder Tests', fontsize=20)
+    ax.set_ylabel('P-values', fontsize=20)
+    ax.set_title('P-values of Dieharder Tests', fontsize=20)
+    ax.set_yticks([i / 10.0 for i in range(0, 11)])
+    ax.set_ylim(0, 1)
+    plt.xticks(rotation=45, ha='right', fontsize=12)
+
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor='green', edgecolor='green', label='Random (p > 0.01)'),
+        Patch(facecolor='blue', edgecolor='blue', label='Non-random (p ≤ 0.01)'),
+    ]
+    ax.legend(handles=legend_elements, loc='upper right', prop={'size': 14})
+
+    plt.tight_layout()
+    cache.set(f"{job_id}_progressGraphDieharder", 20)
+    
+    # 6️⃣ Return PNG image
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight')
+    buf.seek(0)
+    plt.close(fig)
+
+    return HttpResponse(buf, content_type='image/png')
+
+
+@csrf_exempt
+def create_graph_dieharder1(request):
     if request.method != 'POST':
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
@@ -3001,21 +3050,22 @@ def generate_pdf_report(request):
     cache.set(f"{job_id}_progressReport", 3)
 
     tests_executables = {
-        'Frequency Test': ('fre', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/freqTest_exec'),
-        'Frequency Block Test': ('freBlock', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/block_freq_exec'),
-        'Runs Test': ('runs', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/runs'),
-        'Longest One Block Test': ('oneBlock', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/longest_run_exec'),
-        'Approximate Entropy Test': ('appEntropy', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/approximate_entropy'),
-        'Linear Complexity Test': ('linComp', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/linear_comp_exec'),
-        'Non Overlapping Test': ('nonOver', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_non_overlapping'),
-        'Overlapping Test': ('over', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_exec'),
-        'Universal Test': ('univ', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/universal_exec'),
-        'Serial Test': ('serial', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/serial_exec'),
-        'Cusum Test': ('cusum', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/cusum_exec'),
-        'Random Excursion Test': ('re', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_exec'),
-        'Random Excursion Variant Test': ('rev', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_var_exec'),
-        'Binary Matrix Rank Test': ('rank', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/matrix_exec'),
-    }
+                'Frequency Test': ('fre', os.path.join(TESTS_DIR, "freqTest_exec")),
+                'Frequency Block Test': ('freBlock', os.path.join(TESTS_DIR, "block_freq_exec")),
+                'Runs Test': ('runs', os.path.join(TESTS_DIR, "runs")),
+                'Longest One Block Test': ('oneBlock', os.path.join(TESTS_DIR, "longest_run_exec")),
+                'Approximate Entropy Test': ('appEntropy', os.path.join(TESTS_DIR, "approximate_entropy")),
+                'Linear Complexity Test': ('linComp', os.path.join(TESTS_DIR, "linear_comp_exec")),
+                'Non Overlapping Test': ('nonOver', os.path.join(TESTS_DIR, "template_non_overlapping")),
+                'Overlapping Test': ('over', os.path.join(TESTS_DIR, "template_exec")),
+                'Universal Test': ('univ', os.path.join(TESTS_DIR, "universal_exec")),
+                'Serial Test': ('serial', os.path.join(TESTS_DIR, "serial_exec")),
+                'Cusum Test': ('cusum', os.path.join(TESTS_DIR, "cusum_exec")),
+                'Random Excursion Test': ('re', os.path.join(TESTS_DIR, "random_exec")),
+                'Random Excursion Variant Test': ('rev', os.path.join(TESTS_DIR, "random_var_exec")),
+                'Binary Matrix Rank Test': ('rank', os.path.join(TESTS_DIR, "matrix_exec")),
+                'DFT Test': ('dft', os.path.join(TESTS_DIR, "dft_exec")),
+            }
 
     test_results = {}
     x = 0
@@ -3038,7 +3088,7 @@ def generate_pdf_report(request):
     runs_text = result_text(test_results['Runs Test'])
     longest_run_of_ones_text = result_text(test_results['Longest One Block Test'])
     binary_matrix_rank_text = result_text(test_results['Binary Matrix Rank Test'])
-    # dft_text = result_text(test_results['DFT Test'])
+    dft_text = result_text(test_results['DFT Test'])
     non_overlapping_text = result_text(test_results['Non Overlapping Test'])
     overlapping_text = result_text(test_results['Overlapping Test'])
     maurers_universal_text = result_text(test_results['Universal Test'])
@@ -3073,7 +3123,7 @@ def generate_pdf_report(request):
         [Paragraph('5. Binary Matrix Rank Test', styles['Normal']), 
         str(round(test_results['Binary Matrix Rank Test'], 5)), binary_matrix_rank_text,
         Paragraph('6. Discrete Fourier Transform Test', styles['Normal']), 
-        '-', 'non-random number'],
+        str(round(test_results['DFT Test'], 5)), dft_text],
         [Paragraph('7. Non-overlapping Template Match', styles['Normal']), 
         str(round(test_results['Non Overlapping Test'], 5)), non_overlapping_text,
         Paragraph('8. Overlapping Template Matching Test', styles['Normal']), 
@@ -3255,7 +3305,6 @@ def get_progress_nist90b(request, job_id):
 
 from reportlab.platypus import ListFlowable, ListItem
 
-
 @csrf_exempt
 def generate_pdf_report_nist90b(request):
     global global_graph_image
@@ -3267,7 +3316,7 @@ def generate_pdf_report_nist90b(request):
     except json.JSONDecodeError as e:
         print('Error parsing JSON:', e)
         return HttpResponse("Invalid JSON data.", status=400)
-    cache.set(f"{job_id}_progressReport90b", 0)
+    cache.set(f"{job_id}_progressReport90b", 1)
 
     # Create an HttpResponse object with PDF headers
     graph_response = create_graph_nist90b(request)
@@ -3301,44 +3350,69 @@ def generate_pdf_report_nist90b(request):
     graph_space = Spacer(1, 0.0 * inch)
     cache.set(f"{job_id}_progressReport90b", 3)
 
+    epsilon_list = [b for b in binary_data if b in '01']  # keep only bits
+    n = len(epsilon_list)  # correct length from filtered data
+
+
     # --- NEW: Use .exe for all tests ---
     def run_test_exe(exe_path, test_name):
-        try:
-            cmd = [exe_path, binary_data]
-            result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
-            if result.returncode not in [0, 1]:
-                print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
-                return None, "non-random number"
-            output = result.stdout.strip()
-            print(f"{test_name} output:", output)
-            min_entropy = float(output) if output else 0.0
-            result_text = "random number" if result.returncode == 1 else "non-random number"
-            return min_entropy, result_text
-        except Exception as e:
-            print(f"Exception in {test_name}:", e)
-            return None, "non-random number"
+                tmp_filename = None
+                try:
+                    if not os.path.isfile(exe_path):
+                        print(f"Executable for {test_name} not found at {exe_path}")
+                        return -1, "non-random number"
+                    if not os.access(exe_path, os.X_OK):
+                        print(f"Executable for {test_name} is not executable.")
+                        return -1, "non-random number"
+
+                    # Write binary data exactly as expected by the executable
+                    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                        tmp.write(''.join(epsilon_list))  # no spaces unless required
+                        tmp_filename = tmp.name
+
+                    # Pass n and file path to executable
+                    cmd = [exe_path, tmp_filename]
+                    result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+
+                    os.remove(tmp_filename)
+
+                    if result.returncode not in [0, 1]:
+                        print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
+                        return None, "non-random number"
+
+                    output = result.stdout.strip()
+                    print(f"{test_name} output:", output)
+
+                    min_entropy = float(output) if output else 0.0
+                    result_text = "random number" if result.returncode == 1 else "non-random number"
+                    return min_entropy, result_text
+
+                except Exception as e:
+                    print(f"Exception in {test_name}:", e)
+                    return None, "non-random number"
+
 
     def safe_test_call(exe_path, test_name):
-        try:
-            min_entropy, result_text = run_test_exe(exe_path, test_name)
-            return (min_entropy if min_entropy is not None else 0.0), result_text
-        except Exception as e:
-            print(f"Error in {test_name}:", e)
-            return 0.0, "non-random number"
+                try:
+                    min_entropy, result_text = run_test_exe(exe_path, test_name)
+                    return (min_entropy if min_entropy is not None else 0.0), result_text
+                except Exception as e:
+                    print(f"Error in {test_name}:", e)
+                    return 0.0, "non-random number"
 
     # Paths to executables for each test
     tests_executables = {
-       'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
-         'Markov Test': ('markov',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
-         'Compression Test': ('compression',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
-         'LZ78Y Test': ('l278y',"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
-         'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
-         'MCW Test': ('mcw',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
-         'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
-         'Chi-Square Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/chiSquareTest_exec"),
-         'Permutation Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/permutationTest_exec"),
-         'Longest-Substring Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lrsTest_exec"),
-    }
+                'Collision Test': ('col', os.path.join(TESTS_DIR, "collisionTest_exec")),
+                'Markov Test': ('markov', os.path.join(TESTS_DIR, "markovTest_exec")),
+                'Compression Test': ('compression', os.path.join(TESTS_DIR, "compressionTest_exec")),
+                'LZ78Y Test': ('l278y', os.path.join(TESTS_DIR, "l278yTest_exec1")),
+                'Lag Test': ('lag', os.path.join(TESTS_DIR, "lagTest_exec")),
+                'MCW Test': ('mcw', os.path.join(TESTS_DIR, "multiMcwTest_exec")),
+                'MMC Test': ('mmc', os.path.join(TESTS_DIR, "multiMmcTest_exec")),
+                'Chi-Square Test': ('chi', os.path.join(TESTS_DIR, "chiSquareTest_exec")),
+                'Permutation Test': ('perm', os.path.join(TESTS_DIR, "permutationTest_exec")),
+                'Longest-Substring Test': ('lrs', os.path.join(TESTS_DIR, "lrsTest_exec")),
+            }
 
     test_results = {}
     passed_test_count = 0
@@ -3521,10 +3595,6 @@ def generate_pdf_report_nist90b(request):
 
     return response
 
-@csrf_exempt
-def get_progress_graph90b(request, job_id):
-    progress = cache.get(f"{job_id}_progressReport90b", 0)
-    return JsonResponse({"progress": int(progress)})
 
 @csrf_exempt
 def get_progress_ReportDieharder(request, job_id):
@@ -3583,27 +3653,33 @@ def generate_pdf_report_dieharder1(request):
     cache.set(f"{job_id}_progressReportDieharder", 3)
     x = 0  # Counter for random results
 
-    dieharder_test_ids = ["2"]
+    dieharder_test_ids = ["0","1","2","4","5","6","7","8","9","10","11","12","13","14","15","16","17"]
 
     cache.set(f"{job_id}_progressReportDieharder", 3)
     # Perform tests and increment x for each test that returns True
         # 1️⃣ Update this mapping with all test IDs you want to run and their labels
     test_id_name_map = {
-        
-        "1": "Overlapping Permutations",
-        "2": "Ranks of 31x31 Test",
-        "3": "Ranks of 32x32 Test",
-        "4": "Parking Lot Test",
-        "5": "Minimum Distance Test",
-        "6": "3D Spheres Test",
-        "7": "Craps Test",
-        "8": "Marsaglia-Tsang GCD Test",
-        "9": "OPSO Test",
-        "10": "OQSO Test",
-        "11": "DNA Test",
-        "12": "Count the Ones (Stream) Test",
-        
-    }
+    "0": "Diehard Birthdays Test",
+    "1": "Diehard Overlapping 5-Permutations Test",
+    "2": "Diehard Ranks of 31x31 Matrices Test",
+    # "3": "Diehard Ranks of 32x32 Matrices Test",
+    "4": "Diehard Ranks of 6x8 Matrices Test",
+    "5": "Diehard Bitstream Test",
+    "6": "Diehard OPSO Test",
+    "7": "Diehard OQSO Test",
+    "8": "Diehard DNA Test",
+    "9": "Diehard Count the 1s (Stream) Test",
+    "10": "Diehard Count the 1s (Byte) Test",
+    "11": "Diehard Parking Lot Test",
+    "12": "Diehard Minimum Distance (2D Circle) Test",
+    "13": "Diehard 3D Spheres Test",
+    "14": "Diehard Squeeze Test",
+    "15": "Diehard Overlapping Sums Test",
+    "16": "Diehard Runs Test",
+    "17": "Diehard Craps Test",
+    
+}
+
 
     dieharder_test_ids = list(test_id_name_map.keys())
 
@@ -3628,12 +3704,18 @@ def generate_pdf_report_dieharder1(request):
             )
             output = process.stdout
             for line in output.splitlines():
-                line = line.strip()
-                if line.startswith("Kuiper KS: p ="):
-                    try:
-                        p_value = float(line.split("=")[1].strip())
-                    except Exception:
-                        p_value = None
+                    line = line.strip()
+
+                    # Match p-value even with extra spaces or nan
+                    if line.startswith("Kuiper KS: p"):
+                        match = re.search(r"p\s*=\s*([^\s]+)", line)
+                        if match:
+                            val = match.group(1)
+                            try:
+                                p_value = float(val) if val.lower() != "nan" else 0.0
+                            except ValueError:
+                                p_value = 0.0
+
             if p_value is None or not (0 <= p_value <= 1):
                 p_value = 0
         except subprocess.TimeoutExpired:
@@ -3659,15 +3741,56 @@ def generate_pdf_report_dieharder1(request):
         final_text = "non-random number"
 
     data1 = [
-            [Paragraph('Test type', styles['Normal']), 'Result', 'Test type', 'Result'],
-            [Paragraph('1. Overlapping Permutations', styles['Normal']), test_results.get("Overlapping Permutations", "N/A"), Paragraph('2. Ranks of 31x31 Test', styles['Normal']), test_results.get("Ranks of 31x31 Test", "N/A")],
-            [Paragraph('3. Ranks of 32x32 Test', styles['Normal']), test_results.get("Ranks of 32x32 Test", "N/A"), Paragraph('4. Parking Lot Test', styles['Normal']), test_results.get("Parking Lot Test", "N/A")],
-            [Paragraph('5. Minimum Distance Test', styles['Normal']), test_results.get("Minimum Distance Test", "N/A"), Paragraph('6. 3D Spheres Test', styles['Normal']), test_results.get("3D Spheres Test", "N/A")],
-            [Paragraph('7. Craps Test', styles['Normal']), test_results.get("Craps Test", "N/A"), Paragraph('8. Marsaglia-Tsang GCD Test', styles['Normal']), test_results.get("Marsaglia-Tsang GCD Test", "N/A")],
-            [Paragraph('9. OPSO Test', styles['Normal']), test_results.get("OPSO Test", "N/A"), Paragraph('10. OQSO Test', styles['Normal']), test_results.get("OQSO Test", "N/A")],
-            [Paragraph('11. DNA Test', styles['Normal']), test_results.get("DNA Test", "N/A"), Paragraph('12. Count the Ones (Stream) Test', styles['Normal']), test_results.get("Count the Ones (Stream) Test", "N/A")],
-            [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, styles['Heading2'])],
-        ]
+    [Paragraph('Test type', styles['Normal']), 'Result',
+     Paragraph('Test type', styles['Normal']), 'Result'],
+
+    [Paragraph('0. Diehard Birthdays Test', styles['Normal']),
+     test_results.get("Diehard Birthdays Test", "N/A"),
+     Paragraph('1. Diehard Overlapping 5-Permutations Test', styles['Normal']),
+     test_results.get("Diehard Overlapping 5-Permutations Test", "N/A")],
+
+    [Paragraph('2. Diehard Ranks of 31x31 Matrices Test', styles['Normal']),
+     test_results.get("Diehard Ranks of 31x31 Matrices Test", "N/A"),
+     Paragraph('4. Diehard Ranks of 6x8 Matrices Test', styles['Normal']),
+     test_results.get("Diehard Ranks of 6x8 Matrices Test", "N/A")],
+
+    [Paragraph('5. Diehard Bitstream Test', styles['Normal']),
+     test_results.get("Diehard Bitstream Test", "N/A"),
+     Paragraph('6. Diehard OPSO Test', styles['Normal']),
+     test_results.get("Diehard OPSO Test", "N/A")],
+
+    [Paragraph('7. Diehard OQSO Test', styles['Normal']),
+     test_results.get("Diehard OQSO Test", "N/A"),
+     Paragraph('8. Diehard DNA Test', styles['Normal']),
+     test_results.get("Diehard DNA Test", "N/A")],
+
+    [Paragraph('9. Diehard Count the 1s (Stream) Test', styles['Normal']),
+     test_results.get("Diehard Count the 1s (Stream) Test", "N/A"),
+     Paragraph('10. Diehard Count the 1s (Byte) Test', styles['Normal']),
+     test_results.get("Diehard Count the 1s (Byte) Test", "N/A")],
+
+    [Paragraph('11. Diehard Parking Lot Test', styles['Normal']),
+     test_results.get("Diehard Parking Lot Test", "N/A"),
+     Paragraph('12. Diehard Minimum Distance (2D Circle) Test', styles['Normal']),
+     test_results.get("Diehard Minimum Distance (2D Circle) Test", "N/A")],
+
+    [Paragraph('13. Diehard 3D Spheres Test', styles['Normal']),
+     test_results.get("Diehard 3D Spheres Test", "N/A"),
+     Paragraph('14. Diehard Squeeze Test', styles['Normal']),
+     test_results.get("Diehard Squeeze Test", "N/A")],
+
+    [Paragraph('15. Diehard Overlapping Sums Test', styles['Normal']),
+     test_results.get("Diehard Overlapping Sums Test", "N/A"),
+     Paragraph('16. Diehard Runs Test', styles['Normal']),
+     test_results.get("Diehard Runs Test", "N/A")],
+
+    [Paragraph('17. Diehard Craps Test', styles['Normal']),
+     test_results.get("Diehard Craps Test", "N/A"), '', ''],
+
+    [Paragraph('Final Result', styles['Normal']),
+     Paragraph(final_text, styles['Heading2']), '', ''],
+]
+
 
 
 
@@ -4064,7 +4187,8 @@ def generate_pdf_report_dieharder(request):
     buffer.close()
 
     return response
-
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import HttpRequest
 
 @csrf_exempt
 def generate_pdf_report_server(request):
@@ -4080,21 +4204,56 @@ def generate_pdf_report_server(request):
     cache.set(f"{job_id}_progressReportServer", 0)
     binary_data = binary_data.replace('%0A', '').replace('%20', '').replace(' ', '').replace('\n', '').replace('\r', '')
 
+
+    binary_data = binary_data.replace('%0A', '').replace('%20', '').replace(' ', '').replace('\n', '').replace('\r', '')
+
+    print("1")
+    # ✅ Convert binary string to bytes
+    # bin_bytes = bytearray(int(b) for b in binary_data)
+
+    # # ✅ Create a temporary .bin file
+    # tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".bin")
+    # tmp_file.write(bin_bytes)
+    # tmp_file.flush()
+    # tmp_file.seek(0)
+
+    # # 2️⃣ Create Django UploadedFile
+    # uploaded_file = SimpleUploadedFile(
+    #     name="random.bin",
+    #     content=bin_bytes,
+    #     content_type="application/octet-stream"
+    # )
+
+    # # 3️⃣ Clone request and inject the file
+    # new_request = HttpRequest()
+    # new_request.method = "POST"
+    # new_request.FILES["file"] = uploaded_file
+    # new_request.POST = request.POST
+
+    
+
+    print("1")
     # Prepare binary data for .exe tests (NIST SP 800-22)
     epsilon_list = [str(int(b)) for b in binary_data]
     n = str(len(epsilon_list))
     cache.set(f"{job_id}_progressReportServer", 2)
+    print("2")
     # Generate graphs for all three test sets
     graph_response1 = create_graph(request)
     cache.set(f"{job_id}_progressReportServer", 3)
-    graph_response = create_graph_dieharder(request)
+    print("3")
+    graph_response = create_graph_dieharder1(request)
+
+    print("4")
     # cache.set(f"{job_id}_progressReportServer", 4)
     graph_response2 = create_graph_nist90b(request)
     cache.set(f"{job_id}_progressReportServer", 5)
+
     graph_buffer1 = graph_response1.content
     graph_buffer = graph_response.content
     graph_buffer2 = graph_response2.content
 
+    print("5")
     graph_image_io1 = BytesIO(graph_buffer1)
     graph_image_io = BytesIO(graph_buffer)
     graph_image_io2 = BytesIO(graph_buffer2)
@@ -4102,6 +4261,7 @@ def generate_pdf_report_server(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="report.pdf"'
 
+    print("6")
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4,
                             rightMargin=10, leftMargin=10,
@@ -4120,22 +4280,31 @@ def generate_pdf_report_server(request):
     bold_red_style = ParagraphStyle(
         'BoldRed', parent=styles['Normal'], fontSize=12, fontName='Helvetica-Bold', textColor='red'
     )
+    print("7")
     cache.set(f"{job_id}_progressReportServer", 6)
     def run_test_exe(exe_path, test_name):
         try:
-            cmd = [exe_path, n] + epsilon_list
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                tmp.write(' '.join(epsilon_list))
+                tmp_filename = tmp.name
+            cmd = [exe_path, str(n), tmp_filename]
             result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+                    
+            os.remove(tmp_filename)
+
             if result.returncode != 0:
                 print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
                 return -1
+
             output = result.stdout.strip()
             print(f"{test_name} output:", output)
+
             p_value = float(output)
             return p_value if 0 <= p_value <= 1 else -1
+
         except Exception as e:
             print(f"Exception in {test_name}:", e)
             return -1
-
     def safe_test_call(exe_path, test_name):
         try:
             p_value = run_test_exe(exe_path, test_name)
@@ -4176,26 +4345,45 @@ def generate_pdf_report_server(request):
         return 'random number' if p > 0.01 else 'non-random number'
 
     cache.set(f"{job_id}_progressReportServer",22)
-
+    print("8")
     l=23
     # --- NIST SP 800-90B (.exe) ---
     def run_test_exe_90b(exe_path, test_name):
-        try:
-            cmd = [exe_path, binary_data]
-            result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
-            if result.returncode not in [0, 1]:
-                print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
-                return None, "non-random number"
-            cache.set(f"{job_id}_progressReportServer", m)
-            m=m+1
-            output = result.stdout.strip()
-            print(f"{test_name} output:", output)
-            min_entropy = float(output) if output else 0.0
-            result_text = "random number" if result.returncode == 1 else "non-random number"
-            return min_entropy, result_text
-        except Exception as e:
-            print(f"Exception in {test_name}:", e)
-            return None, "non-random number"
+                tmp_filename = None
+                try:
+                    if not os.path.isfile(exe_path):
+                        print(f"Executable for {test_name} not found at {exe_path}")
+                        return -1, "non-random number"
+                    if not os.access(exe_path, os.X_OK):
+                        print(f"Executable for {test_name} is not executable.")
+                        return -1, "non-random number"
+
+                    # Write binary data exactly as expected by the executable
+                    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                        tmp.write(''.join(epsilon_list))  # no spaces unless required
+                        tmp_filename = tmp.name
+
+                    # Pass n and file path to executable
+                    cmd = [exe_path, tmp_filename]
+                    result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+
+                    os.remove(tmp_filename)
+
+                    if result.returncode not in [0, 1]:
+                        print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
+                        return None, "non-random number"
+
+                    output = result.stdout.strip()
+                    print(f"{test_name} output:", output)
+
+                    min_entropy = float(output) if output else 0.0
+                    result_text = "random number" if result.returncode == 1 else "non-random number"
+                    return min_entropy, result_text
+
+                except Exception as e:
+                    print(f"Exception in {test_name}:", e)
+                    return None, "non-random number"
+
 
     def safe_test_call_90b(exe_path, test_name):
         try:
@@ -4204,16 +4392,21 @@ def generate_pdf_report_server(request):
         except Exception as e:
             print(f"Error in {test_name}:", e)
             return 0.0, "non-random number"
-
+        
     nist90b_executables = {
-        'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
-        'Markov Test': ('markov',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
-        'Compression Test': ('compression',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
-        'LZ78Y Test': ('l278y',"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
-        'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
-        'MCW Test': ('mcw',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
-        'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
-    }
+                'Collision Test': ('col', os.path.join(TESTS_DIR, "collisionTest_exec")),
+                'Markov Test': ('markov', os.path.join(TESTS_DIR, "markovTest_exec")),
+                'Compression Test': ('compression', os.path.join(TESTS_DIR, "compressionTest_exec")),
+                'LZ78Y Test': ('l278y', os.path.join(TESTS_DIR, "l278yTest_exec1")),
+                'Lag Test': ('lag', os.path.join(TESTS_DIR, "lagTest_exec")),
+                'MCW Test': ('mcw', os.path.join(TESTS_DIR, "multiMcwTest_exec")),
+                'MMC Test': ('mmc', os.path.join(TESTS_DIR, "multiMmcTest_exec")),
+                'Chi-Square Test': ('chi', os.path.join(TESTS_DIR, "chiSquareTest_exec")),
+                'Permutation Test': ('perm', os.path.join(TESTS_DIR, "permutationTest_exec")),
+                'Longest-Substring Test': ('lrs', os.path.join(TESTS_DIR, "lrsTest_exec")),
+            }
+
+    print("9")
     cache.set(f"{job_id}_progressReportServer", 31)
     nist90b_results = {}
     nist90b_passed = 0
@@ -4233,28 +4426,31 @@ def generate_pdf_report_server(request):
     cache.set(f"{job_id}_progressReportServer", 33)
 
     # --- Dieharder Tests Execution ---
-    dieharder_test_ids = [
-        "2","0","1","4"
-        #   "1", "0", "3", "4", "5", "6", "7", "8", "9",
-        # "10", "11", "12", "13", "14", "15", "100", "101", "102", "103"
-    ]
+    dieharder_test_ids = ["0","1","2","4","5","6","7","8","9","10","11","12","13","14","15","16","17"]
+
 
     test_id_name_map = {
-        "0": "Birthday Spacing",
-        "1": "Overlapping Permutations",
-        "2": "Ranks 31x31",
-        "3": "Ranks 32x32",
-        "4": "Parking Lot",
-        "5": "Minimum Distance",
-        "6": "Spheres 3D",
-        "7": "Craps",
-        "8": "Marsaglia-Tsang GCD",
-        "9": "OPSO",
-        "10": "OQSO",
-        "11": "DNA",
-        "12": "Count the 1s (Stream)",
+        "0": "Diehard Birthdays Test",
+        "1": "Diehard Overlapping 5-Permutations Test",
+        "2": "Diehard Ranks of 31x31 Matrices Test",
+        # "3": "Diehard Ranks of 32x32 Matrices Test",
+        "4": "Diehard Ranks of 6x8 Matrices Test",
+        "5": "Diehard Bitstream Test",
+        "6": "Diehard OPSO Test",
+        "7": "Diehard OQSO Test",
+        "8": "Diehard DNA Test",
+        "9": "Diehard Count the 1s (Stream) Test",
+        "10": "Diehard Count the 1s (Byte) Test",
+        "11": "Diehard Parking Lot Test",
+        "12": "Diehard Minimum Distance (2D Circle) Test",
+        "13": "Diehard 3D Spheres Test",
+        "14": "Diehard Squeeze Test",
+        "15": "Diehard Overlapping Sums Test",
+        "16": "Diehard Runs Test",
+        "17": "Diehard Craps Test",
         
     }
+
 
    
     byte_chunks = [binary_data[i:i+8] for i in range(0, len(binary_data), 8)]
@@ -4279,6 +4475,7 @@ def generate_pdf_report_server(request):
             "-g", "66",
             "-f", tmpfile_path
         ]
+
         p_value = None
         try:
             process = subprocess.run(
@@ -4290,12 +4487,18 @@ def generate_pdf_report_server(request):
             )
             output = process.stdout
             for line in output.splitlines():
-                line = line.strip()
-                if line.startswith("Kuiper KS: p ="):
-                    try:
-                        p_value = float(line.split("=")[1].strip())
-                    except Exception:
-                        p_value = None
+                    line = line.strip()
+
+                    # Match p-value even with extra spaces or nan
+                    if line.startswith("Kuiper KS: p"):
+                        match = re.search(r"p\s*=\s*([^\s]+)", line)
+                        if match:
+                            val = match.group(1)
+                            try:
+                                p_value = float(val) if val.lower() != "nan" else 0.0
+                            except ValueError:
+                                p_value = 0.0
+
             if p_value is None or not (0 <= p_value <= 1):
                 p_value = 0
         except subprocess.TimeoutExpired:
@@ -4348,20 +4551,18 @@ def generate_pdf_report_server(request):
         Paragraph('26. Minimum Distance Test', styles['Normal']), dieharder_results.get("Minimum Distance Test", "non-random number")],
         [Paragraph('27. Ranks of 31x31 Test', styles['Normal']), dieharder_results.get("Ranks of 31x31 Test", "non-random number"),
         Paragraph('28. 3D Spheres Test', styles['Normal']), dieharder_results.get("3D Spheres Test", "non-random number")],
-        [Paragraph('29. Ranks of 32x32 Test', styles['Normal']), dieharder_results.get("Ranks of 32x32 Test", "non-random number"),
+        [Paragraph('29. Ranks of 32x32 Test', styles['Normal']), dieharder_results.get("Ranks of 32x32 Test", "non-random number"),#
         Paragraph('30. Craps Test', styles['Normal']), dieharder_results.get("Craps Test", "non-random number")],
-        [Paragraph('31. Bitstream Test', styles['Normal']), dieharder_results.get("Bitstream Test", "non-random number"),
-        Paragraph('32. Marsaglia-Tsang GCD Test', styles['Normal']), dieharder_results.get("Marsaglia-Tsang GCD Test", "non-random number")],
-        [Paragraph('33. OPSO Test', styles['Normal']), dieharder_results.get("OPSO Test", "non-random number"),
-        Paragraph('34. OQSO Test', styles['Normal']), dieharder_results.get("OQSO Test", "non-random number")],
-        [Paragraph('35. DNA Test', styles['Normal']), dieharder_results.get("DNA Test", "non-random number"),
-        Paragraph('36. Count the Ones (Stream) Test', styles['Normal']), dieharder_results.get("Count the Ones (Stream) Test", "non-random number")],
-        [Paragraph('37. Count the Ones (Bytes) Test', styles['Normal']), dieharder_results.get("Count the Ones (Bytes) Test", "non-random number"),
-        Paragraph('38. Simple GCD Test', styles['Normal']), dieharder_results.get("Simple GCD Test", "non-random number")],
-        [Paragraph('39. Generalized Minimum Distance Test', styles['Normal']), dieharder_results.get("Generalized Minimum Distance Test", "non-random number"),
-        Paragraph('40. TestU01 Linear Complexity Test', styles['Normal']), dieharder_results.get("TestU01 Linear Complexity Test", "non-random number")],
-        [Paragraph('41. TestU01 Longest Repeated Substring Test', styles['Normal']), dieharder_results.get("TestU01 Longest Repeated Substring Test", "non-random number"),
-        Paragraph('42. TestU01 Matrix Rank Test', styles['Normal']), dieharder_results.get("TestU01 Matrix Rank Test", "non-random number")],
+        
+        
+        [Paragraph('31. OPSO Test', styles['Normal']), dieharder_results.get("OPSO Test", "non-random number"),
+        Paragraph('32. OQSO Test', styles['Normal']), dieharder_results.get("OQSO Test", "non-random number")],
+        [Paragraph('33. DNA Test', styles['Normal']), dieharder_results.get("DNA Test", "non-random number"),
+        Paragraph('34. Count the Ones (Stream) Test', styles['Normal']), dieharder_results.get("Count the Ones (Stream) Test", "non-random number")],
+        [Paragraph('35. Count the Ones (Bytes) Test', styles['Normal']), dieharder_results.get("Count the Ones (Bytes) Test", "non-random number"),
+        Paragraph('36. Simple GCD Test', styles['Normal']), dieharder_results.get("Simple GCD Test", "non-random number")],
+        [Paragraph('37. Generalized Minimum Distance Test', styles['Normal']), dieharder_results.get("Generalized Minimum Distance Test", "non-random number"),
+        Paragraph('38. Bitstream Test', styles['Normal']), dieharder_results.get("Bitstream Test", "non-random number")],
         [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, bold_red_style), '', ''],
     ]
 
@@ -4377,9 +4578,14 @@ def generate_pdf_report_server(request):
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
 
+    print("10")
     # Images for graphs
     graph_image1 = Image(graph_image_io1, width=7 * inch, height=4.5 * inch)
+    print("11")
+    
     graph_image = Image(graph_image_io, width=7 * inch, height=4.5 * inch)
+    print(graph_image)
+    print("12")
     graph_image2 = Image(graph_image_io2, width=7 * inch, height=4.5 * inch)
     cache.set(f"{job_id}_progressReportServer", 56)
     # Logo
@@ -4391,7 +4597,7 @@ def generate_pdf_report_server(request):
         ('VALIGN', (100, 100), (0, 0), 'TOP'),
     ]))
 
-    
+    print("13")
     # AI Analysis
     all_results_text = {}
     all_results_text.update({k: result_text(v) for k, v in nist22_results.items()})
@@ -4440,6 +4646,7 @@ def generate_pdf_report_server(request):
     ]
     cache.set(f"{job_id}_progressReportServer", 59)
     doc.build(elements)
+    print("14")
     response.write(buffer.getvalue())
     buffer.close()
     cache.set(f"{job_id}_progressReportServer", 60)
@@ -4458,6 +4665,14 @@ from django.utils.timezone import get_current_timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
 import pytz
+import os
+
+# Get the base directory relative to this file (views.py)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Navigate to the tests folder (adjust if needed)
+TESTS_DIR = os.path.join(BASE_DIR, "tests")
+
 
 @csrf_exempt
 def generate_final_ans(request):
@@ -4472,7 +4687,6 @@ def generate_final_ans(request):
             line = data.get('line', '')
             userId = data.get('user_id', '')
             fileName = data.get('file_name', '')
-
             if not binary_data:
                 return JsonResponse({"error": "binary_data is missing or empty"}, status=400)
 
@@ -4497,6 +4711,8 @@ def generate_final_ans(request):
                 # 🟢 Replacing Celery with direct call
                 return JsonResponse(run_after_delay(binary_data, scheduled_time, job_id, line, userId,fileName))
 
+            cache.set(f"{job_id}_progress", 1)
+
             # Prepare input for the executable
             epsilon_list = [str(int(b)) for b in binary_data]
             n = str(len(binary_data))
@@ -4504,7 +4720,7 @@ def generate_final_ans(request):
             test_p_values = {}
             x = 0  # counter for number of tests with p_value > 0.01
 
-            cache.set(f"{job_id}_progress", 1)
+            
 
             def run_test_exe(exe_path, test_name):
                 try:
@@ -4539,20 +4755,21 @@ def generate_final_ans(request):
                     return 0
             cache.set(f"{job_id}_progress", 2)
             tests_executables = {
-                'Frequency Test': ('fre', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/freqTest_exec'),
-                'Frequency Block Test': ('freBlock', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/block_freq_exec'),
-                'Runs Test': ('runs', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/runs'),
-                'Longest One Block Test': ('oneBlock', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/longest_run_exec'),
-                'Approximate Entropy Test': ('appEntropy', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/approximate_entropy'),
-                'Linear Complexity Test': ('linComp', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/linear_comp_exec'),
-                'Non Overlapping Test': ('nonOver', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_non_overlapping'),
-                'Overlapping Test': ('over', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_exec'),
-                'Universal Test': ('univ', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/universal_exec'),
-                'Serial Test': ('serial', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/serial_exec'),
-                'Cusum Test': ('cusum', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/cusum_exec'),
-                'Random Excursion Test': ('re', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_exec'),
-                'Random Excursion Variant Test': ('rev', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_var_exec'),
-                'Binary Matrix Rank Test': ('rank', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/matrix_exec'),
+                'Frequency Test': ('fre', os.path.join(TESTS_DIR, "freqTest_exec")),
+                'Frequency Block Test': ('freBlock', os.path.join(TESTS_DIR, "block_freq_exec")),
+                'Runs Test': ('runs', os.path.join(TESTS_DIR, "runs")),
+                'Longest One Block Test': ('oneBlock', os.path.join(TESTS_DIR, "longest_run_exec")),
+                'Approximate Entropy Test': ('appEntropy', os.path.join(TESTS_DIR, "approximate_entropy")),
+                'Linear Complexity Test': ('linComp', os.path.join(TESTS_DIR, "linear_comp_exec")),
+                'Non Overlapping Test': ('nonOver', os.path.join(TESTS_DIR, "template_non_overlapping")),
+                'Overlapping Test': ('over', os.path.join(TESTS_DIR, "template_exec")),
+                'Universal Test': ('univ', os.path.join(TESTS_DIR, "universal_exec")),
+                'Serial Test': ('serial', os.path.join(TESTS_DIR, "serial_exec")),
+                'Cusum Test': ('cusum', os.path.join(TESTS_DIR, "cusum_exec")),
+                'Random Excursion Test': ('re', os.path.join(TESTS_DIR, "random_exec")),
+                'Random Excursion Variant Test': ('rev', os.path.join(TESTS_DIR, "random_var_exec")),
+                'Binary Matrix Rank Test': ('rank', os.path.join(TESTS_DIR, "matrix_exec")),
+                'DFT Test': ('dft', os.path.join(TESTS_DIR, "dft_exec")),
             }
 
 
@@ -4584,7 +4801,6 @@ def generate_final_ans(request):
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
-
 from celery import shared_task
 from django.core.cache import cache
 from supabase import create_client, Client
@@ -4620,6 +4836,8 @@ def run_after_delay(job_id, scheduled_time, binary_data, line, user_id, fileName
     n = str(len(epsilon_list))
     print(f"Running test now at: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
+    print("job id",job_id)
+    print("time", user_id)
     test_p_values = {}
     passed_count = 0
     progress_percentage = 2
@@ -4663,21 +4881,22 @@ def run_after_delay(job_id, scheduled_time, binary_data, line, user_id, fileName
         return 0 if p_value in [-1, None] else p_value
 
     tests_executables = {
-        'Frequency Test': ('fre', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/freqTest_exec'),
-        'Frequency Block Test': ('freBlock', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/block_freq_exec'),
-        'Runs Test': ('runs', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/runs'),
-        'Longest One Block Test': ('oneBlock', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/longest_run_exec'),
-        'Approximate Entropy Test': ('appEntropy', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/approximate_entropy'),
-        'Linear Complexity Test': ('linComp', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/linear_comp_exec'),
-        'Non Overlapping Test': ('nonOver', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_non_overlapping'),
-        'Overlapping Test': ('over', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/template_exec'),
-        'Universal Test': ('univ', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/universal_exec'),
-        'Serial Test': ('serial', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/serial_exec'),
-        'Cusum Test': ('cusum', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/cusum_exec'),
-        'Random Excursion Test': ('re', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_exec'),
-        'Random Excursion Variant Test': ('rev', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/random_var_exec'),
-        'Binary Matrix Rank Test': ('rank', '/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/matrix_exec'),
-    }
+                'Frequency Test': ('fre', os.path.join(TESTS_DIR, "freqTest_exec")),
+                'Frequency Block Test': ('freBlock', os.path.join(TESTS_DIR, "block_freq_exec")),
+                'Runs Test': ('runs', os.path.join(TESTS_DIR, "runs")),
+                'Longest One Block Test': ('oneBlock', os.path.join(TESTS_DIR, "longest_run_exec")),
+                'Approximate Entropy Test': ('appEntropy', os.path.join(TESTS_DIR, "approximate_entropy")),
+                'Linear Complexity Test': ('linComp', os.path.join(TESTS_DIR, "linear_comp_exec")),
+                'Non Overlapping Test': ('nonOver', os.path.join(TESTS_DIR, "template_non_overlapping")),
+                'Overlapping Test': ('over', os.path.join(TESTS_DIR, "template_exec")),
+                'Universal Test': ('univ', os.path.join(TESTS_DIR, "universal_exec")),
+                'Serial Test': ('serial', os.path.join(TESTS_DIR, "serial_exec")),
+                'Cusum Test': ('cusum', os.path.join(TESTS_DIR, "cusum_exec")),
+                'Random Excursion Test': ('re', os.path.join(TESTS_DIR, "random_exec")),
+                'Random Excursion Variant Test': ('rev', os.path.join(TESTS_DIR, "random_var_exec")),
+                'Binary Matrix Rank Test': ('rank', os.path.join(TESTS_DIR, "matrix_exec")),
+                'DFT Test': ('dft', os.path.join(TESTS_DIR, "dft_exec")),
+            }
 
     progress_percentage=0
     for i, (display_name, (label, exe_path)) in enumerate(tests_executables.items(), start=1):
@@ -4743,7 +4962,151 @@ def get_progress(request, job_id):
     progress = cache.get(f"{job_id}_progress", 0)
     return JsonResponse({"progress": int(progress)})
 
+import os
+import re
+import uuid
+import pytz
+import datetime
+import subprocess
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
 
+@csrf_exempt
+def generate_final_ans1(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+    file = request.FILES.get('file')
+    scheduled_time_str = request.POST.get('scheduled_time', '')
+    job_id = request.POST.get('job_id', str(uuid.uuid4()))
+    userId = request.POST.get('user_id', '')
+    fileName = request.POST.get('file_name', 'uploaded.bin')
+
+    if not file:
+        return JsonResponse({"error": "No file uploaded"}, status=400)
+    if not scheduled_time_str:
+        return JsonResponse({"error": "scheduled_time is required"}, status=400)
+
+    try:
+        naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
+
+    # Time handling
+    kolkata_tz = pytz.timezone("Asia/Kolkata")
+    scheduled_time = kolkata_tz.localize(naive_scheduled_time)
+    current_time = datetime.datetime.now(kolkata_tz)
+    time_difference = (scheduled_time - current_time).total_seconds()
+    print("Time difference:", time_difference)
+
+    cache.set(f"{job_id}_progress", 1)
+
+    # Paths
+    sts_dir = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/sts-2.1.2"
+    assess_path = os.path.join(sts_dir, "assess")
+    data_dir = os.path.join(sts_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
+
+    # Save file to sts-2.1.2/data/
+    saved_path = os.path.join(data_dir, fileName)
+    with open(saved_path, 'wb') as f:
+        for chunk in file.chunks():
+            f.write(chunk)
+
+    # Calculate stream length in bits
+    file_size_bytes = os.path.getsize(saved_path)
+    stream_length = file_size_bytes * 8  # bits
+
+    # NIST STS default: each bitstream is 1,000,000 bits (125,000 bytes)
+    BITS_PER_STREAM = 1_000_000
+    num_bitstreams = max(1, stream_length // BITS_PER_STREAM)
+
+    print(f"File size: {file_size_bytes} bytes")
+    print(f"Stream length: {stream_length} bits")
+    print(f"Calculated number of bitstreams: {num_bitstreams}")
+
+    cache.set(f"{job_id}_progress", 2)
+
+    # Default parameter values for the tests
+    block_freq_M = 128
+    non_overlap_m = 9
+    overlap_m = 9
+    approx_entropy_m = 10
+    serial_m = 16
+    linear_complexity_M = 500
+
+    # Use relative path for assess binary
+    relative_path_in_sts = os.path.join("data", fileName)
+
+    # All inputs fed at once to avoid interactive stops
+    user_inputs = (
+        f"0\n"                              # Choose Input File
+        f"{relative_path_in_sts}\n"         # File path relative to sts_dir
+        f"1\n"                              # Run all tests
+        f"{block_freq_M}\n"                 # Block Frequency Test param
+        f"{non_overlap_m}\n"                # NonOverlapping Template Test param
+        f"{overlap_m}\n"                     # Overlapping Template Test param
+        f"{approx_entropy_m}\n"              # Approximate Entropy Test param
+        f"{serial_m}\n"                      # Serial Test param
+        f"{linear_complexity_M}\n"           # Linear Complexity Test param
+        f"0\n"                              # Skip parameter adjustments
+        f"{num_bitstreams}\n"               # Number of bitstreams (calculated)
+        f"1\n"                              # Binary mode
+    )
+
+    try:
+        process = subprocess.run(
+            [assess_path, str(stream_length)],
+            input=user_inputs,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            cwd=sts_dir,
+            timeout=1200
+        )
+
+        output = process.stdout
+        error_output = process.stderr
+
+        if error_output:
+            print("----- Errors -----")
+            print(error_output)
+
+        # Extract only p-values
+        p_values = []
+        for line in output.splitlines():
+            match = re.search(r"p[_-]?value\s*=\s*([0-9]*\.?[0-9]+)", line, re.IGNORECASE)
+            if match:
+                try:
+                    p_values.append(float(match.group(1)))
+                except ValueError:
+                    pass  # Ignore parsing issues
+
+        cache.set(f"{job_id}_raw_output", output)
+
+    except subprocess.TimeoutExpired:
+        cache.set(f"{job_id}_raw_output", "Timeout while running NIST STS tests.")
+        p_values = []
+        output = ""
+    except Exception as e:
+        cache.set(f"{job_id}_raw_output", f"Error running NIST STS tests: {str(e)}")
+        p_values = []
+        output = ""
+    finally:
+        cache.set(f"{job_id}_progress", 5)
+
+    return JsonResponse({
+        "final_result": "Completed",
+        "test_results": p_values,
+        "full_output": output,
+        "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    })
+
+import tempfile
+import os
+import tempfile
+import os
 
 @csrf_exempt
 def generate_final_ans_nist90b(request):
@@ -4773,16 +5136,10 @@ def generate_final_ans_nist90b(request):
             kolkata_tz = pytz.timezone("Asia/Kolkata")
             scheduled_time = kolkata_tz.localize(naive_scheduled_time)
 
-            # Get current aware datetime in same timezone
             current_time = datetime.datetime.now(kolkata_tz)
-
-            # Compute time difference safely
             time_difference = (scheduled_time - current_time).total_seconds()
-
-            
             print("Time difference:", time_difference)
 
-            # ✅ Always initialize this before any return
             passed_test_count = 0
             test_results = {}
             progress_counter = 3
@@ -4792,12 +5149,29 @@ def generate_final_ans_nist90b(request):
                 return JsonResponse(run_after_delay_90b(job_id, scheduled_time, binary_data, line, userId, fileName))
             cache.set(f"{job_id}_progress90b", 1)
 
-            
+            epsilon_list = [b for b in binary_data if b in '01']  # keep only bits
+            n = len(epsilon_list)  # correct length from filtered data
 
             def run_test_exe(exe_path, test_name):
+                tmp_filename = None
                 try:
-                    cmd = [exe_path, binary_data]
+                    if not os.path.isfile(exe_path):
+                        print(f"Executable for {test_name} not found at {exe_path}")
+                        return -1, "non-random number"
+                    if not os.access(exe_path, os.X_OK):
+                        print(f"Executable for {test_name} is not executable.")
+                        return -1, "non-random number"
+
+                    # Write binary data exactly as expected by the executable
+                    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                        tmp.write(''.join(epsilon_list))  # no spaces unless required
+                        tmp_filename = tmp.name
+
+                    # Pass n and file path to executable
+                    cmd = [exe_path, tmp_filename]
                     result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+
+                    os.remove(tmp_filename)
 
                     if result.returncode not in [0, 1]:
                         print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
@@ -4813,6 +5187,7 @@ def generate_final_ans_nist90b(request):
                 except Exception as e:
                     print(f"Exception in {test_name}:", e)
                     return None, "non-random number"
+
             cache.set(f"{job_id}_progress90b", 2)
             def safe_test_call(exe_path, test_name):
                 try:
@@ -4821,36 +5196,35 @@ def generate_final_ans_nist90b(request):
                 except Exception as e:
                     print(f"Error in {test_name}:", e)
                     return 0.0, "non-random number"
+
             cache.set(f"{job_id}_progress90b", 3)
-            # Paths to executables for each test
             tests_executables = {
-               'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
-               'Markov Test': ('markov',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
-               'Compression Test': ('compression',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
-               'LZ78Y Test': ('l278y',"/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
-               'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
-               'MCW Test': ('mcw',  "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
-               'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
-               'Chi-Square Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/chiSquareTest_exec"),
-               'Permutation Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/permutationTest_exec"),
-               'Longest-Substring Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lrsTest_exec"),
+                'Collision Test': ('col', os.path.join(TESTS_DIR, "collisionTest_exec")),
+                'Markov Test': ('markov', os.path.join(TESTS_DIR, "markovTest_exec")),
+                'Compression Test': ('compression', os.path.join(TESTS_DIR, "compressionTest_exec")),
+                'LZ78Y Test': ('l278y', os.path.join(TESTS_DIR, "l278yTest_exec1")),
+                'Lag Test': ('lag', os.path.join(TESTS_DIR, "lagTest_exec")),
+                'MCW Test': ('mcw', os.path.join(TESTS_DIR, "multiMcwTest_exec")),
+                'MMC Test': ('mmc', os.path.join(TESTS_DIR, "multiMmcTest_exec")),
+                'Chi-Square Test': ('chi', os.path.join(TESTS_DIR, "chiSquareTest_exec")),
+                'Permutation Test': ('perm', os.path.join(TESTS_DIR, "permutationTest_exec")),
+                'Longest-Substring Test': ('lrs', os.path.join(TESTS_DIR, "lrsTest_exec")),
             }
 
-            # Run each test
             for test_name, (label, exe_path) in tests_executables.items():
                 min_entropy, result_text = safe_test_call(exe_path, test_name)
                 test_results[test_name] = {
                     "min_entropy": min_entropy,
                     "result": result_text
                 }
-
                 if result_text == "random number":
                     passed_test_count += 1
 
                 progress_counter += 1
                 cache.set(f"{job_id}_progress90b", progress_counter)
+
             cache.set(f"{job_id}_progress90b", 14)
-            # Final decision based on number of passed tests
+
             final_text = 'random number' if passed_test_count > 5 else 'non-random number'
 
             response_data = {
@@ -4859,7 +5233,6 @@ def generate_final_ans_nist90b(request):
             }
 
             cache.set(f"{job_id}_progress90b", 15)
-
             return JsonResponse(response_data)
 
         except json.JSONDecodeError:
@@ -4878,7 +5251,10 @@ def run_after_delay_90b(job_id, scheduled_time, binary_data, line, user_id, file
 
     cache.set(f"{job_id}_progress90b", 1)
 
+      # correct length from filtered data
+
     epsilon_list = [b for b in binary_data if b in '01']
+    n = len(epsilon_list)
     print(f"Running test now at: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}, Data length: {len(epsilon_list)}")
 
     # ✅ Initialize counters
@@ -4887,45 +5263,62 @@ def run_after_delay_90b(job_id, scheduled_time, binary_data, line, user_id, file
     progress_counter = 3
 
     def run_test_exe(exe_path, test_name):
-        try:
-            cmd = [exe_path, binary_data]
-            result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+                tmp_filename = None
+                try:
+                    if not os.path.isfile(exe_path):
+                        print(f"Executable for {test_name} not found at {exe_path}")
+                        return -1, "non-random number"
+                    if not os.access(exe_path, os.X_OK):
+                        print(f"Executable for {test_name} is not executable.")
+                        return -1, "non-random number"
 
-            if result.returncode not in [0, 1]:
-                print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
-                return None, "non-random number"
+                    # Write binary data exactly as expected by the executable
+                    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                        tmp.write(''.join(epsilon_list))  # no spaces unless required
+                        tmp_filename = tmp.name
 
-            output = result.stdout.strip()
-            print(f"{test_name} output:", output)
+                    # Pass n and file path to executable
+                    cmd = [exe_path, tmp_filename]
+                    result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
 
-            min_entropy = float(output) if output else 0.0
-            result_text = "random number" if result.returncode == 1 else "non-random number"
-            return min_entropy, result_text
+                    os.remove(tmp_filename)
 
-        except Exception as e:
-            print(f"Exception in {test_name}:", e)
-            return None, "non-random number"
+                    if result.returncode not in [0, 1]:
+                        print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
+                        return None, "non-random number"
+
+                    output = result.stdout.strip()
+                    print(f"{test_name} output:", output)
+
+                    min_entropy = float(output) if output else 0.0
+                    result_text = "random number" if result.returncode == 1 else "non-random number"
+                    return min_entropy, result_text
+
+                except Exception as e:
+                    print(f"Exception in {test_name}:", e)
+                    return None, "non-random number"
 
     def safe_test_call(exe_path, test_name):
-        try:
-            min_entropy, result_text = run_test_exe(exe_path, test_name)
-            return (min_entropy if min_entropy is not None else 0.0), result_text
-        except Exception as e:
-            print(f"Error in {test_name}:", e)
-            return 0.0, "non-random number"
+                try:
+                    min_entropy, result_text = run_test_exe(exe_path, test_name)
+                    return (min_entropy if min_entropy is not None else 0.0), result_text
+                except Exception as e:
+                    print(f"Error in {test_name}:", e)
+                    return 0.0, "non-random number"
+
 
     # ✅ Same test structure as in generate_final_ans_nist90b
     tests_executables = {
-        'Collision Test': ('col', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/collisionTest_exec"),
-        'Markov Test': ('markov', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/markovTest_exec"),
-        'Compression Test': ('compression', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/compressionTest_exec"),
-        'LZ78Y Test': ('l278y', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/l278yTest_exec"),
-        'Lag Test': ('lag', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lagTest_exec"),
-        'MCW Test': ('mcw', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMcwTest_exec"),
-        'MMC Test': ('mmc', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/multiMmcTest_exec"),
-        'Chi-Square Test': ('chi', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/chiSquareTest_exec"),
-        'Permutation Test': ('perm', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/permutationTest_exec"),
-        'Longest-Substring Test': ('lrs', "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/tests/lrsTest_exec"),
+                'Collision Test': ('col', os.path.join(TESTS_DIR, "collisionTest_exec")),
+                'Markov Test': ('markov', os.path.join(TESTS_DIR, "markovTest_exec")),
+                'Compression Test': ('compression', os.path.join(TESTS_DIR, "compressionTest_exec")),
+                'LZ78Y Test': ('l278y', os.path.join(TESTS_DIR, "l278yTest_exec1")),
+                'Lag Test': ('lag', os.path.join(TESTS_DIR, "lagTest_exec")),
+                'MCW Test': ('mcw', os.path.join(TESTS_DIR, "multiMcwTest_exec")),
+                'MMC Test': ('mmc', os.path.join(TESTS_DIR, "multiMmcTest_exec")),
+                'Chi-Square Test': ('chi', os.path.join(TESTS_DIR, "chiSquareTest_exec")),
+                'Permutation Test': ('perm', os.path.join(TESTS_DIR, "permutationTest_exec")),
+                'Longest-Substring Test': ('lrs', os.path.join(TESTS_DIR, "lrsTest_exec")),
     }
 
     # ✅ Run each test
@@ -4968,7 +5361,7 @@ def run_after_delay_90b(job_id, scheduled_time, binary_data, line, user_id, file
     # ✅ Upload final result to Supabase
     try:
         current_time = datetime.datetime.now().isoformat()
-        response = supabase.table("results").upsert(
+        response = supabase.table("results2").upsert(
             {
                 "user_id": int(user_id),
                 "line": int(line),
@@ -4982,7 +5375,7 @@ def run_after_delay_90b(job_id, scheduled_time, binary_data, line, user_id, file
             },
             ignore_duplicates=False
         ).execute()
-        print("Supabase upsert response:", response)
+        
     except Exception as e:
         print("Failed to update Supabase:", e)
 
@@ -5063,9 +5456,9 @@ def generate_final_ans_dieharder(request):
 
         # List of all Dieharder test IDs
         dieharder_test_ids = [
-             "2" 
-            #  "1", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-            # "13", "17", "18"
+             "2","1", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+            "13","14","15","16","17"
+            # , "18","3"
         ]
         cache.set(f"{job_id}_progress_dieharder", 2)
         results = []
@@ -5101,13 +5494,20 @@ def generate_final_ans_dieharder(request):
 
                 for line in output.splitlines():
                     line = line.strip()
-                    if line.startswith("Kuiper KS: p ="):
-                        try:
-                            p_value = float(line.split("=")[1].strip())
-                        except Exception:
-                            p_value = None
-                    elif line.startswith("Assessment:"):
-                        assessment = line.replace("Assessment:", "").strip()
+
+                    # Match p-value even with extra spaces or nan
+                    if line.startswith("Kuiper KS: p"):
+                        match = re.search(r"p\s*=\s*([^\s]+)", line)
+                        if match:
+                            val = match.group(1)
+                            try:
+                                p_value = float(val) if val.lower() != "nan" else 0.0
+                            except ValueError:
+                                p_value = 0.0
+
+                # Match assessment text
+                if line.startswith("Assessment:"):
+                    assessment = line.replace("Assessment:", "").strip()
 
                 results.append({
                     "test_id": test_id,
@@ -5131,7 +5531,7 @@ def generate_final_ans_dieharder(request):
             finally:
                 cache.set(f"{job_id}_progress_dieharder", m)
                 m += 1
-
+        cache.set(f"{job_id}_progress_dieharder", 19)
         # final_text = 'random number' if passed_count > len(dieharder_test_ids) / 2 else 'non-random number'
         final_text = 'non-random number'
         response_data = {
@@ -5140,7 +5540,7 @@ def generate_final_ans_dieharder(request):
             
         }
 
-        cache.set(f"{job_id}_progress_dieharder", 5)
+        cache.set(f"{job_id}_progress_dieharder", 20)
 
         if os.path.exists(tmpfile_path):
             os.remove(tmpfile_path)
@@ -5179,7 +5579,7 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
 
     dieharder_test_ids = [
         "2"
-        # , "1", "4", "5", "6", "7", "8", "9", "10", "11", "12"
+        , "1", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14","15","16","17"
     ]
 
     results = []
@@ -5209,15 +5609,21 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
             assessment = None
 
             for line in output.splitlines():
-                line = line.strip()
-                if line.startswith("Kuiper KS: p ="):
-                    try:
-                        p_value = float(line.split("=")[1].strip())
-                    except Exception:
-                        p_value = None
-                elif line.startswith("Assessment:"):
-                    assessment = line.replace("Assessment:", "").strip()
+                    line = line.strip()
 
+                    # Match p-value even with extra spaces or nan
+                    if line.startswith("Kuiper KS: p"):
+                        match = re.search(r"p\s*=\s*([^\s]+)", line)
+                        if match:
+                            val = match.group(1)
+                            try:
+                                p_value = float(val) if val.lower() != "nan" else 0.0
+                            except ValueError:
+                                p_value = 0.0
+
+                # Match assessment text
+            if line.startswith("Assessment:"):
+                assessment = line.replace("Assessment:", "").strip()
             results.append({
                 "test_id": test_id,
                 "p_value": p_value,
@@ -6209,7 +6615,7 @@ class DieharderxTestView(APIView):
         # Build the dieharder command
         command = [
             "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
-            "-d", "19", 
+            "-d", "18", 
             "-g", "66",
             "-f", tmpfile_path
         ]
@@ -6233,16 +6639,23 @@ class DieharderxTestView(APIView):
             # Parse p-value and assessment
             for line in output.splitlines():
                 line = line.strip()
-                if line.startswith("Kuiper KS: p ="):
-                    try:
-                        p_value = float(line.split("=")[1].strip())
-                    except Exception:
-                        p_value = None
-                if line.startswith("Assessment:"):
-                    assessment = line.replace("Assessment:", "").strip()
+
+                # Match p-value even with extra spaces or nan
+                if line.startswith("Kuiper KS: p"):
+                    match = re.search(r"p\s*=\s*([^\s]+)", line)
+                    if match:
+                        val = match.group(1)
+                        try:
+                            p_value = float(val) if val.lower() != "nan" else 0.0
+                        except ValueError:
+                            p_value = 0.0
+
+            # Match assessment text
+            if line.startswith("Assessment:"):
+                assessment = line.replace("Assessment:", "").strip()
 
             return Response({
-                "output":output,
+                # "output":output,
                 "p_value": p_value,
                 "assessment": assessment
             })
