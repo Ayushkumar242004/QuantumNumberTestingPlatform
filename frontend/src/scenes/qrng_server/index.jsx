@@ -135,7 +135,7 @@ const Qrng_Server = () => {
   useEffect(() => {
     if (isFetching) {
       if (loadingProgress === 100 && loadingProgressn === 100) {
-        fetchRandomNumber(); // Fetch again only when both progress bars are 100
+        handleConnect(); // Fetch again only when both progress bars are 100
       }
     } else {
       clearInterval(intervalRef.current); // optional cleanup
@@ -271,11 +271,11 @@ const Qrng_Server = () => {
         Rand_type,
         Length,
       });
-      console.log("response",response);
+      console.log("response", response);
       if (response.data?.random) {
         const randomValue = response.data.random; // extract random binary
-      setBinaryInput(randomValue);
-      console.log("binary input (from API):", randomValue);
+        setBinaryInput(randomValue);
+        console.log("binary input (from API):", randomValue);
 
       } else {
         console.error("Error in connection:", response.data);
@@ -627,32 +627,32 @@ const Qrng_Server = () => {
   const jobIdRef4n = useRef(null);
   const jobIdRef5 = useRef(null);
   const jobIdRef5n = useRef(null);
-///bin file creation
-const [binFile, setBinFile] = useState(null);   // will hold the generated .bin file
+  ///bin file creation
+  const [binFile, setBinFile] = useState(null);   // will hold the generated .bin file
 
-useEffect(() => {
-  if (!binaryInput || binaryInput.length % 8 !== 0) {
-    console.warn("Invalid or incomplete binary string");
-    return;
-  }
+  useEffect(() => {
+    if (!binaryInput || binaryInput.length % 8 !== 0) {
+      console.warn("Invalid or incomplete binary string");
+      return;
+    }
 
-  // Step 1: Split binaryInput into 8-bit chunks
-  const byteChunks = binaryInput.match(/.{8}/g); // each element is like "01000001"
+    // Step 1: Split binaryInput into 8-bit chunks
+    const byteChunks = binaryInput.match(/.{8}/g); // each element is like "01000001"
 
-  // Step 2: Convert chunks to characters using fromCharCode
-  const byteString = byteChunks
-    .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-    .join("");
+    // Step 2: Convert chunks to characters using fromCharCode
+    const byteString = byteChunks
+      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
+      .join("");
 
-  // Step 3: Create a Blob and File from the byteString
-  const blob = new Blob([byteString], { type: "application/octet-stream" });
-  const file = new File([blob], "output.bin", { type: "application/octet-stream" });
+    // Step 3: Create a Blob and File from the byteString
+    const blob = new Blob([byteString], { type: "application/octet-stream" });
+    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
-  setBinFile(file);
-  console.log("bin file",binFile);
-  
-}, [binaryInput]);
-////
+    setBinFile(file);
+    console.log("bin file", binFile);
+
+  }, [binaryInput]);
+  ////
 
   useEffect(() => {
     if (!binaryInput) return; // Do not fetch if binaryInput is empty
@@ -726,17 +726,17 @@ useEffect(() => {
         }, 1000);
 
         const formData = new FormData();
-          formData.append("file", binFile);
-          const formattedScheduledTime = "2024-07-07 11:30:00"
-  
-          formData.append("scheduled_time", formattedScheduledTime);
-          formData.append("job_id", currentJobId);
+        formData.append("file", binFile);
+        const formattedScheduledTime = "2024-07-07 11:30:00"
 
-          const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          );
+        formData.append("scheduled_time", formattedScheduledTime);
+        formData.append("job_id", currentJobId);
+
+        const response = await axios.post(
+          "http://localhost:8000/generate_final_ans_dieharder/",
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
 
         clearInterval(progressInterval); // Stop the interval
         setLoadingProgress(100); // Set progress to 100% after response is received
@@ -1239,7 +1239,100 @@ useEffect(() => {
         .catch((error) => console.error("Error generating graph:", error));
     }
   };
+  const [hostname, setHostname] = useState("");
+  const [port, setPort] = useState("");
 
+  const handleConnect = async () => {
+    if (!hostname || !port) {
+      alert("Please enter both hostname and port");
+      return;
+    }
+    // Same request body as fetchRandomNumber
+    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
+    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
+    const Rand_type = 1;
+    const Length = length || 8; // same as in fetchRandomNumber
+    
+    console.log("called");
+    try {
+      console.log("hi");
+      const response = await axios.post("http://localhost:3003/proxy", {
+        hostname,   // <-- taken from state
+        port,       // <-- taken from state
+        path: "/api/v1/randbin", // default path
+        payload: {
+          API_Key,
+          APISalt,
+          Rand_type,
+          Length,
+        },
+      });
+  console.log("response",response);
+      console.log("Response:", response.data);
+  
+      if (response.data?.random) {
+        const randomValue = response.data.random;
+        setBinaryInput(randomValue);
+        console.log("binary input (from API):", randomValue);
+        alert("Connected! Random value received.");
+      } else {
+        console.error("Error in connection:", response.data);
+        alert("Error in response. Check console.");
+      }
+    } catch (error) {
+      console.error("Error connecting:", error);
+      alert("Connection failed. See console for details.");
+      setBinaryInput("");
+    }
+  };
+
+
+  const [hostname2, setHostname2] = useState("");
+  const [port2, setPort2] = useState("");
+
+  const handleConnect2 = async () => {
+    if (!hostname2 || !port2) {
+      alert("Please enter both hostname and port");
+      return;
+    }
+  
+    // Same request body as fetchRandomNumber
+    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
+    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
+    const Rand_type = 1;
+    const Length = length || 8; // same as in fetchRandomNumber
+  
+    try {
+      const response = await axios.post("http://localhost:3003/proxy", {
+        hostname: hostname2,
+  port: port2,     // <-- taken from state
+        path: "/api/v1/randbin", // default path
+        payload: {
+          API_Key,
+          APISalt,
+          Rand_type,
+          Length,
+        },
+      });
+  
+      console.log("Response:", response.data);
+  
+      if (response.data?.random) {
+        const randomValue = response.data.random;
+        setBinaryInput2(randomValue);
+        console.log("binary input (from API):", randomValue);
+        alert("Connected! Random value received.");
+      } else {
+        console.error("Error in connection:", response.data);
+        alert("Error in response. Check console.");
+      }
+    } catch (error) {
+      console.error("Error connecting:", error);
+      alert("Connection failed. See console for details.");
+      setBinaryInput2("");
+    }
+  };
+  
   return (
     <Box m="20px">
       <Header title="Server Connections" />
@@ -1449,36 +1542,41 @@ useEffect(() => {
                 </Box>
               </td>
               <td>
-                {/* Dropdown for server selection */}
                 <FormControl
                   variant="outlined"
                   size="small"
-                  sx={{ minWidth: 120 }}
+                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
                 >
-                  <Select
-                    value={selectedServer}
-                    onChange={handleServerChange}
-                    MenuProps={{
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      getContentAnchorEl: null,
+                  <TextField
+                    label="Hostname / IP"
+                    variant="outlined"
+                    size="small"
+                    value={hostname}
+                    onChange={(e) => setHostname(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
                     }}
+                  />
+                  <TextField
+                    label="Port"
+                    variant="outlined"
+                    size="small"
+                    type="number"
+                    value={port}
+                    onChange={(e) => setPort(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleConnect}
                   >
-                    <MenuItem value="Server 1">Server 1</MenuItem>
-                    <MenuItem value="Server 2">Server 2</MenuItem>
-                    <MenuItem value="Server 3">Server 3</MenuItem>
-                    <MenuItem value="Server 4">Server 4</MenuItem>
-                    <MenuItem value="Server 5">Server 5</MenuItem>
-                  </Select>
+                    Connect
+                  </Button>
                 </FormControl>
               </td>
-
 
 
             </tr>
@@ -1654,36 +1752,41 @@ useEffect(() => {
                 </Box>
               </td>
               <td>
-                {/* Dropdown for server selection */}
                 <FormControl
                   variant="outlined"
                   size="small"
-                  sx={{ minWidth: 120 }}
+                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
                 >
-                  <Select
-                    value={selectedServer2}
-                    onChange={handleServerChange2}
-                    MenuProps={{
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      getContentAnchorEl: null,
+                  <TextField
+                    label="Hostname / IP"
+                    variant="outlined"
+                    size="small"
+                    value={hostname2}
+                    onChange={(e) => setHostname2(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
                     }}
+                  />
+                  <TextField
+                    label="Port"
+                    variant="outlined"
+                    size="small"
+                    type="number"
+                    value={port2}
+                    onChange={(e) => setPort2(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleConnect2}
                   >
-                    <MenuItem value="Server 1">Server 1</MenuItem>
-                    <MenuItem value="Server 2">Server 2</MenuItem>
-                    <MenuItem value="Server 3">Server 3</MenuItem>
-                    <MenuItem value="Server 4">Server 4</MenuItem>
-                    <MenuItem value="Server 5">Server 5</MenuItem>
-                  </Select>
+                    Connect
+                  </Button>
                 </FormControl>
               </td>
-
 
             </tr>
 
@@ -1726,7 +1829,7 @@ useEffect(() => {
                   >
                     Stop Fetching
                   </button>
- <Button
+                  <Button
                     variant="contained"
                     onClick={() => handleButtonClick3("report")}
                     disabled={loadingProgress3 < 100 || loadingProgress3n < 100}
@@ -2133,7 +2236,7 @@ useEffect(() => {
                   >
                     Stop Fetching
                   </button>
-                 <Button
+                  <Button
                     variant="contained"
                     onClick={() => handleButtonClick5("report")}
                     disabled={loadingProgress5 < 100 || loadingProgress5n < 100}

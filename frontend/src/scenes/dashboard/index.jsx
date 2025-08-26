@@ -194,7 +194,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (isFetching) {
       if (loadingProgressd === 100 && loadingProgressn === 100 && loadingProgressn2 === 100) {
-        fetchRandomNumber(); // Fetch again only when both progress bars are 100
+        handleConnect(); // Fetch again only when both progress bars are 100
       }
     } else {
       clearInterval(intervalRef.current); // optional cleanup
@@ -440,7 +440,8 @@ const Dashboard = () => {
     if (!isFetching) {
       setIsFetching(true);
       setIsLive(true);
-      fetchRandomNumber();
+      handleConnect();
+      // fetchRandomNumber();
     }
   };
 
@@ -861,7 +862,52 @@ const Dashboard = () => {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [isGeneratingReportT, setIsGeneratingReportT] = useState(false);
 
+  const [hostname, setHostname] = useState("");
+  const [port, setPort] = useState("");
 
+  const handleConnect = async () => {
+    if (!hostname || !port) {
+      alert("Please enter both hostname and port");
+      return;
+    }
+    // Same request body as fetchRandomNumber
+    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
+    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
+    const Rand_type = 1;
+    const Length = length || 8; // same as in fetchRandomNumber
+
+    console.log("called");
+    try {
+      console.log("hi");
+      const response = await axios.post("http://localhost:3003/proxy", {
+        hostname,   // <-- taken from state
+        port,       // <-- taken from state
+        path: "/api/v1/randbin", // default path
+        payload: {
+          API_Key,
+          APISalt,
+          Rand_type,
+          Length,
+        },
+      });
+      console.log("response", response);
+      console.log("Response:", response.data);
+
+      if (response.data?.random) {
+        const randomValue = response.data.random;
+        setBinaryInput(randomValue);
+        console.log("binary input (from API):", randomValue);
+        alert("Connected! Random value received.");
+      } else {
+        console.error("Error in connection:", response.data);
+        alert("Error in response. Check console.");
+      }
+    } catch (error) {
+      console.error("Error connecting:", error);
+      alert("Connection failed. See console for details.");
+      setBinaryInput("");
+    }
+  };
 
 
   return (
@@ -891,9 +937,38 @@ const Dashboard = () => {
             }
           }}
         >
+          <TextField
+            label="Hostname / IP"
+            variant="outlined"
+            size="small"
+            value={hostname}
+            onChange={(e) => setHostname(e.target.value)}
+            InputLabelProps={{ sx: { color: "white" } }}
+            sx={{ width: 160 }}
+          />
+
+          <TextField
+            label="Port"
+            variant="outlined"
+            size="small"
+            type="number"
+            value={port}
+            onChange={(e) => setPort(e.target.value)}
+            InputLabelProps={{ sx: { color: "white" } }}
+            sx={{ width: 100 }}
+          />
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={startFetching}
+            sx={{ height: "40px" }}
+          >
+            Connect
+          </Button>
 
           {/* Compact Action Buttons */}
-          <Button
+          {/* <Button
             onClick={startFetching}
             variant="contained"
             size="small"
@@ -912,7 +987,7 @@ const Dashboard = () => {
             }}
           >
             Start
-          </Button>
+          </Button> */}
 
           <Button
             onClick={stopFetching}
