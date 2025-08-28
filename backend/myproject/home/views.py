@@ -2524,6 +2524,7 @@ def create_graph(request):
         data = json.loads(request.body)
         binary_data = data.get('binary_data', '')
         job_id = data.get('job_id', str(uuid.uuid4()))
+        file_name = data.get('file_name', 'Unknown File')
     except json.JSONDecodeError as e:
         print('Error parsing JSON:', e)
         return HttpResponse("Invalid JSON data.", status=400)
@@ -2609,6 +2610,7 @@ def create_graph(request):
     ax.set_yticks([i / 10.0 for i in range(0, 11)])
     ax.set_ylim(0, 1)
     plt.xticks(rotation=45, ha='right', fontsize=12)
+    plt.title(f"File Name: {file_name}", fontsize=22, pad=20)
     plt.tight_layout()
 
     legend_elements = [
@@ -2974,6 +2976,7 @@ def generate_pdf_report(request):
         data = json.loads(request.body)
         binary_data = data.get('binary_data', '')
         job_id = data.get('job_id', str(uuid.uuid4()))
+        file_name = data.get('file_name', 'Unknown File')
     except json.JSONDecodeError as e:
         print('Error parsing JSON:', e)
         return HttpResponse("Invalid JSON data.", status=400)
@@ -3338,6 +3341,10 @@ def generate_pdf_report_nist90b(request):
     title = Paragraph("Report-QNu Labs", styles['Title'])
     title_space = Spacer(1, 0.0 * inch)
 
+    # Add file name subtitle
+    file_name_para = Paragraph(f"<b>File Name:</b> {file_name}", styles['Normal'])
+    file_name_space = Spacer(1, 0.2 * inch)
+
     subtitle_style = styles['Heading2']
     subtitle_style.fontName = 'Helvetica-Bold'
     subtitle_style.fontSize = 12
@@ -3574,6 +3581,8 @@ def generate_pdf_report_nist90b(request):
         logo_table,
         title,
         title_space,
+        file_name_para,
+        file_name_space,
         nist_subtitle,
         subtitle_space,
         table1,
@@ -4707,11 +4716,21 @@ def generate_final_ans(request):
             
             print("Time difference:", time_difference)
 
+            def update_progress(step: int):
+                try:
+                    progress_percentage = round((step / 18) * 100)
+                    current_time = datetime.datetime.now().isoformat()
+                    supabase.table("results").update({
+                        "progress": progress_percentage,
+                    }).eq("user_id", int(userId)).eq("line", int(line)).execute()
+                except Exception as e:
+                    print(f"Supabase progress update failed at step {step}: {e}")
+
             if time_difference > 0:
                 # 🟢 Replacing Celery with direct call
                 return JsonResponse(run_after_delay(binary_data, scheduled_time, job_id, line, userId,fileName))
 
-            cache.set(f"{job_id}_progress", 1)
+            update_progress(1)
 
             # Prepare input for the executable
             epsilon_list = [str(int(b)) for b in binary_data]
@@ -4753,7 +4772,7 @@ def generate_final_ans(request):
                 except Exception as e:
                     print(f"Error in {test_name}:", e)
                     return 0
-            cache.set(f"{job_id}_progress", 2)
+            update_progress(2)
             tests_executables = {
                 'Frequency Test': ('fre', os.path.join(TESTS_DIR, "freqTest_exec")),
                 'Frequency Block Test': ('freBlock', os.path.join(TESTS_DIR, "block_freq_exec")),
@@ -4778,7 +4797,8 @@ def generate_final_ans(request):
             for i, (display_name, (label, exe_path)) in enumerate(tests_executables.items(), start=1):
                 p_value = safe_test_call(exe_path, display_name)
                 test_p_values[display_name] = p_value
-                cache.set(f"{job_id}_progress", m)
+                update_progress(m)
+                # cache.set(f"{job_id}_progress", m)
                 m=m+1
                 if p_value > 0.01:
                     x += 1
@@ -4793,14 +4813,23 @@ def generate_final_ans(request):
                 "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }
 
-            cache.set(f"{job_id}_progress", 18)
-
+            # cache.set(f"{job_id}_progress", 18)
+            update_progress(18)
+            try:
+                supabase.table("results").update({
+                    "progress": 100,   # in case progress not fully updated
+                    "result": final_text
+                }).eq("user_id", int(userId)).eq("line", int(line)).execute()
+            except Exception as e:
+                print(f"Supabase final result update failed: {e}")
             return JsonResponse(response_data)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+
 from celery import shared_task
 from django.core.cache import cache
 from supabase import create_client, Client
