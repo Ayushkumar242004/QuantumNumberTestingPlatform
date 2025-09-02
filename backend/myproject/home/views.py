@@ -96,7 +96,7 @@ from google.genai import types
 from django.core.cache import cache
 import  uuid
 
-client = genai.Client(api_key="AIzaSyBEgltUoSm5vFEvDxOd29yZ1hJ3apSYpqg") # place your api key here in inverted commas
+client = genai.Client(api_key="AIzaSyA4yim2okmVuLZqFfK9ryUa1HQRtRL2JUs") # place your api key here in inverted commas
 import subprocess
 
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -4944,7 +4944,7 @@ def run_after_delay(job_id, scheduled_time, binary_data, line, user_id, fileName
             supabase.table("results").upsert({
                 "user_id": int(user_id),
                 "line": int(line),
-                "binary_data": binary_data,
+                "binary_data": " ",
                 "scheduled_time": scheduled_time.isoformat(),
                 "upload_time": current_time,
                 "result": "null",
@@ -4965,7 +4965,7 @@ def run_after_delay(job_id, scheduled_time, binary_data, line, user_id, fileName
             {
                 "user_id": int(user_id),
                 "line": int(line),
-                "binary_data": binary_data,
+                "binary_data": " ",
                 "scheduled_time": scheduled_time.isoformat(),
                 "upload_time": current_time,
                 "result": final_result,

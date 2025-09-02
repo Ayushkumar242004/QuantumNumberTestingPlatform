@@ -843,7 +843,8 @@ const Nist_tests = () => {
   };
 
   const handleFileChange = async (event) => {
-
+   setLoadingProgressGr(0);
+   setLoadingProgressRep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -913,7 +914,7 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
+      alertShownRef.current = false;
       // Allow reupload of same file
       event.target.value = "";
     };
@@ -923,6 +924,8 @@ const Nist_tests = () => {
 
 
   const handleFileChange2 = async (event) => {
+    setLoadingProgress2Gr(0);
+   setLoadingProgress2Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -993,7 +996,7 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
+      alertShownRef2.current = false;
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
@@ -1001,6 +1004,8 @@ const Nist_tests = () => {
   };
 
   const handleFileChange3 = async (event) => {
+    setLoadingProgress3Gr(0);
+   setLoadingProgress3Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1071,7 +1076,7 @@ const Nist_tests = () => {
         console.error('Unexpected error:', err);
       }
 
-
+      alertShownRef3.current = false;
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
     };
@@ -1080,6 +1085,8 @@ const Nist_tests = () => {
 
 
   const handleFileChange4 = async (event) => {
+    setLoadingProgress4Gr(0);
+   setLoadingProgress4Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1152,7 +1159,7 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
+      alertShownRef4.current = false;
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
@@ -1160,6 +1167,8 @@ const Nist_tests = () => {
 
 
   const handleFileChange5 = async (event) => {
+    setLoadingProgress5Gr(0);
+   setLoadingProgress5Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1232,7 +1241,7 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
+      alertShownRef5.current = false;
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
@@ -1240,6 +1249,8 @@ const Nist_tests = () => {
 
 
   const handleFileChange6 = async (event) => {
+    setLoadingProgress6Gr(0);
+   setLoadingProgress6Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1311,7 +1322,7 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
+      alertShownRef6.current = false;
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
@@ -1319,6 +1330,8 @@ const Nist_tests = () => {
 
 
   const handleFileChange7 = async (event) => {
+    setLoadingProgress7Gr(0);
+   setLoadingProgress7Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1390,7 +1403,7 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
+      alertShownRef7.current = false;
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
@@ -1398,6 +1411,8 @@ const Nist_tests = () => {
 
 
   const handleFileChange8 = async (event) => {
+    setLoadingProgress8Gr(0);
+   setLoadingProgress8Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1469,7 +1484,7 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
+      alertShownRef8.current = false;
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
@@ -1477,6 +1492,8 @@ const Nist_tests = () => {
 
 
   const handleFileChange9 = async (event) => {
+    setLoadingProgress9Gr(0);
+   setLoadingProgress9Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1547,7 +1564,7 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
+      alertShownRef9.current = false;
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
@@ -1555,6 +1572,8 @@ const Nist_tests = () => {
 
 
   const handleFileChange10 = async (event) => {
+    setLoadingProgress10Gr(0);
+   setLoadingProgress10Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1626,7 +1645,7 @@ const Nist_tests = () => {
       } catch (err) {
         console.error('Unexpected error:', err);
       }
-
+      alertShownRef10.current = false;
       event.target.value = "";
     };
     reader.readAsArrayBuffer(selectedFile);
@@ -1845,17 +1864,18 @@ const Nist_tests = () => {
   let binaryDataSent9 = false;
   let binaryDataSent10 = false;
 
-  const [showUploadAlert, setShowUploadAlert] = useState(false);
-  const [hasShownAlert, setHasShownAlert] = useState(false); // track first-time show
 
-  useEffect(() => {
-    if (showUploadAlert && !hasShownAlert) {
-      alert("File Uploaded successfully");
-      setHasShownAlert(true); // mark as shown
-      setShowUploadAlert(false); // reset state
-    }
-  }, [showUploadAlert, hasShownAlert]);
 
+  const alertShownRef = useRef(false);
+  const alertShownRef2 = useRef(false);
+  const alertShownRef3 = useRef(false);
+  const alertShownRef4 = useRef(false);
+  const alertShownRef5 = useRef(false);
+  const alertShownRef6 = useRef(false);
+  const alertShownRef7 = useRef(false);
+  const alertShownRef8 = useRef(false);
+  const alertShownRef9 = useRef(false);
+  const alertShownRef10 = useRef(false);
 
 useEffect(() => {
 
@@ -2025,13 +2045,17 @@ useEffect(() => {
         });
   
         setShowRedButton(false);
+         if (!alertShownRef.current) {
+        alert("File uploaded successfully!");
+        alertShownRef.current = true;
+      }
   
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
   
-        // setLoadingProgress(100);
+        setLoadingProgress(100);
         setResult(response.data);
         localStorage.setItem("resultFetchedFromSupabase", "true");
   
@@ -2057,6 +2081,81 @@ useEffect(() => {
       }
     };
   }, [binaryInput, debouncedScheduledTime]);
+
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 2)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched", progress);
+  
+            setLoadingProgress2(progress);
+  
+            if (data.result) {
+              setResult2({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase2", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []); // <-- runs only on mount/unmount
+
   useEffect(() => {
     if (!binaryInput2 || !debouncedScheduledTime2) return;
 
@@ -2073,28 +2172,24 @@ useEffect(() => {
 
 
     setLoadingProgress2(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
-
+      
       const payload = {
         user_id: userId,
         line: 2,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime2,
         result: result,
         file_name: fileName2,
         upload_time: uploadTime2,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent2) {
-        payload.binary_data = binaryInput2;
-        binaryDataSent2 = true; // Mark as sent
-      }
-
+     
+    
       const { error } = await supabase
         .from('results')
         .upsert(payload);
@@ -2113,58 +2208,170 @@ useEffect(() => {
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
+      const fetchProgressFromSupabase = async () => {
         try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
-              setShowRedButton2(false);
-              const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 18) * 100);
-              setLoadingProgress2(prev => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error:', err);
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 2)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            return;
+          }
+  
+          if (data) {
+           
+            const progress = data.progress || 0;
+            console.log("fetched", progress);
+            setLoadingProgress2(progress);
+  
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+              setLoadingProgress2(100);
+              console.log("U");
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
             }
-          }, 1000);
-          const username = localStorage.getItem("username");
-          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-            binary_data: binaryInput2,
-            scheduled_time: debouncedScheduledTime2,
-            job_id: currentJobId,
-            line: lineNo,
-            user_id: userId,
-            file_name: fileName2
-          });
-          setShowRedButton2(false);
-          clearInterval(progressInterval);
-          setLoadingProgress2(100);
-          setResult2(response.data);
-          localStorage.setItem('resultFetchedFromSupabase22b2', 'true');
-          await upsertProgress(100, userId, response.data.final_result);
-        } catch (error) {
-
-          clearInterval(progressInterval);
-          setLoadingProgress2(0);
-          await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
-        }
-      };
-
-      fetchResult();
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+        } 
+        
     };
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+  
+    // Run one fetch immediately
+    await fetchProgressFromSupabase();
+    try {
+      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        binary_data: binaryInput2,
+        scheduled_time: debouncedScheduledTime2,
+        job_id: currentJobId,
+        line: lineNo,
+        user_id: userId,
+        file_name: fileName2,
+      });
 
-    startProcess();
+      setShowRedButton2(false);
+      if (!alertShownRef2.current) {
+        alert("File uploaded successfully!");
+        alertShownRef2.current = true;
+      }
 
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
 
-    // Cleanup to prevent duplicate intervals
-    return () => clearInterval(progressInterval);
+      setLoadingProgress2(100);
+      setResult2(response.data);
+      localStorage.setItem("resultFetchedFromSupabase2", "true");
+
+      await upsertProgress(100, userId, response.data.final_result);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress2(0);
+      await upsertProgress(0, userId);
+      alert("Error: ${error.message}");
+    }
+  };
+
+  startProcess();
+  
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+
   }, [binaryInput2, debouncedScheduledTime2]);
 
 
   useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 3)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched", progress);
+  
+            setLoadingProgress3(progress);
+  
+            if (data.result) {
+              setResult3({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase2", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []); // <-- runs only on mount/unmount
+
+  useEffect(() => {
     if (!binaryInput3 || !debouncedScheduledTime3) return;
 
+    // Store the job ID in a ref so it persists across renders
     const currentJobId = uuidv4();
     jobIdRef3.current = currentJobId;
     const lineNo = 3;
@@ -2175,36 +2382,34 @@ useEffect(() => {
       return;
     }
 
+
     setLoadingProgress3(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
+      
       const payload = {
         user_id: userId,
         line: 3,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime3,
         result: result,
         file_name: fileName3,
         upload_time: uploadTime3,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent3) {
-        payload.binary_data = binaryInput3;
-        binaryDataSent3 = true; // Mark as sent
-      }
-
+     
+    
       const { error } = await supabase
         .from('results')
         .upsert(payload);
-
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
     };
+
 
     const startProcess = async () => {
       const userId = await fetchUserId();
@@ -2212,61 +2417,172 @@ useEffect(() => {
 
         return;
       }
+      // Initial database entry with 0% progress
+      await upsertProgress(0, userId);
 
-      await upsertProgress(0, userId); // initial 0% progress
-
-      const fetchResult = async () => {
+      const fetchProgressFromSupabase = async () => {
         try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
-              setShowRedButton3(false);
-              const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 18) * 100);
-              setLoadingProgress3(prev => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error:', err);
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 3)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            return;
+          }
+  
+          if (data) {
+           
+            const progress = data.progress || 0;
+            console.log("fetched", progress);
+            setLoadingProgress3(progress);
+  
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+              setLoadingProgress3(100);
+              console.log("U");
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
             }
-          }, 1000);
-
-          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-            binary_data: binaryInput3,
-            scheduled_time: debouncedScheduledTime3,
-            job_id: currentJobId,
-            line: lineNo,
-            user_id: userId,
-            file_name: fileName3
-          });
-          setShowRedButton3(false);
-          clearInterval(progressInterval);
-          setLoadingProgress3(100);
-          setResult3(response.data);
-          localStorage.setItem('resultFetchedFromSupabase22b3', 'true');
-          await upsertProgress(100, userId, response.data.final_result);
-        } catch (error) {
-
-          clearInterval(progressInterval);
-          setLoadingProgress3(0);
-          await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
-        }
-      };
-
-      fetchResult();
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+        } 
+        
     };
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+  
+    // Run one fetch immediately
+    await fetchProgressFromSupabase();
+    try {
+      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        binary_data: binaryInput3,
+        scheduled_time: debouncedScheduledTime3,
+        job_id: currentJobId,
+        line: lineNo,
+        user_id: userId,
+        file_name: fileName3,
+      });
 
-    startProcess();
+      setShowRedButton3(false);
+      if (!alertShownRef3.current) {
+        alert("File uploaded successfully!");
+        alertShownRef3.current = true;
+      }
 
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress3(100);
+      setResult3(response.data);
+      localStorage.setItem("resultFetchedFromSupabase3", "true");
+
+      await upsertProgress(100, userId, response.data.final_result);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress3(0);
+      await upsertProgress(0, userId);
+      alert("Error: ${error.message}");
+    }
+  };
+
+  startProcess();
+  
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+
   }, [binaryInput3, debouncedScheduledTime3]);
 
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 4)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched", progress);
+  
+            setLoadingProgress4(progress);
+  
+            if (data.result) {
+              setResult4({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase2", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
     if (!binaryInput4 || !debouncedScheduledTime4) return;
 
+    // Store the job ID in a ref so it persists across renders
     const currentJobId = uuidv4();
     jobIdRef4.current = currentJobId;
     const lineNo = 4;
@@ -2277,37 +2593,34 @@ useEffect(() => {
       return;
     }
 
+
     setLoadingProgress4(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
+      
       const payload = {
         user_id: userId,
         line: 4,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime4,
         result: result,
         file_name: fileName4,
         upload_time: uploadTime4,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent4) {
-        payload.binary_data = binaryInput4;
-        binaryDataSent4 = true; // Mark as sent
-      }
-
+     
+    
       const { error } = await supabase
         .from('results')
         .upsert(payload);
-
-
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
     };
+
 
     const startProcess = async () => {
       const userId = await fetchUserId();
@@ -2315,61 +2628,172 @@ useEffect(() => {
 
         return;
       }
-
+      // Initial database entry with 0% progress
       await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
+      const fetchProgressFromSupabase = async () => {
         try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
-              setShowRedButton4(false);
-              const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 18) * 100);
-              setLoadingProgress4(prev => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error:', err);
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 4)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            return;
+          }
+  
+          if (data) {
+           
+            const progress = data.progress || 0;
+            console.log("fetched", progress);
+            setLoadingProgress4(progress);
+  
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+              setLoadingProgress4(100);
+              console.log("U");
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
             }
-          }, 1000);
-
-          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-            binary_data: binaryInput4,
-            scheduled_time: debouncedScheduledTime4,
-            job_id: currentJobId,
-            line: lineNo,
-            user_id: userId,
-            file_name: fileName4
-          });
-          setShowRedButton4(false);
-          clearInterval(progressInterval);
-          setLoadingProgress4(100);
-          setResult4(response.data);
-          localStorage.setItem('resultFetchedFromSupabase22b4', 'true');
-          await upsertProgress(100, userId, response.data.final_result);
-        } catch (error) {
-
-          clearInterval(progressInterval);
-          setLoadingProgress4(0);
-          await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
-        }
-      };
-
-      fetchResult();
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+        } 
+        
     };
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+  
+    // Run one fetch immediately
+    await fetchProgressFromSupabase();
+    try {
+      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        binary_data: binaryInput4,
+        scheduled_time: debouncedScheduledTime4,
+        job_id: currentJobId,
+        line: lineNo,
+        user_id: userId,
+        file_name: fileName4,
+      });
 
-    startProcess();
+      setShowRedButton4(false);
+      if (!alertShownRef4.current) {
+        alert("File uploaded successfully!");
+        alertShownRef4.current = true;
+      }
 
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress4(100);
+      setResult4(response.data);
+      localStorage.setItem("resultFetchedFromSupabase4", "true");
+
+      await upsertProgress(100, userId, response.data.final_result);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress4(0);
+      await upsertProgress(0, userId);
+      alert("Error: ${error.message}");
+    }
+  };
+
+  startProcess();
+  
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+
   }, [binaryInput4, debouncedScheduledTime4]);
 
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 5)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched", progress);
+  
+            setLoadingProgress5(progress);
+  
+            if (data.result) {
+              setResult5({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase5", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
     if (!binaryInput5 || !debouncedScheduledTime5) return;
 
+    // Store the job ID in a ref so it persists across renders
     const currentJobId = uuidv4();
     jobIdRef5.current = currentJobId;
     const lineNo = 5;
@@ -2380,37 +2804,34 @@ useEffect(() => {
       return;
     }
 
+
     setLoadingProgress5(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
+      
       const payload = {
         user_id: userId,
         line: 5,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime5,
         result: result,
         file_name: fileName5,
         upload_time: uploadTime5,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent5) {
-        payload.binary_data = binaryInput5;
-        binaryDataSent5 = true; // Mark as sent
-      }
-
+     
+    
       const { error } = await supabase
         .from('results')
         .upsert(payload);
-
-
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
     };
+
 
     const startProcess = async () => {
       const userId = await fetchUserId();
@@ -2418,62 +2839,172 @@ useEffect(() => {
 
         return;
       }
+      // Initial database entry with 0% progress
+      await upsertProgress(0, userId);
 
-      await upsertProgress(0, userId); // Initial entry
-
-      const fetchResult = async () => {
+      const fetchProgressFromSupabase = async () => {
         try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
-              setShowRedButton5(false);
-              const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 18) * 100);
-              setLoadingProgress5(prev => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error:', err);
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 5)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            return;
+          }
+  
+          if (data) {
+           
+            const progress = data.progress || 0;
+            console.log("fetched", progress);
+            setLoadingProgress5(progress);
+  
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+              setLoadingProgress5(100);
+              console.log("U");
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
             }
-          }, 1000);
-
-          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-            binary_data: binaryInput5,
-            scheduled_time: debouncedScheduledTime5,
-            job_id: currentJobId,
-            line: lineNo,
-            user_id: userId,
-            file_name: fileName5
-          });
-          setShowRedButton5(false);
-          clearInterval(progressInterval);
-          setLoadingProgress5(100);
-          setResult5(response.data);
-          localStorage.setItem('resultFetchedFromSupabase22b5', 'true');
-          await upsertProgress(100, userId, response.data.final_result);
-        } catch (error) {
-
-          clearInterval(progressInterval);
-          setLoadingProgress5(0);
-          await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
-        }
-      };
-
-      fetchResult();
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+        } 
+        
     };
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+  
+    // Run one fetch immediately
+    await fetchProgressFromSupabase();
+    try {
+      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        binary_data: binaryInput5,
+        scheduled_time: debouncedScheduledTime5,
+        job_id: currentJobId,
+        line: lineNo,
+        user_id: userId,
+        file_name: fileName5,
+      });
 
-    startProcess();
+      setShowRedButton5(false);
+      if (!alertShownRef5.current) {
+        alert("File uploaded successfully!");
+        alertShownRef5.current = true;
+      }
 
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress5(100);
+      setResult5(response.data);
+      localStorage.setItem("resultFetchedFromSupabase5", "true");
+
+      await upsertProgress(100, userId, response.data.final_result);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress5(0);
+      await upsertProgress(0, userId);
+      alert("Error: ${error.message}");
+    }
+  };
+
+  startProcess();
+  
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+
   }, [binaryInput5, debouncedScheduledTime5]);
 
+  useEffect(() => {
 
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 6)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched", progress);
+  
+            setLoadingProgress6(progress);
+  
+            if (data.result) {
+              setResult6({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase2", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
     if (!binaryInput6 || !debouncedScheduledTime6) return;
 
+    // Store the job ID in a ref so it persists across renders
     const currentJobId = uuidv4();
     jobIdRef6.current = currentJobId;
     const lineNo = 6;
@@ -2484,37 +3015,34 @@ useEffect(() => {
       return;
     }
 
+
     setLoadingProgress6(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
+      
       const payload = {
         user_id: userId,
         line: 6,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime6,
         result: result,
         file_name: fileName6,
-        upload_time: uploadTime,
-        progress: progressPercentage,
+        upload_time: uploadTime6,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent6) {
-        payload.binary_data = binaryInput6;
-        binaryDataSent6 = true; // Mark as sent
-      }
-
+     
+    
       const { error } = await supabase
         .from('results')
         .upsert(payload);
-
-
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
     };
+
 
     const startProcess = async () => {
       const userId = await fetchUserId();
@@ -2522,61 +3050,171 @@ useEffect(() => {
 
         return;
       }
-
+      // Initial database entry with 0% progress
       await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
+      const fetchProgressFromSupabase = async () => {
         try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
-              setShowRedButton6(false);
-              const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 18) * 100);
-              setLoadingProgress6(prev => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error:', err);
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 6)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            return;
+          }
+  
+          if (data) {
+           
+            const progress = data.progress || 0;
+            console.log("fetched", progress);
+            setLoadingProgress6(progress);
+  
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+              setLoadingProgress6(100);
+              console.log("U");
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
             }
-          }, 1000);
-
-          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-            binary_data: binaryInput6,
-            scheduled_time: debouncedScheduledTime6,
-            job_id: currentJobId,
-            line: lineNo,
-            user_id: userId,
-            file_name: fileName6
-          });
-          setShowRedButton6(false);
-          clearInterval(progressInterval);
-          setLoadingProgress6(100);
-          setResult6(response.data);
-          localStorage.setItem('resultFetchedFromSupabase22b6', 'true');
-          await upsertProgress(100, userId, response.data.final_result);
-        } catch (error) {
-
-          clearInterval(progressInterval);
-          setLoadingProgress6(0);
-          await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
-        }
-      };
-
-      fetchResult();
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+        } 
+        
     };
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+  
+    // Run one fetch immediately
+    await fetchProgressFromSupabase();
+    try {
+      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        binary_data: binaryInput6,
+        scheduled_time: debouncedScheduledTime6,
+        job_id: currentJobId,
+        line: lineNo,
+        user_id: userId,
+        file_name: fileName6,
+      });
 
-    startProcess();
+      setShowRedButton6(false);
+      if (!alertShownRef6.current) {
+        alert("File uploaded successfully!");
+        alertShownRef6.current = true;
+      }
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
 
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
+      setLoadingProgress6(100);
+      setResult6(response.data);
+      localStorage.setItem("resultFetchedFromSupabase6", "true");
+
+      await upsertProgress(100, userId, response.data.final_result);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress6(0);
+      await upsertProgress(0, userId);
+      alert("Error: ${error.message}");
+    }
+  };
+
+  startProcess();
+  
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+
   }, [binaryInput6, debouncedScheduledTime6]);
 
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 7)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched", progress);
+  
+            setLoadingProgress7(progress);
+  
+            if (data.result) {
+              setResult7({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase7", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
     if (!binaryInput7 || !debouncedScheduledTime7) return;
 
+    // Store the job ID in a ref so it persists across renders
     const currentJobId = uuidv4();
     jobIdRef7.current = currentJobId;
     const lineNo = 7;
@@ -2587,37 +3225,34 @@ useEffect(() => {
       return;
     }
 
+
     setLoadingProgress7(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
+      
       const payload = {
         user_id: userId,
         line: 7,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime7,
         result: result,
         file_name: fileName7,
         upload_time: uploadTime7,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent7) {
-        payload.binary_data = binaryInput7;
-        binaryDataSent7 = true; // Mark as sent
-      }
-
+     
+    
       const { error } = await supabase
         .from('results')
         .upsert(payload);
-
-
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
     };
+
 
     const startProcess = async () => {
       const userId = await fetchUserId();
@@ -2625,62 +3260,172 @@ useEffect(() => {
 
         return;
       }
-
+      // Initial database entry with 0% progress
       await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
+      const fetchProgressFromSupabase = async () => {
         try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
-              setShowRedButton7(false);
-              const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 18) * 100);
-              setLoadingProgress7(prev => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error:', err);
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 7)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            return;
+          }
+  
+          if (data) {
+           
+            const progress = data.progress || 0;
+            console.log("fetched", progress);
+            setLoadingProgress7(progress);
+  
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+              setLoadingProgress7(100);
+              console.log("U");
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
             }
-          }, 1000);
-
-          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-            binary_data: binaryInput7,
-            scheduled_time: debouncedScheduledTime7,
-            job_id: currentJobId,
-            line: lineNo,
-            user_id: userId,
-            file_name: fileName7
-          });
-          setShowRedButton7(false);
-          clearInterval(progressInterval);
-          setLoadingProgress7(100);
-          setResult7(response.data);
-          localStorage.setItem('resultFetchedFromSupabase22b7', 'true');
-          await upsertProgress(100, userId, response.data.final_result);
-        } catch (error) {
-
-          clearInterval(progressInterval);
-          setLoadingProgress7(0);
-          await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
-        }
-      };
-
-      fetchResult();
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+        } 
+        
     };
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+  
+    // Run one fetch immediately
+    await fetchProgressFromSupabase();
+    try {
+      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        binary_data: binaryInput7,
+        scheduled_time: debouncedScheduledTime7,
+        job_id: currentJobId,
+        line: lineNo,
+        user_id: userId,
+        file_name: fileName7,
+      });
 
-    startProcess();
+      setShowRedButton7(false);
+      if (!alertShownRef7.current) {
+        alert("File uploaded successfully!");
+        alertShownRef7.current = true;
+      }
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
 
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
+      setLoadingProgress7(100);
+      setResult7(response.data);
+      localStorage.setItem("resultFetchedFromSupabase7", "true");
+
+      await upsertProgress(100, userId, response.data.final_result);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress7(0);
+      await upsertProgress(0, userId);
+      alert("Error: ${error.message}");
+    }
+  };
+
+  startProcess();
+  
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+
   }, [binaryInput7, debouncedScheduledTime7]);
 
 
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 8)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched", progress);
+  
+            setLoadingProgress8(progress);
+  
+            if (data.result) {
+              setResult8({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase8", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
     if (!binaryInput8 || !debouncedScheduledTime8) return;
 
+    // Store the job ID in a ref so it persists across renders
     const currentJobId = uuidv4();
     jobIdRef8.current = currentJobId;
     const lineNo = 8;
@@ -2691,37 +3436,34 @@ useEffect(() => {
       return;
     }
 
+
     setLoadingProgress8(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
+      
       const payload = {
         user_id: userId,
         line: 8,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime8,
         result: result,
         file_name: fileName8,
         upload_time: uploadTime8,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent8) {
-        payload.binary_data = binaryInput8;
-        binaryDataSent8 = true; // Mark as sent
-      }
-
+     
+    
       const { error } = await supabase
         .from('results')
         .upsert(payload);
-
-
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
     };
+
 
     const startProcess = async () => {
       const userId = await fetchUserId();
@@ -2729,61 +3471,171 @@ useEffect(() => {
 
         return;
       }
-
+      // Initial database entry with 0% progress
       await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
+      const fetchProgressFromSupabase = async () => {
         try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
-              setShowRedButton8(false);
-              const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 18) * 100);
-              setLoadingProgress8(prev => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error:', err);
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 8)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            return;
+          }
+  
+          if (data) {
+           
+            const progress = data.progress || 0;
+            console.log("fetched", progress);
+            setLoadingProgress8(progress);
+  
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+              setLoadingProgress8(100);
+              console.log("U");
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
             }
-          }, 1000);
-
-          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-            binary_data: binaryInput8,
-            scheduled_time: debouncedScheduledTime8,
-            job_id: currentJobId,
-            line: lineNo,
-            user_id: userId,
-            file_name: fileName8
-          });
-          setShowRedButton8(false);
-          clearInterval(progressInterval);
-          setLoadingProgress8(100);
-          setResult8(response.data);
-          localStorage.setItem('resultFetchedFromSupabase22b8', 'true');
-          await upsertProgress(100, userId, response.data.final_result);
-        } catch (error) {
-
-          clearInterval(progressInterval);
-          setLoadingProgress8(0);
-          await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
-        }
-      };
-
-      fetchResult();
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+        } 
+        
     };
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+  
+    // Run one fetch immediately
+    await fetchProgressFromSupabase();
+    try {
+      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        binary_data: binaryInput8,
+        scheduled_time: debouncedScheduledTime8,
+        job_id: currentJobId,
+        line: lineNo,
+        user_id: userId,
+        file_name: fileName8,
+      });
 
-    startProcess();
+      setShowRedButton8(false);
+      if (!alertShownRef8.current) {
+        alert("File uploaded successfully!");
+        alertShownRef8.current = true;
+      }
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
 
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
+      setLoadingProgress8(100);
+      setResult8(response.data);
+      localStorage.setItem("resultFetchedFromSupabase8", "true");
+
+      await upsertProgress(100, userId, response.data.final_result);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress8(0);
+      await upsertProgress(0, userId);
+      alert("Error: ${error.message}");
+    }
+  };
+
+  startProcess();
+  
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+
   }, [binaryInput8, debouncedScheduledTime8]);
 
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 9)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched", progress);
+  
+            setLoadingProgress9(progress);
+  
+            if (data.result) {
+              setResult9({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase2", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
     if (!binaryInput9 || !debouncedScheduledTime9) return;
 
+    // Store the job ID in a ref so it persists across renders
     const currentJobId = uuidv4();
     jobIdRef9.current = currentJobId;
     const lineNo = 9;
@@ -2794,36 +3646,34 @@ useEffect(() => {
       return;
     }
 
+
     setLoadingProgress9(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
+      
       const payload = {
         user_id: userId,
         line: 9,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime9,
         result: result,
         file_name: fileName9,
         upload_time: uploadTime9,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent9) {
-        payload.binary_data = binaryInput9;
-        binaryDataSent9 = true; // Mark as sent
-      }
-
+     
+    
       const { error } = await supabase
         .from('results')
         .upsert(payload);
-
       if (error) {
         console.error('Error storing progress in Supabase:', error);
       }
     };
+
 
     const startProcess = async () => {
       const userId = await fetchUserId();
@@ -2831,60 +3681,172 @@ useEffect(() => {
 
         return;
       }
-
+      // Initial database entry with 0% progress
       await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
+      const fetchProgressFromSupabase = async () => {
         try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
-              setShowRedButton9(false);
-              const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 18) * 100);
-              setLoadingProgress9(prev => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error:', err);
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 9)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            return;
+          }
+  
+          if (data) {
+           
+            const progress = data.progress || 0;
+            console.log("fetched", progress);
+            setLoadingProgress9(progress);
+  
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+              setLoadingProgress9(100);
+              console.log("U");
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
             }
-          }, 1000);
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+        } 
+        
+    };
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+  
+    // Run one fetch immediately
+    await fetchProgressFromSupabase();
+    try {
+      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        binary_data: binaryInput9,
+        scheduled_time: debouncedScheduledTime9,
+        job_id: currentJobId,
+        line: lineNo,
+        user_id: userId,
+        file_name: fileName9,
+      });
 
-          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-            binary_data: binaryInput9,
-            scheduled_time: debouncedScheduledTime9,
-            job_id: currentJobId,
-            line: lineNo,
-            user_id: userId,
-            file_name: fileName9
-          });
-          setShowRedButton9(false);
-          clearInterval(progressInterval);
-          setLoadingProgress9(100);
-          setResult9(response.data);
-          localStorage.setItem('resultFetchedFromSupabase22b9', 'true');
-          await upsertProgress(100, userId, response.data.final_result);
-        } catch (error) {
+      setShowRedButton9(false);
+      if (!alertShownRef9.current) {
+        alert("File uploaded successfully!");
+        alertShownRef9.current = true;
+      }
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
 
-          clearInterval(progressInterval);
-          setLoadingProgress9(0);
-          await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
+      setLoadingProgress9(100);
+      setResult9(response.data);
+      localStorage.setItem("resultFetchedFromSupabase9", "true");
+
+      await upsertProgress(100, userId, response.data.final_result);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress9(0);
+      await upsertProgress(0, userId);
+      alert("Error: ${error.message}");
+    }
+  };
+
+  startProcess();
+  
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+
+  }, [binaryInput9, debouncedScheduledTime9]);
+
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 10)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched", progress);
+  
+            setLoadingProgress10(progress);
+  
+            if (data.result) {
+              setResult10({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase10", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
         }
       };
-
-      fetchResult();
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
-
-    startProcess();
-
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
-  }, [binaryInput9, debouncedScheduledTime9]);
+  }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
     if (!binaryInput10 || !debouncedScheduledTime10) return;
 
+    // Store the job ID in a ref so it persists across renders
     const currentJobId = uuidv4();
     jobIdRef10.current = currentJobId;
     const lineNo = 10;
@@ -2895,35 +3857,34 @@ useEffect(() => {
       return;
     }
 
+
     setLoadingProgress10(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
+      
       const payload = {
         user_id: userId,
         line: 10,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime10,
         result: result,
         file_name: fileName10,
         upload_time: uploadTime10,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent10) {
-        payload.binary_data = binaryInput10;
-        binaryDataSent10 = true; // Mark as sent
-      }
-
+     
+    
       const { error } = await supabase
         .from('results')
         .upsert(payload);
-
-
-      if (error) console.error('Error upserting progress in Supabase:', error);
+      if (error) {
+        console.error('Error storing progress in Supabase:', error);
+      }
     };
+
 
     const startProcess = async () => {
       const userId = await fetchUserId();
@@ -2931,57 +3892,94 @@ useEffect(() => {
 
         return;
       }
-
+      // Initial database entry with 0% progress
       await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
+      const fetchProgressFromSupabase = async () => {
         try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
-              setShowRedButton10(false);
-              const completed = progressRes.data.progress || 0;
-              const percent = Math.round((completed / 18) * 100);
-              setLoadingProgress10(prev => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error('Error fetching progress:', err);
+          const { data, error } = await supabase
+            .from("results")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 10)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            return;
+          }
+  
+          if (data) {
+           
+            const progress = data.progress || 0;
+            console.log("fetched", progress);
+            setLoadingProgress10(progress);
+  
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+              setLoadingProgress10(100);
+              console.log("U");
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
             }
-          }, 1000);
-
-          const response = await axios.post("http://localhost:8000/generate_final_ans/", {
-            binary_data: binaryInput10,
-            scheduled_time: debouncedScheduledTime10,
-            job_id: currentJobId,
-            line: lineNo,
-            user_id: userId,
-            file_name: fileName10
-          });
-          setShowRedButton10(false);
-          clearInterval(progressInterval);
-          setLoadingProgress10(100);
-          setResult10(response.data);
-          localStorage.setItem('resultFetchedFromSupabase22b10', 'true');
-          await upsertProgress(100, userId, response.data.final_result);
-        } catch (error) {
-
-          setLoadingProgress10(0);
-          clearInterval(progressInterval);
-          await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
-        }
-      };
-
-      fetchResult();
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+        } 
+        
     };
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+  
+    // Run one fetch immediately
+    await fetchProgressFromSupabase();
+    try {
+      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        binary_data: binaryInput10,
+        scheduled_time: debouncedScheduledTime10,
+        job_id: currentJobId,
+        line: lineNo,
+        user_id: userId,
+        file_name: fileName10,
+      });
 
-    startProcess();
+      setShowRedButton10(false);
+      if (!alertShownRef10.current) {
+        alert("File uploaded successfully!");
+        alertShownRef10.current = true;
+      }
 
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress10(100);
+      setResult10(response.data);
+      localStorage.setItem("resultFetchedFromSupabase10", "true");
+
+      await upsertProgress(100, userId, response.data.final_result);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgress10(0);
+      await upsertProgress(0, userId);
+      alert("Error: ${error.message}");
+    }
+  };
+
+  startProcess();
+  
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+
   }, [binaryInput10, debouncedScheduledTime10]);
-
 
 
   const handleButtonClick = async (type) => {
@@ -3034,7 +4032,7 @@ useEffect(() => {
         } catch (err) {
           alert(`Error: ${err}`);
         }
-      }, 100);
+      }, 1000);
 
       fetch("http://localhost:8000/pdf-report/", {
         method: "POST",
@@ -3165,9 +4163,42 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick2 = (type) => {
+  const handleButtonClick2 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+        .from("results")
+        .select("report_path")
+        .eq("user_id", userId)
+        .eq("line", 2)
+        .single();
+
+      if (fetchError) {
+        console.error("Error checking existing report:", fetchError.message);
+      }
+
+      if (existingResult && existingResult.report_path) {
+        console.log("Report already exists in Supabase:", existingResult.report_path);
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("reports")
+          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+          console.error("Error generating signed URL:", urlError.message);
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress2Rep(100);
+        return; // stop here, no need to regenerate
+      }
+
+
       let progressInterval;
       setLoadingProgress2Rep(5);
 
@@ -3190,11 +4221,31 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress2Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 2)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3205,8 +4256,41 @@ useEffect(() => {
     } else if (type === "graph") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+        .from("results")
+        .select("graph_path")
+        .eq("user_id", userId)
+        .eq("line", 2)
+        .single();
+
+      if (fetchError) {
+        console.error("Error checking existing graph:", fetchError.message);
+      }
+
+      if (existingResult && existingResult.graph_path) {
+        console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("graphs")
+          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+          console.error("Error generating signed URL:", urlError.message);
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress2Gr(100);
+        return; // stop here, no need to regenerate
+      }
+
+
       let progressInterval;
       setLoadingProgress2Gr(5);
+      
 
       progressInterval = setInterval(async () => {
         try {
@@ -3227,11 +4311,32 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress2Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 2)           // condition 2
+
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3242,9 +4347,41 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick3 = (type) => {
+  const handleButtonClick3 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+        .from("results")
+        .select("report_path")
+        .eq("user_id", userId)
+        .eq("line", 3)
+        .single();
+
+      if (fetchError) {
+        console.error("Error checking existing report:", fetchError.message);
+      }
+
+      if (existingResult && existingResult.report_path) {
+        console.log("Report already exists in Supabase:", existingResult.report_path);
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("reports")
+          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+          console.error("Error generating signed URL:", urlError.message);
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress3Rep(100);
+        return; // stop here, no need to regenerate
+      }
+
       let progressInterval;
       setLoadingProgress3Rep(5);
 
@@ -3267,11 +4404,31 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress3Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 3)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3280,6 +4437,38 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 3)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress3Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress3Gr(0);
 
@@ -3302,11 +4491,32 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress3Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 3)           // condition 2
+
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3317,9 +4527,41 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick4 = (type) => {
+  const handleButtonClick4 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 4)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress4Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress4Rep(5);
 
@@ -3342,11 +4584,31 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress4Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 4)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3355,6 +4617,37 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 4)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress4Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress4Gr(0);
 
@@ -3377,11 +4670,32 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress4Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 4)           // condition 2
+
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3392,9 +4706,40 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick5 = (type) => {
+  const handleButtonClick5 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 5)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress5Rep(100);
+      return; // stop here, no need to regenerate
+    }
       let progressInterval;
       setLoadingProgress5Rep(5);
 
@@ -3417,11 +4762,31 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress5Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 5)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3430,6 +4795,37 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 5)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress5Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress5Gr(0);
 
@@ -3452,11 +4848,33 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress5Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 5)           // condition 2
+
+          }
+
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3468,10 +4886,43 @@ useEffect(() => {
   };
 
 
-  const handleButtonClick6 = (type) => {
+  const handleButtonClick6 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 6)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress6Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress6Rep(5);
 
@@ -3494,11 +4945,31 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput6, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress6Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 6)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3508,6 +4979,37 @@ useEffect(() => {
 
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 1)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress6Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress6Gr(0);
 
@@ -3530,11 +5032,32 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput6, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress6Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 6)           // condition 2
+
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3545,10 +5068,41 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick7 = (type) => {
+  const handleButtonClick7 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 7)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress7Rep(100);
+      return; // stop here, no need to regenerate
+    }
       let progressInterval;
       setLoadingProgress7Rep(5);
 
@@ -3571,11 +5125,31 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput7, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress7Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 7)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3584,6 +5158,38 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+        .from("results")
+        .select("graph_path")
+        .eq("user_id", userId)
+        .eq("line", 7)
+        .single();
+
+      if (fetchError) {
+        console.error("Error checking existing graph:", fetchError.message);
+      }
+
+      if (existingResult && existingResult.graph_path) {
+        console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("graphs")
+          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+          console.error("Error generating signed URL:", urlError.message);
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress7Gr(100);
+        return; // stop here, no need to regenerate
+      }
+
+
       let progressInterval;
       setLoadingProgress7Gr(0);
 
@@ -3606,11 +5212,32 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput7, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress7Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 7)           // condition 2
+
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3622,10 +5249,43 @@ useEffect(() => {
 
 
 
-  const handleButtonClick8 = (type) => {
+  const handleButtonClick8 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 8)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress8Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress8Rep(5);
 
@@ -3648,11 +5308,31 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput8, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress8Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 8)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3661,6 +5341,37 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 8)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress8Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress8Gr(0);
 
@@ -3683,11 +5394,32 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput8, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress8Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 8)           // condition 2
+
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3698,10 +5430,42 @@ useEffect(() => {
   };
 
 
-  const handleButtonClick9 = (type) => {
+  const handleButtonClick9 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 9)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress9Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress9Rep(5);
 
@@ -3724,11 +5488,31 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput9, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress9Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 9)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3737,6 +5521,37 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 9)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress9Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress9Gr(0);
 
@@ -3759,11 +5574,32 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput9, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress9Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 9)           // condition 2
+
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3773,10 +5609,42 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick10 = (type) => {
+  const handleButtonClick10 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 10)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress10Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress10Rep(5);
 
@@ -3799,11 +5667,31 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput10, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress10Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 10)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3812,6 +5700,37 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 10)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress10Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress10Gr(0);
 
@@ -3834,11 +5753,32 @@ useEffect(() => {
         body: JSON.stringify({ binary_data: binaryInput10, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress10Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 10)           // condition 2
+
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
