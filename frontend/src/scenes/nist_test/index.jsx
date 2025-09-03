@@ -1994,7 +1994,11 @@ useEffect(() => {
   
       // Initial DB entry
       await upsertProgress(0, userId);
-  
+      setShowRedButton(false);
+      if (!alertShownRef.current) {
+     alert("File uploaded successfully!");
+     alertShownRef.current = true;
+   }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2044,11 +2048,7 @@ useEffect(() => {
           file_name: fileName,
         });
   
-        setShowRedButton(false);
-         if (!alertShownRef.current) {
-        alert("File uploaded successfully!");
-        alertShownRef.current = true;
-      }
+      
   
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
@@ -2207,6 +2207,11 @@ useEffect(() => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
+      setShowRedButton2(false);
+      if (!alertShownRef2.current) {
+        alert("File uploaded successfully!");
+        alertShownRef2.current = true;
+      }
 
       const fetchProgressFromSupabase = async () => {
         try {
@@ -2255,12 +2260,7 @@ useEffect(() => {
         file_name: fileName2,
       });
 
-      setShowRedButton2(false);
-      if (!alertShownRef2.current) {
-        alert("File uploaded successfully!");
-        alertShownRef2.current = true;
-      }
-
+     
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
@@ -2419,7 +2419,11 @@ useEffect(() => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
-
+      setShowRedButton3(false);
+      if (!alertShownRef3.current) {
+        alert("File uploaded successfully!");
+        alertShownRef3.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2467,11 +2471,7 @@ useEffect(() => {
         file_name: fileName3,
       });
 
-      setShowRedButton3(false);
-      if (!alertShownRef3.current) {
-        alert("File uploaded successfully!");
-        alertShownRef3.current = true;
-      }
+      
 
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
@@ -2630,7 +2630,11 @@ useEffect(() => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
-
+      setShowRedButton4(false);
+      if (!alertShownRef4.current) {
+        alert("File uploaded successfully!");
+        alertShownRef4.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2678,11 +2682,7 @@ useEffect(() => {
         file_name: fileName4,
       });
 
-      setShowRedButton4(false);
-      if (!alertShownRef4.current) {
-        alert("File uploaded successfully!");
-        alertShownRef4.current = true;
-      }
+     
 
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
@@ -2841,7 +2841,11 @@ useEffect(() => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
-
+      setShowRedButton5(false);
+      if (!alertShownRef5.current) {
+        alert("File uploaded successfully!");
+        alertShownRef5.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2889,11 +2893,7 @@ useEffect(() => {
         file_name: fileName5,
       });
 
-      setShowRedButton5(false);
-      if (!alertShownRef5.current) {
-        alert("File uploaded successfully!");
-        alertShownRef5.current = true;
-      }
+     
 
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
@@ -3052,7 +3052,11 @@ useEffect(() => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
-
+      setShowRedButton6(false);
+      if (!alertShownRef6.current) {
+        alert("File uploaded successfully!");
+        alertShownRef6.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -3100,11 +3104,7 @@ useEffect(() => {
         file_name: fileName6,
       });
 
-      setShowRedButton6(false);
-      if (!alertShownRef6.current) {
-        alert("File uploaded successfully!");
-        alertShownRef6.current = true;
-      }
+     
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
@@ -3262,7 +3262,11 @@ useEffect(() => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
-
+      setShowRedButton7(false);
+      if (!alertShownRef7.current) {
+        alert("File uploaded successfully!");
+        alertShownRef7.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -3310,11 +3314,7 @@ useEffect(() => {
         file_name: fileName7,
       });
 
-      setShowRedButton7(false);
-      if (!alertShownRef7.current) {
-        alert("File uploaded successfully!");
-        alertShownRef7.current = true;
-      }
+    
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
@@ -3473,7 +3473,11 @@ useEffect(() => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
-
+      setShowRedButton8(false);
+      if (!alertShownRef8.current) {
+        alert("File uploaded successfully!");
+        alertShownRef8.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -3521,11 +3525,7 @@ useEffect(() => {
         file_name: fileName8,
       });
 
-      setShowRedButton8(false);
-      if (!alertShownRef8.current) {
-        alert("File uploaded successfully!");
-        alertShownRef8.current = true;
-      }
+     
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
@@ -3683,7 +3683,11 @@ useEffect(() => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
-
+      setShowRedButton9(false);
+      if (!alertShownRef9.current) {
+        alert("File uploaded successfully!");
+        alertShownRef9.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -3731,11 +3735,7 @@ useEffect(() => {
         file_name: fileName9,
       });
 
-      setShowRedButton9(false);
-      if (!alertShownRef9.current) {
-        alert("File uploaded successfully!");
-        alertShownRef9.current = true;
-      }
+    
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
@@ -3894,6 +3894,11 @@ useEffect(() => {
       }
       // Initial database entry with 0% progress
       await upsertProgress(0, userId);
+      setShowRedButton10(false);
+      if (!alertShownRef10.current) {
+        alert("File uploaded successfully!");
+        alertShownRef10.current = true;
+      }
 
       const fetchProgressFromSupabase = async () => {
         try {
@@ -3942,12 +3947,7 @@ useEffect(() => {
         file_name: fileName10,
       });
 
-      setShowRedButton10(false);
-      if (!alertShownRef10.current) {
-        alert("File uploaded successfully!");
-        alertShownRef10.current = true;
-      }
-
+     
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
@@ -4037,7 +4037,7 @@ useEffect(() => {
       fetch("http://localhost:8000/pdf-report/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobId }),
+        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobId,file_name: fileName }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {

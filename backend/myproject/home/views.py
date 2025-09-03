@@ -3316,6 +3316,7 @@ def generate_pdf_report_nist90b(request):
         data = json.loads(request.body)
         job_id = data.get('job_id', str(uuid.uuid4()))
         binary_data = data.get('binary_data', '')
+        file_name = data.get('file_name', 'Unknown File')
     except json.JSONDecodeError as e:
         print('Error parsing JSON:', e)
         return HttpResponse("Invalid JSON data.", status=400)
@@ -5173,10 +5174,21 @@ def generate_final_ans_nist90b(request):
             test_results = {}
             progress_counter = 3
 
+            def update_progress(step: int):
+                try:
+                    progress_percentage = round((step / 18) * 100)
+                    current_time = datetime.datetime.now().isoformat()
+                    supabase.table("results2").update({
+                        "progress": progress_percentage,
+                    }).eq("user_id", int(userId)).eq("line", int(line)).execute()
+                except Exception as e:
+                    print(f"Supabase progress update failed at step {step}: {e}")
+
+
             if time_difference > 0:
                 print(time_difference)
                 return JsonResponse(run_after_delay_90b(job_id, scheduled_time, binary_data, line, userId, fileName))
-            cache.set(f"{job_id}_progress90b", 1)
+            update_progress(1)
 
             epsilon_list = [b for b in binary_data if b in '01']  # keep only bits
             n = len(epsilon_list)  # correct length from filtered data
@@ -5217,7 +5229,7 @@ def generate_final_ans_nist90b(request):
                     print(f"Exception in {test_name}:", e)
                     return None, "non-random number"
 
-            cache.set(f"{job_id}_progress90b", 2)
+            update_progress(2)
             def safe_test_call(exe_path, test_name):
                 try:
                     min_entropy, result_text = run_test_exe(exe_path, test_name)
@@ -5226,7 +5238,7 @@ def generate_final_ans_nist90b(request):
                     print(f"Error in {test_name}:", e)
                     return 0.0, "non-random number"
 
-            cache.set(f"{job_id}_progress90b", 3)
+            update_progress(3)
             tests_executables = {
                 'Collision Test': ('col', os.path.join(TESTS_DIR, "collisionTest_exec")),
                 'Markov Test': ('markov', os.path.join(TESTS_DIR, "markovTest_exec")),
@@ -5250,10 +5262,10 @@ def generate_final_ans_nist90b(request):
                     passed_test_count += 1
 
                 progress_counter += 1
-                cache.set(f"{job_id}_progress90b", progress_counter)
+                update_progress(progress_counter)
 
-            cache.set(f"{job_id}_progress90b", 14)
-
+            update_progress(14)
+            
             final_text = 'random number' if passed_test_count > 5 else 'non-random number'
 
             response_data = {
@@ -5261,7 +5273,7 @@ def generate_final_ans_nist90b(request):
                 "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }
 
-            cache.set(f"{job_id}_progress90b", 15)
+            update_progress(15)
             return JsonResponse(response_data)
 
         except json.JSONDecodeError:
@@ -5371,7 +5383,7 @@ def run_after_delay_90b(job_id, scheduled_time, binary_data, line, user_id, file
             supabase.table("results").upsert({
                 "user_id": int(user_id),
                 "line": int(line),
-                "binary_data": binary_data,
+                "binary_data": " ",
                 "scheduled_time": scheduled_time.isoformat(),
                 "upload_time": current_time,
                 "result": "null",  # Update later with final result
