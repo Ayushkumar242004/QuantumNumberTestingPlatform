@@ -97,7 +97,7 @@ const Qrng_Server = () => {
     if (!isFetching) {
 
       setIsFetching(true);
-      fetchRandomNumber();
+      handleConnect();
     }
   };
   const startFetching2 = () => {
@@ -392,6 +392,11 @@ const Qrng_Server = () => {
       setBinaryInput(""); // Optionally handle the error state
     }
   };
+  const [isSaveEnabled, setIsSaveEnabled] = useState(false);
+  const [isSaveEnabled2, setIsSaveEnabled2] = useState(false);
+  const [isSaveEnabled3, setIsSaveEnabled3] = useState(false);
+  const [isSaveEnabled4, setIsSaveEnabled4] = useState(false);
+  const [isSaveEnabled5, setIsSaveEnabled5] = useState(false);
 
   const saveBinaryNumber = async () => {
     // Use the binaryInput state which holds the fetched binary data
@@ -424,10 +429,11 @@ const Qrng_Server = () => {
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = fileName; // Filename for the downloaded file
-
+      
+      
       // Programmatically click the link to trigger the download
       link.click();
-
+        alert("Binary Number saved")
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
@@ -472,7 +478,7 @@ const Qrng_Server = () => {
 
       // Programmatically click the link to trigger the download
       link.click();
-
+      alert("Binary Number saved")
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
@@ -517,7 +523,7 @@ const Qrng_Server = () => {
 
       // Programmatically click the link to trigger the download
       link.click();
-
+      alert("Binary Number saved")
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
@@ -562,7 +568,7 @@ const Qrng_Server = () => {
 
       // Programmatically click the link to trigger the download
       link.click();
-
+      alert("Binary Number saved")
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
@@ -573,7 +579,7 @@ const Qrng_Server = () => {
 
   const saveBinaryNumber5 = async () => {
     // Use the binaryInput state which holds the fetched binary data
-    const binaryNumber = binaryInput;
+    const binaryNumber = binaryInput5;
 
     if (!binaryNumber) {
       return;
@@ -607,7 +613,7 @@ const Qrng_Server = () => {
 
       // Programmatically click the link to trigger the download
       link.click();
-
+      alert("Binary Number saved")
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
@@ -629,6 +635,10 @@ const Qrng_Server = () => {
   const jobIdRef5n = useRef(null);
   ///bin file creation
   const [binFile, setBinFile] = useState(null);   // will hold the generated .bin file
+  const [binFile2, setBinFile2] = useState(null);   
+  const [binFile3, setBinFile3] = useState(null);   
+  const [binFile4, setBinFile4] = useState(null);   
+  const [binFile5, setBinFile5] = useState(null);   
 
   useEffect(() => {
     if (!binaryInput || binaryInput.length % 8 !== 0) {
@@ -653,6 +663,98 @@ const Qrng_Server = () => {
 
   }, [binaryInput]);
   ////
+
+  useEffect(() => {
+    if (!binaryInput2 || binaryInput2.length % 8 !== 0) {
+      console.warn("Invalid or incomplete binary string");
+      return;
+    }
+
+    // Step 1: Split binaryInput into 8-bit chunks
+    const byteChunks = binaryInput2.match(/.{8}/g); // each element is like "01000001"
+
+    // Step 2: Convert chunks to characters using fromCharCode
+    const byteString = byteChunks
+      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
+      .join("");
+
+    // Step 3: Create a Blob and File from the byteString
+    const blob = new Blob([byteString], { type: "application/octet-stream" });
+    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
+
+    setBinFile2(file);
+    console.log("bin file", binFile2);
+
+  }, [binaryInput2]);
+
+  useEffect(() => {
+    if (!binaryInput3 || binaryInput3.length % 8 !== 0) {
+      console.warn("Invalid or incomplete binary string");
+      return;
+    }
+
+    // Step 1: Split binaryInput into 8-bit chunks
+    const byteChunks = binaryInput3.match(/.{8}/g); // each element is like "01000001"
+
+    // Step 2: Convert chunks to characters using fromCharCode
+    const byteString = byteChunks
+      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
+      .join("");
+
+    // Step 3: Create a Blob and File from the byteString
+    const blob = new Blob([byteString], { type: "application/octet-stream" });
+    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
+
+    setBinFile3(file);
+    console.log("bin file", binFile3);
+
+  }, [binaryInput3]);
+
+  useEffect(() => {
+    if (!binaryInput4 || binaryInput4.length % 8 !== 0) {
+      console.warn("Invalid or incomplete binary string");
+      return;
+    }
+
+    // Step 1: Split binaryInput into 8-bit chunks
+    const byteChunks = binaryInput4.match(/.{8}/g); // each element is like "01000001"
+
+    // Step 2: Convert chunks to characters using fromCharCode
+    const byteString = byteChunks
+      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
+      .join("");
+
+    // Step 3: Create a Blob and File from the byteString
+    const blob = new Blob([byteString], { type: "application/octet-stream" });
+    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
+
+    setBinFile4(file);
+    console.log("bin file", binFile4);
+
+  }, [binaryInput]);
+
+  useEffect(() => {
+    if (!binaryInput5 || binaryInput5.length % 8 !== 0) {
+      console.warn("Invalid or incomplete binary string");
+      return;
+    }
+
+    // Step 1: Split binaryInput into 8-bit chunks
+    const byteChunks = binaryInput5.match(/.{8}/g); // each element is like "01000001"
+
+    // Step 2: Convert chunks to characters using fromCharCode
+    const byteString = byteChunks
+      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
+      .join("");
+
+    // Step 3: Create a Blob and File from the byteString
+    const blob = new Blob([byteString], { type: "application/octet-stream" });
+    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
+
+    setBinFile5(file);
+    console.log("bin file", binFile5);
+
+  }, [binaryInput5]);
 
   useEffect(() => {
     if (!binaryInput) return; // Do not fetch if binaryInput is empty
@@ -702,8 +804,6 @@ const Qrng_Server = () => {
     fetchResult();
   }, [binaryInput]);
 
-
-
   useEffect(() => {
     if (!binaryInput) return; // Do not fetch if binaryInput is empty
     const currentJobId = uuidv4();
@@ -717,7 +817,7 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 3) * 100);
+            const percent = Math.round((completed / 15) * 100);
             console.log(`Polled progress: ${percent}%`);
             setLoadingProgress(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
@@ -806,22 +906,29 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 22) * 100);
+            const percent = Math.round((completed / 15) * 100);
             setLoadingProgress2(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
           }
         }, 1000);
 
+        const formData = new FormData();
+        formData.append("file", binFile2);
+        const formattedScheduledTime = "2024-07-07 11:30:00"
+
+        formData.append("scheduled_time", formattedScheduledTime);
+        formData.append("job_id", currentJobId);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          {
-            binary_data: binaryInput2, scheduled_time: scheduledTime2, job_id: currentJobId,
-          }
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
+
         clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress2(100);
-        setResultDieharder2(response.data); // Set the response data
+        setLoadingProgress2(100); // Set progress to 100% after response is received
+        setResultDieharder2(response.data); // Set the result data
       } catch (error) {
         setLoadingProgress2(0);
         clearInterval(progressInterval);
@@ -891,22 +998,29 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 22) * 100);
+            const percent = Math.round((completed / 15) * 100);
             setLoadingProgress3(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
           }
         }, 1000);
 
+        const formData = new FormData();
+        formData.append("file", binFile3);
+        const formattedScheduledTime = "2024-07-07 11:30:00"
+
+        formData.append("scheduled_time", formattedScheduledTime);
+        formData.append("job_id", currentJobId);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          {
-            binary_data: binaryInput3, scheduled_time: scheduledTime3, job_id: currentJobId,
-          }
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
+
         clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress3(100);
-        setResultDieharder3(response.data); // Set the response data
+        setLoadingProgress3(100); // Set progress to 100% after response is received
+        setResultDieharder3(response.data); // Set the result data
       } catch (error) {
         console.error("Error executing generating final answer:", error);
         setLoadingProgress3(0);
@@ -975,20 +1089,29 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 22) * 100);
+            const percent = Math.round((completed / 15) * 100);
             setLoadingProgress4(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
           }
         }, 1000);
 
+        const formData = new FormData();
+        formData.append("file", binFile4);
+        const formattedScheduledTime = "2024-07-07 11:30:00"
+
+        formData.append("scheduled_time", formattedScheduledTime);
+        formData.append("job_id", currentJobId);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          { binary_data: binaryInput4, scheduled_time: scheduledTime4, job_id: currentJobId }
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
+
         clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress4(100);
-        setResultDieharder4(response.data); // Set the response data
+        setLoadingProgress4(100); // Set progress to 100% after response is received
+        setResultDieharder4(response.data); // Set the result data
       } catch (error) {
         setLoadingProgress4(0);
         clearInterval(progressInterval);
@@ -1056,22 +1179,29 @@ const Qrng_Server = () => {
           try {
             const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 22) * 100);
+            const percent = Math.round((completed / 15) * 100);
             setLoadingProgress5(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
           }
         }, 1000);
 
+        const formData = new FormData();
+        formData.append("file", binFile5);
+        const formattedScheduledTime = "2024-07-07 11:30:00"
+
+        formData.append("scheduled_time", formattedScheduledTime);
+        formData.append("job_id", currentJobId);
+
         const response = await axios.post(
           "http://localhost:8000/generate_final_ans_dieharder/",
-          {
-            binary_data: binaryInput5, scheduled_time: scheduledTime5, job_id: currentJobId,
-          }
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
+
         clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress5(100);
-        setResultDieharder5(response.data); // Set the response data
+        setLoadingProgress5(100); // Set progress to 100% after response is received
+        setResultDieharder5(response.data); // Set the result data
       } catch (error) {
         setLoadingProgress5(0);
         clearInterval(progressInterval);
@@ -1242,42 +1372,41 @@ const Qrng_Server = () => {
   const [hostname, setHostname] = useState("");
   const [port, setPort] = useState("");
 
+
+  const [hostname3, setHostname3] = useState("");
+  const [port3, setPort3] = useState("");
+
+  const [hostname4, setHostname4] = useState("");
+  const [port4, setPort4] = useState("");
+
+  const [hostname5, setHostname5] = useState("");
+  const [port5, setPort5] = useState("");
+
   const handleConnect = async () => {
-    if (!hostname || !port) {
-      alert("Please enter both hostname and port");
+    if (!hostname || !port || !length) {
+      alert("Please enter hostname, port, and length");
       return;
     }
-    // Same request body as fetchRandomNumber
-    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
-    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
-    const Rand_type = 1;
-    const Length = length || 8; // same as in fetchRandomNumber
-    
-    console.log("called");
+
     try {
-      console.log("hi");
       const response = await axios.post("http://localhost:3003/proxy", {
-        hostname,   // <-- taken from state
-        port,       // <-- taken from state
-        path: "/api/v1/randbin", // default path
-        payload: {
-          API_Key,
-          APISalt,
-          Rand_type,
-          Length,
-        },
+        hostname,      // string, e.g. "202.83.17.121"
+        port: Number(port),  // make sure it’s a number
+        length: Number(length) // make sure it’s a number
       });
-  console.log("response",response);
+
       console.log("Response:", response.data);
-  
+
       if (response.data?.random) {
         const randomValue = response.data.random;
         setBinaryInput(randomValue);
+        setIsSaveEnabled(true);
         console.log("binary input (from API):", randomValue);
         alert("Connected! Random value received.");
       } else {
         console.error("Error in connection:", response.data);
-        alert("Error in response. Check console.");
+        alert("Incorrect credentials or invalid response.");
+        setBinaryInput("");
       }
     } catch (error) {
       console.error("Error connecting:", error);
@@ -1287,44 +1416,35 @@ const Qrng_Server = () => {
   };
 
 
+
   const [hostname2, setHostname2] = useState("");
   const [port2, setPort2] = useState("");
 
   const handleConnect2 = async () => {
-    if (!hostname2 || !port2) {
-      alert("Please enter both hostname and port");
+    if (!hostname2 || !port2 || !length2) {
+      alert("Please enter hostname, port and length");
       return;
     }
-  
-    // Same request body as fetchRandomNumber
-    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
-    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
-    const Rand_type = 1;
-    const Length = length || 8; // same as in fetchRandomNumber
-  
+
     try {
       const response = await axios.post("http://localhost:3003/proxy", {
-        hostname: hostname2,
-  port: port2,     // <-- taken from state
-        path: "/api/v1/randbin", // default path
-        payload: {
-          API_Key,
-          APISalt,
-          Rand_type,
-          Length,
-        },
+        hostname:hostname2,      // string, e.g. "202.83.17.121"
+        port: Number(port2),  // make sure it’s a number
+        length: Number(length2) // make sure it’s a number
       });
-  
+
       console.log("Response:", response.data);
-  
+
       if (response.data?.random) {
         const randomValue = response.data.random;
         setBinaryInput2(randomValue);
+        setIsSaveEnabled2(true);
         console.log("binary input (from API):", randomValue);
         alert("Connected! Random value received.");
       } else {
         console.error("Error in connection:", response.data);
-        alert("Error in response. Check console.");
+        alert("Incorrect credentials or invalid response.");
+        setBinaryInput2("");
       }
     } catch (error) {
       console.error("Error connecting:", error);
@@ -1332,7 +1452,104 @@ const Qrng_Server = () => {
       setBinaryInput2("");
     }
   };
-  
+
+  const handleConnect3 = async () => {
+    if (!hostname3 || !port3 || !length3) {
+      alert("Please enter hostname, port, and length");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:3003/proxy", {
+        hostname:hostname3,       // string, e.g. "202.83.17.121"
+        port: Number(port3),  // make sure it’s a number
+        length: Number(length3) // make sure it’s a number
+      });
+
+      console.log("Response:", response.data);
+
+      if (response.data?.random) {
+        const randomValue = response.data.random;
+        setBinaryInput3(randomValue);
+        setIsSaveEnabled3(true);
+        console.log("binary input (from API):", randomValue);
+        alert("Connected! Random value received.");
+      } else {
+        console.error("Error in connection:", response.data);
+        alert("Incorrect credentials or invalid response.");
+        setBinaryInput3("");
+      }
+    } catch (error) {
+      console.error("Error connecting:", error);
+      alert("Connection failed. See console for details.");
+      setBinaryInput3("");
+    }
+  };
+  const handleConnect4 = async () => {
+    if (!hostname4 || !port4 || !length4) {
+      alert("Please enter hostname, port, and length");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:3003/proxy", {
+        hostname:hostname4,     // string, e.g. "202.83.17.121"
+        port: Number(port4),  // make sure it’s a number
+        length: Number(length4) // make sure it’s a number
+      });
+
+      console.log("Response:", response.data);
+
+      if (response.data?.random) {
+        const randomValue = response.data.random;
+        setBinaryInput4(randomValue);
+        setIsSaveEnabled4(true);
+        console.log("binary input (from API):", randomValue);
+        alert("Connected! Random value received.");
+      } else {
+        console.error("Error in connection:", response.data);
+        alert("Incorrect credentials or invalid response.");
+        setBinaryInput4("");
+      }
+    } catch (error) {
+      console.error("Error connecting:", error);
+      alert("Connection failed. See console for details.");
+      setBinaryInput4("");
+    }
+  };
+
+  const handleConnect5 = async () => {
+    if (!hostname5 || !port5 || !length5) {
+      alert("Please enter hostname, port, and length");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:3003/proxy", {
+        hostname:hostname5,     // string, e.g. "202.83.17.121"
+        port: Number(port5),  // make sure it’s a number
+        length: Number(length5) // make sure it’s a number
+      });
+
+      console.log("Response:", response.data);
+
+      if (response.data?.random) {
+        const randomValue = response.data.random;
+        setBinaryInput5(randomValue);
+        setIsSaveEnabled5(true);
+        console.log("binary input (from API):", randomValue);
+        alert("Connected! Random value received.");
+      } else {
+        console.error("Error in connection:", response.data);
+        alert("Incorrect credentials or invalid response.");
+        setBinaryInput5("");
+      }
+    } catch (error) {
+      console.error("Error connecting:", error);
+      alert("Connection failed. See console for details.");
+      setBinaryInput5("");
+    }
+  };
   return (
     <Box m="20px">
       <Header title="Server Connections" />
@@ -1382,35 +1599,28 @@ const Qrng_Server = () => {
                   alignItems="center"
                   gap="10px"
                 >
-                  <button
-                    onClick={startFetching}
-                    style={{
-                      backgroundColor: colors.greenAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Start Fetching
-                  </button>
-                  <button
-                    onClick={stopFetching}
-                    disabled={!isFetching}
-                    style={{
-                      backgroundColor: isFetching
-                        ? colors.redAccent[400]
-                        : colors.primary[300],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: isFetching ? "pointer" : "not-allowed",
-                    }}
-                  >
-                    Stop Fetching
-                  </button>
+                  <>
+                    <style>
+                      {`
+      .start-fetching-btn {
+        background-color: ${colors.greenAccent[800]};
+        color: ${colors.primary[100]};
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      .start-fetching-btn:hover {
+        background-color: ${colors.greenAccent[600]};
+      }
+    `}
+                    </style>
+
+                    <button onClick={handleConnect} className="start-fetching-btn">
+                      Connect
+                    </button>
+                  </>
+
                   <Button
                     variant="contained"
                     onClick={() => handleButtonClick("report")}
@@ -1452,20 +1662,37 @@ const Qrng_Server = () => {
                     />
                   </Button>
                   {/* New Button for Saving Binary Number */}
-                  <button
-                    onClick={saveBinaryNumber} // Add your saveBinaryNumber function here
-                    disabled={loadingProgress < 100 || loadingProgressn < 100}
-                    style={{
-                      backgroundColor: colors.blueAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Save Binary Number
-                  </button>
+                  <>
+  <style>
+    {`
+      .save-binary-btn {
+        background-color: ${colors.blueAccent[400]};
+        color: ${colors.primary[100]};
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      .save-binary-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .save-binary-btn:not(:disabled):hover {
+        background-color: ${colors.blueAccent[600]};
+      }
+    `}
+  </style>
+
+  <button
+  onClick={saveBinaryNumber}
+  disabled={!isSaveEnabled }
+  className="save-binary-btn"
+>
+  Save Binary Number
+</button>
+
+</>
+
                 </Box>
               </td>
 
@@ -1568,13 +1795,7 @@ const Qrng_Server = () => {
                       sx: { color: "white" }
                     }}
                   />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleConnect}
-                  >
-                    Connect
-                  </Button>
+                
                 </FormControl>
               </td>
 
@@ -1591,35 +1812,28 @@ const Qrng_Server = () => {
                   alignItems="center"
                   gap="10px"
                 >
-                  <button
-                    onClick={startFetching2}
-                    style={{
-                      backgroundColor: colors.greenAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Start Fetching
-                  </button>
-                  <button
-                    onClick={stopFetching2}
-                    disabled={!isFetching2}
-                    style={{
-                      backgroundColor: isFetching2
-                        ? colors.redAccent[400]
-                        : colors.primary[300],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: isFetching2 ? "pointer" : "not-allowed",
-                    }}
-                  >
-                    Stop Fetching
-                  </button>
+                   <>
+                    <style>
+                      {`
+      .start-fetching-btn {
+        background-color: ${colors.greenAccent[800]};
+        color: ${colors.primary[100]};
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      .start-fetching-btn:hover {
+        background-color: ${colors.greenAccent[600]};
+      }
+    `}
+                    </style>
+
+                    <button onClick={handleConnect2} className="start-fetching-btn">
+                      Connect
+                    </button>
+                  </>
+               
                   <Button
                     variant="contained"
                     onClick={() => handleButtonClick2("report")}
@@ -1662,19 +1876,12 @@ const Qrng_Server = () => {
                   </Button>
                   {/* New Button for Saving Binary Number */}
                   <button
-                    onClick={saveBinaryNumber2} // Add your saveBinaryNumber function here
-                    disabled={loadingProgress2 < 100 || loadingProgress2n < 100}
-                    style={{
-                      backgroundColor: colors.blueAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Save Binary Number
-                  </button>
+  onClick={saveBinaryNumber2}
+  disabled={!isSaveEnabled2 }
+  className="save-binary-btn"
+>
+  Save Binary Number
+</button>
                 </Box>
               </td>
 
@@ -1778,13 +1985,7 @@ const Qrng_Server = () => {
                       sx: { color: "white" }
                     }}
                   />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleConnect2}
-                  >
-                    Connect
-                  </Button>
+                 
                 </FormControl>
               </td>
 
@@ -1800,35 +2001,28 @@ const Qrng_Server = () => {
                   alignItems="center"
                   gap="10px"
                 >
-                  <button
-                    onClick={startFetching3}
-                    style={{
-                      backgroundColor: colors.greenAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Start Fetching
-                  </button>
-                  <button
-                    onClick={stopFetching3}
-                    disabled={!isFetching3}
-                    style={{
-                      backgroundColor: isFetching3
-                        ? colors.redAccent[400]
-                        : colors.primary[300],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: isFetching3 ? "pointer" : "not-allowed",
-                    }}
-                  >
-                    Stop Fetching
-                  </button>
+                   <>
+                    <style>
+                      {`
+      .start-fetching-btn {
+        background-color: ${colors.greenAccent[800]};
+        color: ${colors.primary[100]};
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      .start-fetching-btn:hover {
+        background-color: ${colors.greenAccent[600]};
+      }
+    `}
+                    </style>
+
+                    <button onClick={handleConnect3} className="start-fetching-btn">
+                      Connect
+                    </button>
+                  </>
+                
                   <Button
                     variant="contained"
                     onClick={() => handleButtonClick3("report")}
@@ -1871,19 +2065,12 @@ const Qrng_Server = () => {
                   </Button>
                   {/* New Button for Saving Binary Number */}
                   <button
-                    onClick={saveBinaryNumber3}
-                    disabled={loadingProgress3 < 100 || loadingProgress3n < 100} // Add your saveBinaryNumber function here
-                    style={{
-                      backgroundColor: colors.blueAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Save Binary Number
-                  </button>
+  onClick={saveBinaryNumber3}
+  disabled={!isSaveEnabled3 }
+  className="save-binary-btn"
+>
+  Save Binary Number
+</button>
                 </Box>
               </td>
 
@@ -1960,36 +2147,35 @@ const Qrng_Server = () => {
                 </Box>
               </td>
               <td>
-                {/* Dropdown for server selection */}
                 <FormControl
                   variant="outlined"
                   size="small"
-                  sx={{ minWidth: 120 }}
+                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
                 >
-                  <Select
-                    value={selectedServer3}
-                    onChange={handleServerChange3}
-                    MenuProps={{
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      getContentAnchorEl: null,
+                  <TextField
+                    label="Hostname / IP"
+                    variant="outlined"
+                    size="small"
+                    value={hostname3}
+                    onChange={(e) => setHostname3(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
                     }}
-                  >
-                    <MenuItem value="Server 1">Server 1</MenuItem>
-                    <MenuItem value="Server 2">Server 2</MenuItem>
-                    <MenuItem value="Server 3">Server 3</MenuItem>
-                    <MenuItem value="Server 4">Server 4</MenuItem>
-                    <MenuItem value="Server 5">Server 5</MenuItem>
-                  </Select>
+                  />
+                  <TextField
+                    label="Port"
+                    variant="outlined"
+                    size="small"
+                    type="number"
+                    value={port3}
+                    onChange={(e) => setPort3(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
+                    }}
+                  />
+                
                 </FormControl>
               </td>
-
 
 
             </tr>
@@ -2004,35 +2190,28 @@ const Qrng_Server = () => {
                   alignItems="center"
                   gap="10px"
                 >
-                  <button
-                    onClick={startFetching4}
-                    style={{
-                      backgroundColor: colors.greenAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Start Fetching
-                  </button>
-                  <button
-                    onClick={stopFetching4}
-                    disabled={!isFetching4}
-                    style={{
-                      backgroundColor: isFetching4
-                        ? colors.redAccent[400]
-                        : colors.primary[300],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: isFetching4 ? "pointer" : "not-allowed",
-                    }}
-                  >
-                    Stop Fetching
-                  </button>
+                    <>
+                    <style>
+                      {`
+      .start-fetching-btn {
+        background-color: ${colors.greenAccent[800]};
+        color: ${colors.primary[100]};
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      .start-fetching-btn:hover {
+        background-color: ${colors.greenAccent[600]};
+      }
+    `}
+                    </style>
+
+                    <button onClick={handleConnect4} className="start-fetching-btn">
+                      Connect
+                    </button>
+                  </>
+               
                   <Button
                     variant="contained"
                     onClick={() => handleButtonClick4("report")}
@@ -2075,19 +2254,12 @@ const Qrng_Server = () => {
                   </Button>
                   {/* New Button for Saving Binary Number */}
                   <button
-                    onClick={saveBinaryNumber4} // Add your saveBinaryNumber function here
-                    disabled={loadingProgress4 < 100 || loadingProgress4n < 100}
-                    style={{
-                      backgroundColor: colors.blueAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Save Binary Number
-                  </button>
+  onClick={saveBinaryNumber4}
+  disabled={!isSaveEnabled4 }
+  className="save-binary-btn"
+>
+  Save Binary Number
+</button>
                 </Box>
               </td>
 
@@ -2164,36 +2336,35 @@ const Qrng_Server = () => {
                 </Box>
               </td>
               <td>
-                {/* Dropdown for server selection */}
                 <FormControl
                   variant="outlined"
                   size="small"
-                  sx={{ minWidth: 120 }}
+                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
                 >
-                  <Select
-                    value={selectedServer4}
-                    onChange={handleServerChange4}
-                    MenuProps={{
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      getContentAnchorEl: null,
+                  <TextField
+                    label="Hostname / IP"
+                    variant="outlined"
+                    size="small"
+                    value={hostname4}
+                    onChange={(e) => setHostname4(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
                     }}
-                  >
-                    <MenuItem value="Server 1">Server 1</MenuItem>
-                    <MenuItem value="Server 2">Server 2</MenuItem>
-                    <MenuItem value="Server 3">Server 3</MenuItem>
-                    <MenuItem value="Server 4">Server 4</MenuItem>
-                    <MenuItem value="Server 5">Server 5</MenuItem>
-                  </Select>
+                  />
+                  <TextField
+                    label="Port"
+                    variant="outlined"
+                    size="small"
+                    type="number"
+                    value={port4}
+                    onChange={(e) => setPort4(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
+                    }}
+                  />
+                
                 </FormControl>
               </td>
-
 
             </tr>
 
@@ -2207,35 +2378,28 @@ const Qrng_Server = () => {
                   alignItems="center"
                   gap="10px"
                 >
-                  <button
-                    onClick={startFetching5}
-                    style={{
-                      backgroundColor: colors.greenAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Start Fetching
-                  </button>
-                  <button
-                    onClick={stopFetching5}
-                    disabled={!isFetching5}
-                    style={{
-                      backgroundColor: isFetching5
-                        ? colors.redAccent[400]
-                        : colors.primary[300],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: isFetching5 ? "pointer" : "not-allowed",
-                    }}
-                  >
-                    Stop Fetching
-                  </button>
+                   <>
+                    <style>
+                      {`
+      .start-fetching-btn {
+        background-color: ${colors.greenAccent[800]};
+        color: ${colors.primary[100]};
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      .start-fetching-btn:hover {
+        background-color: ${colors.greenAccent[600]};
+      }
+    `}
+                    </style>
+
+                    <button onClick={handleConnect5} className="start-fetching-btn">
+                      Connect
+                    </button>
+                  </>
+                 
                   <Button
                     variant="contained"
                     onClick={() => handleButtonClick5("report")}
@@ -2278,19 +2442,12 @@ const Qrng_Server = () => {
                   </Button>
                   {/* New Button for Saving Binary Number */}
                   <button
-                    onClick={saveBinaryNumber5} // Add your saveBinaryNumber function here
-                    disabled={loadingProgress5 < 100 || loadingProgress5n < 100}
-                    style={{
-                      backgroundColor: colors.blueAccent[400],
-                      color: colors.primary[100],
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Save Binary Number
-                  </button>
+  onClick={saveBinaryNumber5}
+  disabled={!isSaveEnabled5 }
+  className="save-binary-btn"
+>
+  Save Binary Number
+</button>
                 </Box>
               </td>
 
@@ -2367,38 +2524,35 @@ const Qrng_Server = () => {
                 </Box>
               </td>
               <td>
-                {/* Dropdown for server selection */}
                 <FormControl
                   variant="outlined"
                   size="small"
-                  sx={{ minWidth: 120 }}
+                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
                 >
-                  <Select
-                    value={selectedServer5}
-                    onChange={handleServerChange5}
-                    MenuProps={{
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      getContentAnchorEl: null,
+                  <TextField
+                    label="Hostname / IP"
+                    variant="outlined"
+                    size="small"
+                    value={hostname5}
+                    onChange={(e) => setHostname5(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
                     }}
-                  >
-                    <MenuItem value="Server 1">Server 1</MenuItem>
-                    <MenuItem value="Server 2">Server 2</MenuItem>
-                    <MenuItem value="Server 3">Server 3</MenuItem>
-                    <MenuItem value="Server 4">Server 4</MenuItem>
-                    <MenuItem value="Server 5">Server 5</MenuItem>
-                  </Select>
+                  />
+                  <TextField
+                    label="Port"
+                    variant="outlined"
+                    size="small"
+                    type="number"
+                    value={port5}
+                    onChange={(e) => setPort5(e.target.value)}
+                    InputLabelProps={{
+                      sx: { color: "white" }
+                    }}
+                  />
+                
                 </FormControl>
-
-
               </td>
-
 
             </tr>
           </tbody>

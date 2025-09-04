@@ -11,7 +11,7 @@ import { MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { supabase } from '../../utils/supabaseClient';
 import CloseIcon from "@mui/icons-material/Close";
-const MAX_STACK_SIZE_ESTIMATE = 150 * 1024 * 1024;
+const MAX_STACK_SIZE_ESTIMATE = 200 * 1024 * 1024;
 
 const Nist_tests = () => {
   const theme = useTheme();
@@ -2068,7 +2068,8 @@ useEffect(() => {
   
         setLoadingProgress(0);
         await upsertProgress(0, userId);
-        alert("Error: ${error.message}");
+       alert(`Error: ${error}`);
+
       }
     };
   
@@ -2279,7 +2280,7 @@ useEffect(() => {
 
       setLoadingProgress2(0);
       await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
+      alert(`Error: ${error}`);
     }
   };
 
@@ -2491,7 +2492,7 @@ useEffect(() => {
 
       setLoadingProgress3(0);
       await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
+      alert(`Error: ${error}`);
     }
   };
 
@@ -2702,7 +2703,7 @@ useEffect(() => {
 
       setLoadingProgress4(0);
       await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
+      alert(`Error: ${error}`);
     }
   };
 
@@ -2913,7 +2914,7 @@ useEffect(() => {
 
       setLoadingProgress5(0);
       await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
+      alert(`Error: ${error}`);
     }
   };
 
@@ -3123,7 +3124,7 @@ useEffect(() => {
 
       setLoadingProgress6(0);
       await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
+      alert(`Error: ${error}`);
     }
   };
 
@@ -3333,7 +3334,7 @@ useEffect(() => {
 
       setLoadingProgress7(0);
       await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
+      alert(`Error: ${error}`);
     }
   };
 
@@ -3544,7 +3545,7 @@ useEffect(() => {
 
       setLoadingProgress8(0);
       await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
+      alert(`Error: ${error}`);
     }
   };
 
@@ -3754,7 +3755,7 @@ useEffect(() => {
 
       setLoadingProgress9(0);
       await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
+      alert(`Error: ${error}`);
     }
   };
 
@@ -3966,7 +3967,7 @@ useEffect(() => {
 
       setLoadingProgress10(0);
       await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
+      alert(`Error: ${error}`);
     }
   };
 
@@ -4969,7 +4970,7 @@ useEffect(() => {
             .update({ report_path: data.path })
             .eq("user_id", userId)   // condition 1
             .eq("line", 6)           // condition 2
-          }
+          } 
         })
         .catch((error) => {
           alert(`Error: ${error}`);

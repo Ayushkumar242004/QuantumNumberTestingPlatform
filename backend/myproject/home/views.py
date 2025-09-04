@@ -4684,6 +4684,179 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TESTS_DIR = os.path.join(BASE_DIR, "tests")
 
 
+# @csrf_exempt
+# def generate_final_ans(request):
+#     if request.method == 'POST':
+#         try:
+#             data = json.loads(request.body)
+#             binary_data = data.get('binary_data', '')
+#             scheduled_time_str = data.get('scheduled_time', '')
+#             job_id = data.get('job_id', str(uuid.uuid4()))
+#             cache.set(f"{job_id}_progress", 0)
+
+#             line = data.get('line', '')
+#             userId = data.get('user_id', '')
+#             fileName = data.get('file_name', '')
+#             if not binary_data:
+#                 return JsonResponse({"error": "binary_data is missing or empty"}, status=400)
+
+#             if not scheduled_time_str:
+#                 return JsonResponse({"error": "scheduled_time is required"}, status=400)
+
+#             # Parse scheduled time and convert to aware datetime
+#             naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+#             kolkata_tz = pytz.timezone("Asia/Kolkata")
+#             scheduled_time = kolkata_tz.localize(naive_scheduled_time)
+
+#             # Get current aware datetime in same timezone
+#             current_time = datetime.datetime.now(kolkata_tz)
+
+#             # Compute time difference safely
+#             time_difference = (scheduled_time - current_time).total_seconds()
+
+            
+#             print("Time difference:", time_difference)
+
+#             def update_progress(step: int):
+#                 try:
+#                     progress_percentage = round((step / 18) * 100)
+#                     current_time = datetime.datetime.now().isoformat()
+#                     supabase.table("results").update({
+#                         "progress": progress_percentage,
+#                     }).eq("user_id", int(userId)).eq("line", int(line)).execute()
+#                 except Exception as e:
+#                     print(f"Supabase progress update failed at step {step}: {e}")
+
+#             if time_difference > 0:
+#                 # 🟢 Replacing Celery with direct call
+#                 return JsonResponse(run_after_delay(binary_data, scheduled_time, job_id, line, userId,fileName))
+
+#             update_progress(1)
+
+#             # Prepare input for the executable
+#             epsilon_list = [str(int(b)) for b in binary_data]
+#             n = str(len(binary_data))
+
+#             test_p_values = {}
+#             x = 0  # counter for number of tests with p_value > 0.01
+
+            
+
+#             def run_test_exe(exe_path, test_name):
+#                 try:
+#                     with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+#                         tmp.write(' '.join(epsilon_list))
+#                         tmp_filename = tmp.name
+#                     cmd = [exe_path, str(n), tmp_filename]
+#                     result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
+                    
+#                     os.remove(tmp_filename)
+
+#                     if result.returncode != 0:
+#                         print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
+#                         return -1
+
+#                     output = result.stdout.strip()
+#                     print(f"{test_name} output:", output)
+
+#                     p_value = float(output)
+#                     return p_value if 0 <= p_value <= 1 else -1
+
+#                 except Exception as e:
+#                     print(f"Exception in {test_name}:", e)
+#                     return -1
+
+#             def safe_test_call(exe_path, test_name):
+#                 try:
+#                     p_value = run_test_exe(exe_path, test_name)
+#                     return 0 if p_value in [-1, None] else p_value
+#                 except Exception as e:
+#                     print(f"Error in {test_name}:", e)
+#                     return 0
+#             update_progress(2)
+#             tests_executables = {
+#                 'Frequency Test': ('fre', os.path.join(TESTS_DIR, "freqTest_exec")),
+#                 'Frequency Block Test': ('freBlock', os.path.join(TESTS_DIR, "block_freq_exec")),
+#                 'Runs Test': ('runs', os.path.join(TESTS_DIR, "runs")),
+#                 'Longest One Block Test': ('oneBlock', os.path.join(TESTS_DIR, "longest_run_exec")),
+#                 'Approximate Entropy Test': ('appEntropy', os.path.join(TESTS_DIR, "approximate_entropy")),
+#                 'Linear Complexity Test': ('linComp', os.path.join(TESTS_DIR, "linear_comp_exec")),
+#                 'Non Overlapping Test': ('nonOver', os.path.join(TESTS_DIR, "template_non_overlapping")),
+#                 'Overlapping Test': ('over', os.path.join(TESTS_DIR, "template_exec")),
+#                 'Universal Test': ('univ', os.path.join(TESTS_DIR, "universal_exec")),
+#                 'Serial Test': ('serial', os.path.join(TESTS_DIR, "serial_exec")),
+#                 'Cusum Test': ('cusum', os.path.join(TESTS_DIR, "cusum_exec")),
+#                 'Random Excursion Test': ('re', os.path.join(TESTS_DIR, "random_exec")),
+#                 'Random Excursion Variant Test': ('rev', os.path.join(TESTS_DIR, "random_var_exec")),
+#                 'Binary Matrix Rank Test': ('rank', os.path.join(TESTS_DIR, "matrix_exec")),
+#                 'DFT Test': ('dft', os.path.join(TESTS_DIR, "dft_exec")),
+#             }
+
+
+#             m=3
+
+#             for i, (display_name, (label, exe_path)) in enumerate(tests_executables.items(), start=1):
+#                 p_value = safe_test_call(exe_path, display_name)
+#                 test_p_values[display_name] = p_value
+#                 update_progress(m)
+#                 # cache.set(f"{job_id}_progress", m)
+#                 m=m+1
+#                 if p_value > 0.01:
+#                     x += 1
+                
+#             valid_tests = {k: (0 if v is None or v > 1 else v) for k, v in test_p_values.items()}
+#             print('Valid tests:', valid_tests)
+
+#             final_text = 'random number' if x > 8 else 'non-random number'
+
+#             response_data = {
+#                 "final_result": final_text,
+#                 "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#             }
+
+#             # cache.set(f"{job_id}_progress", 18)
+#             update_progress(18)
+#             try:
+#                 supabase.table("results").update({
+#                     "progress": 100,   # in case progress not fully updated
+#                     "result": final_text
+#                 }).eq("user_id", int(userId)).eq("line", int(line)).execute()
+#             except Exception as e:
+#                 print(f"Supabase final result update failed: {e}")
+#             return JsonResponse(response_data)
+
+#         except json.JSONDecodeError:
+#             return JsonResponse({"error": "Invalid JSON data"}, status=400)
+
+#     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+import os
+import gc
+import json
+import uuid
+import pytz
+import tempfile
+import datetime
+import subprocess
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from multiprocessing import Process, Queue
+
+# Assuming TESTS_DIR and supabase are defined globally
+import os
+import gc
+import json
+import uuid
+import pytz
+import tempfile
+import datetime
+import subprocess
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from multiprocessing import Process, Queue
+
+# Assuming TESTS_DIR and supabase are defined globally
+
 @csrf_exempt
 def generate_final_ans(request):
     if request.method == 'POST':
@@ -4713,14 +4886,11 @@ def generate_final_ans(request):
 
             # Compute time difference safely
             time_difference = (scheduled_time - current_time).total_seconds()
-
-            
             print("Time difference:", time_difference)
 
             def update_progress(step: int):
                 try:
                     progress_percentage = round((step / 18) * 100)
-                    current_time = datetime.datetime.now().isoformat()
                     supabase.table("results").update({
                         "progress": progress_percentage,
                     }).eq("user_id", int(userId)).eq("line", int(line)).execute()
@@ -4729,51 +4899,46 @@ def generate_final_ans(request):
 
             if time_difference > 0:
                 # 🟢 Replacing Celery with direct call
-                return JsonResponse(run_after_delay(binary_data, scheduled_time, job_id, line, userId,fileName))
+                return JsonResponse(run_after_delay(binary_data, scheduled_time, job_id, line, userId, fileName))
 
             update_progress(1)
-
-            # Prepare input for the executable
-            epsilon_list = [str(int(b)) for b in binary_data]
+            progress = cache.get(f"{job_id}_progress", 1)
+            # --- Write binary data once into a file ---
             n = str(len(binary_data))
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+                tmp.write(" ".join(str(int(b)) for b in binary_data))
+                tmp_filename = tmp.name
 
             test_p_values = {}
             x = 0  # counter for number of tests with p_value > 0.01
 
-            
-
-            def run_test_exe(exe_path, test_name):
+            def run_test_exe(exe_path, test_name, input_file, n):
                 try:
-                    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
-                        tmp.write(' '.join(epsilon_list))
-                        tmp_filename = tmp.name
-                    cmd = [exe_path, str(n), tmp_filename]
+                    cmd = [exe_path, str(n), input_file]
                     result = subprocess.run(cmd, capture_output=True, text=True, shell=False)
-                    
-                    os.remove(tmp_filename)
 
                     if result.returncode != 0:
-                        print(f"Error in {test_name}: Return code {result.returncode}, stderr: {result.stderr}")
+                        print(f"Error in {test_name}: {result.stderr}")
                         return -1
 
                     output = result.stdout.strip()
                     print(f"{test_name} output:", output)
-
                     p_value = float(output)
                     return p_value if 0 <= p_value <= 1 else -1
 
                 except Exception as e:
-                    print(f"Exception in {test_name}:", e)
+                    print(f"Exception in {test_name}: {e}")
                     return -1
 
-            def safe_test_call(exe_path, test_name):
-                try:
-                    p_value = run_test_exe(exe_path, test_name)
-                    return 0 if p_value in [-1, None] else p_value
-                except Exception as e:
-                    print(f"Error in {test_name}:", e)
-                    return 0
+            def run_test_worker(exe_path, test_name, q, input_file, n):
+                p_value = run_test_exe(exe_path, test_name, input_file, n)
+                if p_value in [-1, None]:
+                    q.put(0)
+                else:
+                    q.put(p_value)
+
             update_progress(2)
+            progress = cache.get(f"{job_id}_progress", 2)
             tests_executables = {
                 'Frequency Test': ('fre', os.path.join(TESTS_DIR, "freqTest_exec")),
                 'Frequency Block Test': ('freBlock', os.path.join(TESTS_DIR, "block_freq_exec")),
@@ -4792,18 +4957,31 @@ def generate_final_ans(request):
                 'DFT Test': ('dft', os.path.join(TESTS_DIR, "dft_exec")),
             }
 
+            m = 3
+            for display_name, (label, exe_path) in tests_executables.items():
+                q = Queue()
+                p = Process(target=run_test_worker, args=(exe_path, display_name, q, tmp_filename, n))
+                p.start()
+                p.join()
+                p_value = q.get()
 
-            m=3
-
-            for i, (display_name, (label, exe_path)) in enumerate(tests_executables.items(), start=1):
-                p_value = safe_test_call(exe_path, display_name)
+                # store minimal result
                 test_p_values[display_name] = p_value
+
                 update_progress(m)
-                # cache.set(f"{job_id}_progress", m)
-                m=m+1
+                progress = cache.get(f"{job_id}_progress", m)
+                m += 1
+
                 if p_value > 0.01:
                     x += 1
-                
+
+                # explicit cleanup
+                del p_value, q, p
+                gc.collect()
+
+            # remove the binary file once all tests finish
+            os.remove(tmp_filename)
+
             valid_tests = {k: (0 if v is None or v > 1 else v) for k, v in test_p_values.items()}
             print('Valid tests:', valid_tests)
 
@@ -4814,8 +4992,8 @@ def generate_final_ans(request):
                 "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }
 
-            # cache.set(f"{job_id}_progress", 18)
             update_progress(18)
+            progress = cache.get(f"{job_id}_progress", 18)
             try:
                 supabase.table("results").update({
                     "progress": 100,   # in case progress not fully updated
@@ -4829,6 +5007,7 @@ def generate_final_ans(request):
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
     return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
 
 
 from celery import shared_task
@@ -5479,16 +5658,26 @@ def generate_final_ans_dieharder(request):
 
         # Get current aware datetime in same timezone
         current_time = datetime.datetime.now(kolkata_tz)
-        print("scheduled time", scheduled_time)
-        print("current time", current_time)
-        # Compute time difference safely
+       
         time_difference = (scheduled_time - current_time).total_seconds()
 
         print(f"Time difference for scheduling: {time_difference} seconds.")
+        
+        def update_progress(step: int):
+                try:
+                    progress_percentage = round((step / 18) * 100)
+                    current_time = datetime.datetime.now().isoformat()
+                    supabase.table("results3").update({
+                        "progress": progress_percentage,
+                    }).eq("user_id", int(userId)).eq("line", int(line_number)).execute()
+                except Exception as e:
+                    print(f"Supabase progress update failed at step {step}: {e}")
+
         if time_difference > 0:   
             return JsonResponse(run_after_delay_dieharder(job_id, scheduled_time, file, line_number, userId, fileName))
         
-        cache.set(f"{job_id}_progress_dieharder", 1)
+        update_progress(1)
+        cache.get(f"{job_id}_progress_dieharder", 1)
         # Write file to temp
         with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
             for chunk in file.chunks():
@@ -5501,7 +5690,8 @@ def generate_final_ans_dieharder(request):
             "13","14","15","16","17"
             # , "18","3"
         ]
-        cache.set(f"{job_id}_progress_dieharder", 2)
+        update_progress(2)
+        cache.get(f"{job_id}_progress_dieharder", 2)
         results = []
         passed_count = 0
         m = 3  # start progress
@@ -5570,9 +5760,11 @@ def generate_final_ans_dieharder(request):
                     "error": str(e)
                 })
             finally:
-                cache.set(f"{job_id}_progress_dieharder", m)
+                update_progress(m) 
+                cache.get(f"{job_id}_progress_dieharder", m)           
                 m += 1
-        cache.set(f"{job_id}_progress_dieharder", 19)
+        update_progress(19)
+        cache.get(f"{job_id}_progress_dieharder", 19)
         # final_text = 'random number' if passed_count > len(dieharder_test_ids) / 2 else 'non-random number'
         final_text = 'non-random number'
         response_data = {
@@ -5581,7 +5773,8 @@ def generate_final_ans_dieharder(request):
             
         }
 
-        cache.set(f"{job_id}_progress_dieharder", 20)
+        update_progress(20)
+        cache.get(f"{job_id}_progress_dieharder", 20)
 
         if os.path.exists(tmpfile_path):
             os.remove(tmpfile_path)
@@ -5598,19 +5791,29 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
     now = datetime.datetime.now(kolkata_tz)  # Make current time timezone-aware
 
     wait_seconds = (scheduled_time - now).total_seconds()
+    def update_progress(step: int):
+                try:
+                    progress_percentage = round((step / 18) * 100)
+                    current_time = datetime.datetime.now().isoformat()
+                    supabase.table("results3").update({
+                        "progress": progress_percentage,
+                    }).eq("user_id", int(userId)).eq("line", int(line_number)).execute()
+                except Exception as e:
+                    print(f"Supabase progress update failed at step {step}: {e}")
     
     if wait_seconds > 0:
         print(f"Sleeping for {wait_seconds:.2f} seconds until scheduled time...")
         time.sleep(wait_seconds)
 
     cache.set(f"{job_id}_progress_dieharder", 1)
-
+    update_progress(1)
     # Save file to a temp location and read binary data
     with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
         for chunk in file.chunks():
             tmpfile.write(chunk)
         tmpfile_path = tmpfile.name
-
+    cache.get(f"{job_id}_progress_dieharder", 2)
+    update_progress(2)
     # Extract binary data as string
     with open(tmpfile_path, 'rb') as f:
         byte_data = f.read()
@@ -5626,7 +5829,8 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
     results = []
     passed_count = 0
     progress_counter = 3
-
+    cache.get(f"{job_id}_progress_dieharder", 3)
+    update_progress(3)
     for test_id in dieharder_test_ids:
         command = [
             "/home/ayush/Documents/dieharder-2.6.24/dieharder/dieharder",
@@ -5691,7 +5895,7 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
             supabase.table("results").upsert({
                 "user_id": int(user_id),
                 "line": int(line_number),
-                "binary_data": binary_data_str,
+                "binary_data": " ",
                 "scheduled_time": scheduled_time.isoformat(),
                 "upload_time": current_time,
                 "result": "null",
@@ -5703,6 +5907,7 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
             print(f"Supabase update failed: {e}")
 
         cache.set(f"{job_id}_progress_dieharder", progress_counter)
+        update_progress(progress_counter)
         progress_counter += 1
 
     final_result = 'random number' if passed_count > len(dieharder_test_ids) / 2 else 'non-random number'
@@ -5715,7 +5920,7 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
             {
                 "user_id": int(user_id),
                 "line": int(line_number),
-                "binary_data": binary_data_str,
+                "binary_data": " ",
                 "scheduled_time": scheduled_time.isoformat(),
                 "upload_time": current_time,
                 "result": final_result,
@@ -5733,7 +5938,7 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
         os.remove(tmpfile_path)
 
     cache.set(f"{job_id}_progress_dieharder", 15)
-
+    update_progress(15)
     return {
         "message": f"Dieharder tests executed at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         "job_id": job_id,

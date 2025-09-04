@@ -77,7 +77,7 @@ cephes_igamc(double a, double x)
 	ans = pkm1/qkm1;
 
 	do {
-		c += 1.0;
+		c += 1.0;15
 		y += 1.0;
 		z += 2.0;
 		yc = y * c;

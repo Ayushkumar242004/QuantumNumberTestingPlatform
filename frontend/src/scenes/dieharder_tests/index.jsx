@@ -1947,6 +1947,91 @@ const isTxt = fileName.endsWith(".txt");
   let binaryDataSent9 = false;
   let binaryDataSent10 = false;
 
+  const alertShownRef = useRef(false);
+  const alertShownRef2 = useRef(false);
+  const alertShownRef3 = useRef(false);
+  const alertShownRef4 = useRef(false);
+  const alertShownRef5 = useRef(false);
+  const alertShownRef6 = useRef(false);
+  const alertShownRef7 = useRef(false);
+  const alertShownRef8 = useRef(false);
+  const alertShownRef9 = useRef(false);
+  const alertShownRef10 = useRef(false);
+
+  
+useEffect(() => {
+
+  let progressIntervalId;
+
+  const resumeProgressCheck = async () => {
+    const userId = await fetchUserId();
+    if (!userId) return;
+
+    const fetchProgressFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("results3")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("line", 1)
+          .single();
+
+        if (error) {
+          console.error("Error fetching results from Supabase:", error);
+          // ❌ stop polling on error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+          return;
+        }
+
+        if (data) {
+          const progress = data.progress || 0;
+          console.log("resumed fetched ", progress);
+
+          setLoadingProgress(progress);
+
+          if (data.result) {
+            setResult({ final_result: data.result });
+            localStorage.setItem("resultFetchedFromSupabase", "true");
+          }
+
+          // ✅ Stop polling if already complete
+          if (progress >= 100 && progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      } catch (err) {
+        console.error("Progress fetch error:", err);
+        // ❌ stop polling on unexpected error
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      }
+    };
+
+    // Start polling again
+    progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+
+    // Do one immediate fetch
+    await fetchProgressFromSupabase();
+  };
+
+  // On mount → resume progress check
+  resumeProgressCheck();
+
+  // On unmount → clear polling
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+}, []); 
+
   useEffect(() => {
     if (!binaryInput || !debouncedScheduledTime) {
       return;
@@ -1962,7 +2047,7 @@ const isTxt = fileName.endsWith(".txt");
       return;
     }
     setLoadingProgress(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
@@ -1982,33 +2067,26 @@ const isTxt = fileName.endsWith(".txt");
             .join('');
 
           binaryInsertedRef.current = true; // ✅ Prevent future inserts
-          console.log("binary string", binaryString);
-
+        
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
 
-      const progressPercentage = progress;
-
       const payload = {
         user_id: userId,
         line: 1,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime,
         result: result,
         file_name: fileName,
         upload_time: uploadTime,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent) {
-        payload.binary_data = binaryInput;
-        binaryDataSent = true; // Mark as sent
-      }
-
+     
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -2025,26 +2103,48 @@ const isTxt = fileName.endsWith(".txt");
 
       await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
-        console.log("fetchResult() started.");
+      setShowRedButton(false);
+      if (!alertShownRef.current) {
+     alert("File uploaded successfully!");
+     alertShownRef.current = true;
+   }
 
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton(false);
-              const percent = Math.round((completed / 20) * 100);
-              console.log(`Polled progress: ${percent}%`);
-              setLoadingProgress((prev) => (percent > prev ? percent : prev));
-              await upsertProgress(percent, userId);
-            } catch (err) {
-              console.error("Progress fetch error:", err);
+        const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 1)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
-
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress(progress);
+    
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
+        progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+        await fetchProgressFromSupabase();
+        try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile);
           const formattedScheduledTime = new Date(debouncedScheduledTime)
@@ -2063,28 +2163,36 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton(false);
-          clearInterval(progressInterval);
+
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress(100);
           setResult(response.data);
           localStorage.setItem("resultFetchedFromSupabase3", "true");
           await upsertProgress(100, userId, response.data.final_result);
           console.log("Final progress upserted (100%).");
         } catch (error) {
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress(0);
           await upsertProgress(0, userId);
-          alert(`Error: ${error.message}`);
+         alert(`Error: ${error}`);
+
         }
       };
-
-      fetchResult();
-    };
 
     startProcess();
 
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
   }, [selectedFile, debouncedScheduledTime]);
 
@@ -2101,6 +2209,81 @@ const isTxt = fileName.endsWith(".txt");
   const jobIdRef10 = useRef(null);
 
   useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 2)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched ", progress);
+  
+            setLoadingProgress2(progress);
+  
+            if (data.result) {
+              setResult2({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []); 
+
+  
+
+  useEffect(() => {
     if (!binaryInput2 || !debouncedScheduledTime2) return;
 
     const currentJobId = uuidv4();
@@ -2114,7 +2297,7 @@ const isTxt = fileName.endsWith(".txt");
     }
 
     setLoadingProgress2(0);
-    let progressInterval;
+    let progressIntervalId;
 
     const upsertProgress2 = async (progress, userId, result = null) => {
       let binaryString = null;
@@ -2141,25 +2324,21 @@ const isTxt = fileName.endsWith(".txt");
           return;
         }
       }
-      const progressPercentage = progress;
+;
 
       const payload = {
         user_id: userId,
         line: 2,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime2,
         result: result,
         file_name: fileName2,
         upload_time: uploadTime2,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent2) {
-        payload.binary_data = binaryInput2;
-        binaryDataSent2 = true; // Mark as sent
-      }
-
+    
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -2170,7 +2349,7 @@ const isTxt = fileName.endsWith(".txt");
         }
     };
 
-    const startProcess2 = async () => {
+    const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
 
@@ -2179,23 +2358,48 @@ const isTxt = fileName.endsWith(".txt");
 
       await upsertProgress2(0, userId);
 
-      const fetchResult = async () => {
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton2(false);
-              const percent = Math.round((completed / 20) * 100);
-              setLoadingProgress2(prev => (percent > prev ? percent : prev));
-              await upsertProgress2(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error (line 2):', err);
+      setShowRedButton2(false);
+      if (!alertShownRef2.current) {
+     alert("File uploaded successfully!");
+     alertShownRef2.current = true;
+   }
+      const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 2)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress2(progress);
+    
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress2(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
 
+          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+          await fetchProgressFromSupabase();
+          try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile2);
           const formattedScheduledTime = new Date(debouncedScheduledTime2)
@@ -2213,31 +2417,113 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton2(false);
-          clearInterval(progressInterval);
+         
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress2(100);
           setResult2(response.data);
           localStorage.setItem("resultFetchedFromSupabase3", "true");
           await upsertProgress2(100, userId, response.data.final_result);
           console.log("Final progress upserted (100%).");
         } catch (error) {
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress2(0);
           await upsertProgress2(0, userId);
-          alert(`Error: ${error.message}`);
+         alert(`Error: ${error}`);
+
         }
       };
 
-      fetchResult();
+      startProcess();
+    
+
+      return () => {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      };
+  }, [selectedFile2, debouncedScheduledTime2]);
+
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 3)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched ", progress);
+  
+            setLoadingProgress3(progress);
+  
+            if (data.result) {
+              setResult3({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
-
-    startProcess2();
-
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
-  }, [binaryInput2, debouncedScheduledTime2]);
-
+  }, []); 
 
   useEffect(() => {
     if (!binaryInput3 || !debouncedScheduledTime3) return;
@@ -2247,16 +2533,15 @@ const isTxt = fileName.endsWith(".txt");
     const lineNo = 3;
 
     if (result3) {
-      localStorage.setItem('resultFetchedFromSupabased3', 'true');
+      localStorage.setItem('resultFetchedFromSupabased2', 'true');
       setLoadingProgress3(100);
       return;
     }
 
     setLoadingProgress3(0);
-    let progressInterval;
+    let progressIntervalId;
 
-    const upsertProgress3 = async (progress, userId, result = null) => {
-      
+    const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile3 && !binaryInsertedRef3.current) {
@@ -2274,32 +2559,27 @@ const isTxt = fileName.endsWith(".txt");
             .join('');
 
           binaryInsertedRef3.current = true; // ✅ Prevent future inserts
-          console.log("binary string", binaryString);
-
+        
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
-      
-      const progressPercentage = progress;
+;
+
       const payload = {
         user_id: userId,
         line: 3,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime3,
         result: result,
         file_name: fileName3,
         upload_time: uploadTime3,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent3) {
-        payload.binary_data = binaryInput3;
-        binaryDataSent3 = true; // Mark as sent
-      }
-
+    
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -2308,35 +2588,59 @@ const isTxt = fileName.endsWith(".txt");
         if (error) {
           console.error('Error storing progress in Supabase:', error);
         }
-    
     };
 
-    const startProcess3 = async () => {
+    const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
 
         return;
       }
 
-      await upsertProgress3(0, userId);
+      await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton3(false);
-              const percent = Math.round((completed / 20) * 100);
-              setLoadingProgress3(prev => (percent > prev ? percent : prev));
-              await upsertProgress3(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error (line 3):', err);
+      setShowRedButton3(false);
+      if (!alertShownRef3.current) {
+     alert("File uploaded successfully!");
+     alertShownRef3.current = true;
+   }
+      const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 3)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress3(progress);
+    
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress3(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
 
+          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+          await fetchProgressFromSupabase();
+          try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile3);
           const formattedScheduledTime = new Date(debouncedScheduledTime3)
@@ -2354,34 +2658,114 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton3(false);
          
-
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress3(100);
           setResult3(response.data);
-          localStorage.setItem('resultFetchedFromSupabased3', 'true');
-          await upsertProgress3(100, userId, response.data.final_result);
+          localStorage.setItem("resultFetchedFromSupabase3", "true");
+          await upsertProgress(100, userId, response.data.final_result);
+          console.log("Final progress upserted (100%).");
         } catch (error) {
-
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress3(0);
-          await upsertProgress3(0, userId);
-          alert(`Error: ${error.message}`);
+          await upsertProgress(0, userId);
+         alert(`Error: ${error}`);
+
         }
       };
 
-      fetchResult();
+      startProcess();
+    
+
+      return () => {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      };
+  }, [selectedFile3, debouncedScheduledTime3]);
+
+
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 4)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched ", progress);
+  
+            setLoadingProgress4(progress);
+  
+            if (data.result) {
+              setResult4({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
-
-    startProcess3();
-
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
-  }, [binaryInput3, debouncedScheduledTime3]);
-
-
+  }, []); 
 
   useEffect(() => {
     if (!binaryInput4 || !debouncedScheduledTime4) return;
@@ -2391,15 +2775,15 @@ const isTxt = fileName.endsWith(".txt");
     const lineNo = 4;
 
     if (result4) {
-      localStorage.setItem('resultFetchedFromSupabased4', 'true');
+      localStorage.setItem('resultFetchedFromSupabased2', 'true');
       setLoadingProgress4(100);
       return;
     }
 
     setLoadingProgress4(0);
-    let progressInterval;
+    let progressIntervalId;
 
-    const upsertProgress4 = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile4 && !binaryInsertedRef4.current) {
@@ -2417,32 +2801,27 @@ const isTxt = fileName.endsWith(".txt");
             .join('');
 
           binaryInsertedRef4.current = true; // ✅ Prevent future inserts
-          console.log("binary string", binaryString);
-
+        
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
-      const progressPercentage = progress;
+;
 
       const payload = {
         user_id: userId,
         line: 4,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime4,
         result: result,
         file_name: fileName4,
         upload_time: uploadTime4,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent4) {
-        payload.binary_data = binaryInput4;
-        binaryDataSent4 = true; // Mark as sent
-      }
-
+    
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -2453,32 +2832,62 @@ const isTxt = fileName.endsWith(".txt");
         }
     };
 
-    const startProcess4 = async () => {
+    const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
 
         return;
       }
 
-      await upsertProgress4(0, userId);
+      await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton4(false);
-              const percent = Math.round((completed / 20) * 100);
-              setLoadingProgress4(prev => (percent > prev ? percent : prev));
-              await upsertProgress4(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error (line 4):', err);
+      setShowRedButton4(false);
+      if (!alertShownRef4.current) {
+     alert("File uploaded successfully!");
+     alertShownRef4.current = true;
+   }
+      const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 4)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress4(progress);
+              
+              if (data.result) {
+                setResult4({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase", "true");
+              }
 
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress4(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
+
+          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+          await fetchProgressFromSupabase();
+          try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile4);
           const formattedScheduledTime = new Date(debouncedScheduledTime4)
@@ -2496,31 +2905,115 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton4(false);
-          clearInterval(progressInterval);
+         
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress4(100);
           setResult4(response.data);
-          localStorage.setItem('resultFetchedFromSupabased4', 'true');
-          await upsertProgress4(100, userId, response.data.final_result);
+          localStorage.setItem("resultFetchedFromSupabase3", "true");
+          await upsertProgress(100, userId, response.data.final_result);
+          console.log("Final progress upserted (100%).");
         } catch (error) {
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress4(0);
-          await upsertProgress4(0, userId);
+          await upsertProgress(0, userId);
+         alert(`Error: ${error}`);
 
-          alert(`Error: ${error.message}`);
         }
       };
 
-      fetchResult();
+      startProcess();
+    
+
+      return () => {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      };
+  }, [selectedFile4, debouncedScheduledTime4]);
+
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 5)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched ", progress);
+  
+            setLoadingProgress5(progress);
+  
+            if (data.result) {
+              setResult5({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
-
-    startProcess4();
-
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
-  }, [binaryInput4, debouncedScheduledTime4]);
+  }, []); 
 
+  
 
   useEffect(() => {
     if (!binaryInput5 || !debouncedScheduledTime5) return;
@@ -2530,15 +3023,15 @@ const isTxt = fileName.endsWith(".txt");
     const lineNo = 5;
 
     if (result5) {
-      localStorage.setItem('resultFetchedFromSupabased5', 'true');
+      localStorage.setItem('resultFetchedFromSupabased2', 'true');
       setLoadingProgress5(100);
       return;
     }
 
     setLoadingProgress5(0);
-    let progressInterval;
+    let progressIntervalId;
 
-    const upsertProgress5 = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile5 && !binaryInsertedRef5.current) {
@@ -2556,32 +3049,27 @@ const isTxt = fileName.endsWith(".txt");
             .join('');
 
           binaryInsertedRef5.current = true; // ✅ Prevent future inserts
-          console.log("binary string", binaryString);
-
+          
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
+;
 
-      const progressPercentage = progress;
       const payload = {
         user_id: userId,
         line: 5,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime5,
         result: result,
         file_name: fileName5,
         upload_time: uploadTime5,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent5) {
-        payload.binary_data = binaryInput5;
-        binaryDataSent5 = true; // Mark as sent
-      }
-
+    
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -2590,35 +3078,59 @@ const isTxt = fileName.endsWith(".txt");
         if (error) {
           console.error('Error storing progress in Supabase:', error);
         }
-     
     };
 
-    const startProcess5 = async () => {
+    const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
 
         return;
       }
 
-      await upsertProgress5(0, userId);
+      await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton5(false);
-              const percent = Math.round((completed / 20) * 100);
-              setLoadingProgress5(prev => (percent > prev ? percent : prev));
-              await upsertProgress5(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error (line 5):', err);
+      setShowRedButton5(false);
+      if (!alertShownRef5.current) {
+     alert("File uploaded successfully!");
+     alertShownRef5.current = true;
+   }
+      const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 5)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress5(progress);
+    
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress5(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
 
+          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+          await fetchProgressFromSupabase();
+          try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile5);
           const formattedScheduledTime = new Date(debouncedScheduledTime5)
@@ -2636,31 +3148,115 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton5(false);
-          clearInterval(progressInterval);
+         
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress5(100);
           setResult5(response.data);
-          localStorage.setItem('resultFetchedFromSupabased5', 'true');
-          await upsertProgress5(100, userId, response.data.final_result);
+          localStorage.setItem("resultFetchedFromSupabase3", "true");
+          await upsertProgress(100, userId, response.data.final_result);
+          console.log("Final progress upserted (100%).");
         } catch (error) {
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress5(0);
-          await upsertProgress5(0, userId);
+          await upsertProgress(0, userId);
+         alert(`Error: ${error}`);
 
-          alert(`Error: ${error.message}`);
         }
       };
 
-      fetchResult();
+      startProcess();
+    
+
+      return () => {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      };
+  }, [selectedFile5, debouncedScheduledTime5]);
+
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 6)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched ", progress);
+  
+            setLoadingProgress6(progress);
+  
+            if (data.result) {
+              setResult6({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
-
-    startProcess5();
-
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
-  }, [binaryInput5, debouncedScheduledTime5]);
+  }, []); 
 
+  
 
   useEffect(() => {
     if (!binaryInput6 || !debouncedScheduledTime6) return;
@@ -2670,15 +3266,15 @@ const isTxt = fileName.endsWith(".txt");
     const lineNo = 6;
 
     if (result6) {
-      localStorage.setItem('resultFetchedFromSupabased6', 'true');
+      localStorage.setItem('resultFetchedFromSupabased2', 'true');
       setLoadingProgress6(100);
       return;
     }
 
     setLoadingProgress6(0);
-    let progressInterval;
+    let progressIntervalId;
 
-    const upsertProgress6 = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile6 && !binaryInsertedRef6.current) {
@@ -2696,32 +3292,27 @@ const isTxt = fileName.endsWith(".txt");
             .join('');
 
           binaryInsertedRef6.current = true; // ✅ Prevent future inserts
-          console.log("binary string", binaryString);
 
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
+;
 
-      const progressPercentage = progress;
       const payload = {
         user_id: userId,
         line: 6,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime6,
         result: result,
         file_name: fileName6,
         upload_time: uploadTime6,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent6) {
-        payload.binary_data = binaryInput6;
-        binaryDataSent6 = true; // Mark as sent
-      }
-
+    
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -2730,35 +3321,59 @@ const isTxt = fileName.endsWith(".txt");
         if (error) {
           console.error('Error storing progress in Supabase:', error);
         }
-
     };
 
-    const startProcess6 = async () => {
+    const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
 
         return;
       }
 
-      await upsertProgress6(0, userId);
+      await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton6(false);
-              const percent = Math.round((completed / 20) * 100);
-              setLoadingProgress6(prev => (percent > prev ? percent : prev));
-              await upsertProgress6(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error (line 6):', err);
+      setShowRedButton6(false);
+      if (!alertShownRef6.current) {
+     alert("File uploaded successfully!");
+     alertShownRef6.current = true;
+   }
+      const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 6)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress6(progress);
+    
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress6(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
 
+          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+          await fetchProgressFromSupabase();
+          try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile6);
           const formattedScheduledTime = new Date(debouncedScheduledTime6)
@@ -2776,31 +3391,115 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton6(false);
-          clearInterval(progressInterval);
+         
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress6(100);
           setResult6(response.data);
-          localStorage.setItem('resultFetchedFromSupabased6', 'true');
-          await upsertProgress6(100, userId, response.data.final_result);
+          localStorage.setItem("resultFetchedFromSupabase3", "true");
+          await upsertProgress(100, userId, response.data.final_result);
+          console.log("Final progress upserted (100%).");
         } catch (error) {
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress6(0);
-          await upsertProgress6(0, userId);
+          await upsertProgress(0, userId);
+         alert(`Error: ${error}`);
 
-          alert(`Error: ${error.message}`);
         }
       };
 
-      fetchResult();
+      startProcess();
+    
+
+      return () => {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      };
+  }, [selectedFile6, debouncedScheduledTime6]);
+
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 7)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched ", progress);
+  
+            setLoadingProgress7(progress);
+  
+            if (data.result) {
+              setResult7({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
-
-    startProcess6();
-
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
-  }, [binaryInput6, debouncedScheduledTime6]);
+  }, []); 
 
+  
 
   useEffect(() => {
     if (!binaryInput7 || !debouncedScheduledTime7) return;
@@ -2810,15 +3509,15 @@ const isTxt = fileName.endsWith(".txt");
     const lineNo = 7;
 
     if (result7) {
-      localStorage.setItem('resultFetchedFromSupabased7', 'true');
+      localStorage.setItem('resultFetchedFromSupabased2', 'true');
       setLoadingProgress7(100);
       return;
     }
 
     setLoadingProgress7(0);
-    let progressInterval;
+    let progressIntervalId;
 
-    const upsertProgress7 = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile7 && !binaryInsertedRef7.current) {
@@ -2828,40 +3527,35 @@ const isTxt = fileName.endsWith(".txt");
           const fileBuffer = await new Promise((resolve, reject) => {
             fileReader.onload = () => resolve(fileReader.result);
             fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(selectedFile7);
+            fileReader.readAsBinaryString(selectedFile);
           });
 
           binaryString = Array.from(fileBuffer)
             .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
             .join('');
 
-          binaryInsertedRef7.current = true; // ✅ Prevent future inserts
-          console.log("binary string", binaryString);
-
+          binaryInsertedRef.current = true; // ✅ Prevent future inserts
+          
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
+;
 
-      const progressPercentage = progress;
       const payload = {
         user_id: userId,
         line: 7,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime7,
         result: result,
         file_name: fileName7,
         upload_time: uploadTime7,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent7) {
-        payload.binary_data = binaryInput7;
-        binaryDataSent7 = true; // Mark as sent
-      }
-
+    
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -2870,35 +3564,59 @@ const isTxt = fileName.endsWith(".txt");
         if (error) {
           console.error('Error storing progress in Supabase:', error);
         }
-      
     };
 
-    const startProcess7 = async () => {
+    const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
 
         return;
       }
 
-      await upsertProgress7(0, userId);
+      await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton7(false);
-              const percent = Math.round((completed / 20) * 100);
-              setLoadingProgress7(prev => (percent > prev ? percent : prev));
-              await upsertProgress7(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error (line 7):', err);
+      setShowRedButton7(false);
+      if (!alertShownRef7.current) {
+     alert("File uploaded successfully!");
+     alertShownRef7.current = true;
+   }
+      const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 7)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress7(progress);
+    
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress7(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
 
+          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+          await fetchProgressFromSupabase();
+          try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile7);
           const formattedScheduledTime = new Date(debouncedScheduledTime7)
@@ -2916,31 +3634,115 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton7(false);
-          clearInterval(progressInterval);
+         
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress7(100);
           setResult7(response.data);
-          localStorage.setItem('resultFetchedFromSupabased7', 'true');
-          await upsertProgress7(100, userId, response.data.final_result);
+          localStorage.setItem("resultFetchedFromSupabase3", "true");
+          await upsertProgress(100, userId, response.data.final_result);
+          console.log("Final progress upserted (100%).");
         } catch (error) {
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress7(0);
-          await upsertProgress7(0, userId);
+          await upsertProgress(0, userId);
+         alert(`Error: ${error}`);
 
-          alert(`Error: ${error.message}`);
         }
       };
 
-      fetchResult();
+      startProcess();
+    
+
+      return () => {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      };
+  }, [selectedFile7, debouncedScheduledTime7]);
+
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 8)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched ", progress);
+  
+            setLoadingProgress8(progress);
+  
+            if (data.result) {
+              setResult8({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
-
-    startProcess7();
-
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
-  }, [binaryInput7, debouncedScheduledTime7]);
+  }, []); 
 
+  
 
   useEffect(() => {
     if (!binaryInput8 || !debouncedScheduledTime8) return;
@@ -2950,15 +3752,15 @@ const isTxt = fileName.endsWith(".txt");
     const lineNo = 8;
 
     if (result8) {
-      localStorage.setItem('resultFetchedFromSupabased8', 'true');
+      localStorage.setItem('resultFetchedFromSupabased2', 'true');
       setLoadingProgress8(100);
       return;
     }
 
     setLoadingProgress8(0);
-    let progressInterval;
+    let progressIntervalId;
 
-    const upsertProgress8 = async (progress, userId, result = null) => {
+    const upsertProgress= async (progress, userId, result = null) => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile8 && !binaryInsertedRef8.current) {
@@ -2976,32 +3778,27 @@ const isTxt = fileName.endsWith(".txt");
             .join('');
 
           binaryInsertedRef8.current = true; // ✅ Prevent future inserts
-          console.log("binary string", binaryString);
-
+         
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
+;
 
-      const progressPercentage = progress;
       const payload = {
         user_id: userId,
         line: 8,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime8,
         result: result,
         file_name: fileName8,
         upload_time: uploadTime8,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent8) {
-        payload.binary_data = binaryInput8;
-        binaryDataSent8 = true; // Mark as sent
-      }
-
+    
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -3010,35 +3807,59 @@ const isTxt = fileName.endsWith(".txt");
         if (error) {
           console.error('Error storing progress in Supabase:', error);
         }
-     
     };
 
-    const startProcess8 = async () => {
+    const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
 
         return;
       }
 
-      await upsertProgress8(0, userId);
+      await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton8(false);
-              const percent = Math.round((completed / 20) * 100);
-              setLoadingProgress8(prev => (percent > prev ? percent : prev));
-              await upsertProgress8(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error (line 8):', err);
+      setShowRedButton8(false);
+      if (!alertShownRef8.current) {
+     alert("File uploaded successfully!");
+     alertShownRef8.current = true;
+   }
+      const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 8)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress8(progress);
+    
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress8(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
 
+          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+          await fetchProgressFromSupabase();
+          try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile8);
           const formattedScheduledTime = new Date(debouncedScheduledTime8)
@@ -3056,31 +3877,114 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton8(false);
-          clearInterval(progressInterval);
+         
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress8(100);
           setResult8(response.data);
-          localStorage.setItem('resultFetchedFromSupabased8', 'true');
-          await upsertProgress8(100, userId, response.data.final_result);
+          localStorage.setItem("resultFetchedFromSupabase3", "true");
+          await upsertProgress(100, userId, response.data.final_result);
+          console.log("Final progress upserted (100%).");
         } catch (error) {
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress8(0);
-          await upsertProgress8(0, userId);
+          await upsertProgress(0, userId);
+         alert(`Error: ${error}`);
 
-          alert(`Error: ${error.message}`);
         }
       };
 
-      fetchResult();
+      startProcess();
+    
+
+      return () => {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      };
+  }, [selectedFile8, debouncedScheduledTime8]);
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 9)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched ", progress);
+  
+            setLoadingProgress9(progress);
+  
+            if (data.result) {
+              setResult9({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
-
-    startProcess8();
-
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
-  }, [binaryInput8, debouncedScheduledTime8]);
+  }, []); 
 
+  
 
   useEffect(() => {
     if (!binaryInput9 || !debouncedScheduledTime9) return;
@@ -3090,15 +3994,15 @@ const isTxt = fileName.endsWith(".txt");
     const lineNo = 9;
 
     if (result9) {
-      localStorage.setItem('resultFetchedFromSupabased9', 'true');
+      localStorage.setItem('resultFetchedFromSupabased2', 'true');
       setLoadingProgress9(100);
       return;
     }
 
     setLoadingProgress9(0);
-    let progressInterval;
+    let progressIntervalId;
 
-    const upsertProgress9 = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile9 && !binaryInsertedRef9.current) {
@@ -3116,32 +4020,27 @@ const isTxt = fileName.endsWith(".txt");
             .join('');
 
           binaryInsertedRef9.current = true; // ✅ Prevent future inserts
-          console.log("binary string", binaryString);
-
+          
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
+;
 
-      const progressPercentage = progress;
       const payload = {
         user_id: userId,
         line: 9,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime9,
         result: result,
         file_name: fileName9,
         upload_time: uploadTime9,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent9) {
-        payload.binary_data = binaryInput9;
-        binaryDataSent9 = true; // Mark as sent
-      }
-
+    
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -3152,32 +4051,57 @@ const isTxt = fileName.endsWith(".txt");
         }
     };
 
-    const startProcess9 = async () => {
+    const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
 
         return;
       }
 
-      await upsertProgress9(0, userId);
+      await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton9(false);
-              const percent = Math.round((completed / 20) * 100);
-              setLoadingProgress9(prev => (percent > prev ? percent : prev));
-              await upsertProgress9(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error (line 9):', err);
+      setShowRedButton9(false);
+      if (!alertShownRef9.current) {
+     alert("File uploaded successfully!");
+     alertShownRef9.current = true;
+   }
+      const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 9)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress9(progress);
+    
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress9(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
 
+          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+          await fetchProgressFromSupabase();
+          try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile9);
           const formattedScheduledTime = new Date(debouncedScheduledTime9)
@@ -3195,31 +4119,115 @@ const isTxt = fileName.endsWith(".txt");
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton9(false);
-          clearInterval(progressInterval);
+         
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress9(100);
           setResult9(response.data);
-          localStorage.setItem('resultFetchedFromSupabased9', 'true');
-          await upsertProgress9(100, userId, response.data.final_result);
+          localStorage.setItem("resultFetchedFromSupabase3", "true");
+          await upsertProgress(100, userId, response.data.final_result);
+          console.log("Final progress upserted (100%).");
         } catch (error) {
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress9(0);
-          await upsertProgress9(0, userId);
+          await upsertProgress(0, userId);
+         alert(`Error: ${error}`);
 
-          alert(`Error: ${error.message}`);
         }
       };
 
-      fetchResult();
+      startProcess();
+    
+
+      return () => {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      };
+  }, [selectedFile9, debouncedScheduledTime9]);
+
+
+  useEffect(() => {
+
+    let progressIntervalId;
+  
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+  
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 10)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching results from Supabase:", error);
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+  
+          if (data) {
+            const progress = data.progress || 0;
+            console.log("resumed fetched ", progress);
+  
+            setLoadingProgress10(progress);
+  
+            if (data.result) {
+              setResult10({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+  
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+          console.error("Progress fetch error:", err);
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
+  
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+  
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
-
-    startProcess9();
-
+  
+    // On mount → resume progress check
+    resumeProgressCheck();
+  
+    // On unmount → clear polling
     return () => {
-      if (progressInterval) clearInterval(progressInterval);
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
     };
-  }, [binaryInput9, debouncedScheduledTime9]);
+  }, []); 
 
+  
 
   useEffect(() => {
     if (!binaryInput10 || !debouncedScheduledTime10) return;
@@ -3229,15 +4237,15 @@ const isTxt = fileName.endsWith(".txt");
     const lineNo = 10;
 
     if (result10) {
-      localStorage.setItem('resultFetchedFromSupabased10', 'true');
+      localStorage.setItem('resultFetchedFromSupabased2', 'true');
       setLoadingProgress10(100);
       return;
     }
 
     setLoadingProgress10(0);
-    let progressInterval;
+    let progressIntervalId;
 
-    const upsertProgress10 = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile10 && !binaryInsertedRef10.current) {
@@ -3255,33 +4263,27 @@ const isTxt = fileName.endsWith(".txt");
             .join('');
 
           binaryInsertedRef10.current = true; // ✅ Prevent future inserts
-          console.log("binary string", binaryString);
-
+       
         } catch (err) {
           console.error("❌ Error reading binary file:", err);
           return;
         }
       }
-
-      const progressPercentage = progress;
+;
 
       const payload = {
         user_id: userId,
         line: 10,
+        binary_data: " ",
         scheduled_time: debouncedScheduledTime10,
         result: result,
         file_name: fileName10,
         upload_time: uploadTime10,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
 
-      // Only send binary_data once
-      if (!binaryDataSent10) {
-        payload.binary_data = binaryInput10;
-        binaryDataSent10 = true; // Mark as sent
-      }
-
+    
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
@@ -3290,35 +4292,59 @@ const isTxt = fileName.endsWith(".txt");
         if (error) {
           console.error('Error storing progress in Supabase:', error);
         }
-     
     };
 
-    const startProcess10 = async () => {
+    const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) {
 
         return;
       }
 
-      await upsertProgress10(0, userId);
+      await upsertProgress(0, userId);
 
-      const fetchResult = async () => {
-        try {
-          progressInterval = setInterval(async () => {
-            try {
-              const progressRes = await axios.get(
-                `http://localhost:8000/get_progress_dieharder/${currentJobId}`
-              );
-              const completed = progressRes.data.progress || 0;
-              setShowRedButton10(false);
-              const percent = Math.round((completed / 20) * 100);
-              setLoadingProgress10(prev => (percent > prev ? percent : prev));
-              await upsertProgress10(percent, userId);
-            } catch (err) {
-              console.error('Progress fetch error (line 10):', err);
+      setShowRedButton10(false);
+      if (!alertShownRef10.current) {
+     alert("File uploaded successfully!");
+     alertShownRef10.current = true;
+   }
+      const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results3")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", 10)
+              .single();
+    
+            if (error) {
+              console.error("Error fetching results from Supabase:", error);
+              return;
             }
-          }, 1000);
+    
+            if (data) {
+             
+              const progress = data.progress || 0;
+              console.log("fetched", progress);
+              setLoadingProgress10(progress);
+    
+              //  Stop polling once progress is 100%
+              if (progress >= 100 && progressIntervalId) {
+                setLoadingProgress10(100);
+                console.log("U");
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            console.error("Progress fetch error:", err);
+          }
+        };
 
+          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+          await fetchProgressFromSupabase();
+          try {
+        
           const formData = new FormData();
           formData.append("file", selectedFile10);
           const formattedScheduledTime = new Date(debouncedScheduledTime10)
@@ -3328,40 +4354,47 @@ const isTxt = fileName.endsWith(".txt");
 
           formData.append("scheduled_time", debouncedScheduledTime10);
           formData.append("job_id", currentJobId);
-      
           formData.append("line", lineNo);
           formData.append("user_id", userId);
           formData.append("file_name", fileName10);
-          
           const response = await axios.post(
             "http://localhost:8000/generate_final_ans_dieharder/",
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
-          setShowRedButton10(false);
-          clearInterval(progressInterval);
+         
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+         
           setLoadingProgress10(100);
           setResult10(response.data);
-          localStorage.setItem('resultFetchedFromSupabased10', 'true');
-          await upsertProgress10(100, userId, response.data.final_result);
+          localStorage.setItem("resultFetchedFromSupabase3", "true");
+          await upsertProgress(100, userId, response.data.final_result);
+          console.log("Final progress upserted (100%).");
         } catch (error) {
-          clearInterval(progressInterval);
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          } 
           setLoadingProgress10(0);
-          await upsertProgress10(0, userId);
+          await upsertProgress(0, userId);
+         alert(`Error: ${error}`);
 
-          alert(`Error: ${error.message}`);
         }
       };
 
-      fetchResult();
-    };
+      startProcess();
+    
 
-    startProcess10();
-
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
-  }, [binaryInput10, debouncedScheduledTime10]);
+      return () => {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      };
+  }, [selectedFile10, debouncedScheduledTime10]);
 
   const [binFile, setBinFile] = useState(null);   // will hold the generated .bin file
   const [binFile2, setBinFile2] = useState(null);
