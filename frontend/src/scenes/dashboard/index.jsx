@@ -53,7 +53,7 @@ const BinaryGraphDisplay = ({ binaryInput }) => {
     const fetchGraph = async () => {
       try {
         const response = await fetch(
-          "${REACT_APP_BASE_URL}/graph-generation/",
+          `${REACT_APP_BASE_URL}/graph-generation-nist90b/`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -99,14 +99,13 @@ const BinaryGraphDisplay = ({ binaryInput }) => {
 };
 
 const Dashboard = () => {
-  const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
-
   const theme = useTheme();
+  const REACT_APP_PROXY_URL = process.env.REACT_APP_PROXY_URL;
   const colors = tokens(theme.palette.mode);
   const [isLive, setIsLive] = useState(false);
   const [binaryInput, setBinaryInput] = useState(""); // State to store fetched binary data
   const [binaryInput2, setBinaryInput2] = useState(""); // State to store fetched binary data
-  const [url, setUrl] = useState("http://localhost:3003/proxy"); // Default URL
+  const [url, setUrl] = useState(`${REACT_APP_PROXY_URL}/proxy`); // Default URL
   const [isFetching, setIsFetching] = useState(false); // Fetching status
   const [intervalId, setIntervalId] = useState(null); // Interval ID
   const [reportUrl, setReportUrl] = useState(null);
@@ -115,6 +114,9 @@ const Dashboard = () => {
   const [loadingProgressn, setLoadingProgressn] = useState(0);
   const [loadingProgressn2, setLoadingProgressn2] = useState(0);
   const [loadingProgressd, setLoadingProgressd] = useState(0);
+  
+  const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+ 
 
   // Handle API URL input
   const handleUrlChange = (e) => {
@@ -207,53 +209,131 @@ const Dashboard = () => {
   }, [isFetching, loadingProgressd, loadingProgressn, loadingProgressn2]);
 
 
-  useEffect(() => {
-    if (!binaryInput) return; // Do not fetch if binaryInput is empty
+//   useEffect(() => {
+//     if (!binaryInput) return; // Do not fetch if binaryInput is empty
 
-    const currentJobId = uuidv4();
-    jobIdRefn.current = currentJobId;
-    setLoadingProgressn(0);
-    let progressInterval;
+//     const currentJobId = uuidv4();
+//     jobIdRefn.current = currentJobId;
+//     setLoadingProgressn(0);
+//     let progressInterval;
 
-    const fetchResult = async () => {
+//     const fetchResult = async () => {
 
+//       try {
+//         setLoadingProgressn(0);
+//         // progressInterval = setInterval(async () => {
+//         //   try {
+//         //     const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
+//         //     const completed = progressRes.data.progress || 0;
+//         //     const percent = Math.round((completed / 18) * 100);
+//         //     console.log("progress",percent);
+//         //     setLoadingProgressn(prev => (percent > prev ? percent : prev)); // Prevent regressions
+//         //   } catch (err) {
+//         //     alert(`Error: ${err.message}`);
+//         //   }
+//         // }, 1000);
+
+
+//         // const response = await axios.post(
+//         //   "${REACT_APP_BASE_URL}/generate_final_ans/",
+//         //   {
+//         //     binary_data: binaryInput,
+//         //     scheduled_time: scheduledTime,
+//         //     job_id: currentJobId,
+//         //   }
+//         // );
+
+//         // clearInterval(progressInterval);
+//         setTimeout(() => {
+//   setLoadingProgressn(100);
+// }, 1000);
+//         setResultNIST({ final_result: "non-random number" });
+
+
+//         // setResultNIST(response.data); // Set the result data
+//       } catch (error) {
+//         alert(`Error: ${error.message}`);
+//         clearInterval(progressInterval);
+//         setLoadingProgressn(0);
+
+//       }
+//     };
+
+//     fetchResult();
+//   }, [binaryInput]);
+
+
+useEffect(() => {
+  if (!binaryInput) {
+    return;
+  }
+
+  const currentJobId = uuidv4();
+  jobIdRefn.current = currentJobId;
+  setLoadingProgressn(0);
+  let progressIntervalId;
+
+  const startProcess = async () => {
+   
+    const fetchProgressFromBackend = async () => {
       try {
-
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 18) * 100);
-            setLoadingProgressn(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            alert(`Error: ${err.message}`);
-          }
-        }, 1000);
-
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans/`,
-          {
-            binary_data: binaryInput,
-            scheduled_time: scheduledTime,
-            job_id: currentJobId,
-          }
+        const progressRes = await axios.get(
+          `${REACT_APP_BASE_URL}/get_progress/${currentJobId}`
         );
+        const completed = progressRes.data.progress || 0;
+        const percent = Math.round((completed / 18) * 100);
 
-        clearInterval(progressInterval);
-        setLoadingProgressn(100);
+        setLoadingProgress(percent);
 
-        setResultNIST(response.data); // Set the result data
-      } catch (error) {
-        alert(`Error: ${error.message}`);
-        clearInterval(progressInterval);
-        setLoadingProgressn(0);
-
+        if (percent >= 100 && progressIntervalId) {
+          setLoadingProgressn(100);
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      } catch (err) {
+        console.error("Progress fetch error:", err);
       }
     };
 
-    fetchResult();
-  }, [binaryInput]);
+    // Start polling
+    progressIntervalId = setInterval(fetchProgressFromBackend, 1000);
+
+    // Run one fetch immediately
+    await fetchProgressFromBackend();
+
+    try {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
+        binary_data: binaryInput,
+        scheduled_time: scheduledTime,
+        job_id: currentJobId,
+      });
+
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setLoadingProgressn(100);
+      setResultNIST(response.data);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+      setLoadingProgressn(0);
+      alert(`Error: ${error}`);
+    }
+  };
+
+  startProcess();
+
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+}, [binaryInput]);
 
 
   useEffect(() => {
@@ -464,34 +544,6 @@ const Dashboard = () => {
   const intervalRef = useRef(null);
 
 
-  const fetchRandomNumber = async () => {
-
-    // Default values for internal variables
-    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
-    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
-    const Rand_type = 1; // Request binary data
-    const Length = length || 8; // If length is not provided, use the passed value or default to 64
-
-    try {
-      const response = await axios.post("http://localhost:3003/proxy", {
-        API_Key,
-        APISalt,
-        Rand_type,
-        Length,
-      });
-
-      if (response.data?.random) {
-        const randomValue = response.data.random; // extract random binary
-        setBinaryInput(randomValue);
-        console.log("binary input", binaryInput);
-      }
-    } catch (error) {
-      alert("Error: server down");
-      setBinaryInput("");
-    }
-  };
-
-
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime(scheduledTime2);
@@ -503,44 +555,79 @@ const Dashboard = () => {
   }, [scheduledTime2]);
 
   useEffect(() => {
-    if (!binaryInput2 || !debouncedScheduledTime) return;// Do not fetch if binaryInput is empty
-    const jobId = uuidv4();
-    const fetchResult = async () => {
-      setLoadingProgress2(0); // Start loading from 0%
-      let progressInterval;
+  if (!binaryInput2 || !debouncedScheduledTime) {
+    return;
+  }
 
+  const currentJobId = uuidv4();
+ 
+  setLoadingProgress2(0);
+  let progressIntervalId;
+
+  const startProcess = async () => {
+    const fetchProgressFromBackend = async () => {
       try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${jobId}`);
-            setShowRedButton(false);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 18) * 100);
-            console.log(percent);
-            setLoadingProgress2(percent);
-          } catch (err) {
-            alert(`Error: ${err.message}`);
-          }
-        }, 1000);
-
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
-          binary_data: binaryInput2,
-          scheduled_time: debouncedScheduledTime,
-          job_id: jobId,
-        });
+        const progressRes = await axios.get(
+          `${REACT_APP_BASE_URL}/get_progress/${currentJobId}`
+        );
         setShowRedButton(false);
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress2(100); // Set progress to 100% after response is received
-        setResultNIST2(response.data); // Set the result data
-      } catch (error) {
-        alert(`Error: ${error.message}`);
-        clearInterval(progressInterval);
-        setLoadingProgress2(0); // Reset progress in case of failure
+        const completed = progressRes.data.progress || 0;
+        const percent = Math.round((completed / 18) * 100);
+
+        console.log("Fetched progress (job2):", percent);
+        setLoadingProgress2(prev => (percent > prev ? percent : prev));
+
+        if (percent >= 100 && progressIntervalId) {
+          setLoadingProgress2(100);
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+      } catch (err) {
+        console.error("Progress fetch error (job2):", err);
       }
     };
 
-    fetchResult();
-  }, [binaryInput2, debouncedScheduledTime]);
+    // Start polling
+    progressIntervalId = setInterval(fetchProgressFromBackend, 1000);
+
+    // Run one fetch immediately
+    await fetchProgressFromBackend();
+
+    try {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
+        binary_data: binaryInput2,
+        scheduled_time: debouncedScheduledTime,
+        job_id: currentJobId,
+      });
+
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+
+      setShowRedButton(false);
+      setLoadingProgress2(100);
+      setResultNIST2(response.data);
+    } catch (error) {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+      setLoadingProgress2(0);
+      console.error("Error generating final answer (job2):", error);
+      alert(`Error: ${error}`);
+    }
+  };
+
+  startProcess();
+
+  return () => {
+    if (progressIntervalId) {
+      clearInterval(progressIntervalId);
+      progressIntervalId = null;
+    }
+  };
+}, [binaryInput2, debouncedScheduledTime]);
 
   useEffect(() => {
     if (!binaryInput2 || !debouncedScheduledTime) return;// Do not fetch if binaryInput is empty
@@ -555,7 +642,7 @@ const Dashboard = () => {
             const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress90b/${jobId}`);
             setShowRedButton(false);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
+            const percent = Math.round((completed / 15) * 100);
             setLoadingProgress2b(percent);
           } catch (err) {
             alert(`Error: ${err.message}`);
@@ -607,7 +694,7 @@ const Dashboard = () => {
             const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             setShowRedButton(false);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 22) * 100);
+            const percent = Math.round((completed / 20) * 100);
             setLoadingProgress2c(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             alert(`Error: ${err.message}`);
@@ -689,7 +776,7 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress90b/${jobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 10) * 100);
+            const percent = Math.round((completed / 15) * 100);
             setLoadingProgressb(percent);
           } catch (err) {
             alert(`Error: ${err.message}`);
@@ -742,7 +829,7 @@ const Dashboard = () => {
           try {
             const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 22) * 100);
+            const percent = Math.round((completed / 20) * 100);
             setLoadingProgressc(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             alert(`Error: ${err.message}`);
@@ -869,41 +956,30 @@ const Dashboard = () => {
   const [port, setPort] = useState("");
 
   const handleConnect = async () => {
-    if (!hostname || !port) {
-      alert("Please enter both hostname and port");
+    if (!hostname || !port || !length) {
+      alert("Please enter hostname, port, and length");
       return;
     }
-    // Same request body as fetchRandomNumber
-    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
-    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
-    const Rand_type = 1;
-    const Length = length || 8; // same as in fetchRandomNumber
 
-    console.log("called");
     try {
-      console.log("hi");
-      const response = await axios.post("http://localhost:3003/proxy", {
-        hostname,   // <-- taken from state
-        port,       // <-- taken from state
-        path: "/api/v1/randbin", // default path
-        payload: {
-          API_Key,
-          APISalt,
-          Rand_type,
-          Length,
-        },
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
+        hostname,      // string, e.g. "202.83.17.121"
+        port: Number(port),  // make sure it’s a number
+        length: Number(length) // make sure it’s a number
       });
-      console.log("response", response);
+
       console.log("Response:", response.data);
 
       if (response.data?.random) {
         const randomValue = response.data.random;
         setBinaryInput(randomValue);
+      
         console.log("binary input (from API):", randomValue);
         alert("Connected! Random value received.");
       } else {
         console.error("Error in connection:", response.data);
-        alert("Error in response. Check console.");
+        alert("Incorrect credentials or invalid response.");
+        setBinaryInput("");
       }
     } catch (error) {
       console.error("Error connecting:", error);
@@ -1079,7 +1155,11 @@ const Dashboard = () => {
         <Box position="relative" display="inline-flex">
           <Button
             variant="contained"
-            onClick={() => handleButtonClick("report")}
+            onClick={() => {
+    setLoadingProgressRep(0);   // reset progress first
+    handleButtonClick("report");
+  }}
+
             disabled={loadingProgressd < 100 || loadingProgressn < 100 || loadingProgressn2 < 100}
             sx={{
               backgroundColor: colors.redAccent[400],
@@ -1433,353 +1513,6 @@ const Dashboard = () => {
 
       </Box>
 
-      <Box
-        mt="40px"
-        p="20px"
-        sx={{
-          backgroundColor: colors.primary[400],
-          borderRadius: "8px",
-        }}
-      >
-        <Box
-          component="table"
-          sx={{
-            width: "100%",
-            borderCollapse: "collapse",
-            textAlign: "center",
-            "& th": {
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              padding: "12px",
-            },
-            "& td": {
-              padding: "12px",
-              border: `1px solid ${colors.blueAccent[500]}`,
-            },
-          }}
-        >
-          <thead>
-            <tr>
-
-              <th style={{ width: "20%" }}>Upload File</th>
-              <th style={{ width: "10%" }}>SP 800-22B Result</th>
-              <th style={{ width: "5%" }}>Progress Bar</th>
-              <th style={{ width: "10%" }}>SP 800-90B Result</th>
-              <th style={{ width: "5%" }}>Progress Bar</th>
-              <th style={{ width: "10%" }}>DieHarder Result</th>
-              <th style={{ width: "5%" }}>Progress Bar</th>
-              <th style={{ width: "10%" }}>Uploading Time</th>
-              <th style={{ width: "10%" }}>Filename</th>
-              <th style={{ width: "15%" }}>Scheduling Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-
-              <td>
-                <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload}
-                      sx={{
-                        backgroundColor: colors.greenAccent[400],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[500],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                      {showRedButton && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange}
-                    />
-
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick2("report")}
-                        disabled={loadingProgress2 < 100 || loadingProgress2b < 100 || loadingProgress2c < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                          position: 'relative', // Added for the green dot positioning
-                        }}
-                      >
-                        Generate Report
-                        {/* Green dot indicator */}
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: 4,
-                            right: 4,
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            backgroundColor: colors.greenAccent[500],
-                            opacity: isGeneratingReport && loadingProgress2Rep < 100 ? 1 : 0,
-                            transition: 'opacity 0.3s ease',
-                            boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
-                          }}
-                        />
-
-                        {loadingProgress2Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress2Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress2Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress2Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress2Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress2Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-                              color: colors.greenAccent[500],
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress2Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
-                </Box>
-              </td>
-              <td>{resultNIST2 ? resultNIST2.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress2} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress2}%
-                  </Typography>
-                </Box>
-              </td>
-
-
-              <td>{resultNIST90B2 ? resultNIST90B2.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress2b} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress2b}%
-                  </Typography>
-                </Box>
-              </td>
-
-
-              <td>{resultDieharder2 ? resultDieharder2.final_result : ""}</td>
-
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress2c} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight="bold" color="white" mt="5px">
-                    {loadingProgress2c}%
-                  </Typography>
-                </Box>
-              </td>
-
-
-              <td>{uploadTime || ""}</td>
-              <td>{fileName || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date}
-                  onChange={handleDateChange}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                {/* Time Input */}
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time}
-                  onChange={handleTimeChange}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1,     // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black",   // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {/* Display Combined Scheduled Time */}
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime2 || "Not set"}
-                </Typography>
-              </td>
-
-
-            </tr>
-
-
-          </tbody>
-        </Box>
-
-
-      </Box>
 
       <Box
         sx={{
@@ -1872,7 +1605,7 @@ const Dashboard = () => {
         <Button
           variant="contained"
           onClick={() => {
-            window.open("http://localhost:3000/report", "_blank");
+            window.open(`${REACT_APP_BASE_URL}/report`, "_blank");
           }}
           sx={{
             backgroundColor: "#E63946",

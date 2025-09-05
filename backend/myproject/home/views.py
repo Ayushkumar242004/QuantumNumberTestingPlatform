@@ -5797,7 +5797,7 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
                     current_time = datetime.datetime.now().isoformat()
                     supabase.table("results3").update({
                         "progress": progress_percentage,
-                    }).eq("user_id", int(userId)).eq("line", int(line_number)).execute()
+                    }).eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
                 except Exception as e:
                     print(f"Supabase progress update failed at step {step}: {e}")
     
