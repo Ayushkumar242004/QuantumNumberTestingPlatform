@@ -22,6 +22,9 @@ const MAX_STACK_SIZE_ESTIMATE = 150 * 1024 * 1024;
 
 const Nist_tests90b = () => {
   const theme = useTheme();
+
+  const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+
   const colors = tokens(theme.palette.mode);
   const [binaryInput, setBinaryInput] = useState("");
   const [binaryInput2, setBinaryInput2] = useState("");
@@ -1947,7 +1950,7 @@ const Nist_tests90b = () => {
       await fetchProgressFromSupabase();
   
       try {
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
           binary_data: binaryInput,
           scheduled_time: debouncedScheduledTime,
           job_id: currentJobId,
@@ -2158,7 +2161,7 @@ const Nist_tests90b = () => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
         binary_data: binaryInput2,
         scheduled_time: debouncedScheduledTime2,
         job_id: currentJobId,
@@ -2369,7 +2372,7 @@ const Nist_tests90b = () => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
         binary_data: binaryInput3,
         scheduled_time: debouncedScheduledTime3,
         job_id: currentJobId,
@@ -2581,7 +2584,7 @@ const Nist_tests90b = () => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
         binary_data: binaryInput4,
         scheduled_time: debouncedScheduledTime4,
         job_id: currentJobId,
@@ -2793,7 +2796,7 @@ const Nist_tests90b = () => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
         binary_data: binaryInput5,
         scheduled_time: debouncedScheduledTime5,
         job_id: currentJobId,
@@ -3004,7 +3007,7 @@ const Nist_tests90b = () => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
         binary_data: binaryInput6,
         scheduled_time: debouncedScheduledTime6,
         job_id: currentJobId,
@@ -3214,7 +3217,7 @@ const Nist_tests90b = () => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
         binary_data: binaryInput7,
         scheduled_time: debouncedScheduledTime7,
         job_id: currentJobId,
@@ -3425,7 +3428,7 @@ const Nist_tests90b = () => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
         binary_data: binaryInput8,
         scheduled_time: debouncedScheduledTime8,
         job_id: currentJobId,
@@ -3637,7 +3640,7 @@ const Nist_tests90b = () => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
         binary_data: binaryInput9,
         scheduled_time: debouncedScheduledTime9,
         job_id: currentJobId,
@@ -3846,7 +3849,7 @@ const Nist_tests90b = () => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
         binary_data: binaryInput10,
         scheduled_time: debouncedScheduledTime10,
         job_id: currentJobId,
@@ -3931,7 +3934,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -3942,7 +3945,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobId,file_name: fileName }),
@@ -4018,7 +4021,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
@@ -4029,7 +4032,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobId }),
@@ -4111,7 +4114,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -4122,7 +4125,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobId,file_name: fileName2 }),
@@ -4201,7 +4204,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
@@ -4212,7 +4215,7 @@ const Nist_tests90b = () => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobId }),
@@ -4294,7 +4297,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -4305,7 +4308,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobId,file_name:fileName3 }),
@@ -4381,7 +4384,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
@@ -4392,7 +4395,7 @@ const Nist_tests90b = () => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobId,file_name:fileName3 }),
@@ -4474,7 +4477,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -4485,7 +4488,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobId,file_name:fileName4 }),
@@ -4560,7 +4563,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
@@ -4571,7 +4574,7 @@ const Nist_tests90b = () => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobId,file_name:fileName4 }),
@@ -4652,7 +4655,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -4663,7 +4666,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobId,file_name:fileName5 }),
@@ -4738,7 +4741,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
@@ -4749,7 +4752,7 @@ const Nist_tests90b = () => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobId,file_name:fileName5 }),
@@ -4835,7 +4838,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -4846,7 +4849,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput6, job_id: currentJobId,file_name:fileName6 }),
@@ -4922,7 +4925,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
@@ -4933,7 +4936,7 @@ const Nist_tests90b = () => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput6, job_id: currentJobId,file_name:fileName6 }),
@@ -5014,7 +5017,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -5025,7 +5028,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch("${REACT_APP_BASE_URL}/pdf-report/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput7, job_id: currentJobId,file_name:fileName7 }),
@@ -5101,7 +5104,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
@@ -5112,7 +5115,7 @@ const Nist_tests90b = () => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput7, job_id: currentJobId,file_name:fileName7 }),
@@ -5195,7 +5198,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -5206,7 +5209,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput8, job_id: currentJobId,file_name:fileName8 }),
@@ -5281,7 +5284,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -5292,7 +5295,7 @@ const Nist_tests90b = () => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch("${REACT_APP_BASE_URL}/graph-generation/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput8, job_id: currentJobId,file_name:fileName8 }),
@@ -5374,7 +5377,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -5385,7 +5388,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput9, job_id: currentJobId,file_name:fileName9 }),
@@ -5460,7 +5463,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
@@ -5471,7 +5474,7 @@ const Nist_tests90b = () => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput9, job_id: currentJobId,file_name:fileName9 }),
@@ -5553,7 +5556,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
@@ -5564,7 +5567,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput10, job_id: currentJobId,file_name:fileName10 }),
@@ -5639,7 +5642,7 @@ const Nist_tests90b = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph90b/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph90b/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
@@ -5650,7 +5653,7 @@ const Nist_tests90b = () => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput10, job_id: currentJobId,file_name:fileName10 }),

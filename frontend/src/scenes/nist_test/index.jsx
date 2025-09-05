@@ -14,6 +14,8 @@ import CloseIcon from "@mui/icons-material/Close";
 const MAX_STACK_SIZE_ESTIMATE = 200 * 1024 * 1024;
 
 const Nist_tests = () => {
+  const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [binaryInput, setBinaryInput] = useState("");
@@ -2039,7 +2041,7 @@ useEffect(() => {
       await fetchProgressFromSupabase();
   
       try {
-        const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+          const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
           binary_data: binaryInput,
           scheduled_time: debouncedScheduledTime,
           job_id: currentJobId,
@@ -2252,7 +2254,7 @@ useEffect(() => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
         binary_data: binaryInput2,
         scheduled_time: debouncedScheduledTime2,
         job_id: currentJobId,
@@ -2463,7 +2465,7 @@ useEffect(() => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+      const response = await axios.post(`{REACT_APP_BASE_URL}/generate_final_ans/`, {
         binary_data: binaryInput3,
         scheduled_time: debouncedScheduledTime3,
         job_id: currentJobId,
@@ -2674,7 +2676,7 @@ useEffect(() => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
         binary_data: binaryInput4,
         scheduled_time: debouncedScheduledTime4,
         job_id: currentJobId,
@@ -2885,7 +2887,7 @@ useEffect(() => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
         binary_data: binaryInput5,
         scheduled_time: debouncedScheduledTime5,
         job_id: currentJobId,
@@ -3096,7 +3098,7 @@ useEffect(() => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
         binary_data: binaryInput6,
         scheduled_time: debouncedScheduledTime6,
         job_id: currentJobId,
@@ -3306,7 +3308,7 @@ useEffect(() => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
         binary_data: binaryInput7,
         scheduled_time: debouncedScheduledTime7,
         job_id: currentJobId,
@@ -3517,7 +3519,7 @@ useEffect(() => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
         binary_data: binaryInput8,
         scheduled_time: debouncedScheduledTime8,
         job_id: currentJobId,
@@ -3727,7 +3729,7 @@ useEffect(() => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
         binary_data: binaryInput9,
         scheduled_time: debouncedScheduledTime9,
         job_id: currentJobId,
@@ -3939,7 +3941,7 @@ useEffect(() => {
     // Run one fetch immediately
     await fetchProgressFromSupabase();
     try {
-      const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
         binary_data: binaryInput10,
         scheduled_time: debouncedScheduledTime10,
         job_id: currentJobId,
@@ -4024,7 +4026,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -4035,7 +4037,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobId,file_name: fileName }),
@@ -4111,7 +4113,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -4122,7 +4124,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobId }),
@@ -4205,7 +4207,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -4216,7 +4218,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobId }),
@@ -4295,7 +4297,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -4306,7 +4308,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobId }),
@@ -4388,7 +4390,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -4399,7 +4401,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobId }),
@@ -4475,7 +4477,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -4486,7 +4488,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobId }),
@@ -4568,7 +4570,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -4579,7 +4581,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobId }),
@@ -4654,7 +4656,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -4665,7 +4667,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobId }),
@@ -4746,7 +4748,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -4757,7 +4759,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobId }),
@@ -4832,7 +4834,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -4843,7 +4845,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobId }),
@@ -4929,7 +4931,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -4940,7 +4942,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput6, job_id: currentJobId }),
@@ -4985,7 +4987,7 @@ useEffect(() => {
       .from("results")
       .select("graph_path")
       .eq("user_id", userId)
-      .eq("line", 1)
+      .eq("line", 6)
       .single();
 
     if (fetchError) {
@@ -5016,7 +5018,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -5027,7 +5029,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput6, job_id: currentJobId }),
@@ -5109,7 +5111,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -5120,7 +5122,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput7, job_id: currentJobId }),
@@ -5196,7 +5198,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -5207,7 +5209,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput7, job_id: currentJobId }),
@@ -5292,7 +5294,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -5303,7 +5305,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput8, job_id: currentJobId }),
@@ -5378,7 +5380,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -5389,7 +5391,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput8, job_id: currentJobId }),
@@ -5472,7 +5474,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -5483,7 +5485,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput9, job_id: currentJobId }),
@@ -5558,7 +5560,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -5569,7 +5571,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput9, job_id: currentJobId }),
@@ -5651,7 +5653,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_nist/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_nist/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 25) * 100);
@@ -5662,7 +5664,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput10, job_id: currentJobId }),
@@ -5737,7 +5739,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graph/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graph/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 16) * 100);
@@ -5748,7 +5750,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generation-nist90b/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput10, job_id: currentJobId }),
@@ -9105,7 +9107,7 @@ useEffect(() => {
         <Button
           variant="contained"
           onClick={() => {
-            window.open("http://localhost:3000/report", "_blank");
+            window.open(`${REACT_APP_BASE_URL}/report`, "_blank");
           }}
           sx={{
             backgroundColor: "#E63946",

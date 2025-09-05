@@ -18,6 +18,8 @@ const Dieharder_tests = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+
   useEffect(() => {
     // Reset body styles
     document.body.style.overflow = 'auto';
@@ -2159,7 +2161,7 @@ useEffect(() => {
           formData.append("file_name", fileName);
 
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -2413,7 +2415,7 @@ useEffect(() => {
           formData.append("user_id", userId);
           formData.append("file_name", fileName2);
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -2654,7 +2656,7 @@ useEffect(() => {
           formData.append("user_id", userId);
           formData.append("file_name", fileName3);
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -2901,7 +2903,7 @@ useEffect(() => {
           formData.append("user_id", userId);
           formData.append("file_name", fileName4);
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -3144,7 +3146,7 @@ useEffect(() => {
           formData.append("user_id", userId);
           formData.append("file_name", fileName5);
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -3387,7 +3389,7 @@ useEffect(() => {
           formData.append("user_id", userId);
           formData.append("file_name", fileName6);
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -3630,7 +3632,7 @@ useEffect(() => {
           formData.append("user_id", userId);
           formData.append("file_name", fileName7);
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -3873,7 +3875,7 @@ useEffect(() => {
           formData.append("user_id", userId);
           formData.append("file_name", fileName8);
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -4115,7 +4117,7 @@ useEffect(() => {
           formData.append("user_id", userId);
           formData.append("file_name", fileName9);
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -4358,7 +4360,7 @@ useEffect(() => {
           formData.append("user_id", userId);
           formData.append("file_name", fileName10);
           const response = await axios.post(
-            "http://localhost:8000/generate_final_ans_dieharder/",
+            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -4422,15 +4424,47 @@ useEffect(() => {
 
   }, [binaryInput]);
 
-  const handleButtonClick = (type) => {
+  const handleButtonClick = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 1)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgressRep(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgressRep(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -4449,36 +4483,88 @@ useEffect(() => {
       formData.append("job_id", currentJobId);
 
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         body: formData,
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgressRep(100);
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 1)           // condition 2
+          }
         })
         .catch((error) => {
-          console.error("Report generation error:", error);
+          alert(`Error: ${error}`);
           clearInterval(progressInterval);
           setLoadingProgressRep(0);
         });
     }
     else if (type === "graph") {
+   
       if (!selectedFile && !binFile) {
         alert("Please select a binary file before generating the graph.");
         return;
       }
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 1)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgressGr(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgressGr(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 20) * 100);
@@ -4497,7 +4583,7 @@ useEffect(() => {
       }
       formData.append("job_id", currentJobId);
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         body: formData,
       })
@@ -4507,11 +4593,32 @@ useEffect(() => {
           }
           return response.blob();
         })
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgressGr(100);
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results3")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 1)           // condition 2
+
+          }
         })
         .catch((error) => {
           console.error("Graph generation error:", error);
@@ -4523,15 +4630,47 @@ useEffect(() => {
   };
 
 
-  const handleButtonClick2 = (type) => {
+  const handleButtonClick2 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
       setLoadingProgress2Rep(0);
 
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 2)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress2Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -4550,16 +4689,37 @@ useEffect(() => {
       }
       formData.append("job_id", currentJobId);
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         body: formData,
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress2Rep(100);
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 2)           // condition 2
+          }
+       
         })
         .catch((error) => {
           console.error("Report generation error:", error);
@@ -4569,12 +4729,44 @@ useEffect(() => {
     } else if (type === "graph") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+        .from("results3")
+        .select("graph_path")
+        .eq("user_id", userId)
+        .eq("line", 2)
+        .single();
+
+      if (fetchError) {
+        console.error("Error checking existing graph:", fetchError.message);
+      }
+
+      if (existingResult && existingResult.graph_path) {
+        console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("graphs")
+          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+          console.error("Error generating signed URL:", urlError.message);
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress2Gr(100);
+        return; // stop here, no need to regenerate
+      }
+
+
       let progressInterval;
       setLoadingProgress2Gr(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 22) * 100);
@@ -4585,17 +4777,38 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress2Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results3")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 2)           // condition 2
+
+          }
         })
         .catch((error) => {
 
@@ -4606,15 +4819,48 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick3 = (type) => {
+  const handleButtonClick3 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 3)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress3Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress3Rep(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -4625,17 +4871,37 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress3Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 3)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -4644,12 +4910,44 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 3)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress3Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress3Gr(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 22) * 100);
@@ -4660,17 +4958,38 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress3Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 3)           // condition 2
+
+          }
         })
         .catch((error) => {
 
@@ -4681,15 +5000,48 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick4 = (type) => {
+  const handleButtonClick4 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 4)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress4Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress4Rep(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -4700,17 +5052,37 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress4Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 4)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -4724,7 +5096,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 22) * 100);
@@ -4735,7 +5107,7 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobId }),
@@ -4756,15 +5128,46 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick5 = (type) => {
+  const handleButtonClick5 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
       const currentJobId = uuidv4();
       let progressInterval;
       setLoadingProgress5Rep(0);
 
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 5)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress5Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -4775,17 +5178,37 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress5Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 5)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -4794,12 +5217,43 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 5)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress5Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress5Gr(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 22) * 100);
@@ -4810,17 +5264,39 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress5Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results3")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 5)           // condition 2
+
+          }
+
         })
         .catch((error) => {
 
@@ -4832,16 +5308,49 @@ useEffect(() => {
   };
 
 
-  const handleButtonClick6 = (type) => {
+  const handleButtonClick6 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 6)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress6Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress6Rep(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -4852,17 +5361,37 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput6, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress6Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 6)           // condition 2
+          } 
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -4872,12 +5401,44 @@ useEffect(() => {
 
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 6)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress6Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress6Gr(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 22) * 100);
@@ -4888,17 +5449,38 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput6, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress6Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results3")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 6)           // condition 2
+
+          }
         })
         .catch((error) => {
 
@@ -4909,16 +5491,47 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick7 = (type) => {
+  const handleButtonClick7 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 7)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress7Rep(100);
+      return; // stop here, no need to regenerate
+    }
       let progressInterval;
       setLoadingProgress7Rep(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -4929,7 +5542,7 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput7, job_id: currentJobId }),
@@ -4953,7 +5566,7 @@ useEffect(() => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 22) * 100);
@@ -4964,17 +5577,37 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput7, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress7Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 7)           // condition 2
+          }
         })
         .catch((error) => {
 
@@ -4986,16 +5619,48 @@ useEffect(() => {
 
 
 
-  const handleButtonClick8 = (type) => {
+  const handleButtonClick8 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 8)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress8Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress8Rep(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -5006,17 +5671,37 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput8, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress8Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 8)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -5025,12 +5710,44 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 8)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress8Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress8Gr(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 22) * 100);
@@ -5041,17 +5758,38 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput8, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress8Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results3")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 8)           // condition 2
+
+          }
         })
         .catch((error) => {
 
@@ -5062,16 +5800,49 @@ useEffect(() => {
   };
 
 
-  const handleButtonClick9 = (type) => {
+  const handleButtonClick9 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 9)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress9Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress9Rep(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -5082,17 +5853,37 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput9, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress9Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 9)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -5101,12 +5892,43 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 9)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress9Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress9Gr(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 22) * 100);
@@ -5117,17 +5939,38 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput9, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress9Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results3")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 9)           // condition 2
+
+          }
         })
         .catch((error) => {
 
@@ -5137,16 +5980,49 @@ useEffect(() => {
     }
   };
 
-  const handleButtonClick10 = (type) => {
+  const handleButtonClick10 = async(type) => {
+    const userId = await fetchUserId();
     if (type === "report") {
 
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("report_path")
+      .eq("user_id", userId)
+      .eq("line", 10)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing report:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.report_path) {
+      console.log("Report already exists in Supabase:", existingResult.report_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("reports")
+        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress10Rep(100);
+      return; // stop here, no need to regenerate
+    }
+
+
       let progressInterval;
       setLoadingProgress10Rep(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_ReportDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 30) * 100);
@@ -5157,17 +6033,37 @@ useEffect(() => {
         }
       }, 1000);
 
-      fetch("http://localhost:8000/pdf-report-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput10, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress10Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `report-${currentJobId}.pdf`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("reports")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading report:", error.message);
+          } else {
+            console.log("Report uploaded:", data.path);
+
+            // ✅ Only save columns that exist in results table
+            await supabase
+            .from("results3")
+            .update({ report_path: data.path })
+            .eq("user_id", userId)   // condition 1
+            .eq("line", 10)           // condition 2
+          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -5176,12 +6072,43 @@ useEffect(() => {
         });
     } else if (type === "graph") {
       const currentJobId = uuidv4();
+
+      const { data: existingResult, error: fetchError } = await supabase
+      .from("results3")
+      .select("graph_path")
+      .eq("user_id", userId)
+      .eq("line", 10)
+      .single();
+
+    if (fetchError) {
+      console.error("Error checking existing graph:", fetchError.message);
+    }
+
+    if (existingResult && existingResult.graph_path) {
+      console.log("Graph already exists in Supabase:", existingResult.graph_path);
+
+      // ✅ 2. Get a signed URL for direct access
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("graphs")
+        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+      if (urlError) {
+        console.error("Error generating signed URL:", urlError.message);
+        return;
+      }
+
+      // ✅ 3. Open the existing graph
+      window.open(signedUrlData.signedUrl, "_blank");
+      setLoadingProgress10Gr(100);
+      return; // stop here, no need to regenerate
+    }
+
       let progressInterval;
       setLoadingProgress10Gr(0);
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_graphDieharder/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 22) * 100);
@@ -5192,17 +6119,38 @@ useEffect(() => {
       }, 1000);
 
 
-      fetch("http://localhost:8000/graph-generaion-dieharder/", {
+      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput10, job_id: currentJobId }),
       })
         .then((response) => response.blob())
-        .then((blob) => {
+        .then(async(blob) => {
           setLoadingProgress10Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
+
+          const fileName = `graph-${currentJobId}.png`;
+          const file = new File([blob], fileName, { type: blob.type });
+
+          const { data, error } = await supabase.storage
+            .from("graphs")
+            .upload(`jobs/${fileName}`, file, { upsert: false });
+
+          if (error) {
+            console.error("Error uploading graph:", error.message);
+          } else {
+            console.log("Graph uploaded to Supabase:", data.path);
+
+            // ✅ Only save columns that exist
+            await supabase
+              .from("results3")
+              .update({ graph_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 10)           // condition 2
+
+          }
         })
         .catch((error) => {
 
@@ -5210,6 +6158,7 @@ useEffect(() => {
           setLoadingProgress10Gr(0);
         });
     }
+    
   };
 
   const handleDownloadOutput = async () => {

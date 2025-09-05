@@ -30,6 +30,7 @@ const BinaryGraphDisplay = ({ binaryInput }) => {
   const [graphUrl, setGraphUrl] = useState(null);
   const [error, setError] = useState("");
   const [reportUrl, setReportUrl] = useState("");
+  const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
 
   useEffect(() => {
     // Reset body styles
@@ -52,7 +53,7 @@ const BinaryGraphDisplay = ({ binaryInput }) => {
     const fetchGraph = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8000/graph-generation/",
+          "${REACT_APP_BASE_URL}/graph-generation/",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -98,6 +99,8 @@ const BinaryGraphDisplay = ({ binaryInput }) => {
 };
 
 const Dashboard = () => {
+  const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isLive, setIsLive] = useState(false);
@@ -218,7 +221,7 @@ const Dashboard = () => {
 
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 18) * 100);
             setLoadingProgressn(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -229,7 +232,7 @@ const Dashboard = () => {
 
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans/",
+          `${REACT_APP_BASE_URL}/generate_final_ans/`,
           {
             binary_data: binaryInput,
             scheduled_time: scheduledTime,
@@ -276,7 +279,7 @@ const Dashboard = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 20) * 100);
             setLoadingProgressd(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -286,7 +289,7 @@ const Dashboard = () => {
         }, 1000);
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_dieharder/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -314,7 +317,7 @@ const Dashboard = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress90b/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 15) * 100);
 
@@ -326,7 +329,7 @@ const Dashboard = () => {
 
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_nist90b/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`,
           {
             binary_data: binaryInput,
             scheduled_time: scheduledTime,
@@ -509,7 +512,7 @@ const Dashboard = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress/${jobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${jobId}`);
             setShowRedButton(false);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 18) * 100);
@@ -520,7 +523,7 @@ const Dashboard = () => {
           }
         }, 1000);
 
-        const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
           binary_data: binaryInput2,
           scheduled_time: debouncedScheduledTime,
           job_id: jobId,
@@ -549,7 +552,7 @@ const Dashboard = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${jobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress90b/${jobId}`);
             setShowRedButton(false);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 10) * 100);
@@ -559,7 +562,7 @@ const Dashboard = () => {
           }
         }, 1000);
 
-        const response = await axios.post("http://localhost:8000/generate_final_ans_nist90b/", {
+        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
           binary_data: binaryInput2,
           scheduled_time: debouncedScheduledTime,
           job_id: jobId,
@@ -601,7 +604,7 @@ const Dashboard = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             setShowRedButton(false);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 22) * 100);
@@ -612,7 +615,7 @@ const Dashboard = () => {
         }, 1000);
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_dieharder/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -640,7 +643,7 @@ const Dashboard = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress/${jobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${jobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 18) * 100);
 
@@ -652,7 +655,7 @@ const Dashboard = () => {
 
 
         // Call the actual NIST testing endpoint
-        const response = await axios.post("http://localhost:8000/generate_final_ans/", {
+        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
           binary_data: binaryInput,
           scheduled_time: scheduledTime,
           job_id: jobId,
@@ -684,7 +687,7 @@ const Dashboard = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress90b/${jobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress90b/${jobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 10) * 100);
             setLoadingProgressb(percent);
@@ -693,7 +696,7 @@ const Dashboard = () => {
           }
         }, 1000);
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_nist90b/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`,
           {
             binary_data: binaryInput,
             scheduled_time: scheduledTime,
@@ -737,7 +740,7 @@ const Dashboard = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 22) * 100);
             setLoadingProgressc(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -747,7 +750,7 @@ const Dashboard = () => {
         }, 1000);
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_dieharder/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -773,7 +776,7 @@ const Dashboard = () => {
       setLoadingProgressRep(0);
 
 
-      fetch("http://localhost:8000/pdf-report-server/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-server/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobId }),
@@ -794,7 +797,7 @@ const Dashboard = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_server/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_server/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 60) * 100);
@@ -816,7 +819,7 @@ const Dashboard = () => {
       setLoadingProgress2Rep(0);
 
 
-      fetch("http://localhost:8000/pdf-report-server/", {
+      fetch(`${REACT_APP_BASE_URL}/pdf-report-server/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobId }),
@@ -837,7 +840,7 @@ const Dashboard = () => {
 
       progressInterval = setInterval(async () => {
         try {
-          const progressRes = await fetch(`http://localhost:8000/get_progress_server/${currentJobId}`);
+          const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_server/${currentJobId}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 60) * 100);
