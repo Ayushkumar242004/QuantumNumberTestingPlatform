@@ -10,7 +10,7 @@ import { tokens } from "../../theme";
 import { mockTransactions } from "../../data/mockData";
 import { Circle } from "@mui/icons-material";
 import Header from "../../components/Header";
-
+import "./Dashboard.css";
 import StatBox from "../../components/StatBox";
 import DeviceThermostatOutlinedIcon from "@mui/icons-material/DeviceThermostatOutlined";
 import NumbersOutlinedIcon from "@mui/icons-material/NumbersOutlined";
@@ -100,12 +100,10 @@ const BinaryGraphDisplay = ({ binaryInput }) => {
 
 const Dashboard = () => {
   const theme = useTheme();
-  const REACT_APP_PROXY_URL = process.env.REACT_APP_PROXY_URL;
   const colors = tokens(theme.palette.mode);
   const [isLive, setIsLive] = useState(false);
   const [binaryInput, setBinaryInput] = useState(""); // State to store fetched binary data
   const [binaryInput2, setBinaryInput2] = useState(""); // State to store fetched binary data
-  const [url, setUrl] = useState(`${REACT_APP_PROXY_URL}/proxy`); // Default URL
   const [isFetching, setIsFetching] = useState(false); // Fetching status
   const [intervalId, setIntervalId] = useState(null); // Interval ID
   const [reportUrl, setReportUrl] = useState(null);
@@ -116,7 +114,10 @@ const Dashboard = () => {
   const [loadingProgressd, setLoadingProgressd] = useState(0);
   
   const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
- 
+  const REACT_APP_PROXY_URL = process.env.REACT_APP_PROXY_URL;
+  
+  const [url, setUrl] = useState(`${REACT_APP_PROXY_URL}/proxy`); // Default URL
+const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
   // Handle API URL input
   const handleUrlChange = (e) => {
@@ -291,7 +292,7 @@ useEffect(() => {
           progressIntervalId = null;
         }
       } catch (err) {
-        console.error("Progress fetch error:", err);
+
       }
     };
 
@@ -574,7 +575,7 @@ useEffect(() => {
         const completed = progressRes.data.progress || 0;
         const percent = Math.round((completed / 18) * 100);
 
-        console.log("Fetched progress (job2):", percent);
+     
         setLoadingProgress2(prev => (percent > prev ? percent : prev));
 
         if (percent >= 100 && progressIntervalId) {
@@ -583,7 +584,7 @@ useEffect(() => {
           progressIntervalId = null;
         }
       } catch (err) {
-        console.error("Progress fetch error (job2):", err);
+        
       }
     };
 
@@ -614,7 +615,7 @@ useEffect(() => {
         progressIntervalId = null;
       }
       setLoadingProgress2(0);
-      console.error("Error generating final answer (job2):", error);
+    
       alert(`Error: ${error}`);
     }
   };
@@ -968,21 +969,20 @@ useEffect(() => {
         length: Number(length) // make sure it’s a number
       });
 
-      console.log("Response:", response.data);
-
+  
       if (response.data?.random) {
         const randomValue = response.data.random;
         setBinaryInput(randomValue);
       
-        console.log("binary input (from API):", randomValue);
+      
         alert("Connected! Random value received.");
       } else {
-        console.error("Error in connection:", response.data);
+        
         alert("Incorrect credentials or invalid response.");
         setBinaryInput("");
       }
     } catch (error) {
-      console.error("Error connecting:", error);
+     
       alert("Connection failed. See console for details.");
       setBinaryInput("");
     }
@@ -1605,7 +1605,7 @@ useEffect(() => {
         <Button
           variant="contained"
           onClick={() => {
-            window.open(`${REACT_APP_BASE_URL}/report`, "_blank");
+            window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
           }}
           sx={{
             backgroundColor: "#E63946",
@@ -1662,38 +1662,6 @@ useEffect(() => {
           }}
         />
       </Box>
-
-      {/* Define keyframes in your global styles */}
-      <style jsx global>{`
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0) translateX(0);
-    }
-    50% {
-      transform: translateY(-20px) translateX(20px);
-    }
-  }
-  
-  @keyframes floatLogo {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 0.3;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.5;
-      transform: scale(1.1);
-    }
-  }
-`}</style>
 
     </Box>
   );

@@ -20,7 +20,7 @@ import {
   ChevronLeft,
 } from "@mui/icons-material";
 import { supabase } from "../../utils/supabaseClient";
-
+import "./Sidebar.css";
 const navItems = [
   {
     title: "Dashboard",
@@ -283,25 +283,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
           </Box>
         )}
       </Box>
-      <style jsx>{`
-        .loader-logout {
-          border: 3px solid rgba(255, 255, 255, 0.3);
-          border-top: 3px solid white;
-          border-radius: 50%;
-          width: 20px;
-          height: 20px;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
+     
     </Box>
   );
 }

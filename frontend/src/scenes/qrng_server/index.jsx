@@ -14,6 +14,9 @@ const MAX_STACK_SIZE_ESTIMATE = 1 * 1024 * 1024;
 const Qrng_Server = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+  const REACT_APP_PROXY_URL = process.env.REACT_APP_PROXY_URL;
+const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
   const [binaryInput, setBinaryInput] = useState(""); // State to store fetched binary data
   const [binaryInput2, setBinaryInput2] = useState(""); // State to store fetched binary data
@@ -102,28 +105,28 @@ const Qrng_Server = () => {
   };
   const startFetching2 = () => {
     if (!isFetching2) {
-      console.log("clicked");
+         
       setIsFetching2(true);
       fetchRandomNumber2();
     }
   };
   const startFetching3 = () => {
     if (!isFetching3) {
-      console.log("clicked");
+         
       setIsFetching3(true);
       fetchRandomNumber3();
     }
   };
   const startFetching4 = () => {
     if (!isFetching4) {
-      console.log("clicked");
+         
       setIsFetching4(true);
       fetchRandomNumber4();
     }
   };
   const startFetching5 = () => {
     if (!isFetching5) {
-      console.log("clicked");
+         
       setIsFetching5(true);
       fetchRandomNumber5();
     }
@@ -149,7 +152,7 @@ const Qrng_Server = () => {
     if (isFetching2) {
 
       if (loadingProgress2 === 100 && loadingProgress2n === 100) {
-        console.log("test");
+    
         fetchRandomNumber2(); // Fetch again only when both progress bars are 100
       }
 
@@ -178,7 +181,7 @@ const Qrng_Server = () => {
     if (isFetching4) {
 
       if (loadingProgress4 === 100 && loadingProgress4n === 100) {
-        console.log("test");
+       
         fetchRandomNumber4(); // Fetch again only when both progress bars are 100
       }
     } else {
@@ -257,34 +260,34 @@ const Qrng_Server = () => {
   }, []);
 
   const fetchRandomNumber = async () => {
-    console.log("1");
+   
     // Default values for internal variables
     const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
     const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
     const Rand_type = 1; // Request binary data
     const Length = length || 8; // If length is not provided, use the passed value or default to 64
-    console.log("2");
+    
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         API_Key,
         APISalt,
         Rand_type,
         Length,
       });
-      console.log("response", response);
+      
       if (response.data?.random) {
         const randomValue = response.data.random; // extract random binary
         setBinaryInput(randomValue);
-        console.log("binary input (from API):", randomValue);
+        
 
       } else {
-        console.error("Error in connection:", response.data);
+       
       }
     } catch (error) {
       alert("Error: server down");
       setBinaryInput(""); // Optionally handle the error state
     }
-    console.log("3");
+    
   };
 
   const fetchRandomNumber2 = async () => {
@@ -295,7 +298,7 @@ const Qrng_Server = () => {
     const Length = length2 || 8;
 
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         API_Key,
         APISalt,
         Rand_type,
@@ -307,7 +310,7 @@ const Qrng_Server = () => {
         setBinaryInput2(response.data.random); // Update the state with random binary data
 
       } else {
-        console.error("Invalid response format:", response.data);
+           
       }
     } catch (error) {
       alert("Error: server down");
@@ -322,7 +325,7 @@ const Qrng_Server = () => {
     const Rand_type = 1; // Request binary data
     const Length = length3 || 8;
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         API_Key,
         APISalt,
         Rand_type,
@@ -332,7 +335,7 @@ const Qrng_Server = () => {
       if (response.data?.random) {
         setBinaryInput3(response.data.random); // Update the state with random binary data
       } else {
-        console.error("Invalid response format:", response.data);
+           
       }
     } catch (error) {
       alert("Error: server down");
@@ -349,7 +352,7 @@ const Qrng_Server = () => {
     const Length = length4 || 8;
 
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         API_Key,
         APISalt,
         Rand_type,
@@ -359,7 +362,7 @@ const Qrng_Server = () => {
       if (response.data?.random) {
         setBinaryInput4(response.data.random); // Update the state with random binary data
       } else {
-        console.error("Invalid response format:", response.data);
+           
       }
     } catch (error) {
       alert("Error: server down");
@@ -375,7 +378,7 @@ const Qrng_Server = () => {
     const Rand_type = 1; // Request binary data
     const Length = length5 || 8;
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         API_Key,
         APISalt,
         Rand_type,
@@ -385,7 +388,7 @@ const Qrng_Server = () => {
       if (response.data?.random) {
         setBinaryInput5(response.data.random); // Update the state with random binary data
       } else {
-        console.error("Invalid response format:", response.data);
+           
       }
     } catch (error) {
       alert("Error: server down");
@@ -437,7 +440,7 @@ const Qrng_Server = () => {
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      console.error("Error occurred:", error);
+         
       alert("Failed to fetch username or save file.");
     }
   };
@@ -482,7 +485,7 @@ const Qrng_Server = () => {
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      console.error("Error occurred:", error);
+         
       alert("Failed to fetch username or save file.");
     }
   };
@@ -527,7 +530,7 @@ const Qrng_Server = () => {
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      console.error("Error occurred:", error);
+         
       alert("Failed to fetch username or save file.");
     }
   };
@@ -572,7 +575,7 @@ const Qrng_Server = () => {
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      console.error("Error occurred:", error);
+         
       alert("Failed to fetch username or save file.");
     }
   };
@@ -617,7 +620,7 @@ const Qrng_Server = () => {
       // Clean up the URL object after the download is triggered
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      console.error("Error occurred:", error);
+         
       alert("Failed to fetch username or save file.");
     }
   };
@@ -642,7 +645,7 @@ const Qrng_Server = () => {
 
   useEffect(() => {
     if (!binaryInput || binaryInput.length % 8 !== 0) {
-      console.warn("Invalid or incomplete binary string");
+      
       return;
     }
 
@@ -659,14 +662,14 @@ const Qrng_Server = () => {
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile(file);
-    console.log("bin file", binFile);
+   
 
   }, [binaryInput]);
   ////
 
   useEffect(() => {
     if (!binaryInput2 || binaryInput2.length % 8 !== 0) {
-      console.warn("Invalid or incomplete binary string");
+      
       return;
     }
 
@@ -683,13 +686,13 @@ const Qrng_Server = () => {
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile2(file);
-    console.log("bin file", binFile2);
+    
 
   }, [binaryInput2]);
 
   useEffect(() => {
     if (!binaryInput3 || binaryInput3.length % 8 !== 0) {
-      console.warn("Invalid or incomplete binary string");
+      
       return;
     }
 
@@ -706,13 +709,13 @@ const Qrng_Server = () => {
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile3(file);
-    console.log("bin file", binFile3);
+    
 
   }, [binaryInput3]);
 
   useEffect(() => {
     if (!binaryInput4 || binaryInput4.length % 8 !== 0) {
-      console.warn("Invalid or incomplete binary string");
+      
       return;
     }
 
@@ -729,13 +732,13 @@ const Qrng_Server = () => {
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile4(file);
-    console.log("bin file", binFile4);
+    
 
   }, [binaryInput]);
 
   useEffect(() => {
     if (!binaryInput5 || binaryInput5.length % 8 !== 0) {
-      console.warn("Invalid or incomplete binary string");
+      
       return;
     }
 
@@ -752,7 +755,7 @@ const Qrng_Server = () => {
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile5(file);
-    console.log("bin file", binFile5);
+   
 
   }, [binaryInput5]);
 
@@ -770,7 +773,7 @@ const Qrng_Server = () => {
 
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 18) * 100);
             setLoadingProgressn(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -781,7 +784,7 @@ const Qrng_Server = () => {
 
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans/",
+          `${REACT_APP_BASE_URL}/generate_final_ans/`,
           {
             binary_data: binaryInput,
             scheduled_time: scheduledTime,
@@ -794,7 +797,7 @@ const Qrng_Server = () => {
 
         setResultNIST(response.data); // Set the result data
       } catch (error) {
-        console.error("Error executing generating final answer:", error);
+           
         clearInterval(progressInterval);
         setLoadingProgressn(0);
 
@@ -815,10 +818,10 @@ const Qrng_Server = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 15) * 100);
-            console.log(`Polled progress: ${percent}%`);
+            
             setLoadingProgress(prev => (percent > prev ? percent : prev)); // Prevent regressions
           } catch (err) {
             console.warn("Error fetching progress:", err);
@@ -833,7 +836,7 @@ const Qrng_Server = () => {
         formData.append("job_id", currentJobId);
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_dieharder/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -842,7 +845,7 @@ const Qrng_Server = () => {
         setLoadingProgress(100); // Set progress to 100% after response is received
         setResultDieharder(response.data); // Set the result data
       } catch (error) {
-        console.error("Error executing generating final answer:", error);
+           
         setLoadingProgress(0); // Reset progress in case of failure
         clearInterval(progressInterval);
       }
@@ -863,7 +866,7 @@ const Qrng_Server = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 18) * 100);
             setLoadingProgress2n(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -873,7 +876,7 @@ const Qrng_Server = () => {
         }, 1000);
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans/",
+          `${REACT_APP_BASE_URL}/generate_final_ans/`,
           {
             binary_data: binaryInput2,
             scheduled_time: scheduledTime2,
@@ -884,7 +887,7 @@ const Qrng_Server = () => {
         setLoadingProgress2n(100);
         setResultNIST2(response.data); // Set the response data
       } catch (error) {
-        console.error("Error executing generating final answer:", error);
+           
         setLoadingProgress2n(0);
         clearInterval(progressInterval);
       }
@@ -904,7 +907,7 @@ const Qrng_Server = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 15) * 100);
             setLoadingProgress2(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -921,7 +924,7 @@ const Qrng_Server = () => {
         formData.append("job_id", currentJobId);
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_dieharder/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -932,7 +935,7 @@ const Qrng_Server = () => {
       } catch (error) {
         setLoadingProgress2(0);
         clearInterval(progressInterval);
-        console.error("Error executing generating final answer:", error);
+           
 
       }
     };
@@ -953,7 +956,7 @@ const Qrng_Server = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 18) * 100);
             setLoadingProgress3n(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -964,7 +967,7 @@ const Qrng_Server = () => {
 
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans/",
+          `${REACT_APP_BASE_URL}/generate_final_ans/`,
           {
             binary_data: binaryInput3,
             scheduled_time: scheduledTime3,
@@ -976,7 +979,7 @@ const Qrng_Server = () => {
         setLoadingProgress3n(100);
         setResultNIST3(response.data); // Set the response data
       } catch (error) {
-        console.error("Error executing generating final answer:", error);
+           
         setLoadingProgress3n(0);
         clearInterval(progressInterval);
       }
@@ -996,7 +999,7 @@ const Qrng_Server = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 15) * 100);
             setLoadingProgress3(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -1013,7 +1016,7 @@ const Qrng_Server = () => {
         formData.append("job_id", currentJobId);
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_dieharder/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -1022,7 +1025,7 @@ const Qrng_Server = () => {
         setLoadingProgress3(100); // Set progress to 100% after response is received
         setResultDieharder3(response.data); // Set the result data
       } catch (error) {
-        console.error("Error executing generating final answer:", error);
+           
         setLoadingProgress3(0);
         clearInterval(progressInterval);
 
@@ -1044,7 +1047,7 @@ const Qrng_Server = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 18) * 100);
             setLoadingProgress4n(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -1055,7 +1058,7 @@ const Qrng_Server = () => {
 
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans/",
+          `${REACT_APP_BASE_URL}/generate_final_ans/`,
           {
             binary_data: binaryInput4,
             scheduled_time: scheduledTime4,
@@ -1067,7 +1070,7 @@ const Qrng_Server = () => {
         setLoadingProgress4n(100);
         setResultNIST4(response.data); // Set the response data
       } catch (error) {
-        console.error("Error executing generating final answer:", error);
+           
         setLoadingProgress4n(0);
         clearInterval(progressInterval);
 
@@ -1087,7 +1090,7 @@ const Qrng_Server = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 15) * 100);
             setLoadingProgress4(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -1104,7 +1107,7 @@ const Qrng_Server = () => {
         formData.append("job_id", currentJobId);
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_dieharder/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -1115,7 +1118,7 @@ const Qrng_Server = () => {
       } catch (error) {
         setLoadingProgress4(0);
         clearInterval(progressInterval);
-        console.error("Error executing generating final answer:", error);
+           
       }
     };
 
@@ -1134,7 +1137,7 @@ const Qrng_Server = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 18) * 100);
             setLoadingProgress5n(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -1145,7 +1148,7 @@ const Qrng_Server = () => {
 
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans/",
+          `${REACT_APP_BASE_URL}/generate_final_ans/`,
           {
             binary_data: binaryInput5,
             scheduled_time: scheduledTime5,
@@ -1156,7 +1159,7 @@ const Qrng_Server = () => {
         setLoadingProgress5n(100);
         setResultNIST5(response.data); // Set the response data
       } catch (error) {
-        console.error("Error executing generating final answer:", error);
+           
         setLoadingProgress5n(0);
         clearInterval(progressInterval);
 
@@ -1177,7 +1180,7 @@ const Qrng_Server = () => {
       try {
         progressInterval = setInterval(async () => {
           try {
-            const progressRes = await axios.get(`http://localhost:8000/get_progress_dieharder/${currentJobId}`);
+            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
             const completed = progressRes.data.progress || 0;
             const percent = Math.round((completed / 15) * 100);
             setLoadingProgress5(prev => (percent > prev ? percent : prev)); // Prevent regressions
@@ -1194,7 +1197,7 @@ const Qrng_Server = () => {
         formData.append("job_id", currentJobId);
 
         const response = await axios.post(
-          "http://localhost:8000/generate_final_ans_dieharder/",
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -1205,7 +1208,7 @@ const Qrng_Server = () => {
       } catch (error) {
         setLoadingProgress5(0);
         clearInterval(progressInterval);
-        console.error("Error executing generating final answer:", error);
+           
       }
     };
 
@@ -1223,7 +1226,7 @@ const Qrng_Server = () => {
   const handleButtonClick = (type) => {
     if (type === "report") {
       setIsGeneratingReportT(true);
-      fetch("http://localhost:8000/pdf-report-server/", {
+      fetch("${REACT_APP_BASE_URL}/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput }),
@@ -1234,9 +1237,12 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating report:", error));
+        .catch(() => {
+  return;
+});
+
     } else if (type === "graph") {
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch("${REACT_APP_BASE_URL}/graph-generation/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput }),
@@ -1246,14 +1252,17 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating graph:", error));
+        .catch(() => {
+  return;
+});
+;
     }
   };
 
   const handleButtonClick2 = (type) => {
     if (type === "report") {
       setIsGeneratingReportT(true);
-      fetch("http://localhost:8000/pdf-report-server/", {
+      fetch("${REACT_APP_BASE_URL}/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput2 }),
@@ -1264,9 +1273,12 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating report:", error));
+        .catch(() => {
+  return;
+});
+
     } else if (type === "graph") {
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch("${REACT_APP_BASE_URL}/graph-generation/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput2 }),
@@ -1276,14 +1288,17 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating graph:", error));
+        .catch(() => {
+  return;
+});
+;
     }
   };
 
   const handleButtonClick3 = (type) => {
     if (type === "report") {
       setIsGeneratingReportT(true);
-      fetch("http://localhost:8000/pdf-report-server/", {
+      fetch("${REACT_APP_BASE_URL}/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput3 }),
@@ -1294,9 +1309,12 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating report:", error));
+        .catch(() => {
+  return;
+});
+
     } else if (type === "graph") {
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch("${REACT_APP_BASE_URL}/graph-generation/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput3 }),
@@ -1306,14 +1324,17 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating graph:", error));
+        .catch(() => {
+  return;
+});
+;
     }
   };
 
   const handleButtonClick4 = (type) => {
     if (type === "report") {
       setIsGeneratingReportT(true);
-      fetch("http://localhost:8000/pdf-report-server/", {
+      fetch("${REACT_APP_BASE_URL}/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput4 }),
@@ -1324,9 +1345,12 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating report:", error));
+        .catch(() => {
+  return;
+});
+
     } else if (type === "graph") {
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch("${REACT_APP_BASE_URL}/graph-generation/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput4 }),
@@ -1336,14 +1360,17 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating graph:", error));
+        .catch(() => {
+  return;
+});
+;
     }
   };
 
   const handleButtonClick5 = (type) => {
     if (type === "report") {
       setIsGeneratingReportT(true);
-      fetch("http://localhost:8000/pdf-report-server/", {
+      fetch("${REACT_APP_BASE_URL}/pdf-report-server/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput5 }),
@@ -1354,9 +1381,12 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating report:", error));
+        .catch(() => {
+  return;
+});
+
     } else if (type === "graph") {
-      fetch("http://localhost:8000/graph-generation/", {
+      fetch("${REACT_APP_BASE_URL}/graph-generation/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ binary_data: binaryInput5 }),
@@ -1366,7 +1396,10 @@ const Qrng_Server = () => {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         })
-        .catch((error) => console.error("Error generating graph:", error));
+        .catch(() => {
+  return;
+});
+;
     }
   };
   const [hostname, setHostname] = useState("");
@@ -1389,27 +1422,27 @@ const Qrng_Server = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         hostname,      // string, e.g. "202.83.17.121"
         port: Number(port),  // make sure it’s a number
         length: Number(length) // make sure it’s a number
       });
 
-      console.log("Response:", response.data);
+       
 
       if (response.data?.random) {
         const randomValue = response.data.random;
         setBinaryInput(randomValue);
         setIsSaveEnabled(true);
-        console.log("binary input (from API):", randomValue);
+      
         alert("Connected! Random value received.");
       } else {
-        console.error("Error in connection:", response.data);
+       
         alert("Incorrect credentials or invalid response.");
         setBinaryInput("");
       }
     } catch (error) {
-      console.error("Error connecting:", error);
+      
       alert("Connection failed. See console for details.");
       setBinaryInput("");
     }
@@ -1427,27 +1460,27 @@ const Qrng_Server = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         hostname:hostname2,      // string, e.g. "202.83.17.121"
         port: Number(port2),  // make sure it’s a number
         length: Number(length2) // make sure it’s a number
       });
 
-      console.log("Response:", response.data);
+       
 
       if (response.data?.random) {
         const randomValue = response.data.random;
         setBinaryInput2(randomValue);
         setIsSaveEnabled2(true);
-        console.log("binary input (from API):", randomValue);
+      
         alert("Connected! Random value received.");
       } else {
-        console.error("Error in connection:", response.data);
+       
         alert("Incorrect credentials or invalid response.");
         setBinaryInput2("");
       }
     } catch (error) {
-      console.error("Error connecting:", error);
+      
       alert("Connection failed. See console for details.");
       setBinaryInput2("");
     }
@@ -1460,27 +1493,27 @@ const Qrng_Server = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         hostname:hostname3,       // string, e.g. "202.83.17.121"
         port: Number(port3),  // make sure it’s a number
         length: Number(length3) // make sure it’s a number
       });
 
-      console.log("Response:", response.data);
+       
 
       if (response.data?.random) {
         const randomValue = response.data.random;
         setBinaryInput3(randomValue);
         setIsSaveEnabled3(true);
-        console.log("binary input (from API):", randomValue);
+      
         alert("Connected! Random value received.");
       } else {
-        console.error("Error in connection:", response.data);
+       
         alert("Incorrect credentials or invalid response.");
         setBinaryInput3("");
       }
     } catch (error) {
-      console.error("Error connecting:", error);
+      
       alert("Connection failed. See console for details.");
       setBinaryInput3("");
     }
@@ -1492,27 +1525,27 @@ const Qrng_Server = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         hostname:hostname4,     // string, e.g. "202.83.17.121"
         port: Number(port4),  // make sure it’s a number
         length: Number(length4) // make sure it’s a number
       });
 
-      console.log("Response:", response.data);
+       
 
       if (response.data?.random) {
         const randomValue = response.data.random;
         setBinaryInput4(randomValue);
         setIsSaveEnabled4(true);
-        console.log("binary input (from API):", randomValue);
+      
         alert("Connected! Random value received.");
       } else {
-        console.error("Error in connection:", response.data);
+       
         alert("Incorrect credentials or invalid response.");
         setBinaryInput4("");
       }
     } catch (error) {
-      console.error("Error connecting:", error);
+      
       alert("Connection failed. See console for details.");
       setBinaryInput4("");
     }
@@ -1525,27 +1558,27 @@ const Qrng_Server = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3003/proxy", {
+      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
         hostname:hostname5,     // string, e.g. "202.83.17.121"
         port: Number(port5),  // make sure it’s a number
         length: Number(length5) // make sure it’s a number
       });
 
-      console.log("Response:", response.data);
+       
 
       if (response.data?.random) {
         const randomValue = response.data.random;
         setBinaryInput5(randomValue);
         setIsSaveEnabled5(true);
-        console.log("binary input (from API):", randomValue);
+      
         alert("Connected! Random value received.");
       } else {
-        console.error("Error in connection:", response.data);
+       
         alert("Incorrect credentials or invalid response.");
         setBinaryInput5("");
       }
     } catch (error) {
-      console.error("Error connecting:", error);
+      
       alert("Connection failed. See console for details.");
       setBinaryInput5("");
     }
@@ -2649,7 +2682,7 @@ const Qrng_Server = () => {
         <Button
           variant="contained"
           onClick={() => {
-            window.open("http://localhost:3000/report", "_blank");
+           window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
           }}
           sx={{
             backgroundColor: "#E63946",
