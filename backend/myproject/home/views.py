@@ -3231,7 +3231,7 @@ def generate_pdf_report_nist90b(request):
         nist_description_paragraph,
         Spacer(1, 0.2 * inch),
         AIAnalysis_subtitle,
-        # gemini_analysis_paragraph,
+        gemini_analysis_paragraph,
     ]
 
     doc.build(elements)
@@ -4966,6 +4966,7 @@ def get_progress90b(request, job_id):
     progress = cache.get(f"{job_id}_progress90b", 0)
     return JsonResponse({"progress": int(progress)})
 
+
 import os
 import tempfile
 import subprocess
@@ -5037,7 +5038,8 @@ def run_nist90b_on_bin(request):
 
     # If scheduled in the future, defer execution
     if time_difference > 0:
-        return JsonResponse(run_after_delay_90b(job_id, scheduled_time, binary_data, line, userId, fileName))
+        print(f"Sleeping for {time_difference:.2f} seconds until scheduled time...")
+        time.sleep(time_difference)
 
     update_progress(1)
 
@@ -5154,6 +5156,229 @@ def run_nist90b_on_bin(request):
         "tests": [{"name": name, "min_entropy": res["min_entropy"], "result": res["result"]}
                   for name, res in results.items()]
     })
+
+
+def run_after_delay_nist90b(job_id, scheduled_time, file, line, user_id, fileName):
+    """
+    Runs NIST 90B tests on the given file after waiting until scheduled_time.
+    Computes results the same way as run_nist90b_on_bin.
+    """
+    
+
+    def update_progress(step: int):
+        try:
+            progress_percentage = round((step / 8) * 100)  # 8 steps total
+            supabase.table("results2").update({
+                "progress": progress_percentage,
+            }).eq("user_id", int(user_id)).eq("line", int(line)).execute()
+        except Exception as e:
+            print(f"Supabase progress update failed at step {step}: {e}")
+
+    cache.set(f"{job_id}_progress90b", 1)
+    update_progress(1)
+
+    # Save file to temporary location
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+        for chunk in file.chunks():
+            tmp_file.write(chunk)
+        tmp_file_path = tmp_file.name
+
+    file_size_bytes = os.path.getsize(tmp_file_path)
+    file_size_bits = file_size_bytes * 8
+    MAX_BITS = 1_000_000
+    n_samples = min(file_size_bits, MAX_BITS)
+
+    update_progress(2)
+
+    # Define IID/Non-IID test executables
+    tests_executables = {
+        "IID Test": os.path.join(CPP_FOLDER, "ea_iid"),
+        "Non-IID Test": os.path.join(CPP_FOLDER, "ea_non_iid")
+    }
+
+    results = {}
+    passed_count = 0
+    step_counter = 3
+
+    # Run each test
+    for test_name, exe_path in tests_executables.items():
+        min_entropy = 0.0
+        verdict = "non-random number"
+        if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
+            verdict = "executable missing"
+            print(f"{test_name} executable missing at {exe_path}")
+        else:
+            try:
+                result = subprocess.run([exe_path, "-v", tmp_file_path],
+                                        capture_output=True, text=True, shell=False)
+                output = result.stdout.strip()
+                error_output = result.stderr.strip()
+                if error_output:
+                    print(f"{test_name} error: {error_output}")
+
+                # Extract min-entropy
+                for line_out in output.splitlines():
+                    if any(k in line_out.lower() for k in ["h_original", "min(", "h_bitstring"]):
+                        nums = re.findall(r"[-+]?\d*\.\d+|\d+", line_out)
+                        if nums:
+                            min_entropy = float(nums[0])
+                            break
+
+                threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
+                verdict = "random number" if min_entropy >= threshold else "non-random number"
+                if verdict == "random number":
+                    passed_count += 1
+            except Exception as e:
+                print(f"Error running {test_name}: {e}")
+                min_entropy = 0.0
+                verdict = "non-random number"
+
+        results[test_name] = {"min_entropy": min_entropy, "result": verdict}
+        step_counter += 1
+        update_progress(step_counter)
+
+    # Clean up temp file
+    try:
+        os.remove(tmp_file_path)
+        if os.path.exists(tmp_file_path + ".json"):
+            os.remove(tmp_file_path + ".json")
+        if os.path.exists(tmp_file_path + ".column"):
+            os.remove(tmp_file_path + ".column")
+    except:
+        pass
+    update_progress(6)
+
+    # Final verdict
+    final_text = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
+    executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    update_progress(7)
+
+    # Store results in cache
+    job_results = {
+        "job_id": job_id,
+        "tests": results,
+        "final_result": final_text,
+        "executed_at": executed_at,
+    }
+    cache.set(f"{job_id}_results90b", job_results, timeout=3600)
+    update_progress(8)
+
+    # Update Supabase with final results
+    try:
+        current_time = datetime.datetim
+        supabase.table("results2").upsert({
+            "user_id": int(user_id),
+            "line": int(line),
+            "binary_data": " ",
+            "scheduled_time": scheduled_time.isoformat(),
+            "upload_time": current_time,
+            "result": final_text,
+            "progress": 100,
+            "file_name": fileName,
+            "updated_at": current_time
+        }, ignore_duplicates=False).execute()
+    except Exception as e:
+        print("Failed to update Supabase:", e)
+
+    cache.set(f"{job_id}_progress90b", 15)
+    return {"message": f"Test executed at {executed_at}", "job_id": job_id, "final_result": final_text}
+
+
+    update_progress(2)
+
+    # Define IID/Non-IID test executables
+    tests_executables = {
+        "IID Test": os.path.join(CPP_FOLDER, "ea_iid"),
+        "Non-IID Test": os.path.join(CPP_FOLDER, "ea_non_iid")
+    }
+
+    results = {}
+    passed_count = 0
+    step_counter = 3
+
+    # Run each test
+    for test_name, exe_path in tests_executables.items():
+        min_entropy = 0.0
+        verdict = "non-random number"
+        if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
+            verdict = "executable missing"
+            print(f"{test_name} executable missing at {exe_path}")
+        else:
+            try:
+                result = subprocess.run([exe_path, "-v", tmp_file_path],
+                                        capture_output=True, text=True, shell=False)
+                output = result.stdout.strip()
+                error_output = result.stderr.strip()
+                if error_output:
+                    print(f"{test_name} error: {error_output}")
+
+                # Extract min-entropy
+                for line_out in output.splitlines():
+                    if any(k in line_out.lower() for k in ["h_original", "min(", "h_bitstring"]):
+                        nums = re.findall(r"[-+]?\d*\.\d+|\d+", line_out)
+                        if nums:
+                            min_entropy = float(nums[0])
+                            break
+
+                threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
+                verdict = "random number" if min_entropy >= threshold else "non-random number"
+                if verdict == "random number":
+                    passed_count += 1
+            except Exception as e:
+                print(f"Error running {test_name}: {e}")
+                min_entropy = 0.0
+                verdict = "non-random number"
+
+        results[test_name] = {"min_entropy": min_entropy, "result": verdict}
+        step_counter += 1
+        update_progress(step_counter)
+
+    # Clean up temp file
+    try:
+        os.remove(tmp_file_path)
+        if os.path.exists(tmp_file_path + ".json"):
+            os.remove(tmp_file_path + ".json")
+        if os.path.exists(tmp_file_path + ".column"):
+            os.remove(tmp_file_path + ".column")
+    except:
+        pass
+    update_progress(6)
+
+    # Final verdict
+    final_text = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
+    executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    update_progress(7)
+
+    # Store results in cache
+    job_results = {
+        "job_id": job_id,
+        "tests": results,
+        "final_result": final_text,
+        "executed_at": executed_at,
+    }
+    cache.set(f"{job_id}_results90b", job_results, timeout=3600)
+    update_progress(8)
+
+    # Update Supabase with final results
+    try:
+        current_time = datetime.datetime.now().isoformat()
+        supabase.table("results2").upsert({
+            "user_id": int(user_id),
+            "line": int(line),
+            "binary_data": " ",
+            "scheduled_time": scheduled_time.isoformat(),
+            "upload_time": current_time,
+            "result": final_text,
+            "progress": 100,
+            "file_name": fileName,
+            "updated_at": current_time
+        }, ignore_duplicates=False).execute()
+    except Exception as e:
+        print("Failed to update Supabase:", e)
+
+    cache.set(f"{job_id}_progress90b", 15)
+    return {"message": f"Test executed at {executed_at}", "job_id": job_id, "final_result": final_text}
+
 
 
 from django.http import JsonResponse

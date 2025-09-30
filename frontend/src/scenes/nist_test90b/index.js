@@ -2565,36 +2565,38 @@ const Nist_tests90b = () => {
 
   }, [binaryInput5, debouncedScheduledTime5]);
 
+
   const handleButtonClick = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-
       const { data: existingResult, error: fetchError } = await supabase
         .from("results2")
         .select("report_path")
         .eq("user_id", userId)
-        .eq("line", 1)
+        .eq("line",1)
         .maybeSingle();
 
-      
-      if (existingResult && existingResult.report_path) {
+      // if (fetchError) {
 
+      // }
 
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+      // if (existingResult && existingResult.report_path) {
 
-        if (urlError) {
+      //   // ✅ 2. Get a signed URL for direct access
+      //   const { data: signedUrlData, error: urlError } = await supabase.storage
+      //     .from("reports")
+      //     .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
 
-          return;
-        }
+      //   if (urlError) {
 
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgressRep(100);
-        return; // stop here, no need to regenerate
-      }
+      //     return;
+      //   }
+
+      //   // ✅ 3. Open the existing graph
+      //   window.open(signedUrlData.signedUrl, "_blank");
+      //   setLoadingProgressRep(100);
+      //   return; // stop here, no need to regenerate
+      // }
 
       let progressInterval;
       setLoadingProgressRep(5);
@@ -2606,12 +2608,11 @@ const Nist_tests90b = () => {
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 15) * 100);
 
-          setLoadingProgressRep((prev) => (percent > prev ? percent : prev));
+          setLoadingProgressRep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
         }
       }, 1000);
-
 
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
@@ -2620,9 +2621,8 @@ const Nist_tests90b = () => {
       })
         .then((response) => response.blob())
         .then(async (blob) => {
-          setLoadingProgressRep(100);
+          setLoadingProgressRep(100); // Done
           clearInterval(progressInterval);
-
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
 
@@ -2643,7 +2643,7 @@ const Nist_tests90b = () => {
               .from("results2")
               .update({ report_path: data.path })
               .eq("user_id", userId)   // condition 1
-              .eq("line", 1)           // condition 2
+              .eq("line", 1)          // condition 2
           }
         })
         .catch((error) => {
@@ -2651,6 +2651,7 @@ const Nist_tests90b = () => {
           clearInterval(progressInterval);
           setLoadingProgressRep(0);
         });
+
     } else if (type === "graph") {
 
       const { data: existingResult, error: fetchError } = await supabase
@@ -2660,30 +2661,32 @@ const Nist_tests90b = () => {
         .eq("line", 1)
         .maybeSingle();
 
-        
-      
+      // if (fetchError) {
 
-      if (existingResult && existingResult.graph_path) {
+      // }
+
+      // if (existingResult && existingResult.graph_path) {
 
 
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("graphs")
-          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+      //   // ✅ 2. Get a signed URL for direct access
+      //   const { data: signedUrlData, error: urlError } = await supabase.storage
+      //     .from("graphs")
+      //     .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
 
-        if (urlError) {
+      //   if (urlError) {
 
-          return;
-        }
+      //     return;
+      //   }
 
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgressGr(100);
-        return; // stop here, no need to regenerate
-      }
+      //   // ✅ 3. Open the existing graph
+      //   window.open(signedUrlData.signedUrl, "_blank");
+      //   setLoadingProgressGr(100);
+      //   return; // stop here, no need to regenerate
+      // }
 
       let progressInterval;
-      setLoadingProgressGr(2);
+      setLoadingProgressGr(5);
+
 
       progressInterval = setInterval(async () => {
         try {
@@ -2691,12 +2694,12 @@ const Nist_tests90b = () => {
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
           const percent = Math.round((completed / 7) * 100);
-
-          setLoadingProgressGr((prev) => (percent > prev ? percent : prev));
+          setLoadingProgressGr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
           alert(`Error: ${err}`);
         }
       }, 1000);
+
 
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
@@ -2705,9 +2708,8 @@ const Nist_tests90b = () => {
       })
         .then((response) => response.blob())
         .then(async (blob) => {
-          setLoadingProgressGr(100);
+          setLoadingProgressGr(100); // Done
           clearInterval(progressInterval);
-
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
 
@@ -2728,7 +2730,7 @@ const Nist_tests90b = () => {
               .from("results2")
               .update({ graph_path: data.path })
               .eq("user_id", userId)   // condition 1
-              .eq("line", 1)           // condition 2
+              .eq("line", 1)          // condition 2
 
           }
         })
@@ -2737,8 +2739,11 @@ const Nist_tests90b = () => {
           clearInterval(progressInterval);
           setLoadingProgressGr(0);
         });
+
     }
   };
+
+
   const handleButtonClick2 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
