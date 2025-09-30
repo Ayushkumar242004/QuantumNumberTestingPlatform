@@ -128,11 +128,11 @@ const Nist_tests90b = () => {
   const [time10, setTime10] = useState("");
 
 
-     const [isEnabled, setIsEnabled] = useState(true); 
-     const [isEnabled2, setIsEnabled2] = useState(true); 
-     const [isEnabled3, setIsEnabled3] = useState(true); 
-     const [isEnabled4, setIsEnabled4] = useState(true); 
-     const [isEnabled5, setIsEnabled5] = useState(true); 
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [isEnabled2, setIsEnabled2] = useState(true);
+  const [isEnabled3, setIsEnabled3] = useState(true);
+  const [isEnabled4, setIsEnabled4] = useState(true);
+  const [isEnabled5, setIsEnabled5] = useState(true);
 
 
   const fetchUserId = async () => {
@@ -560,11 +560,11 @@ const Nist_tests90b = () => {
   const [showRedButton9, setShowRedButton9] = useState(false);
   const [showRedButton10, setShowRedButton10] = useState(false);
 
-  
+
 
   const handleFileUpload = () => {
-  setShowRedButton(true);
-  setIsEnabled(true);
+    setShowRedButton(true);
+    setIsEnabled(true);
     fileInputRef.current.click();
   };
   const handleFileUpload2 = () => {
@@ -589,7 +589,7 @@ const Nist_tests90b = () => {
   };
 
 
-   const [currentJobIdT, setCurrentJobIdT] = useState(() => {
+  const [currentJobIdT, setCurrentJobIdT] = useState(() => {
     const saved = localStorage.getItem("currentJobId_90b");
     if (saved) return saved;
     const newId = uuidv4();
@@ -651,13 +651,115 @@ const Nist_tests90b = () => {
 
 
 
+  // const handleFileChange = async (event) => {
+  //    setLoadingProgressGr(0);
+  //   setLoadingProgressRep(0);
+  //   const selectedFile = event.target.files[0];
+  //   if (!selectedFile) {
+  //     // User closed the file picker without choosing a file
+  //     setShowRedButton(false);
+  //     return;
+  //   }
+
+  //   if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+  //     alert("Warning: The selected file is too large. Please choose a smaller file.");
+  //     return;
+  //   }
+
+  //   const userId = await fetchUserId();
+  //   if (!userId) return;
+
+  //   // Reset all state variables
+  //   setBinaryInput("");
+  //   setScheduledTime("");
+  //   setDebouncedScheduledTime("");
+  //   setResult(null);
+  //   setFileName("");
+  //   setUploadTime("");
+  //   setLoadingProgress(0);
+  //   setTime("");
+
+  //   setFileName(selectedFile.name);
+
+  //   const reader = new FileReader();
+  //   reader.onload = async (e) => {
+  //     const binaryData = e.target.result;
+  //     const byteArray = new Uint8Array(binaryData);
+
+  //     let binaryString = "";
+
+  //     if (selectedFile.name.toLowerCase().endsWith(".bin")) {
+  //       // Convert each byte to its binary representation (8 bits)
+  //       for (let i = 0; i < byteArray.length; i++) {
+  //         binaryString += byteArray[i].toString(2).padStart(8, '0');
+  //       }
+  //     } else {
+  //       // Assume it's a .txt file containing binary text
+  //       const decoder = new TextDecoder();
+  //       binaryString = decoder.decode(byteArray).trim();
+  //     }
+
+  //     setBinaryInput(binaryString);
+
+  //     const now = new Date();
+  //     const pad = (n) => String(n).padStart(2, '0');
+  //     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  //     setUploadTime(currentTime);
+
+  //     try {
+  //       localStorage.setItem('resultFetchedFromSupabase_two', 'false');
+  //       const { error: deleteError } = await supabase
+  //         .from('results2')
+  //         .delete()
+  //         .match({ line: 1, user_id: userId });
+
+  //       setLoadingProgress(0);
+  //       if (deleteError) {
+
+  //         return;
+  //       }
+  //     } catch (err) {
+
+  //     }
+
+  //     event.target.value = "";
+  //   };
+  //   setIsEnabled(false);
+  //   reader.readAsArrayBuffer(selectedFile);
+  // };
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile2, setSelectedFile2] = useState(null);
+  const [selectedFile3, setSelectedFile3] = useState(null);
+  const [selectedFile4, setSelectedFile4] = useState(null);
+  const [selectedFile5, setSelectedFile5] = useState(null);
+
+  const binaryInsertedRef = useRef(false); // 🔁 Track binary insert
+  const binaryInsertedRef2 = useRef(false);
+  const binaryInsertedRef3 = useRef(false);
+  const binaryInsertedRef4 = useRef(false);
+  const binaryInsertedRef5 = useRef(false);
+
   const handleFileChange = async (event) => {
-     setLoadingProgressGr(0);
+    setLoadingProgressGr(0);
     setLoadingProgressRep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
       setShowRedButton(false);
+      return;
+    }
+
+    setSelectedFile(selectedFile);
+
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
+
+
+
+    if (!isBin && !isTxt) {
+      alert("Please upload a .bin or .txt file.");
       return;
     }
 
@@ -669,69 +771,67 @@ const Nist_tests90b = () => {
     const userId = await fetchUserId();
     if (!userId) return;
 
-    // Reset all state variables
+    // Reset state
     setBinaryInput("");
-    setScheduledTime("");
-    setDebouncedScheduledTime("");
     setResult(null);
     setFileName("");
     setUploadTime("");
     setLoadingProgress(0);
     setTime("");
+    setScheduledTime("");
+    setDebouncedScheduledTime("");
 
     setFileName(selectedFile.name);
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    setUploadTime(currentTime);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-
-      let binaryString = "";
-
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to its binary representation (8 bits)
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume it's a .txt file containing binary text
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
-
-      setBinaryInput(binaryString);
-
-      const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
-      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      setUploadTime(currentTime);
-
-      try {
-        localStorage.setItem('resultFetchedFromSupabase_two', 'false');
-        const { error: deleteError } = await supabase
-          .from('results2')
-          .delete()
-          .match({ line: 1, user_id: userId });
-
-        setLoadingProgress(0);
-        if (deleteError) {
-          
+    try {
+      if (isBin) {
+        // BIN file logic (unchanged)
+        const buffer = await selectedFile.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const binaryData = Array.from(bytes)
+          .map(byte => byte.toString(2).padStart(8, '0'))
+          .join('');
+        setBinaryInput(binaryData);
+      } else if (isTxt) {
+        // TXT file logic (newly added)
+        const text = await selectedFile.text();
+        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
+        if (binaryString.length === 0) {
+          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
           return;
         }
-      } catch (err) {
-          
+        setBinaryInput(binaryString);
       }
+    } catch (error) {
 
-      event.target.value = "";
-    };
+      alert("Failed to extract binary data from the file.");
+      return;
+    }
+
+    // Supabase cleanup
+    try {
+      localStorage.setItem('resultFetchedFromSupabase3', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 1, user_id: userId });
+
+      if (deleteError) {
+        return;
+      }
+    } catch (err) {
+
+    }
     setIsEnabled(false);
-    reader.readAsArrayBuffer(selectedFile);
+    event.target.value = "";
   };
 
-
-
   const handleFileChange2 = async (event) => {
-     setLoadingProgress2Gr(0);
+    setLoadingProgress2Gr(0);
     setLoadingProgress2Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
@@ -804,7 +904,7 @@ const Nist_tests90b = () => {
         }
 
       } catch (err) {
-          
+
       }
 
       // Reset the file input value to allow the same file to be uploaded again
@@ -817,7 +917,7 @@ const Nist_tests90b = () => {
 
   const handleFileChange3 = async (event) => {
     const selectedFile = event.target.files[0];
-     setLoadingProgress3Gr(0);
+    setLoadingProgress3Gr(0);
     setLoadingProgress3Rep(0);
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -867,7 +967,7 @@ const Nist_tests90b = () => {
 
       setBinaryInput3(binaryString);
       // Update binaryInput state with new binary data
-      
+
       // Store the current time when the file is uploaded
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
@@ -889,7 +989,7 @@ const Nist_tests90b = () => {
         }
 
       } catch (err) {
-          
+
       }
 
       // Reset the file input value to allow the same file to be uploaded again
@@ -899,16 +999,16 @@ const Nist_tests90b = () => {
     reader.readAsArrayBuffer(selectedFile);
   };
 
-  const handleFileChange4 = async(event) => {
+  const handleFileChange4 = async (event) => {
     const selectedFile = event.target.files[0];
-     setLoadingProgress4Gr(0);
+    setLoadingProgress4Gr(0);
     setLoadingProgress4Rep(0);
     if (!selectedFile) {
       // User closed the file picker without choosing a file
       setShowRedButton4(false);
       return;
     }
-   
+
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert(
         "Warning: The selected file is too large. Please choose a smaller file."
@@ -933,7 +1033,7 @@ const Nist_tests90b = () => {
     // Set the new filename
     setFileName4(selectedFile.name);
     const reader = new FileReader();
-    reader.onload = async(e) => {
+    reader.onload = async (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       let binaryString = "";
@@ -950,7 +1050,7 @@ const Nist_tests90b = () => {
       }
 
       setBinaryInput4(binaryString);
-      
+
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
@@ -970,7 +1070,7 @@ const Nist_tests90b = () => {
         }
 
       } catch (err) {
-          
+
       }
 
       // Reset the file input value to allow the same file to be uploaded again
@@ -980,9 +1080,9 @@ const Nist_tests90b = () => {
     reader.readAsArrayBuffer(selectedFile);
   };
 
-  const handleFileChange5 = async(event) => {
+  const handleFileChange5 = async (event) => {
     const selectedFile = event.target.files[0];
-     setLoadingProgress5Gr(0);
+    setLoadingProgress5Gr(0);
     setLoadingProgress5Rep(0);
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1002,7 +1102,7 @@ const Nist_tests90b = () => {
       return;
     }
 
-   // Reset all state variables for line 2
+    // Reset all state variables for line 2
     setBinaryInput5(""); // Clear binary input
     setScheduledTime5(""); // Clear scheduled time
     setDebouncedScheduledTime5(""); // Clear debounced scheduled time
@@ -1014,7 +1114,7 @@ const Nist_tests90b = () => {
     // Set the new filename
     setFileName5(selectedFile.name);
     const reader = new FileReader();
-    reader.onload = async(e) => {
+    reader.onload = async (e) => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       let binaryString = "";
@@ -1031,7 +1131,7 @@ const Nist_tests90b = () => {
       }
 
       setBinaryInput5(binaryString);
-     
+
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
@@ -1051,7 +1151,7 @@ const Nist_tests90b = () => {
         }
 
       } catch (err) {
-          
+
       }
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
@@ -1124,7 +1224,7 @@ const Nist_tests90b = () => {
                 setUploadTime4(row.upload_time);
                 setLoadingProgress4(row.progress);
                 break;
-              
+
               default:
                 break;
             }
@@ -1206,7 +1306,7 @@ const Nist_tests90b = () => {
 
   const finalResult = result ? result.final_result : " ";
 
-  
+
   const handleScheduledTimeChange = (event) => {
     setScheduledTime(event.target.value);
 
@@ -1392,11 +1492,11 @@ const Nist_tests90b = () => {
   useEffect(() => {
 
     let progressIntervalId;
-  
+
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1404,10 +1504,10 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 1)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1415,17 +1515,17 @@ const Nist_tests90b = () => {
             }
             return;
           }
-  
+
           if (data) {
             const progress = data.progress || 0;
-           
+
             setLoadingProgress(progress);
-  
+
             if (data.result) {
               setResult({ final_result: data.result });
               localStorage.setItem("resultFetchedFromSupabase90b", "true");
             }
-  
+
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1433,7 +1533,7 @@ const Nist_tests90b = () => {
             }
           }
         } catch (err) {
-             
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -1441,17 +1541,17 @@ const Nist_tests90b = () => {
           }
         }
       };
-  
+
       // Start polling again
       progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-  
+
       // Do one immediate fetch
       await fetchProgressFromSupabase();
     };
-  
+
     // On mount → resume progress check
     resumeProgressCheck();
-  
+
     // On unmount → clear polling
     return () => {
       if (progressIntervalId) {
@@ -1459,26 +1559,49 @@ const Nist_tests90b = () => {
         progressIntervalId = null;
       }
     };
-  }, []); 
+  }, []);
 
+  
   useEffect(() => {
     if (!binaryInput || !debouncedScheduledTime) {
-      return;// Do not fetch if binaryInput is empty
+      return;
     }
-   
+    console.log("1");
+
     const lineNo = 1;
     if (result) {
-      localStorage.setItem('resultFetchedFromSupabase90b', 'true'); // Store flag in localStorage
-      setLoadingProgress(100); // Set progress to 100 if result is already present
+      localStorage.setItem('resultFetchedFromSupabase90b', 'true');
+      setLoadingProgress(100);
       return;
     }
     setLoadingProgress(0);
-    let progressIntervalId; 
-    // console.log("1")
+    let progressIntervalId;
+    console.log("2");
     const upsertProgress = async (progress, userId, result = null) => {
-      const progressPercentage = progress;
-      
-      // Create the base payload
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile && !binaryInsertedRef.current) {
+        try {
+          const fileReader = new FileReader();
+
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile);
+          });
+
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+
+          binaryInsertedRef.current = true; // ✅ Prevent future inserts
+
+        } catch (err) {
+
+          return;
+        }
+      }
+
       const payload = {
         user_id: userId,
         line: 1,
@@ -1487,32 +1610,34 @@ const Nist_tests90b = () => {
         result: result,
         file_name: fileName,
         upload_time: uploadTime,
-        progress: progressPercentage,
+        progress: progress,
         updated_at: new Date().toISOString()
       };
+
 
       const { error } = await supabase
         .from('results2')
         .upsert(payload);
 
+
       if (error) {
-           
+
       }
     };
+    console.log("3");
 
     const startProcess = async () => {
       const userId = await fetchUserId();
-      if (!userId) {
+      if (!userId) return;
 
-        return;
-      }
-      // Initial database entry with 0% progress
       await upsertProgress(1, userId);
+
       setShowRedButton(false);
       if (!alertShownRef.current) {
-     alert("File uploaded successfully!");
-     alertShownRef.current = true;
-   }
+        alert("File uploaded successfully!");
+        alertShownRef.current = true;
+      }
+      console.log("4");
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1520,69 +1645,79 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 1)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             return;
           }
-  
+
           if (data) {
-           
+
             const progress = data.progress || 0;
-               
+
             setLoadingProgress(progress);
-  
-            //  Stogenerate_final_ans_nip polling once progress is 100%
+
+            //  Stop polling once progress is 100%
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress(100);
-              console.log("U");
+
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-             
+
         }
       };
 
+      console.log("5");
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-  
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
-  
       try {
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
-          binary_data: binaryInput,
-          scheduled_time: debouncedScheduledTime,
-          job_id: currentJobIdT,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName,
-        });
-  
-      
-  
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        const formattedScheduledTime = new Date(debouncedScheduledTime)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+
+        console.log("6");
+
+        formData.append("scheduled_time", debouncedScheduledTime);
+        formData.append("job_id", currentJobIdT);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName);
+
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/nist90b_run/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        console.log("7");
+        console.log("response", response);
+        setIsEnabled(true);
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-         setIsEnabled(true);
+        console.log("8");
         setLoadingProgress(100);
         setResult(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b", "true");
-  
         await upsertProgress(100, userId, response.data.final_result);
-
+        console.log("9");
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-  
         setLoadingProgress(0);
         await upsertProgress(0, userId);
-        alert("Error: ${error.message}");
+        alert(`Error: ${error}`);
+
       }
     };
 
@@ -1594,16 +1729,17 @@ const Nist_tests90b = () => {
         progressIntervalId = null;
       }
     };
-  }, [binaryInput, debouncedScheduledTime]);
+  }, [selectedFile, debouncedScheduledTime]);
 
- useEffect(() => {
+
+  useEffect(() => {
 
     let progressIntervalId;
-  
+
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1611,10 +1747,10 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 2)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1622,17 +1758,17 @@ const Nist_tests90b = () => {
             }
             return;
           }
-  
+
           if (data) {
             const progress = data.progress || 0;
-               
+
             setLoadingProgress2(progress);
-  
+
             if (data.result) {
               setResult2({ final_result: data.result });
               localStorage.setItem("resultFetchedFromSupabase90b2", "true");
             }
-  
+
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1640,7 +1776,7 @@ const Nist_tests90b = () => {
             }
           }
         } catch (err) {
-             
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -1648,17 +1784,17 @@ const Nist_tests90b = () => {
           }
         }
       };
-  
+
       // Start polling again
       progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-  
+
       // Do one immediate fetch
       await fetchProgressFromSupabase();
     };
-  
+
     // On mount → resume progress check
     resumeProgressCheck();
-  
+
     // On unmount → clear polling
     return () => {
       if (progressIntervalId) {
@@ -1671,7 +1807,7 @@ const Nist_tests90b = () => {
   useEffect(() => {
     if (!binaryInput2 || !debouncedScheduledTime2) return;
 
-   
+
     const lineNo = 2;
 
     if (result2) {
@@ -1685,7 +1821,7 @@ const Nist_tests90b = () => {
     let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      
+
       const payload = {
         user_id: userId,
         line: 2,
@@ -1698,13 +1834,13 @@ const Nist_tests90b = () => {
         updated_at: new Date().toISOString()
       };
 
-     
-    
+
+
       const { error } = await supabase
         .from('results2')
         .upsert(payload);
       if (error) {
-           
+
       }
     };
 
@@ -1719,9 +1855,9 @@ const Nist_tests90b = () => {
       await upsertProgress(1, userId);
       setShowRedButton2(false);
       if (!alertShownRef2.current) {
-     alert("File uploaded successfully!");
-     alertShownRef2.current = true;
-   }
+        alert("File uploaded successfully!");
+        alertShownRef2.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1729,19 +1865,19 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 2)
-             .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             return;
           }
-  
+
           if (data) {
-           
+
             const progress = data.progress || 0;
-               
+
             setLoadingProgress2(progress);
-  
+
             //  Stop polling once progress is 100%
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress2(100);
@@ -1751,67 +1887,67 @@ const Nist_tests90b = () => {
             }
           }
         } catch (err) {
-             
-        } 
-        
+
+        }
+
+      };
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+
+      // Run one fetch immediately
+      await fetchProgressFromSupabase();
+      try {
+        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
+          binary_data: binaryInput2,
+          scheduled_time: debouncedScheduledTime2,
+          job_id: currentJobIdT2,
+          line: lineNo,
+          user_id: userId,
+          file_name: fileName2,
+        });
+
+        setIsEnabled2(true);
+
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress2(100);
+        setResult2(response.data);
+        localStorage.setItem("resultFetchedFromSupabase90b2", "true");
+
+        await upsertProgress(100, userId, response.data.final_result);
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress2(0);
+        await upsertProgress(0, userId);
+        alert("Error: ${error.message}");
+      }
     };
-    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-  
-    // Run one fetch immediately
-    await fetchProgressFromSupabase();
-    try {
-      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
-        binary_data: binaryInput2,
-        scheduled_time: debouncedScheduledTime2,
-        job_id: currentJobIdT2,
-        line: lineNo,
-        user_id: userId,
-        file_name: fileName2,
-      });
 
-     setIsEnabled2(true);
+    startProcess();
 
+    return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
-
-      setLoadingProgress2(100);
-      setResult2(response.data);
-      localStorage.setItem("resultFetchedFromSupabase90b2", "true");
-
-      await upsertProgress(100, userId, response.data.final_result);
-    } catch (error) {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-
-      setLoadingProgress2(0);
-      await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
-    }
-  };
-
-  startProcess();
-  
-  return () => {
-    if (progressIntervalId) {
-      clearInterval(progressIntervalId);
-      progressIntervalId = null;
-    }
-  };
+    };
 
   }, [binaryInput2, debouncedScheduledTime2]);
 
   useEffect(() => {
 
     let progressIntervalId;
-  
+
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1819,10 +1955,10 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 3)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1830,17 +1966,17 @@ const Nist_tests90b = () => {
             }
             return;
           }
-  
+
           if (data) {
             const progress = data.progress || 0;
-            
+
             setLoadingProgress3(progress);
-  
+
             if (data.result) {
               setResult3({ final_result: data.result });
               localStorage.setItem("resultFetchedFromSupabase90b2", "true");
             }
-  
+
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1848,7 +1984,7 @@ const Nist_tests90b = () => {
             }
           }
         } catch (err) {
-             
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -1856,17 +1992,17 @@ const Nist_tests90b = () => {
           }
         }
       };
-  
+
       // Start polling again
       progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-  
+
       // Do one immediate fetch
       await fetchProgressFromSupabase();
     };
-  
+
     // On mount → resume progress check
     resumeProgressCheck();
-  
+
     // On unmount → clear polling
     return () => {
       if (progressIntervalId) {
@@ -1879,7 +2015,7 @@ const Nist_tests90b = () => {
   useEffect(() => {
     if (!binaryInput3 || !debouncedScheduledTime3) return;
 
-    
+
     const lineNo = 3;
 
     if (result3) {
@@ -1893,7 +2029,7 @@ const Nist_tests90b = () => {
     let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      
+
       const payload = {
         user_id: userId,
         line: 3,
@@ -1906,13 +2042,13 @@ const Nist_tests90b = () => {
         updated_at: new Date().toISOString()
       };
 
-     
-    
+
+
       const { error } = await supabase
         .from('results2')
         .upsert(payload);
       if (error) {
-           
+
       }
     };
 
@@ -1927,9 +2063,9 @@ const Nist_tests90b = () => {
       await upsertProgress(1, userId);
       setShowRedButton3(false);
       if (!alertShownRef3.current) {
-     alert("File uploaded successfully!");
-     alertShownRef3.current = true;
-   }
+        alert("File uploaded successfully!");
+        alertShownRef3.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1937,19 +2073,19 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 3)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             return;
           }
-  
+
           if (data) {
-           
+
             const progress = data.progress || 0;
-               
+
             setLoadingProgress3(progress);
-  
+
             //  Stop polling once progress is 100%
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress3(100);
@@ -1959,56 +2095,56 @@ const Nist_tests90b = () => {
             }
           }
         } catch (err) {
-             
-        } 
-        
+
+        }
+
+      };
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+
+      // Run one fetch immediately
+      await fetchProgressFromSupabase();
+      try {
+        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
+          binary_data: binaryInput3,
+          scheduled_time: debouncedScheduledTime3,
+          job_id: currentJobIdT3,
+          line: lineNo,
+          user_id: userId,
+          file_name: fileName3,
+        });
+
+        setIsEnabled3(true);
+
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress3(100);
+        setResult3(response.data);
+        localStorage.setItem("resultFetchedFromSupabase90b3", "true");
+
+        await upsertProgress(100, userId, response.data.final_result);
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress3(0);
+        await upsertProgress(0, userId);
+        alert("Error: ${error.message}");
+      }
     };
-    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-  
-    // Run one fetch immediately
-    await fetchProgressFromSupabase();
-    try {
-      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
-        binary_data: binaryInput3,
-        scheduled_time: debouncedScheduledTime3,
-        job_id: currentJobIdT3,
-        line: lineNo,
-        user_id: userId,
-        file_name: fileName3,
-      });
 
-      setIsEnabled3(true);
+    startProcess();
 
+    return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
-
-      setLoadingProgress3(100);
-      setResult3(response.data);
-      localStorage.setItem("resultFetchedFromSupabase90b3", "true");
-
-      await upsertProgress(100, userId, response.data.final_result);
-    } catch (error) {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-
-      setLoadingProgress3(0);
-      await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
-    }
-  };
-
-  startProcess();
-  
-  return () => {
-    if (progressIntervalId) {
-      clearInterval(progressIntervalId);
-      progressIntervalId = null;
-    }
-  };
+    };
 
   }, [binaryInput3, debouncedScheduledTime3]);
 
@@ -2016,11 +2152,11 @@ const Nist_tests90b = () => {
   useEffect(() => {
 
     let progressIntervalId;
-  
+
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2028,10 +2164,10 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 4)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2039,17 +2175,17 @@ const Nist_tests90b = () => {
             }
             return;
           }
-  
+
           if (data) {
             const progress = data.progress || 0;
-          
+
             setLoadingProgress4(progress);
-  
+
             if (data.result) {
               setResult4({ final_result: data.result });
               localStorage.setItem("resultFetchedFromSupabase90b4", "true");
             }
-  
+
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2057,7 +2193,7 @@ const Nist_tests90b = () => {
             }
           }
         } catch (err) {
-             
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -2065,17 +2201,17 @@ const Nist_tests90b = () => {
           }
         }
       };
-  
+
       // Start polling again
       progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-  
+
       // Do one immediate fetch
       await fetchProgressFromSupabase();
     };
-  
+
     // On mount → resume progress check
     resumeProgressCheck();
-  
+
     // On unmount → clear polling
     return () => {
       if (progressIntervalId) {
@@ -2101,7 +2237,7 @@ const Nist_tests90b = () => {
     let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      
+
       const payload = {
         user_id: userId,
         line: 4,
@@ -2114,13 +2250,13 @@ const Nist_tests90b = () => {
         updated_at: new Date().toISOString()
       };
 
-     
-    
+
+
       const { error } = await supabase
         .from('results2')
         .upsert(payload);
       if (error) {
-           
+
       }
     };
 
@@ -2145,19 +2281,19 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 4)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             return;
           }
-  
+
           if (data) {
-           
+
             const progress = data.progress || 0;
-               
+
             setLoadingProgress4(progress);
-  
+
             //  Stop polling once progress is 100%
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress4(100);
@@ -2167,56 +2303,56 @@ const Nist_tests90b = () => {
             }
           }
         } catch (err) {
-             
-        } 
-        
+
+        }
+
+      };
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+
+      // Run one fetch immediately
+      await fetchProgressFromSupabase();
+      try {
+        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
+          binary_data: binaryInput4,
+          scheduled_time: debouncedScheduledTime4,
+          job_id: currentJobIdT4,
+          line: lineNo,
+          user_id: userId,
+          file_name: fileName4,
+        });
+
+        setIsEnabled4(true);
+
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress4(100);
+        setResult4(response.data);
+        localStorage.setItem("resultFetchedFromSupabase90b4", "true");
+
+        await upsertProgress(100, userId, response.data.final_result);
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress4(0);
+        await upsertProgress(0, userId);
+        alert("Error: ${error.message}");
+      }
     };
-    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-  
-    // Run one fetch immediately
-    await fetchProgressFromSupabase();
-    try {
-      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
-        binary_data: binaryInput4,
-        scheduled_time: debouncedScheduledTime4,
-        job_id: currentJobIdT4,
-        line: lineNo,
-        user_id: userId,
-        file_name: fileName4,
-      });
 
-      setIsEnabled4(true);
+    startProcess();
 
+    return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
-
-      setLoadingProgress4(100);
-      setResult4(response.data);
-      localStorage.setItem("resultFetchedFromSupabase90b4", "true");
-
-      await upsertProgress(100, userId, response.data.final_result);
-    } catch (error) {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-
-      setLoadingProgress4(0);
-      await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
-    }
-  };
-
-  startProcess();
-  
-  return () => {
-    if (progressIntervalId) {
-      clearInterval(progressIntervalId);
-      progressIntervalId = null;
-    }
-  };
+    };
 
   }, [binaryInput4, debouncedScheduledTime4]);
 
@@ -2224,11 +2360,11 @@ const Nist_tests90b = () => {
   useEffect(() => {
 
     let progressIntervalId;
-  
+
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2236,10 +2372,10 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 5)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2247,17 +2383,17 @@ const Nist_tests90b = () => {
             }
             return;
           }
-  
+
           if (data) {
             const progress = data.progress || 0;
-            
+
             setLoadingProgress5(progress);
-  
+
             if (data.result) {
               setResult5({ final_result: data.result });
               localStorage.setItem("resultFetchedFromSupabase90b5", "true");
             }
-  
+
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2265,7 +2401,7 @@ const Nist_tests90b = () => {
             }
           }
         } catch (err) {
-             
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -2273,17 +2409,17 @@ const Nist_tests90b = () => {
           }
         }
       };
-  
+
       // Start polling again
       progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-  
+
       // Do one immediate fetch
       await fetchProgressFromSupabase();
     };
-  
+
     // On mount → resume progress check
     resumeProgressCheck();
-  
+
     // On unmount → clear polling
     return () => {
       if (progressIntervalId) {
@@ -2296,7 +2432,7 @@ const Nist_tests90b = () => {
   useEffect(() => {
     if (!binaryInput5 || !debouncedScheduledTime5) return;
 
-   
+
     const lineNo = 5;
 
     if (result5) {
@@ -2310,7 +2446,7 @@ const Nist_tests90b = () => {
     let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
-      
+
       const payload = {
         user_id: userId,
         line: 5,
@@ -2323,13 +2459,13 @@ const Nist_tests90b = () => {
         updated_at: new Date().toISOString()
       };
 
-     
-    
+
+
       const { error } = await supabase
         .from('results2')
         .upsert(payload);
       if (error) {
-           
+
       }
     };
 
@@ -2354,19 +2490,19 @@ const Nist_tests90b = () => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 5)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             return;
           }
-  
+
           if (data) {
-           
+
             const progress = data.progress || 0;
-               
+
             setLoadingProgress5(progress);
-  
+
             //  Stop polling once progress is 100%
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress5(100);
@@ -2376,76 +2512,73 @@ const Nist_tests90b = () => {
             }
           }
         } catch (err) {
-             
-        } 
-        
+
+        }
+
+      };
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+
+      // Run one fetch immediately
+      await fetchProgressFromSupabase();
+      try {
+        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
+          binary_data: binaryInput5,
+          scheduled_time: debouncedScheduledTime5,
+          job_id: currentJobIdT5,
+          line: lineNo,
+          user_id: userId,
+          file_name: fileName5,
+        });
+
+        setIsEnabled5(true);
+
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress5(100);
+        setResult5(response.data);
+        localStorage.setItem("resultFetchedFromSupabase90b5", "true");
+
+        await upsertProgress(100, userId, response.data.final_result);
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress5(0);
+        await upsertProgress(0, userId);
+        alert("Error: ${error.message}");
+      }
     };
-    progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-  
-    // Run one fetch immediately
-    await fetchProgressFromSupabase();
-    try {
-      const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
-        binary_data: binaryInput5,
-        scheduled_time: debouncedScheduledTime5,
-        job_id: currentJobIdT5,
-        line: lineNo,
-        user_id: userId,
-        file_name: fileName5,
-      });
 
-      setIsEnabled5(true);
+    startProcess();
 
+    return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
-
-      setLoadingProgress5(100);
-      setResult5(response.data);
-      localStorage.setItem("resultFetchedFromSupabase90b5", "true");
-
-      await upsertProgress(100, userId, response.data.final_result);
-    } catch (error) {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-
-      setLoadingProgress5(0);
-      await upsertProgress(0, userId);
-      alert("Error: ${error.message}");
-    }
-  };
-
-  startProcess();
-  
-  return () => {
-    if (progressIntervalId) {
-      clearInterval(progressIntervalId);
-      progressIntervalId = null;
-    }
-  };
+    };
 
   }, [binaryInput5, debouncedScheduledTime5]);
 
   const handleButtonClick = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-   
+
       const { data: existingResult, error: fetchError } = await supabase
         .from("results2")
         .select("report_path")
         .eq("user_id", userId)
         .eq("line", 1)
-        .maybeSingle(); 
+        .maybeSingle();
 
-      if (fetchError) {
-           
-      }
-
+      
       if (existingResult && existingResult.report_path) {
-           
+
 
         // ✅ 2. Get a signed URL for direct access
         const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -2453,7 +2586,7 @@ const Nist_tests90b = () => {
           .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
 
         if (urlError) {
-   
+
           return;
         }
 
@@ -2462,7 +2595,6 @@ const Nist_tests90b = () => {
         setLoadingProgressRep(100);
         return; // stop here, no need to regenerate
       }
-
 
       let progressInterval;
       setLoadingProgressRep(5);
@@ -2480,10 +2612,11 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
+
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT,file_name: fileName }),
+        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2501,16 +2634,16 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-               
+
           } else {
-             
+
 
             // ✅ Only save columns that exist in results table
             await supabase
-            .from("results2")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 1)           // condition 2
+              .from("results2")
+              .update({ report_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 1)           // condition 2
           }
         })
         .catch((error) => {
@@ -2519,20 +2652,19 @@ const Nist_tests90b = () => {
           setLoadingProgressRep(0);
         });
     } else if (type === "graph") {
-     
+
       const { data: existingResult, error: fetchError } = await supabase
         .from("results2")
         .select("graph_path")
         .eq("user_id", userId)
         .eq("line", 1)
-        .maybeSingle(); 
+        .maybeSingle();
 
-      if (fetchError) {
-           
-      }
+        
+      
 
       if (existingResult && existingResult.graph_path) {
-           
+
 
         // ✅ 2. Get a signed URL for direct access
         const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -2540,7 +2672,7 @@ const Nist_tests90b = () => {
           .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
 
         if (urlError) {
-   
+
           return;
         }
 
@@ -2569,7 +2701,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT,file_name: fileName }),
+        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2587,9 +2719,9 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-              
+
           } else {
-              
+
 
             // ✅ Only save columns that exist
             await supabase
@@ -2607,23 +2739,23 @@ const Nist_tests90b = () => {
         });
     }
   };
-  const handleButtonClick2 = async(type) => {
+  const handleButtonClick2 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-      
+
       const { data: existingResult, error: fetchError } = await supabase
         .from("results2")
         .select("report_path")
         .eq("user_id", userId)
         .eq("line", 2)
-        .maybeSingle(); 
+        .maybeSingle();
 
       if (fetchError) {
-           
+
       }
 
       if (existingResult && existingResult.report_path) {
-           
+
 
         // ✅ 2. Get a signed URL for direct access
         const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -2631,7 +2763,7 @@ const Nist_tests90b = () => {
           .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
 
         if (urlError) {
-   
+
           return;
         }
 
@@ -2661,10 +2793,10 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2,file_name: fileName2 }),
+        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2 }),
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress2Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -2678,16 +2810,16 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-               
+
           } else {
-             
+
 
             // ✅ Only save columns that exist in results table
             await supabase
-            .from("results2")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 2)           // condition 2
+              .from("results2")
+              .update({ report_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 2)           // condition 2
           }
         })
         .catch((error) => {
@@ -2705,14 +2837,14 @@ const Nist_tests90b = () => {
         .select("graph_path")
         .eq("user_id", userId)
         .eq("line", 2)
-        .maybeSingle(); 
+        .maybeSingle();
 
       if (fetchError) {
-           
+
       }
 
       if (existingResult && existingResult.graph_path) {
-           
+
 
         // ✅ 2. Get a signed URL for direct access
         const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -2720,7 +2852,7 @@ const Nist_tests90b = () => {
           .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
 
         if (urlError) {
-   
+
           return;
         }
 
@@ -2733,7 +2865,7 @@ const Nist_tests90b = () => {
 
       let progressInterval;
       setLoadingProgress2Gr(5);
-      
+
 
       progressInterval = setInterval(async () => {
         try {
@@ -2751,10 +2883,10 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2 ,file_name: fileName2}),
+        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2 }),
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress2Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -2768,9 +2900,9 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-              
+
           } else {
-              
+
 
             // ✅ Only save columns that exist
             await supabase
@@ -2790,23 +2922,23 @@ const Nist_tests90b = () => {
     }
   };
 
-  const handleButtonClick3 = async(type) => {
+  const handleButtonClick3 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-     
+
       const { data: existingResult, error: fetchError } = await supabase
         .from("results2")
         .select("report_path")
         .eq("user_id", userId)
         .eq("line", 3)
-        .maybeSingle(); 
+        .maybeSingle();
 
       if (fetchError) {
-           
+
       }
 
       if (existingResult && existingResult.report_path) {
-           
+
 
         // ✅ 2. Get a signed URL for direct access
         const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -2814,7 +2946,7 @@ const Nist_tests90b = () => {
           .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
 
         if (urlError) {
-   
+
           return;
         }
 
@@ -2843,10 +2975,10 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3,file_name:fileName3 }),
+        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3 }),
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress3Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -2860,16 +2992,16 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-               
+
           } else {
-             
+
 
             // ✅ Only save columns that exist in results table
             await supabase
-            .from("results2")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 3)           // condition 2
+              .from("results2")
+              .update({ report_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 3)           // condition 2
           }
         })
         .catch((error) => {
@@ -2878,36 +3010,36 @@ const Nist_tests90b = () => {
           setLoadingProgress3Rep(0);
         });
     } else if (type === "graph") {
-      
+
       const { data: existingResult, error: fetchError } = await supabase
-      .from("results2")
-      .select("graph_path")
-      .eq("user_id", userId)
-      .eq("line", 3)
-      .maybeSingle(); 
+        .from("results2")
+        .select("graph_path")
+        .eq("user_id", userId)
+        .eq("line", 3)
+        .maybeSingle();
 
-    if (fetchError) {
-         
-    }
+      if (fetchError) {
 
-    if (existingResult && existingResult.graph_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("graphs")
-        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-           
-        return;
       }
 
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress3Gr(100);
-      return; // stop here, no need to regenerate
-    }
+      if (existingResult && existingResult.graph_path) {
+
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("graphs")
+          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress3Gr(100);
+        return; // stop here, no need to regenerate
+      }
 
 
       let progressInterval;
@@ -2929,10 +3061,10 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3,file_name:fileName3 }),
+        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3 }),
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress3Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -2946,9 +3078,9 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-              
+
           } else {
-              
+
 
             // ✅ Only save columns that exist
             await supabase
@@ -2968,39 +3100,39 @@ const Nist_tests90b = () => {
     }
   };
 
-  const handleButtonClick4 = async(type) => {
+  const handleButtonClick4 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-     
+
       const { data: existingResult, error: fetchError } = await supabase
-      .from("results2")
-      .select("report_path")
-      .eq("user_id", userId)
-      .eq("line", 4)
-      .maybeSingle(); 
+        .from("results2")
+        .select("report_path")
+        .eq("user_id", userId)
+        .eq("line", 4)
+        .maybeSingle();
 
-    if (fetchError) {
-         
-    }
+      if (fetchError) {
 
-    if (existingResult && existingResult.report_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("reports")
-        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-           
-        return;
       }
 
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress4Rep(100);
-      return; // stop here, no need to regenerate
-    }
+      if (existingResult && existingResult.report_path) {
+
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("reports")
+          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress4Rep(100);
+        return; // stop here, no need to regenerate
+      }
 
       let progressInterval;
       setLoadingProgress4Rep(5);
@@ -3021,10 +3153,10 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4,file_name:fileName4 }),
+        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4 }),
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress4Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3038,16 +3170,16 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-               
+
           } else {
-             
+
 
             // ✅ Only save columns that exist in results table
             await supabase
-            .from("results2")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 4)           // condition 2
+              .from("results2")
+              .update({ report_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 4)           // condition 2
           }
         })
         .catch((error) => {
@@ -3056,36 +3188,36 @@ const Nist_tests90b = () => {
           setLoadingProgress4Rep(0);
         });
     } else if (type === "graph") {
-     
+
       const { data: existingResult, error: fetchError } = await supabase
-      .from("results2")
-      .select("graph_path")
-      .eq("user_id", userId)
-      .eq("line", 4)
-      .maybeSingle(); 
+        .from("results2")
+        .select("graph_path")
+        .eq("user_id", userId)
+        .eq("line", 4)
+        .maybeSingle();
 
-    if (fetchError) {
-         
-    }
+      if (fetchError) {
 
-    if (existingResult && existingResult.graph_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("graphs")
-        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-           
-        return;
       }
 
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress4Gr(100);
-      return; // stop here, no need to regenerate
-    }
+      if (existingResult && existingResult.graph_path) {
+
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("graphs")
+          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress4Gr(100);
+        return; // stop here, no need to regenerate
+      }
 
       let progressInterval;
       setLoadingProgress4Gr(0);
@@ -3106,10 +3238,10 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4,file_name:fileName4 }),
+        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4 }),
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress4Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3123,9 +3255,9 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-              
+
           } else {
-              
+
 
             // ✅ Only save columns that exist
             await supabase
@@ -3145,39 +3277,39 @@ const Nist_tests90b = () => {
     }
   };
 
-  const handleButtonClick5 = async(type) => {
+  const handleButtonClick5 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-     
+
       const { data: existingResult, error: fetchError } = await supabase
-      .from("results2")
-      .select("report_path")
-      .eq("user_id", userId)
-      .eq("line", 5)
-      .maybeSingle(); 
+        .from("results2")
+        .select("report_path")
+        .eq("user_id", userId)
+        .eq("line", 5)
+        .maybeSingle();
 
-    if (fetchError) {
-         
-    }
+      if (fetchError) {
 
-    if (existingResult && existingResult.report_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("reports")
-        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-           
-        return;
       }
 
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress5Rep(100);
-      return; // stop here, no need to regenerate
-    }
+      if (existingResult && existingResult.report_path) {
+
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("reports")
+          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress5Rep(100);
+        return; // stop here, no need to regenerate
+      }
       let progressInterval;
       setLoadingProgress5Rep(5);
 
@@ -3197,10 +3329,10 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5,file_name:fileName5 }),
+        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5 }),
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress5Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3214,16 +3346,16 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-               
+
           } else {
-             
+
 
             // ✅ Only save columns that exist in results table
             await supabase
-            .from("results2")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 5)           // condition 2
+              .from("results2")
+              .update({ report_path: data.path })
+              .eq("user_id", userId)   // condition 1
+              .eq("line", 5)           // condition 2
           }
         })
         .catch((error) => {
@@ -3232,36 +3364,36 @@ const Nist_tests90b = () => {
           setLoadingProgress5Rep(0);
         });
     } else if (type === "graph") {
-      
+
       const { data: existingResult, error: fetchError } = await supabase
-      .from("results2")
-      .select("report_path")
-      .eq("user_id", userId)
-      .eq("line", 5)
-      .maybeSingle(); 
+        .from("results2")
+        .select("report_path")
+        .eq("user_id", userId)
+        .eq("line", 5)
+        .maybeSingle();
 
-    if (fetchError) {
-         
-    }
+      if (fetchError) {
 
-    if (existingResult && existingResult.report_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("reports")
-        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-           
-        return;
       }
 
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress5Rep(100);
-      return; // stop here, no need to regenerate
-    }
+      if (existingResult && existingResult.report_path) {
+
+
+        // ✅ 2. Get a signed URL for direct access
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from("reports")
+          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
+
+        if (urlError) {
+
+          return;
+        }
+
+        // ✅ 3. Open the existing graph
+        window.open(signedUrlData.signedUrl, "_blank");
+        setLoadingProgress5Rep(100);
+        return; // stop here, no need to regenerate
+      }
 
       let progressInterval;
       setLoadingProgress5Gr(0);
@@ -3282,10 +3414,10 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5,file_name:fileName5 }),
+        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5 }),
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress5Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3299,9 +3431,9 @@ const Nist_tests90b = () => {
             .upload(`jobs/${fileName}`, file, { upsert: false });
 
           if (error) {
-              
+
           } else {
-              
+
 
             // ✅ Only save columns that exist
             await supabase
@@ -3377,7 +3509,7 @@ const Nist_tests90b = () => {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                       disabled={!isEnabled}  
+                      disabled={!isEnabled}
                       onClick={handleFileUpload}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -3703,7 +3835,7 @@ const Nist_tests90b = () => {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                       disabled={!isEnabled2}  
+                      disabled={!isEnabled2}
                       onClick={handleFileUpload2}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4027,7 +4159,7 @@ const Nist_tests90b = () => {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                       disabled={!isEnabled3}  
+                      disabled={!isEnabled3}
                       onClick={handleFileUpload3}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4350,7 +4482,7 @@ const Nist_tests90b = () => {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                       disabled={!isEnabled4}  
+                      disabled={!isEnabled4}
                       onClick={handleFileUpload4}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4674,7 +4806,7 @@ const Nist_tests90b = () => {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                       disabled={!isEnabled5}  
+                      disabled={!isEnabled5}
                       onClick={handleFileUpload5}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4933,7 +5065,7 @@ const Nist_tests90b = () => {
                   }}
                 />
 
-               
+
                 <TextField
                   label="Enter Time (HH:mm:ss)"
                   placeholder="e.g., 14:30:00"
@@ -4981,7 +5113,7 @@ const Nist_tests90b = () => {
                   Scheduled Time: {scheduledTime5 || "Not set"}
                 </Typography>
               </td>
-            
+
             </tr>
             {/*
 <>

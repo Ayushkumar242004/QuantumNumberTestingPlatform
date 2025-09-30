@@ -86,7 +86,7 @@ urlpatterns = [
     path('generate_final_ans_nist90b/', views.generate_final_ans_nist90b, name='generate_final_ans_nist90b'),
     path("get_progress90b/<uuid:job_id>/", views.get_progress90b, name="get_progress90b"),
 
-    path("nist90b/run/", views.run_nist90b_on_bin, name="nist90b_run"),
+    path("nist90b_run/", views.run_nist90b_on_bin, name="nist90b_run"),
 
     path('generate_final_ans_dieharder/', views.generate_final_ans_dieharder, name='generate_final_ans_dieharder'),
     path("get_progress_dieharder/<uuid:job_id>/", views.get_progress_dieharder, name="get_progress_dieharder"),

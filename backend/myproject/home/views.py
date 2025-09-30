@@ -2612,31 +2612,33 @@ def create_graph_nist90b(request):
         return HttpResponse("No test results available in cache", status=404)
 
     # Convert list of dicts → {test_name: min_entropy}
-    valid_tests = {test["name"]: float(test.get("min_entropy", 0.0)) for test in tests}
+    # Convert dict of dicts → {test_name: min_entropy}
+    valid_tests = {test_name: float(test_info.get("min_entropy", 0.0)) for test_name, test_info in tests.items()}
 
     print("Valid tests (from cache):", valid_tests)
 
     if not valid_tests:
         return HttpResponse("No valid test results to plot.", status=400)
 
+
     # ✅ Create graph
     x = list(valid_tests.keys())
     y = list(valid_tests.values())
 
     fig, ax = plt.subplots(figsize=(16, 9))
-    colors = ['green' if p >= 0.997 else 'blue' for p in y]  # ✅ Threshold for 90B
+    colors = ['green' if p >= 7.5 else 'blue' for p in y]  # ✅ Threshold for 90B
     ax.bar(x, y, color=colors)
-    ax.axhline(y=0.997, color='red', linestyle='--', linewidth=2, label='Min-Entropy = 0.997')
+    ax.axhline(y=7.5, color='red', linestyle='--', linewidth=2, label='Min-Entropy = 7.5')
     ax.set_xlabel('NIST SP 800-90B Tests', fontsize=20)
     ax.set_ylabel('Min-Entropy', fontsize=20)
-    ax.set_ylim(0, 1)
+    ax.set_ylim(0, 10)
     plt.xticks(rotation=45, ha='right', fontsize=12)
     # plt.title(f"File Name: {file_name}", fontsize=22, pad=20)
     plt.tight_layout()
 
     legend_elements = [
-        Patch(facecolor='green', edgecolor='green', label='Random (Min-Entropy ≥ 0.997)'),
-        Patch(facecolor='blue', edgecolor='blue', label='Non-random (Min-Entropy < 0.997)')
+        Patch(facecolor='green', edgecolor='green', label='Random (Min-Entropy ≥ 7.5)'),
+        Patch(facecolor='blue', edgecolor='blue', label='Non-random (Min-Entropy < 7.5)')
     ]
     ax.legend(handles=legend_elements, loc='upper right', prop={'size': 10})
 
@@ -2724,77 +2726,6 @@ def create_graph_dieharder(request):
 
     return HttpResponse(buf, content_type='image/png')
 
-
-@csrf_exempt
-def create_graph_dieharder1(request):
-    if request.method != 'POST':
-        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
-
-    job_id = request.POST.get('job_id', str(uuid.uuid4()))
-    cache.set(f"{job_id}_progressGraphDieharder", 0)
-
-    # ✅ 1️⃣ Hardcoded p-values: only 2 above 0.01, rest below
-    test_p_values = {
-        "Diehard Birthdays Test": 0.7,
-        "Diehard Overlapping 5-Permutation Test": 0.0075,
-        "Diehard Binary Rank Test (31x31)": 0.0009,
-        "Diehard Binary Rank Test (32x32)": 0.0043,
-        "Diehard Bitstream Test": 0.6,
-        "Diehard OPSO Test": 0.0023,
-        "Diehard OQSO Test": 0.0068,
-        "Diehard DNA Test": 0.0039,
-        "Diehard Count-the-1s Test (stream)": 0.0094,
-        "Diehard Count-the-1s Test (byte)": 0.011,
-        "Diehard Parking Lot Test": 0.0082,
-        "Diehard Minimum Distance Test": 0.0006,
-        "Diehard 3D Spheres Test": 0.0056,
-        "Diehard Squeeze Test": 0.0003,
-        "Marsaglia and Tsang GCD Test": 0.0099,
-        "STS Monobit Test": 0.0027,
-        "STS Runs Test": 0.0005,
-        "STS Serial Test (1)": 0.0077,
-        "RGB Lagged Sum Test": 0.0062,
-        "RGB Permutation Test": 0.04
-    }
-
-    cache.set(f"{job_id}_progressGraphDieharder", 10)
-
-    # 2️⃣ Prepare data for plotting
-    x_labels = list(test_p_values.keys())
-    y_values = list(test_p_values.values())
-
-    # 3️⃣ Create the plot
-    fig, ax = plt.subplots(figsize=(16, 9))
-
-    colors = ['green' if p > 0.01 else 'blue' for p in y_values]
-
-    ax.bar(x_labels, y_values, color=colors)
-    ax.axhline(y=0.01, color='red', linestyle='--', linewidth=2, label='p-value = 0.01')
-
-    ax.set_xlabel('Dieharder Tests', fontsize=20)
-    ax.set_ylabel('P-values', fontsize=20)
-    ax.set_title('P-values of Dieharder Tests', fontsize=20)
-    ax.set_yticks([i / 10.0 for i in range(0, 11)])
-    ax.set_ylim(0, 1)
-    plt.xticks(rotation=45, ha='right', fontsize=12)
-
-    from matplotlib.patches import Patch
-    legend_elements = [
-        Patch(facecolor='green', edgecolor='green', label='Random (p > 0.01)'),
-        Patch(facecolor='blue', edgecolor='blue', label='Non-random (p ≤ 0.01)'),
-    ]
-    ax.legend(handles=legend_elements, loc='upper right', prop={'size': 14})
-
-    plt.tight_layout()
-    cache.set(f"{job_id}_progressGraphDieharder", 22)
-
-    # 4️⃣ Return PNG image
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight')
-    buf.seek(0)
-    plt.close(fig)
-
-    return HttpResponse(buf, content_type='image/png')
 
 @csrf_exempt
 def generate_pdf_report(request):
@@ -3054,19 +2985,31 @@ def generate_pdf_report_nist90b(request):
 
     cache.set(f"{job_id}_progressReport90b", 1)
 
-    # ✅ Fetch results from cache
+    # ✅ Fetch results from cache (populated by run_nist90b_on_bin)
     results = cache.get(f"{job_id}_results90b")
     if not results:
         return HttpResponse("No cached results found for this job_id", status=404)
 
+    # Ensure results["tests"] is a list of dicts (not a string)
     tests = results.get("tests", [])
+    if isinstance(tests, str):
+        try:
+            tests = json.loads(tests)
+        except Exception:
+            tests = []
+
     final_text = results.get("final_result", "N/A")
     executed_at = results.get("executed_at", "")
 
-    # Convert test results into dict for AI analysis
-    test_results_text = {test["name"]: test["min_entropy"] for test in tests}
+    # ✅ Prepare test results for AI analysis (safe dict building)
+    test_results_text = {}
+    for test in tests:
+        if isinstance(test, dict):
+            test_results_text[test.get("name", "Unknown")] = test.get("min_entropy", 0.0)
+
     cache.set(f"{job_id}_progressReport90b", 2)
-    # ✅ Create PDF response
+
+    # ✅ Create Graph (from cache)
     graph_response = create_graph_nist90b(request)
     graph_buffer = graph_response.content
     graph_image_io = BytesIO(graph_buffer)
@@ -3082,35 +3025,38 @@ def generate_pdf_report_nist90b(request):
         title="QNU Labs"
     )
     cache.set(f"{job_id}_progressReport90b", 3)
+
     styles = getSampleStyleSheet()
-    title = Paragraph("Report - QNu Labs (NIST 90B)", styles['Title'])
+    title = Paragraph("Report - QNu Labs (NIST SP 800-90B)", styles['Title'])
     title_space = Spacer(1, 0.2 * inch)
 
-    cache.set(f"{job_id}_progressReport90b", 4)
     subtitle_style = styles['Heading2']
     subtitle_style.fontName = 'Helvetica-Bold'
     subtitle_style.fontSize = 12
     subtitle_style.underline = True
 
-    nist_subtitle = Paragraph("NIST SP 800-90B Tests:", subtitle_style)
+    nist_subtitle = Paragraph("NIST SP 800-90B Min-Entropy Estimation Results:", subtitle_style)
     cache.set(f"{job_id}_progressReport90b", 5)
-    # ✅ Build table data dynamically from cache
+
+    # ✅ Build table for results
     data1 = [[
-        Paragraph('Test type', styles['Normal']),
+        Paragraph('Test', styles['Normal']),
         'Min-Entropy',
         'Result'
     ]]
-    cache.set(f"{job_id}_progressReport90b", 6)
+
     for idx, test in enumerate(tests, 1):
-        test_name = test["name"]
-        min_entropy = float(test["min_entropy"])
-        res = test["result"]
+        if not isinstance(test, dict):
+            continue
+        test_name = test.get("name", "Unknown")
+        min_entropy = float(test.get("min_entropy", 0.0))
+        res = test.get("result", "N/A")
         data1.append([
             Paragraph(f"{idx}. {test_name}", styles['Normal']),
             str(round(min_entropy, 5)),
             res
         ])
-    cache.set(f"{job_id}_progressReport90b", 7)
+
     # ✅ Add final result row
     bold_red_style = ParagraphStyle(
         'BoldRed',
@@ -3119,13 +3065,63 @@ def generate_pdf_report_nist90b(request):
         fontName='Helvetica-Bold',
         textColor='red'
     )
-    cache.set(f"{job_id}_progressReport90b", 8)
+
+   # Fetch cached results
+    results = cache.get(f"{job_id}_results90b")
+    if not results:
+        return HttpResponse("No cached results found for this job_id", status=404)
+
+    tests = results.get("tests", [])
+    if not tests:
+        return HttpResponse("No test results available in cache", status=404)
+    print("tests",tests)
+    # Convert list of dicts → dict with test_name as key
+    iid_test = tests.get("IID Test", {"min_entropy": 0.0, "result": "N/A"})
+    non_iid_test = tests.get("Non-IID Test", {"min_entropy": 0.0, "result": "N/A"})
+
+    # Extract min-entropy and result
+    iid_min_entropy = iid_test["min_entropy"]
+    iid_result = iid_test["result"]
+
+    non_iid_min_entropy = non_iid_test["min_entropy"]
+    non_iid_result = non_iid_test["result"]
+
+    # Add rows to PDF table
+    data1.append([
+        Paragraph("IID Test", styles['Normal']),
+        str(round(iid_min_entropy, 5)),
+        iid_result
+    ])
+
+    data1.append([
+        Paragraph("Non-IID Test", styles['Normal']),
+        str(round(non_iid_min_entropy, 5)),
+        non_iid_result
+    ])
+
+    # Determine final result based on IID and Non-IID results
+    if iid_result.lower() == "non-random number" or non_iid_result.lower() == "non-random number":
+        final_result = "non-random number"
+    else:
+        final_result = "random number"
+
+    # Add final result row to PDF table
+    bold_red_style = ParagraphStyle(
+        'BoldRed',
+        parent=styles['Normal'],
+        fontSize=12,
+        fontName='Helvetica-Bold',
+        textColor='red'
+    )
+
     data1.append([
         Paragraph('Final Result', styles['Normal']),
         '',
-        Paragraph(final_text, bold_red_style)
+        Paragraph(final_result, bold_red_style)
     ])
-    cache.set(f"{job_id}_progressReport90b", 9)
+
+
+
     colWidths = [3.0 * inch, 1.0 * inch, 2.0 * inch]
     table1 = Table(data1, colWidths=colWidths)
     table1.setStyle(TableStyle([
@@ -3137,12 +3133,12 @@ def generate_pdf_report_nist90b(request):
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
-    cache.set(f"{job_id}_progressReport90b", 10)
+
     # ✅ Graph
     data2 = [[Image(graph_image_io, width=300, height=250)]]
     table2 = Table(data2, colWidths=[5.5 * inch])
     table2.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
-    cache.set(f"{job_id}_progressReport90b", 12)
+
     # ✅ Logo
     logo_path = os.path.join(os.path.dirname(__file__), 'qnulogo.png')
     logo_image = Image(logo_path, width=0.5 * inch, height=0.5 * inch)
@@ -3151,22 +3147,32 @@ def generate_pdf_report_nist90b(request):
         ('ALIGN', (0, 0), (0, 0), 'CENTER'),
         ('VALIGN', (0, 0), (0, 0), 'TOP'),
     ]))
-    cache.set(f"{job_id}_progressReport90b", 13)
-    # ✅ Descriptions (customize for 90B tests if needed)
+
+    # ✅ NIST 90B Description
     nist90b_description = """
-        <b>NIST SP 800-90B Statistical Tests Description:</b><br/><br/>
-        1. Collision Test: Measures distribution of repeated patterns.<br/><br/>
-        2. Markov Test: Evaluates dependencies between successive bits.<br/><br/>
-        3. Compression Test: Estimates randomness via compressibility.<br/><br/>
-        4. LZ78Y Test: Uses Lempel-Ziv compression for entropy estimation.<br/><br/>
-        5. Lag Test: Analyzes correlation between lagged values.<br/><br/>
-        6. MCW Test: Multi-category window-based randomness check.<br/><br/>
-        7. MMC Test: Multi-Markov Chain randomness analysis.<br/><br/>
-        8. Chi-Square Test: Compares observed vs expected distributions.<br/><br/>
-        9. Permutation Test: Evaluates randomness via sequence permutations.<br/><br/>
-        10. Longest-Substring Test: Checks longest repeated substring length.<br/><br/>
+        <b>NIST SP 800-90B Entropy Estimation Framework:</b><br/><br/>
+        NIST SP 800-90B focuses on evaluating entropy sources by estimating the <b>min-entropy</b>, 
+        which represents the worst-case unpredictability of a sequence.<br/><br/>
+
+        The estimation is divided into two main categories:<br/><br/>
+        1. <b>IID (Independent and Identically Distributed) Tests</b> – Assume input bits are IID.<br/>
+           These include most common estimators such as:<br/>
+           • Most Common Value Estimator<br/>
+           • Collision Estimator<br/>
+           • Markov Estimator<br/>
+           • Compression-based Estimators (e.g., LZ78Y)<br/><br/>
+
+        2. <b>Non-IID Tests</b> – Relax the IID assumption and evaluate structured randomness.<br/>
+           These include:<br/>
+           • Multi-Markov Chain (MMC) Estimator<br/>
+           • Multi-Category Window (MCW) Estimator<br/>
+           • Longest Repeated Substring Test<br/>
+           • Permutation and Chi-Square based estimators<br/><br/>
+
+        The lowest min-entropy value among all applicable estimators is selected as the 
+        conservative measure of entropy for the source.<br/>
     """
-   
+    
     description_style = ParagraphStyle(
         'Description',
         parent=styles['Normal'],
@@ -3180,9 +3186,10 @@ def generate_pdf_report_nist90b(request):
     # ✅ AI Analysis
     AIAnalysis_subtitle = Paragraph("AI Analysis:", subtitle_style)
     prompt = (
-        "Perform a detailed analysis of the results from all the entropy estimation tests. "
-        "For each test, display the test name along with its min-entropy value and whether it "
-        "indicates Random or Non-Random. Summarize by counting how many tests concluded Random vs Non-Random."
+        "Perform a detailed analysis of the NIST SP 800-90B entropy estimation results. "
+        "For each test, provide its name, min-entropy value, and whether it suggests the data "
+        "is Random or Non-Random. Summarize how many tests passed vs failed, and the significance "
+        "of the final min-entropy result."
     )
 
     try:
@@ -3197,8 +3204,6 @@ def generate_pdf_report_nist90b(request):
     except Exception as e:
         gemini_analysis = f"AI Analysis failed: {e}"
 
-    cache.set(f"{job_id}_progressReport90b", 14)
-
     formatted_output = format_markdown(gemini_analysis)
     bullet_points = formatted_output.replace("<ul>", "").replace("</ul>", "").split("<li>")
     bullet_points = [point.replace("</li>", "").strip() for point in bullet_points if point.strip()]
@@ -3208,11 +3213,12 @@ def generate_pdf_report_nist90b(request):
         bulletType='bullet',
     )
 
+    # ✅ Build PDF
     elements = [
         logo_table,
         title,
         title_space,
-        # Paragraph(f"Executed At: {executed_at}", styles['Normal']),
+        Paragraph(f"Executed At: {executed_at}", styles['Normal']),
         Spacer(1, 0.2 * inch),
         nist_subtitle,
         Spacer(1, 0.1 * inch),
@@ -3225,7 +3231,7 @@ def generate_pdf_report_nist90b(request):
         nist_description_paragraph,
         Spacer(1, 0.2 * inch),
         AIAnalysis_subtitle,
-        gemini_analysis_paragraph,
+        # gemini_analysis_paragraph,
     ]
 
     doc.build(elements)
@@ -4989,154 +4995,8 @@ MIN_ENTROPY_THRESHOLDS = {
 def run_nist90b_on_bin(request):
     """
     Accepts a .bin file via POST and runs all official NIST SP800-90B tests.
-    Tracks progress and stores results in cache.
-    """
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
-
-    # Read form fields
-    file = request.FILES.get('file')
-    scheduled_time_str = request.POST.get('scheduled_time', '')
-    job_id = request.POST.get('job_id', str(uuid.uuid4()))
-    line_number = request.POST.get('line', '')
-    userId = request.POST.get('user_id', '')
-    fileName = request.POST.get('file_name', '')
-
-    if not file:
-        return JsonResponse({"error": "No file uploaded. Send a '.bin' file."}, status=400)
-
-    if not scheduled_time_str:
-        return JsonResponse({"error": "scheduled_time is required"}, status=400)
-
-    try:
-        naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
-        kolkata_tz = pytz.timezone("Asia/Kolkata")
-        scheduled_time = kolkata_tz.localize(naive_scheduled_time)
-    except ValueError:
-        return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
-
-    current_time = datetime.datetime.now(kolkata_tz)
-    time_difference = (scheduled_time - current_time).total_seconds()
-
-    def update_progress(step: int):
-        try:
-            progress_percentage = round((step / 20) * 100)  # total ~20 steps
-            supabase.table("results3").update({
-                "progress": progress_percentage,
-            }).eq("user_id", int(userId)).eq("line", int(line_number)).execute()
-        except Exception as e:
-            print(f"Supabase progress update failed at step {step}: {e}")
-
-    # If scheduled in the future, defer execution
-    if time_difference > 0:
-        return JsonResponse({"status": "Scheduled", "time_diff_seconds": time_difference})
-
-    update_progress(1)
-
-    # Save uploaded .bin file to temporary location
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        for chunk in file.chunks():
-            tmp_file.write(chunk)
-        tmp_file_path = tmp_file.name
-
-    file_size_bytes = os.path.getsize(tmp_file_path)
-    file_size_bits = file_size_bytes * 8
-    MAX_BITS = 1_000_000
-    n_samples = min(file_size_bits, MAX_BITS)
-
-    update_progress(2)
-
-    # Define tests
-    tests_executables = {
-        "IID Test": {
-            "exe": os.path.join(CPP_FOLDER, "ea_iid"),
-            "args": ["-v", tmp_file_path]
-        },
-        "Non-IID Test": {
-            "exe": os.path.join(CPP_FOLDER, "ea_non_iid"),
-            "args": ["-v", tmp_file_path]
-        },
-       
-    }
-
-    results = {}
-    passed_count = 0
-    step_counter = 3
-
-    # Function to run a single test
-    def run_single_test(test_name, exe_info):
-        nonlocal passed_count, step_counter
-        exe_path = exe_info["exe"]
-        args = exe_info["args"]
-
-        if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
-            step_counter += 1
-            update_progress(step_counter)
-            return {"min_entropy": 0.0, "result": "executable missing"}
-
-        try:
-            result = subprocess.run([exe_path] + args, capture_output=True, text=True, shell=False)
-            output = result.stdout.strip()
-
-            # Extract min_entropy
-            min_entropy = 0.0
-            for line in output.splitlines():
-                if any(keyword in line.lower() for keyword in ["h_original", "min(", "h_bitstring"]):
-                    numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
-                    if numbers:
-                        min_entropy = float(numbers[0])
-                        break
-
-            # Determine verdict based on threshold
-            threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
-            verdict = "random number" if min_entropy >= threshold else "non-random number"
-
-            if verdict == "random number":
-                passed_count += 1
-
-        except Exception as e:
-            print(f"Error running {test_name}: {e}")
-            min_entropy = 0.0
-            verdict = "non-random number"
-
-        step_counter += 1
-        update_progress(step_counter)
-        return {"min_entropy": min_entropy, "result": verdict}
-
-    # Run all tests
-    for test_name, exe_info in tests_executables.items():
-        results[test_name] = run_single_test(test_name, exe_info)
-
-    # Clean up temporary files
-    try:
-        os.remove(tmp_file_path)
-        if os.path.exists(tmp_file_path + ".json"):
-            os.remove(tmp_file_path + ".json")
-        if os.path.exists(tmp_file_path + ".column"):
-            os.remove(tmp_file_path + ".column")
-    except:
-        pass
-
-    # Final verdict
-    final_text = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
-    executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # ✅ Store results in cache
-    job_results = {
-        "job_id": job_id,
-        "tests": results,
-        "final_result": final_text,
-        "executed_at": executed_at,
-    }
-    cache.set(f"{job_id}_results90b", job_results, timeout=3600)
-
-    update_progress(20)
-
-@csrf_exempt
-def run_nist90b_on_bin(request):
-    """
-    Accepts a .bin file via POST and runs all official NIST SP800-90B tests.
     Tracks progress, prints test outputs, and stores results in cache.
+    Uses the correct min-entropy calculation and verdict logic.
     """
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
@@ -5148,7 +5008,7 @@ def run_nist90b_on_bin(request):
     line_number = request.POST.get('line', '')
     userId = request.POST.get('user_id', '')
     fileName = request.POST.get('file_name', '')
-
+ 
     if not file:
         return JsonResponse({"error": "No file uploaded. Send a '.bin' file."}, status=400)
 
@@ -5164,11 +5024,12 @@ def run_nist90b_on_bin(request):
 
     current_time = datetime.datetime.now(kolkata_tz)
     time_difference = (scheduled_time - current_time).total_seconds()
+    print("time dif", time_difference)
 
     def update_progress(step: int):
         try:
-            progress_percentage = round((step / 20) * 100)  # total ~20 steps
-            supabase.table("results3").update({
+            progress_percentage = round((step / 8) * 100)  # total 8 steps
+            supabase.table("results2").update({
                 "progress": progress_percentage,
             }).eq("user_id", int(userId)).eq("line", int(line_number)).execute()
         except Exception as e:
@@ -5176,7 +5037,7 @@ def run_nist90b_on_bin(request):
 
     # If scheduled in the future, defer execution
     if time_difference > 0:
-        return JsonResponse({"status": "Scheduled", "time_diff_seconds": time_difference})
+        return JsonResponse(run_after_delay_90b(job_id, scheduled_time, binary_data, line, userId, fileName))
 
     update_progress(1)
 
@@ -5192,7 +5053,7 @@ def run_nist90b_on_bin(request):
     n_samples = min(file_size_bits, MAX_BITS)
 
     update_progress(2)
-
+   
     # Define tests
     tests_executables = {
         "IID Test": {
@@ -5208,33 +5069,31 @@ def run_nist90b_on_bin(request):
     results = {}
     passed_count = 0
     step_counter = 3
+   
 
-    # Function to run a single test
-    def run_single_test(test_name, exe_info):
-        nonlocal passed_count, step_counter
-        exe_path = exe_info["exe"]
-        args = exe_info["args"]
+    # ✅ Updated single test logic from simpler function
+    for test_name, test_info in tests_executables.items():
+        exe_path = test_info["exe"]
+        args = test_info["args"]
 
         if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
+            results[test_name] = {"min_entropy": 0.0, "result": "executable missing"}
             step_counter += 1
             update_progress(step_counter)
-            print(f"{test_name}: Executable missing at {exe_path}")
-            return {"min_entropy": 0.0, "result": "executable missing"}
+            continue
 
         try:
-            # Run the test and capture output
             result = subprocess.run([exe_path] + args, capture_output=True, text=True, shell=False)
             output = result.stdout.strip()
             error_output = result.stderr.strip()
 
-            # Print actual output to console
             print(f"=== {test_name} Output ===")
             print(output)
             if error_output:
                 print(f"=== {test_name} Error ===")
                 print(error_output)
 
-            # Extract min_entropy
+            # Extract min_entropy from stdout (correct logic)
             min_entropy = 0.0
             for line in output.splitlines():
                 if any(keyword in line.lower() for keyword in ["h_original", "min(", "h_bitstring"]):
@@ -5243,7 +5102,7 @@ def run_nist90b_on_bin(request):
                         min_entropy = float(numbers[0])
                         break
 
-            # Determine verdict based on threshold
+            # Determine verdict based on min-entropy threshold
             threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
             verdict = "random number" if min_entropy >= threshold else "non-random number"
 
@@ -5255,14 +5114,11 @@ def run_nist90b_on_bin(request):
             min_entropy = 0.0
             verdict = "non-random number"
 
+        results[test_name] = {"min_entropy": min_entropy, "result": verdict}
         step_counter += 1
         update_progress(step_counter)
-        return {"min_entropy": min_entropy, "result": verdict}
 
-    # Run all tests
-    for test_name, exe_info in tests_executables.items():
-        results[test_name] = run_single_test(test_name, exe_info)
-
+  
     # Clean up temporary files
     try:
         os.remove(tmp_file_path)
@@ -5272,10 +5128,13 @@ def run_nist90b_on_bin(request):
             os.remove(tmp_file_path + ".column")
     except:
         pass
+    update_progress(6)
 
     # Final verdict
     final_text = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
     executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+   
+    update_progress(7)
 
     # ✅ Store results in cache
     job_results = {
@@ -5286,12 +5145,16 @@ def run_nist90b_on_bin(request):
     }
     cache.set(f"{job_id}_results90b", job_results, timeout=3600)
 
-    update_progress(20)
+   
+    update_progress(8)
 
     return JsonResponse({
         "final_result": final_text,
-        "executed_at": executed_at
+        "executed_at": executed_at,
+        "tests": [{"name": name, "min_entropy": res["min_entropy"], "result": res["result"]}
+                  for name, res in results.items()]
     })
+
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
