@@ -1,16 +1,15 @@
-Serial Test:  Insufficient memory available.
 			       SERIAL TEST
 		---------------------------------------------
 		 COMPUTATIONAL INFORMATION:		  
 		---------------------------------------------
-		(a) Block length    (m) = 0
-		(b) Sequence length (n) = 8388608
-		(c) Psi_m               = 0.000000
-		(d) Psi_m-1             = 0.000000
-		(e) Psi_m-2             = 0.000000
-		(f) Del_1               = 0.000000
-		(g) Del_2               = 0.000000
+		(a) Block length    (m) = 16
+		(b) Sequence length (n) = 1000000
+		(c) Psi_m               = 65578.004480
+		(d) Psi_m-1             = 32856.272896
+		(e) Psi_m-2             = 16572.444672
+		(f) Del_1               = 32721.731584
+		(g) Del_2               = 16437.903360
 		---------------------------------------------
-SUCCESS		p_value1 = 1.000000
-SUCCESS		p_value2 = 1.000000
+SUCCESS		p_value1 = 0.570724
+SUCCESS		p_value2 = 0.381657
 

@@ -2576,11 +2576,8 @@ const Nist_tests90b = () => {
         .eq("line",1)
         .maybeSingle();
 
-      // if (fetchError) {
 
-      // }
-
-      // if (existingResult && existingResult.report_path) {
+      if (existingResult && existingResult.report_path) {
 
       //   // ✅ 2. Get a signed URL for direct access
       //   const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -2614,6 +2611,7 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
+      
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2660,12 +2658,9 @@ const Nist_tests90b = () => {
         .eq("user_id", userId)
         .eq("line", 1)
         .maybeSingle();
+      
 
-      // if (fetchError) {
-
-      // }
-
-      // if (existingResult && existingResult.graph_path) {
+      if (existingResult && existingResult.graph_path) {
 
 
       //   // ✅ 2. Get a signed URL for direct access
@@ -2743,7 +2738,7 @@ const Nist_tests90b = () => {
     }
   };
 
-
+  
   const handleButtonClick2 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {

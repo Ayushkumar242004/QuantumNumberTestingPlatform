@@ -3172,7 +3172,7 @@ def generate_pdf_report_nist90b(request):
         The lowest min-entropy value among all applicable estimators is selected as the 
         conservative measure of entropy for the source.<br/>
     """
-    
+
     description_style = ParagraphStyle(
         'Description',
         parent=styles['Normal'],
@@ -4511,148 +4511,137 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from multiprocessing import Process, Queue
 
-# Assuming TESTS_DIR / "tests" and supabase are defined globally
-
 import os
-import re
-import uuid
-import pytz
-import datetime
 import subprocess
+from django.conf import settings
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.core.cache import cache
+STS_PATH = os.path.join(settings.TESTS_DIR, "sts-2.1.2")
 
-@csrf_exempt
-def generate_final_ans1(request):
-    if request.method != 'POST':
-        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+TEST_FOLDERS = {
+    "ApproximateEntropy": "results.txt",
+    "BlockFrequency": "results.txt",
+    "CumulativeSums": "results.txt",
+    "FFT": "results.txt",
+    "Frequency": "results.txt",  # this one is different in your screenshot
+    "LinearComplexity": "results.txt",
+    "LongestRun": "results.txt",
+    "NonOverlappingTemplate": "results.txt",
+    "OverlappingTemplate": "results.txt",
+    "RandomExcursions": "results.txt",
+    "RandomExcursionsVariant": "results.txt",
+    "Rank": "results.txt",
+    "Runs": "results.txt",
+    "Serial": "results.txt",
+    "Universal": "results.txt"
+}
 
-    file = request.FILES.get('file')
-    scheduled_time_str = request.POST.get('scheduled_time', '')
-    job_id = request.POST.get('job_id', str(uuid.uuid4()))
-    userId = request.POST.get('user_id', '')
-    fileName = request.POST.get('file_name', 'uploaded.bin')
+def run_nist_tests(request):
+    bitstream_file = os.path.join(STS_PATH, "test.bin")
+    num_bits = 1000000  # adjust according to your file
 
-    if not file:
-        return JsonResponse({"error": "No file uploaded"}, status=400)
-    if not scheduled_time_str:
-        return JsonResponse({"error": "scheduled_time is required"}, status=400)
+    automated_input = f"0\n{bitstream_file}\n1\n0\n1\n1\n".encode()
 
-    try:
-        naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
-    except ValueError:
-        return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
-
-    # Time handling
-    kolkata_tz = pytz.timezone("Asia/Kolkata")
-    scheduled_time = kolkata_tz.localize(naive_scheduled_time)
-    current_time = datetime.datetime.now(kolkata_tz)
-    time_difference = (scheduled_time - current_time).total_seconds()
-    print("Time difference:", time_difference)
-
-    cache.set(f"{job_id}_progress", 1)
-
-    # Paths
-    sts_dir = "/home/ayush/Documents/all_material_for_randomness/Qnu_upload_design/backend/myproject/home/sts-2.1.2"
-    assess_path = os.path.join(sts_dir, "assess")
-    data_dir = os.path.join(sts_dir, "data")
-    os.makedirs(data_dir, exist_ok=True)
-
-    # Save file to sts-2.1.2/data/
-    saved_path = os.path.join(data_dir, fileName)
-    with open(saved_path, 'wb') as f:
-        for chunk in file.chunks():
-            f.write(chunk)
-
-    # Calculate stream length in bits
-    file_size_bytes = os.path.getsize(saved_path)
-    stream_length = file_size_bytes * 8  # bits
-
-    # NIST STS default: each bitstream is 1,000,000 bits (125,000 bytes)
-    BITS_PER_STREAM = 1_000_000
-    num_bitstreams = max(1, stream_length // BITS_PER_STREAM)
-
-    print(f"File size: {file_size_bytes} bytes")
-    print(f"Stream length: {stream_length} bits")
-    print(f"Calculated number of bitstreams: {num_bitstreams}")
-
-    cache.set(f"{job_id}_progress", 2)
-
-    # Default parameter values for the tests
-    block_freq_M = 128
-    non_overlap_m = 9
-    overlap_m = 9
-    approx_entropy_m = 10
-    serial_m = 16
-    linear_complexity_M = 500
-
-    # Use relative path for assess binary
-    relative_path_in_sts = os.path.join("data", fileName)
-
-    # All inputs fed at once to avoid interactive stops
-    user_inputs = (
-        f"0\n"                              # Choose Input File
-        f"{relative_path_in_sts}\n"         # File path relative to sts_dir
-        f"1\n"                              # Run all tests
-        f"{block_freq_M}\n"                 # Block Frequency Test param
-        f"{non_overlap_m}\n"                # NonOverlapping Template Test param
-        f"{overlap_m}\n"                     # Overlapping Template Test param
-        f"{approx_entropy_m}\n"              # Approximate Entropy Test param
-        f"{serial_m}\n"                      # Serial Test param
-        f"{linear_complexity_M}\n"           # Linear Complexity Test param
-        f"0\n"                              # Skip parameter adjustments
-        f"{num_bitstreams}\n"               # Number of bitstreams (calculated)
-        f"1\n"                              # Binary mode
+    process = subprocess.Popen(
+        ["./assess", str(num_bits)],
+        cwd=STS_PATH,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
     )
+    stdout, stderr = process.communicate(input=automated_input)
+    print(stdout.decode())
 
-    try:
-        process = subprocess.run(
-            [assess_path, str(stream_length)],
-            input=user_inputs,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            cwd=sts_dir,
-            timeout=1200
-        )
+    experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
 
-        output = process.stdout
-        error_output = process.stderr
+    if not os.path.exists(experiment_path):
+        return JsonResponse({"status": "error", "message": f"{experiment_path} not found"})
 
-        if error_output:
-            print("----- Errors -----")
-            print(error_output)
+    test_results = {}
+    random_count = 0
+    non_random_count = 0
 
-        # Extract only p-values
+    for test_name, result_file in TEST_FOLDERS.items():
+        test_folder = os.path.join(experiment_path, test_name)
+        results_file = os.path.join(test_folder, result_file)
+
+        if not os.path.isfile(results_file):
+            test_results[test_name] = {"p_value": None, "result": "No Data"}
+            continue
+
         p_values = []
-        for line in output.splitlines():
-            match = re.search(r"p[_-]?value\s*=\s*([0-9]*\.?[0-9]+)", line, re.IGNORECASE)
-            if match:
+        with open(results_file, "r") as f:
+            for line in f:
                 try:
-                    p_values.append(float(match.group(1)))
-                except ValueError:
-                    pass  # Ignore parsing issues
+                    p = float(line.strip())
+                    p_values.append(p)
+                except:
+                    continue
 
-        cache.set(f"{job_id}_raw_output", output)
+        if not p_values:
+            test_result = "No Data"
+            rep_p_value = None
+        else:
+            rep_p_value = min(p_values)  # representative p-value
+            test_result = "Random Number" if rep_p_value > 0.05 else "Non-Random Number"
 
-    except subprocess.TimeoutExpired:
-        cache.set(f"{job_id}_raw_output", "Timeout while running NIST STS tests.")
-        p_values = []
-        output = ""
-    except Exception as e:
-        cache.set(f"{job_id}_raw_output", f"Error running NIST STS tests: {str(e)}")
-        p_values = []
-        output = ""
-    finally:
-        cache.set(f"{job_id}_progress", 5)
+        test_results[test_name] = {"p_value": rep_p_value, "result": test_result}
 
-    return JsonResponse({
-        "final_result": "Completed",
-        "test_results": p_values,
-        "full_output": output,
-        "executed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    })
+        if test_result == "Random Number":
+            random_count += 1
+        elif test_result == "Non-Random Number":
+            non_random_count += 1
+    
+    final_verdict = "Random Number" if random_count >= non_random_count else "Non-Random Number"
+
+    return JsonResponse({"status": "success", "tests": test_results, "final_verdict": final_verdict})
+
+
+TEST_FOLDERS_STATS = {
+    "ApproximateEntropy": "stats.txt",
+    "BlockFrequency": "stats.txt",
+    "CumulativeSums": "stats.txt",
+    "FFT": "stats.txt",
+    "Frequency": "stats.txt",
+    "LinearComplexity": "stats.txt",
+    "LongestRun": "stats.txt",
+    "NonOverlappingTemplate": "stats.txt",
+    "OverlappingTemplate": "stats.txt",
+    "RandomExcursions": "stats.txt",
+    "RandomExcursionsVariant": "stats.txt",
+    "Rank": "stats.txt",
+    "Runs": "stats.txt",
+    "Serial": "stats.txt",
+    "Universal": "stats.txt"
+}
+
+def aggregate_stats(request):
+    """
+    Reads all stats.txt files from the test folders and concatenates their content.
+    Returns the combined content as a single response.
+    """
+    experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
+
+    if not os.path.exists(experiment_path):
+        return JsonResponse({"status": "error", "message": f"{experiment_path} not found"})
+
+    combined_stats = []
+
+    for test_name, stats_file in TEST_FOLDERS_STATS.items():
+        test_folder = os.path.join(experiment_path, test_name)
+        stats_path = os.path.join(test_folder, stats_file)
+
+        if not os.path.isfile(stats_path):
+            continue  # skip missing files
+
+        with open(stats_path, "r") as f:
+            content = f.read().strip()
+            if content:
+                combined_stats.append(f"--- {test_name} ---\n{content}")
+
+    final_content = "\n\n".join(combined_stats)
+    
+    return JsonResponse({"status": "success", "combined_stats": final_content})
+
 
 import tempfile
 import os
