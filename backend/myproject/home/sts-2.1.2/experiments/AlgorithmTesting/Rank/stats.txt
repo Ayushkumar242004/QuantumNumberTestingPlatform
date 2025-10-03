@@ -5,12 +5,12 @@
 		(a) Probability P_32 = 0.288788
 		(b)             P_31 = 0.577576
 		(c)             P_30 = 0.133636
-		(d) Frequency   F_32 = 129879
-		(e)             F_31 = 260553
-		(f)             F_30 = 60128
-		(g) # of matrices    = 450560
-		(h) Chi^2            = 0.941333
+		(d) Frequency   F_32 = 31005
+		(e)             F_31 = 61334
+		(f)             F_30 = 14157
+		(g) # of matrices    = 106496
+		(h) Chi^2            = 2.928644
 		(i) NOTE: 0 BITS WERE DISCARDED.
 		---------------------------------------------
-SUCCESS		p_value = 0.624586
+SUCCESS		p_value = 0.231235
 
