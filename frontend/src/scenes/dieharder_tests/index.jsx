@@ -1651,7 +1651,7 @@ useEffect(() => {
     setLoadingProgress(0);
     let progressIntervalId;
 
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile && !binaryInsertedRef.current) {
@@ -1899,7 +1899,7 @@ useEffect(() => {
     setLoadingProgress2(0);
     let progressIntervalId;
 
-    const upsertProgress2 = async (progress, userId, result = null) => {
+    const upsertProgress2 = async (progress, userId, result = "") => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile2 && !binaryInsertedRef2.current) {
@@ -2139,7 +2139,7 @@ useEffect(() => {
     setLoadingProgress3(0);
     let progressIntervalId;
 
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile3 && !binaryInsertedRef3.current) {
@@ -2379,7 +2379,7 @@ useEffect(() => {
     setLoadingProgress4(0);
     let progressIntervalId;
 
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile4 && !binaryInsertedRef4.current) {
@@ -2625,7 +2625,7 @@ useEffect(() => {
     setLoadingProgress5(0);
     let progressIntervalId;
 
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile5 && !binaryInsertedRef5.current) {
@@ -2901,35 +2901,7 @@ const [binFile5, setBinFile5] = useState(null);
     const userId = await fetchUserId();
     if (type === "report") {
       
-      const { data: existingResult, error: fetchError } = await supabase
-      .from("results3")
-      .select("report_path")
-      .eq("user_id", userId)
-      .eq("line", 1)
-      .maybeSingle(); 
-
-    if (fetchError) {
-         
-    }
-
-    if (existingResult && existingResult.report_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("reports")
-        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-   
-        return;
-      }
-
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgressRep(100);
-      return; // stop here, no need to regenerate
-    }
+     
 
       let progressInterval;
       setLoadingProgressRep(0);
@@ -2969,22 +2941,6 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `report-${currentJobIdT}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-            .from("results3")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 1)           // condition 2
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2994,42 +2950,7 @@ const [binFile5, setBinFile5] = useState(null);
     }
     else if (type === "graph") {
    
-      if (!selectedFile && !binFile) {
-        alert("Please select a binary file before generating the graph.");
-        return;
-      }
-
-   
-      const { data: existingResult, error: fetchError } = await supabase
-      .from("results3")
-      .select("graph_path")
-      .eq("user_id", userId)
-      .eq("line", 1)
-      .maybeSingle(); 
-
-    if (fetchError) {
-         
-    }
-
-    if (existingResult && existingResult.graph_path) {
-       
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("graphs")
-        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-   
-        return;
-      }
-
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgressGr(100);
-      return; // stop here, no need to regenerate
-    }
-
+    
       let progressInterval;
       setLoadingProgressGr(0);
 
@@ -3074,23 +2995,7 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `graph-${currentJobIdT}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results3")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 1)           // condition 2
-
-          }
+         
         })
         .catch((error) => {
              
@@ -3109,37 +3014,7 @@ const [binFile5, setBinFile5] = useState(null);
       let progressInterval;
       setLoadingProgress2Rep(0);
 
-      const { data: existingResult, error: fetchError } = await supabase
-      .from("results3")
-      .select("report_path")
-      .eq("user_id", userId)
-      .eq("line", 2)
-      .maybeSingle(); 
-
-    if (fetchError) {
-         
-    }
-
-    if (existingResult && existingResult.report_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("reports")
-        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-   
-        return;
-      }
-
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress2Rep(100);
-      return; // stop here, no need to regenerate
-    }
-
-
+    
       progressInterval = setInterval(async () => {
         try {
           const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobIdT2}`);
@@ -3175,23 +3050,7 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `report-${currentJobIdT2}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-            .from("results3")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 2)           // condition 2
-          }
-       
+         
         })
         .catch((error) => {
              
@@ -3205,36 +3064,7 @@ const [binFile5, setBinFile5] = useState(null);
       }
 
       
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results3")
-        .select("graph_path")
-        .eq("user_id", userId)
-        .eq("line", 2)
-        .maybeSingle(); 
-
-      if (fetchError) {
-           
-      }
-
-      if (existingResult && existingResult.graph_path) {
-         
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("graphs")
-          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
      
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress2Gr(100);
-        return; // stop here, no need to regenerate
-      }
-
 
       let progressInterval;
       setLoadingProgress2Gr(0);
@@ -3274,23 +3104,7 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `graph-${currentJobIdT2}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results3")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 2)           // condition 2
-
-          }
+      
         })
         .catch((error) => {
 
@@ -3305,35 +3119,7 @@ const [binFile5, setBinFile5] = useState(null);
     const userId = await fetchUserId();
     if (type === "report") {
 
-      const { data: existingResult, error: fetchError } = await supabase
-      .from("results3")
-      .select("report_path")
-      .eq("user_id", userId)
-      .eq("line", 3)
-      .maybeSingle(); 
-
-    if (fetchError) {
-         
-    }
-
-    if (existingResult && existingResult.report_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("reports")
-        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-   
-        return;
-      }
-
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress3Rep(100);
-      return; // stop here, no need to regenerate
-    }
+     
 
 
       let progressInterval;
@@ -3375,22 +3161,6 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `report-${currentJobIdT3}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-            .from("results3")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 3)           // condition 2
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3398,38 +3168,7 @@ const [binFile5, setBinFile5] = useState(null);
           setLoadingProgress3Rep(0);
         });
     } else if (type === "graph") {
-     
-      const { data: existingResult, error: fetchError } = await supabase
-      .from("results3")
-      .select("graph_path")
-      .eq("user_id", userId)
-      .eq("line", 3)
-      .maybeSingle(); 
-
-    if (fetchError) {
-         
-    }
-
-    if (existingResult && existingResult.graph_path) {
-       
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("graphs")
-        .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
    
-        return;
-      }
-
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress3Gr(100);
-      return; // stop here, no need to regenerate
-    }
-
-
       let progressInterval;
       setLoadingProgress3Gr(0);
 
@@ -3467,23 +3206,7 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `graph-${currentJobIdT3}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 3)           // condition 2
-
-          }
+         
         })
         .catch((error) => {
 
@@ -3498,37 +3221,7 @@ const [binFile5, setBinFile5] = useState(null);
     const userId = await fetchUserId();
     if (type === "report") {
     
-      const { data: existingResult, error: fetchError } = await supabase
-      .from("results3")
-      .select("report_path")
-      .eq("user_id", userId)
-      .eq("line", 4)
-      .maybeSingle(); 
-
-    if (fetchError) {
-         
-    }
-
-    if (existingResult && existingResult.report_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("reports")
-        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-   
-        return;
-      }
-
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress4Rep(100);
-      return; // stop here, no need to regenerate
-    }
-
-
+      
       let progressInterval;
       setLoadingProgress4Rep(0);
 
@@ -3568,22 +3261,6 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `report-${currentJobIdT4}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-            .from("results3")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 4)           // condition 2
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3642,36 +3319,7 @@ const [binFile5, setBinFile5] = useState(null);
       let progressInterval;
       setLoadingProgress5Rep(0);
 
-      const { data: existingResult, error: fetchError } = await supabase
-      .from("results3")
-      .select("report_path")
-      .eq("user_id", userId)
-      .eq("line", 5)
-      .maybeSingle(); 
-
-    if (fetchError) {
-         
-    }
-
-    if (existingResult && existingResult.report_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("reports")
-        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-   
-        return;
-      }
-
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress5Rep(100);
-      return; // stop here, no need to regenerate
-    }
-
+     
       progressInterval = setInterval(async () => {
         try {
           const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobIdT5}`);
@@ -3708,22 +3356,7 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `report-${currentJobIdT5}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-            .from("results3")
-            .update({ report_path: data.path })
-            .eq("user_id", userId)   // condition 1
-            .eq("line", 5)           // condition 2
-          }
+          
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3732,36 +3365,7 @@ const [binFile5, setBinFile5] = useState(null);
         });
     } else if (type === "graph") {
       
-      const { data: existingResult, error: fetchError } = await supabase
-      .from("results3")
-      .select("report_path")
-      .eq("user_id", userId)
-      .eq("line", 5)
-      .maybeSingle(); 
-
-    if (fetchError) {
-         
-    }
-
-    if (existingResult && existingResult.report_path) {
-         
-
-      // ✅ 2. Get a signed URL for direct access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from("reports")
-        .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      if (urlError) {
-   
-        return;
-      }
-
-      // ✅ 3. Open the existing graph
-      window.open(signedUrlData.signedUrl, "_blank");
-      setLoadingProgress5Rep(100);
-      return; // stop here, no need to regenerate
-    }
-
+      
       let progressInterval;
       setLoadingProgress5Gr(0);
 
@@ -3800,24 +3404,6 @@ const [binFile5, setBinFile5] = useState(null);
 
           const fileName = `graph-${currentJobIdT5}.png`;
           const file = new File([blob], fileName, { type: blob.type });
-
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results3")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 5)           // condition 2
-
-          }
 
         })
         .catch((error) => {

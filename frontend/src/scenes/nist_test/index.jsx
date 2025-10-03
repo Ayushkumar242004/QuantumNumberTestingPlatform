@@ -1304,7 +1304,7 @@ const Nist_tests = () => {
     setLoadingProgress(0);
     let progressIntervalId;
 
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile && !binaryInsertedRef.current) {
@@ -1531,7 +1531,7 @@ const Nist_tests = () => {
     setLoadingProgress2(0);
     let progressIntervalId;
   
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
   
       if (progress === 0 && selectedFile2 && !binaryInsertedRef2.current) {
@@ -1757,7 +1757,7 @@ const Nist_tests = () => {
     setLoadingProgress3(0);
     let progressIntervalId;
   
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
   
       if (progress === 0 && binaryInput3 && !binaryInsertedRef3.current) {
@@ -1983,7 +1983,7 @@ const Nist_tests = () => {
     setLoadingProgress4(0);
     let progressIntervalId;
   
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
   
       if (progress === 0 && binaryInput4 && !binaryInsertedRef4.current) {
@@ -2209,7 +2209,7 @@ const Nist_tests = () => {
     setLoadingProgress5(0);
     let progressIntervalId;
   
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
   
       if (progress === 0 && binaryInput5 && !binaryInsertedRef5.current) {

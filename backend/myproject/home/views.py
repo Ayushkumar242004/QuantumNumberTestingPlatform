@@ -4676,6 +4676,25 @@ def run_nist_tests(request):
         cache.set(f"{line_number}_results", job_results, timeout=3600)
         update_progress(18)
 
+        try:
+            current_time = datetime.datetime.now().isoformat()
+            supabase.table("results").upsert(
+                {
+                    "user_id": int(userId),
+                    "line": int(line_number),
+                    "binary_data": " ",  # skip large data
+                    "scheduled_time": scheduled_time.isoformat(),
+                    "upload_time": current_time,
+                    "result": final_verdict,
+                    "progress": 100,
+                    "file_name": fileName,
+                    "updated_at": current_time
+                },
+                ignore_duplicates=False
+            ).execute()
+        except Exception as e:
+            print("Failed to update Supabase:", e)
+        
         # Cleanup uploaded file
         try:
             os.remove(temp_file_path)
@@ -5366,6 +5385,26 @@ def run_nist90b_on_bin(request):
 
    
     update_progress(8)
+        # ✅ Upload final results to Supabase
+    try:
+        current_time = datetime.datetime.now().isoformat()
+        supabase.table("results2").upsert(
+            {
+                "user_id": int(userId),
+                "line": int(line_number),
+                "binary_data": " ",  # skip actual binary content
+                "scheduled_time": scheduled_time.isoformat(),
+                "upload_time": current_time,
+                "result": final_text,
+                "progress": 100,
+                "file_name": fileName,
+                "updated_at": current_time
+            },
+            ignore_duplicates=False
+        ).execute()
+    except Exception as e:
+        print("Failed to update Supabase:", e)
+
 
     return JsonResponse({
         "final_result": final_text,
@@ -5708,6 +5747,27 @@ def generate_final_ans_dieharder(request):
 
         update_progress(20)
         cache.set(f"{job_id}_progress_dieharder", 20)
+
+                # ✅ Upload final results to Supabase
+        try:
+            current_time = datetime.datetime.now().isoformat()
+            supabase.table("results3").upsert(
+                {
+                    "user_id": int(userId),
+                    "line": int(line_number),
+                    "binary_data": " ",  # placeholder, skip actual file content
+                    "scheduled_time": scheduled_time.isoformat(),
+                    "upload_time": current_time,
+                    "result": final_text,
+                    "progress": 100,
+                    "file_name": fileName,
+                    "updated_at": current_time
+                },
+                ignore_duplicates=False
+            ).execute()
+        except Exception as e:
+            print("Failed to update Supabase:", e)
+
 
         if os.path.exists(tmpfile_path):
             os.remove(tmpfile_path)
