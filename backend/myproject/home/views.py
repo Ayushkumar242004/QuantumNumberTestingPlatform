@@ -96,7 +96,7 @@ from google.genai import types
 from django.core.cache import cache
 import  uuid
 
-client = genai.Client(api_key="AIzaSyA4yim2okmVuLZqFfK9ryUa1HQRtRL2JUs") # place your api key here in inverted commas
+client = genai.Client(api_key="AIzaSyBilGYGxTG5bsaL7_pArtgTRPBgAA-IOK8") # place your api key here in inverted commas
 import subprocess
 
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -2517,13 +2517,13 @@ def sse_binary_example_view(request):
 
 global_graph_image=None
 
-
 @csrf_exempt
 def create_graph(request):
     try:
         data = json.loads(request.body)
         job_id = data.get('job_id')
         file_name = data.get('file_name', '')
+        line_number=data.get('line_number', '')
     except json.JSONDecodeError as e:
         print('Error parsing JSON:', e)
         return HttpResponse("Invalid JSON data.", status=400)
@@ -2534,17 +2534,21 @@ def create_graph(request):
     cache.set(f"{job_id}_progressGraph", 1)
 
     # ✅ Fetch results from cache
-    results = cache.get(f"{job_id}_results")
+    results = cache.get(f"{line_number}_results")
+    print("results",results)
     if not results:
         return HttpResponse("No cached results found for this job_id", status=404)
 
-    tests = results.get("tests", [])
+    tests = results.get("tests", {})
+    print("tests",tests)
     if not tests:
         return HttpResponse("No test results available in cache", status=404)
 
-    # ✅ Build dictionary of {test_name: p_value}
-    valid_tests = {t["name"]: float(t["p_value"]) for t in tests}
-    print("Valid tests (from cache):", valid_tests)
+    # ✅ Build dictionary of {test_name: p_value} from cached results
+    valid_tests = {test_name: float(test_info.get("p_value") or 0) 
+                   for test_name, test_info in tests.items()}
+    if not valid_tests:
+        return HttpResponse("No valid p-values found in cached results", status=404)
 
     x = list(valid_tests.keys())
     y = list(valid_tests.values())
@@ -2559,9 +2563,9 @@ def create_graph(request):
     ax.set_yticks([i / 10.0 for i in range(0, 11)])
     ax.set_ylim(0, 1)
     plt.xticks(rotation=45, ha='right', fontsize=12)
-    # plt.title(f"File Name: {file_name}", fontsize=22, pad=20)
     plt.tight_layout()
 
+    # ✅ Add legend
     legend_elements = [
         Patch(facecolor='green', edgecolor='green', label='Random (p ≥ 0.01)'),
         Patch(facecolor='blue', edgecolor='blue', label='Non-random (p < 0.01)')
@@ -2570,6 +2574,7 @@ def create_graph(request):
 
     cache.set(f"{job_id}_progressGraph", 100)
 
+    # ✅ Return as image response
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
@@ -2593,6 +2598,7 @@ def create_graph_nist90b(request):
         data = json.loads(request.body)
         job_id = data.get('job_id')
         file_name = data.get('file_name', '')
+        line_number=data.get('line_number', '')
     except json.JSONDecodeError as e:
         print("Error parsing JSON:", e)
         return HttpResponse("Invalid JSON data.", status=400)
@@ -2602,8 +2608,10 @@ def create_graph_nist90b(request):
 
     cache.set(f"{job_id}_progressGraph90b", 1)
 
+    
     # ✅ Fetch results from cache
-    results = cache.get(f"{job_id}_results90b")
+    results = cache.get(f"{line_number}_results90b")
+    print("results",results)
     if not results:
         return HttpResponse("No cached results found for this job_id", status=404)
 
@@ -2668,6 +2676,7 @@ def create_graph_dieharder(request):
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
     job_id = request.POST.get('job_id')
+    line_number = request.POST.get('line_number')
     if not job_id:
         return JsonResponse({"error": "job_id is required"}, status=400)
 
@@ -2675,7 +2684,7 @@ def create_graph_dieharder(request):
     cache.set(f"{job_id}_progressGraphDieharder", 1)
 
     # ✅ Fetch results from cache instead of running tests
-    cached_results = cache.get(f"{job_id}_results_dieharder")
+    cached_results = cache.get(f"{line_number}_results_dieharder")
     if not cached_results:
         return JsonResponse({"error": "No cached results found for this job_id"}, status=404)
 
@@ -2726,7 +2735,6 @@ def create_graph_dieharder(request):
 
     return HttpResponse(buf, content_type='image/png')
 
-
 @csrf_exempt
 def generate_pdf_report(request):
     global global_graph_image
@@ -2735,6 +2743,7 @@ def generate_pdf_report(request):
         data = json.loads(request.body)
         job_id = data.get('job_id')
         file_name = data.get('file_name', '')
+        line_number=data.get('line_number', '')
     except json.JSONDecodeError as e:
         print('Error parsing JSON:', e)
         return HttpResponse("Invalid JSON data.", status=400)
@@ -2745,30 +2754,34 @@ def generate_pdf_report(request):
     cache.set(f"{job_id}_progressReport", 1)
 
     # ✅ Fetch results from cache
-    results = cache.get(f"{job_id}_results")
+    results = cache.get(f"{line_number}_results")
     if not results:
         return HttpResponse("No cached results found for this job_id", status=404)
 
-    tests = results.get("tests", [])
+    tests = results.get("tests", {})
     final_text = results.get("final_result", "N/A")
     executed_at = results.get("executed_at", "")
 
-    test_results_text = {test["name"]: test["p_value"] for test in tests}
+    # ✅ Build dictionary for AI analysis
+    test_results_text = {test_name: test_data.get("p_value", 0) for test_name, test_data in tests.items()}
 
-
-    # Create PDF response
+    # Generate graph
     graph_response = create_graph(request)
     graph_buffer = graph_response.content
     graph_image_io = BytesIO(graph_buffer)
 
+    # ✅ Prepare PDF
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="report.pdf"'
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(
-        buffer, pagesize=A4,
-        rightMargin=10, leftMargin=10,
-        topMargin=10, bottomMargin=30,
+        buffer,
+        pagesize=A4,
+        rightMargin=10,
+        leftMargin=10,
+        topMargin=10,
+        bottomMargin=30,
         title="QNU Labs"
     )
 
@@ -2791,17 +2804,17 @@ def generate_pdf_report(request):
     ]]
 
     def result_text(p):
-        return 'random number' if p > 0.01 else 'non-random number'
+        return 'Random Number' if p > 0.01 else 'Non-Random Number'
 
-    for idx, test in enumerate(tests, 1):
-        test_name = test["name"]
-        p_value = float(test["p_value"])
-        res = result_text(p_value)
+    for idx, (test_name, test_data) in enumerate(tests.items(), 1):
+        p_value = float(test_data.get("p_value") or 0.0)  # <-- Safe for None
+        res = test_data.get("result") or result_text(p_value)
         data1.append([
             Paragraph(f"{idx}. {test_name}", styles['Normal']),
             str(round(p_value, 5)),
             res
         ])
+
 
     # ✅ Add final result row
     bold_red_style = ParagraphStyle(
@@ -2817,7 +2830,6 @@ def generate_pdf_report(request):
         Paragraph(final_text, bold_red_style)
     ])
 
-    # ✅ Create table
     colWidths = [3.0 * inch, 1.0 * inch, 2.0 * inch]
     table1 = Table(data1, colWidths=colWidths)
     table1.setStyle(TableStyle([
@@ -2844,7 +2856,6 @@ def generate_pdf_report(request):
         ('VALIGN', (0, 0), (0, 0), 'TOP'),
     ]))
 
-    # ✅ Descriptions (unchanged, keep your existing text)
     nist_description = """
     #     <b>NIST Statistical Tests Description:</b><br/><br/>
     #     1. <b>Frequency Test:</b> Checks if the number of 0s and 1s in the sequence is approximately equal.<br/><br/>
@@ -2888,10 +2899,7 @@ def generate_pdf_report(request):
             model="gemini-2.0-flash",
             contents=[{"text": prompt}, {"text": json.dumps(test_results_text)}],
         )
-        if response1.candidates:
-            gemini_analysis = response1.candidates[0].content.parts[0].text
-        else:
-            gemini_analysis = "No AI analysis generated."
+        gemini_analysis = response1.candidates[0].content.parts[0].text if response1.candidates else "No AI analysis generated."
     except Exception as e:
         gemini_analysis = f"AI Analysis failed: {e}"
 
@@ -2910,7 +2918,6 @@ def generate_pdf_report(request):
         logo_table,
         title,
         title_space,
-        # Paragraph(f"Executed At: {executed_at}", styles['Normal']),
         Spacer(1, 0.2 * inch),
         nist_subtitle,
         Spacer(1, 0.1 * inch),
@@ -2976,6 +2983,7 @@ def generate_pdf_report_nist90b(request):
         data = json.loads(request.body)
         job_id = data.get('job_id')
         file_name = data.get('file_name', '')
+        line_number=data.get('line_number', '')
     except json.JSONDecodeError as e:
         print('Error parsing JSON:', e)
         return HttpResponse("Invalid JSON data.", status=400)
@@ -2986,7 +2994,8 @@ def generate_pdf_report_nist90b(request):
     cache.set(f"{job_id}_progressReport90b", 1)
 
     # ✅ Fetch results from cache (populated by run_nist90b_on_bin)
-    results = cache.get(f"{job_id}_results90b")
+    results = cache.get(f"{line_number}_results90b")
+    print("results",results)
     if not results:
         return HttpResponse("No cached results found for this job_id", status=404)
 
@@ -3066,11 +3075,7 @@ def generate_pdf_report_nist90b(request):
         textColor='red'
     )
 
-   # Fetch cached results
-    results = cache.get(f"{job_id}_results90b")
-    if not results:
-        return HttpResponse("No cached results found for this job_id", status=404)
-
+   
     tests = results.get("tests", [])
     if not tests:
         return HttpResponse("No test results available in cache", status=404)
@@ -3255,11 +3260,12 @@ def generate_pdf_report_dieharder1(request):
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
     job_id = request.POST.get('job_id')
+    line_number = request.POST.get('line_number')
     if not job_id:
         return JsonResponse({"error": "job_id is required"}, status=400)
 
     # ✅ Fetch results from cache
-    job_results = cache.get(f"{job_id}_results_dieharder")
+    job_results = cache.get(f"{line_number}_results_dieharder")
     if not job_results:
         return JsonResponse({"error": "No cached results found for this job_id"}, status=404)
 
@@ -4535,12 +4541,182 @@ TEST_FOLDERS = {
     "Universal": "results.txt"
 }
 
+@csrf_exempt
 def run_nist_tests(request):
-    bitstream_file = os.path.join(STS_PATH, "test.bin")
-    num_bits = 1000000  # adjust according to your file
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
-    automated_input = f"0\n{bitstream_file}\n1\n0\n1\n1\n".encode()
+    try:
+        # --- Accept uploaded file + metadata ---
+        uploaded_file = request.FILES.get("file")
+        scheduled_time_str = request.POST.get("scheduled_time", "")
+        job_id = request.POST.get("job_id", str(uuid.uuid4()))
+        line_number = request.POST.get("line", "")
+        userId = request.POST.get("user_id", "")
+        fileName = request.POST.get("file_name", uploaded_file.name if uploaded_file else "")
 
+        if not uploaded_file:
+            return JsonResponse({"error": "No file uploaded"}, status=400)
+
+        if not scheduled_time_str:
+            return JsonResponse({"error": "scheduled_time is required"}, status=400)
+
+        # Save progress to cache
+        cache.set(f"{job_id}_progress", 1)
+
+        # Parse scheduled time
+        naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+        kolkata_tz = pytz.timezone("Asia/Kolkata")
+        scheduled_time = kolkata_tz.localize(naive_scheduled_time)
+
+        # Get current aware datetime
+        current_time = datetime.datetime.now(kolkata_tz)
+        time_difference = (scheduled_time - current_time).total_seconds()
+        print(f"[{job_id}] Time difference before run:", time_difference)
+
+        # Save uploaded .bin file to STS_PATH
+        temp_file_path = os.path.join(STS_PATH, f"{job_id}_{uploaded_file.name}")
+        with open(temp_file_path, "wb+") as f:
+            for chunk in uploaded_file.chunks():
+                f.write(chunk)
+
+        # Count bits
+        num_bits = os.path.getsize(temp_file_path) * 8
+
+        # Helper to update progress
+        def update_progress(step: int):
+                try:
+                    progress_percentage = round((step / 18) * 100)
+                    supabase.table("results").update({
+                        "progress": progress_percentage,
+                    }).eq("user_id", int(userId)).eq("line", line_number).execute()
+                except Exception as e:
+                    print(f"Supabase progress update failed at step {step}: {e}")
+
+
+        update_progress(1)
+        if time_difference > 0:
+            # Scheduled in future → defer execution
+            return JsonResponse(run_after_delay_nist22b(job_id, scheduled_time, temp_file_path, line_number, userId, fileName))
+
+        update_progress(2)
+
+        # Prepare input for NIST assess
+        automated_input = f"0\n{temp_file_path}\n1\n0\n1\n1\n".encode()
+
+        # Run NIST test suite
+        process = subprocess.Popen(
+            ["./assess", str(num_bits)],
+            cwd=STS_PATH,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        stdout, stderr = process.communicate(input=automated_input)
+        print(f"[{job_id}] assess output:", stdout.decode(), stderr.decode())
+
+        # Path to experiment results
+        experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
+        if not os.path.exists(experiment_path):
+            return JsonResponse({"status": "error", "message": f"{experiment_path} not found"})
+
+        # Process results
+        test_results = {}
+        random_count = 0
+        non_random_count = 0
+        step = 3
+
+        for test_name, result_file in TEST_FOLDERS.items():
+            test_folder = os.path.join(experiment_path, test_name)
+            results_file = os.path.join(test_folder, result_file)
+
+            if not os.path.isfile(results_file):
+                test_results[test_name] = {"p_value": 0, "result": "no data"}
+                continue
+
+            p_values = []
+            with open(results_file, "r") as f:
+                for line in f:
+                    try:
+                        p = float(line.strip())
+                        p_values.append(p)
+                    except:
+                        continue
+
+            if not p_values:
+                test_result = "no data"
+                rep_p_value = None
+            else:
+                rep_p_value = min(p_values)
+                test_result = "random number" if rep_p_value > 0.05 else "non-random number"
+
+            test_results[test_name] = {"p_value": rep_p_value, "result": test_result}
+
+            if test_result == "random number":
+                random_count += 1
+            elif test_result == "non-random number":
+                non_random_count += 1
+
+            update_progress(step)
+            step += 1
+            gc.collect()
+
+        # Final verdict
+        final_verdict = "random number" if random_count >= non_random_count else "non-random number"
+        executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # ✅ Store results in cache
+        job_results = {
+            "job_id": job_id,
+            "file_name": fileName,
+            "tests": test_results,
+            "final_result": final_verdict,
+            "executed_at": executed_at,
+        }
+        cache.set(f"{line_number}_results", job_results, timeout=3600)
+        update_progress(18)
+
+        # Cleanup uploaded file
+        try:
+            os.remove(temp_file_path)
+        except:
+            pass
+
+        return JsonResponse(job_results)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+def run_after_delay_nist22b(job_id, scheduled_time, file_path, line, user_id, fileName):
+    kolkata_tz = pytz.timezone("Asia/Kolkata")
+    now = datetime.datetime.now(kolkata_tz)
+
+    # Wait until scheduled time
+    wait_seconds = (scheduled_time - now).total_seconds()
+    if wait_seconds > 0:
+        print(f"Sleeping for {wait_seconds:.2f} seconds until scheduled time...")
+        time.sleep(wait_seconds)
+
+    # Save initial progress
+    cache.set(f"{job_id}_progress", 1)
+
+    # Count bits
+    num_bits = os.path.getsize(file_path) * 8
+
+    # Helper to update progress
+    def update_progress(step: int):
+        try:
+            progress_percentage = round((step / 18) * 100)
+            supabase.table("results").update({
+                "progress": progress_percentage,
+            }).eq("user_id", int(user_id)).eq("line", int(line)).execute()
+        except Exception as e:
+            print(f"Supabase progress update failed at step {step}: {e}")
+
+    update_progress(1)
+
+    # Run assess
+    automated_input = f"0\n{file_path}\n1\n0\n1\n1\n".encode()
     process = subprocess.Popen(
         ["./assess", str(num_bits)],
         cwd=STS_PATH,
@@ -4549,51 +4725,94 @@ def run_nist_tests(request):
         stderr=subprocess.PIPE
     )
     stdout, stderr = process.communicate(input=automated_input)
-    print(stdout.decode())
+    print(f"[{job_id}] assess output:", stdout.decode(), stderr.decode())
 
+    # Path to experiment results
     experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
-
     if not os.path.exists(experiment_path):
-        return JsonResponse({"status": "error", "message": f"{experiment_path} not found"})
+        return {"status": "error", "message": f"{experiment_path} not found"}
 
+    # Process results
     test_results = {}
     random_count = 0
     non_random_count = 0
+    step = 3
 
     for test_name, result_file in TEST_FOLDERS.items():
         test_folder = os.path.join(experiment_path, test_name)
         results_file = os.path.join(test_folder, result_file)
 
         if not os.path.isfile(results_file):
-            test_results[test_name] = {"p_value": None, "result": "No Data"}
+            test_results[test_name] = {"p_value": 0, "result": "no data"}
             continue
 
         p_values = []
         with open(results_file, "r") as f:
-            for line in f:
+            for line_content in f:  # <-- renamed variable to avoid overwriting 'line'
                 try:
-                    p = float(line.strip())
+                    p = float(line_content.strip())
                     p_values.append(p)
                 except:
                     continue
 
         if not p_values:
-            test_result = "No Data"
+            test_result = "no data"
             rep_p_value = None
         else:
-            rep_p_value = min(p_values)  # representative p-value
-            test_result = "Random Number" if rep_p_value > 0.05 else "Non-Random Number"
+            rep_p_value = min(p_values)
+            test_result = "random number" if rep_p_value > 0.05 else "non-random number"
 
         test_results[test_name] = {"p_value": rep_p_value, "result": test_result}
 
-        if test_result == "Random Number":
+        if test_result == "random number":
             random_count += 1
-        elif test_result == "Non-Random Number":
+        elif test_result == "non-random number":
             non_random_count += 1
-    
-    final_verdict = "Random Number" if random_count >= non_random_count else "Non-Random Number"
 
-    return JsonResponse({"status": "success", "tests": test_results, "final_verdict": final_verdict})
+        update_progress(step)
+        step += 1
+
+    # Final verdict
+    final_verdict = "random number" if random_count >= non_random_count else "non-random number"
+    executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Store results in cache
+    job_results = {
+        "job_id": job_id,
+        "file_name": fileName,
+        "tests": test_results,
+        "final_result": final_verdict,
+        "executed_at": executed_at,
+    }
+    cache.set(f"{line}_results", job_results, timeout=3600)
+    update_progress(18)
+
+    # Upload to Supabase
+    try:
+        current_time = datetime.datetime.now().isoformat()
+        supabase.table("results").upsert(
+            {
+                "user_id": int(user_id),
+                "line": int(line),
+                "binary_data": " ",  # skip large data
+                "scheduled_time": scheduled_time.isoformat(),
+                "upload_time": current_time,
+                "result": final_verdict,
+                "progress": 100,
+                "file_name": fileName,
+                "updated_at": current_time
+            },
+            ignore_duplicates=False
+        ).execute()
+    except Exception as e:
+        print("Failed to update Supabase:", e)
+
+    return {
+        "message": f"Test executed at {executed_at}",
+        "job_id": job_id,
+        "final_result": final_verdict
+    }
+
 
 
 TEST_FOLDERS_STATS = {
@@ -4614,10 +4833,13 @@ TEST_FOLDERS_STATS = {
     "Universal": "stats.txt"
 }
 
+from django.http import HttpResponse
+
+@csrf_exempt
 def aggregate_stats(request):
     """
     Reads all stats.txt files from the test folders and concatenates their content.
-    Returns the combined content as a single response.
+    Returns the combined content as a downloadable .txt file.
     """
     experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
 
@@ -4639,8 +4861,11 @@ def aggregate_stats(request):
                 combined_stats.append(f"--- {test_name} ---\n{content}")
 
     final_content = "\n\n".join(combined_stats)
-    
-    return JsonResponse({"status": "success", "combined_stats": final_content})
+
+    # ✅ Return as downloadable text file
+    response = HttpResponse(final_content, content_type="text/plain")
+    response["Content-Disposition"] = 'attachment; filename="nist_stats_output.txt"'
+    return response
 
 
 import tempfile
@@ -5027,8 +5252,9 @@ def run_nist90b_on_bin(request):
 
     # If scheduled in the future, defer execution
     if time_difference > 0:
-        print(f"Sleeping for {time_difference:.2f} seconds until scheduled time...")
-        time.sleep(time_difference)
+
+        result = run_after_delay_90b(job_id, scheduled_time, file, line_number, userId, fileName)
+        return JsonResponse(result)
 
     update_progress(1)
 
@@ -5061,7 +5287,7 @@ def run_nist90b_on_bin(request):
     passed_count = 0
     step_counter = 3
    
-
+    combined_output = ""
     # ✅ Updated single test logic from simpler function
     for test_name, test_info in tests_executables.items():
         exe_path = test_info["exe"]
@@ -5083,6 +5309,8 @@ def run_nist90b_on_bin(request):
             if error_output:
                 print(f"=== {test_name} Error ===")
                 print(error_output)
+
+            combined_output += f"=== {test_name} Output ===\n{output}\n\n"
 
             # Extract min_entropy from stdout (correct logic)
             min_entropy = 0.0
@@ -5109,7 +5337,7 @@ def run_nist90b_on_bin(request):
         step_counter += 1
         update_progress(step_counter)
 
-  
+        cache.set(f"{line_number}_download90b", combined_output, timeout=3600)
     # Clean up temporary files
     try:
         os.remove(tmp_file_path)
@@ -5134,7 +5362,7 @@ def run_nist90b_on_bin(request):
         "final_result": final_text,
         "executed_at": executed_at,
     }
-    cache.set(f"{job_id}_results90b", job_results, timeout=3600)
+    cache.set(f"{line_number}_results90b", job_results, timeout=3600)
 
    
     update_progress(8)
@@ -5147,227 +5375,187 @@ def run_nist90b_on_bin(request):
     })
 
 
-def run_after_delay_nist90b(job_id, scheduled_time, file, line, user_id, fileName):
-    """
-    Runs NIST 90B tests on the given file after waiting until scheduled_time.
-    Computes results the same way as run_nist90b_on_bin.
-    """
-    
+def run_after_delay_90b(job_id, scheduled_time, file, line, user_id, fileName):
+    kolkata_tz = pytz.timezone("Asia/Kolkata")
+    now = datetime.datetime.now(kolkata_tz)
 
-    def update_progress(step: int):
-        try:
-            progress_percentage = round((step / 8) * 100)  # 8 steps total
-            supabase.table("results2").update({
-                "progress": progress_percentage,
-            }).eq("user_id", int(user_id)).eq("line", int(line)).execute()
-        except Exception as e:
-            print(f"Supabase progress update failed at step {step}: {e}")
+    wait_seconds = (scheduled_time - now).total_seconds()
+    if wait_seconds > 0:
+        print(f"Sleeping for {wait_seconds:.2f} seconds until scheduled time...")
+        time.sleep(wait_seconds)
 
     cache.set(f"{job_id}_progress90b", 1)
-    update_progress(1)
 
-    # Save file to temporary location
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        for chunk in file.chunks():
-            tmp_file.write(chunk)
-        tmp_file_path = tmp_file.name
+    # ✅ Save uploaded file to temp .bin file
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        for chunk in file.chunks():   # file is Django InMemoryUploadedFile
+            tmp.write(chunk)
+        tmp_filename = tmp.name
 
-    file_size_bytes = os.path.getsize(tmp_file_path)
+    file_size_bytes = os.path.getsize(tmp_filename)
     file_size_bits = file_size_bytes * 8
     MAX_BITS = 1_000_000
     n_samples = min(file_size_bits, MAX_BITS)
 
-    update_progress(2)
+    cache.set(f"{job_id}_progress90b", 2)
 
-    # Define IID/Non-IID test executables
+    # ✅ Define NIST 90B executables
     tests_executables = {
-        "IID Test": os.path.join(CPP_FOLDER, "ea_iid"),
-        "Non-IID Test": os.path.join(CPP_FOLDER, "ea_non_iid")
+        "IID Test": {
+            "exe": os.path.join(CPP_FOLDER, "ea_iid"),
+            "args": ["-v", tmp_filename]
+        },
+        "Non-IID Test": {
+            "exe": os.path.join(CPP_FOLDER, "ea_non_iid"),
+            "args": ["-v", tmp_filename]
+        },
     }
 
     results = {}
     passed_count = 0
     step_counter = 3
+    combined_output = ""
 
-    # Run each test
-    for test_name, exe_path in tests_executables.items():
-        min_entropy = 0.0
-        verdict = "non-random number"
+    for test_name, test_info in tests_executables.items():
+        exe_path = test_info["exe"]
+        args = test_info["args"]
+
         if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
-            verdict = "executable missing"
-            print(f"{test_name} executable missing at {exe_path}")
-        else:
-            try:
-                result = subprocess.run([exe_path, "-v", tmp_file_path],
-                                        capture_output=True, text=True, shell=False)
-                output = result.stdout.strip()
-                error_output = result.stderr.strip()
-                if error_output:
-                    print(f"{test_name} error: {error_output}")
+            results[test_name] = {"min_entropy": 0.0, "result": "executable missing"}
+            step_counter += 1
+            cache.set(f"{job_id}_progress90b", step_counter)
+            continue
 
-                # Extract min-entropy
-                for line_out in output.splitlines():
-                    if any(k in line_out.lower() for k in ["h_original", "min(", "h_bitstring"]):
-                        nums = re.findall(r"[-+]?\d*\.\d+|\d+", line_out)
-                        if nums:
-                            min_entropy = float(nums[0])
-                            break
+        try:
+            result = subprocess.run([exe_path] + args, capture_output=True, text=True, shell=False)
+            output = result.stdout.strip()
+            error_output = result.stderr.strip()
 
-                threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
-                verdict = "random number" if min_entropy >= threshold else "non-random number"
-                if verdict == "random number":
-                    passed_count += 1
-            except Exception as e:
-                print(f"Error running {test_name}: {e}")
-                min_entropy = 0.0
-                verdict = "non-random number"
+            print(f"=== {test_name} Output ===")
+            print(output)
+            if error_output:
+                print(f"=== {test_name} Error ===")
+                print(error_output)
+
+            combined_output += f"=== {test_name} Output ===\n{output}\n\n"
+
+            # Extract min_entropy
+            min_entropy = 0.0
+            for line_text in output.splitlines():
+                if any(keyword in line_text.lower() for keyword in ["h_original", "min(", "h_bitstring"]):
+                    numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line_text)
+                    if numbers:
+                        min_entropy = float(numbers[0])
+                        break
+
+            threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
+            verdict = "random number" if min_entropy >= threshold else "non-random number"
+
+            if verdict == "random number":
+                passed_count += 1
+
+        except Exception as e:
+            print(f"Error running {test_name}: {e}")
+            min_entropy = 0.0
+            verdict = "non-random number"
 
         results[test_name] = {"min_entropy": min_entropy, "result": verdict}
         step_counter += 1
-        update_progress(step_counter)
+        cache.set(f"{job_id}_progress90b", step_counter)
 
-    # Clean up temp file
+        # store raw stdout in cache for download endpoint
+        cache.set(f"{line}_download90b", combined_output, timeout=3600)
+
+        # Supabase update
+        try:
+            current_time = datetime.datetime.now().isoformat()
+            supabase.table("results").upsert({
+                "user_id": int(user_id),
+                "line": int(line),
+                "binary_data": " ",  # we don’t need to store the file raw
+                "scheduled_time": scheduled_time.isoformat(),
+                "upload_time": current_time,
+                "result": "null",
+                "progress": step_counter,
+                "file_name": fileName,
+                "updated_at": current_time
+            }, ignore_duplicates=False).execute()
+        except Exception as e:
+            print(f"Supabase update failed: {e}")
+
+    # ✅ Clean up temp files
     try:
-        os.remove(tmp_file_path)
-        if os.path.exists(tmp_file_path + ".json"):
-            os.remove(tmp_file_path + ".json")
-        if os.path.exists(tmp_file_path + ".column"):
-            os.remove(tmp_file_path + ".column")
+        os.remove(tmp_filename)
+        if os.path.exists(tmp_filename + ".json"):
+            os.remove(tmp_filename + ".json")
+        if os.path.exists(tmp_filename + ".column"):
+            os.remove(tmp_filename + ".column")
     except:
         pass
-    update_progress(6)
+
+    cache.set(f"{job_id}_progress90b", 7)
 
     # Final verdict
-    final_text = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
+    final_result = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
     executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    update_progress(7)
 
-    # Store results in cache
+    # ✅ Store results in cache
     job_results = {
         "job_id": job_id,
         "tests": results,
-        "final_result": final_text,
+        "final_result": final_result,
         "executed_at": executed_at,
     }
-    cache.set(f"{job_id}_results90b", job_results, timeout=3600)
-    update_progress(8)
+    cache.set(f"{line}_results90b", job_results, timeout=3600)
 
-    # Update Supabase with final results
-    try:
-        current_time = datetime.datetim
-        supabase.table("results2").upsert({
-            "user_id": int(user_id),
-            "line": int(line),
-            "binary_data": " ",
-            "scheduled_time": scheduled_time.isoformat(),
-            "upload_time": current_time,
-            "result": final_text,
-            "progress": 100,
-            "file_name": fileName,
-            "updated_at": current_time
-        }, ignore_duplicates=False).execute()
-    except Exception as e:
-        print("Failed to update Supabase:", e)
-
-    cache.set(f"{job_id}_progress90b", 15)
-    return {"message": f"Test executed at {executed_at}", "job_id": job_id, "final_result": final_text}
-
-
-    update_progress(2)
-
-    # Define IID/Non-IID test executables
-    tests_executables = {
-        "IID Test": os.path.join(CPP_FOLDER, "ea_iid"),
-        "Non-IID Test": os.path.join(CPP_FOLDER, "ea_non_iid")
-    }
-
-    results = {}
-    passed_count = 0
-    step_counter = 3
-
-    # Run each test
-    for test_name, exe_path in tests_executables.items():
-        min_entropy = 0.0
-        verdict = "non-random number"
-        if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
-            verdict = "executable missing"
-            print(f"{test_name} executable missing at {exe_path}")
-        else:
-            try:
-                result = subprocess.run([exe_path, "-v", tmp_file_path],
-                                        capture_output=True, text=True, shell=False)
-                output = result.stdout.strip()
-                error_output = result.stderr.strip()
-                if error_output:
-                    print(f"{test_name} error: {error_output}")
-
-                # Extract min-entropy
-                for line_out in output.splitlines():
-                    if any(k in line_out.lower() for k in ["h_original", "min(", "h_bitstring"]):
-                        nums = re.findall(r"[-+]?\d*\.\d+|\d+", line_out)
-                        if nums:
-                            min_entropy = float(nums[0])
-                            break
-
-                threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
-                verdict = "random number" if min_entropy >= threshold else "non-random number"
-                if verdict == "random number":
-                    passed_count += 1
-            except Exception as e:
-                print(f"Error running {test_name}: {e}")
-                min_entropy = 0.0
-                verdict = "non-random number"
-
-        results[test_name] = {"min_entropy": min_entropy, "result": verdict}
-        step_counter += 1
-        update_progress(step_counter)
-
-    # Clean up temp file
-    try:
-        os.remove(tmp_file_path)
-        if os.path.exists(tmp_file_path + ".json"):
-            os.remove(tmp_file_path + ".json")
-        if os.path.exists(tmp_file_path + ".column"):
-            os.remove(tmp_file_path + ".column")
-    except:
-        pass
-    update_progress(6)
-
-    # Final verdict
-    final_text = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
-    executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    update_progress(7)
-
-    # Store results in cache
-    job_results = {
-        "job_id": job_id,
-        "tests": results,
-        "final_result": final_text,
-        "executed_at": executed_at,
-    }
-    cache.set(f"{job_id}_results90b", job_results, timeout=3600)
-    update_progress(8)
-
-    # Update Supabase with final results
+    # Save summary to Supabase results2
     try:
         current_time = datetime.datetime.now().isoformat()
-        supabase.table("results2").upsert({
-            "user_id": int(user_id),
-            "line": int(line),
-            "binary_data": " ",
-            "scheduled_time": scheduled_time.isoformat(),
-            "upload_time": current_time,
-            "result": final_text,
-            "progress": 100,
-            "file_name": fileName,
-            "updated_at": current_time
-        }, ignore_duplicates=False).execute()
+        supabase.table("results2").upsert(
+            {
+                "user_id": int(user_id),
+                "line": int(line),
+                "binary_data": " ",   # don’t dump big file in DB
+                "scheduled_time": scheduled_time.isoformat(),
+                "upload_time": current_time,
+                "result": final_result,
+                "progress": 100,
+                "file_name": fileName,
+                "updated_at": current_time
+            },
+            ignore_duplicates=False
+        ).execute()
     except Exception as e:
         print("Failed to update Supabase:", e)
 
-    cache.set(f"{job_id}_progress90b", 15)
-    return {"message": f"Test executed at {executed_at}", "job_id": job_id, "final_result": final_text}
+    cache.set(f"{job_id}_progress90b", 8)
 
+    return {
+        "message": f"Test executed at {executed_at}",
+        "job_id": job_id,
+        "final_result": final_result
+    }
+
+
+@csrf_exempt
+def download_nist90b_output(request):
+    """
+    Fetches the combined NIST SP800-90B output from cache for a given job_id and line_number.
+    Returns the content as plain text.
+    """
+ 
+    line_number = request.GET.get("line", "1")  # default to 1 if not provided
+
+   
+    cache_key = f"{line_number}_download90b"
+    output_text = cache.get(cache_key)
+
+    if not output_text:
+        return HttpResponse("No cached output found for this job_id and line_number", status=404)
+
+    response = HttpResponse(output_text, content_type="text/plain")
+    response['Content-Disposition'] = f'attachment; filename="{line_number}_nist90b_output.txt"'
+    return response
 
 
 from django.http import JsonResponse
@@ -5511,7 +5699,7 @@ def generate_final_ans_dieharder(request):
             "final_result": final_text,
             "executed_at": executed_at,
         }
-        cache.set(f"{job_id}_results_dieharder", job_results, timeout=3600)
+        cache.set(f"{line_number}_results_dieharder", job_results, timeout=3600)
 
         response_data = {
             "final_result": final_text,
@@ -5657,6 +5845,15 @@ def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id
 
     final_result = 'random number' if passed_count > len(dieharder_test_ids) / 2 else 'non-random number'
     print("Final result based on Dieharder tests:", final_result)
+
+
+    job_results = {
+        "job_id": job_id,
+        "tests": results,
+        "final_result": final_result,
+        
+    }
+    cache.set(f"{line_number}_results_dieharder", job_results, timeout=3600)
 
     # ✅ Final Supabase upsert
     try:

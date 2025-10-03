@@ -6,10 +6,15 @@ import "./UploadReport.css"; // Import CSS for styling
 const UploadReport = () => {
     const [file, setFile] = useState(null);
     const [analysis, setAnalysis] = useState("");
-    const [isUploading, setIsUploading] = useState(false); // Track upload status
+    const [isUploading, setIsUploading] = useState(false);
+    const [fileName, setFileName] = useState("");
 
     const handleFileChange = (event) => {
-        setFile(event.target.files[0]);
+        const selectedFile = event.target.files[0];
+        if (selectedFile) {
+            setFile(selectedFile);
+            setFileName(selectedFile.name);
+        }
     };
 
     const handleUpload = async () => {
@@ -18,7 +23,7 @@ const UploadReport = () => {
             return;
         }
 
-        setIsUploading(true); // Disable the button and change text
+        setIsUploading(true);
         setAnalysis(""); // Clear previous analysis
 
         const formData = new FormData();
@@ -32,8 +37,20 @@ const UploadReport = () => {
             setAnalysis(response.data.analysis);
         } catch (error) {
             console.error("Error uploading file:", error);
+            alert("Error uploading file. Please try again.");
         } finally {
-            setIsUploading(false); // Re-enable the button after analysis is received
+            setIsUploading(false);
+        }
+    };
+
+    const handleRemoveFile = () => {
+        setFile(null);
+        setFileName("");
+        setAnalysis("");
+        // Reset the file input
+        const fileInput = document.getElementById("fileInput");
+        if (fileInput) {
+            fileInput.value = "";
         }
     };
 
@@ -46,24 +63,66 @@ const UploadReport = () => {
                     type="file"
                     id="fileInput"
                     onChange={handleFileChange}
-                    style={{ display: "none" }} // Hide the input
+                    style={{ display: "none" }}
+                    accept=".pdf" // Add appropriate file types
                 />
-                <label htmlFor="fileInput" className="file-upload-text">
-                    Choose File
-                </label>
+                
+                {/* File selection area */}
+                <div className="file-selection-area">
+                    <label htmlFor="fileInput" className="file-upload-label">
+                        <div className="file-upload-box">
+                            <span className="file-upload-text">
+                                {fileName ? fileName : "Choose File"}
+                            </span>
+                            
+                        </div>
+                    </label>
+                    
+                    {/* File info and actions */}
+                    {/* {fileName && (
+                        <div className="file-info">
+                            <span className="file-name">{fileName}</span>
+                            <button 
+                                type="button" 
+                                className="remove-file-btn"
+                                onClick={handleRemoveFile}
+                                disabled={isUploading}
+                            >
+                                ×
+                            </button>
+                        </div>
+                    )} */}
+                </div>
+
+                {/* Upload button */}
                 <button 
                     onClick={handleUpload} 
                     className="upload-btn" 
-                    disabled={isUploading} // Disable button while uploading
+                    disabled={isUploading || !file}
                 >
-                    {isUploading ? "Uploading..." : "Upload"} {/* Change button text */}
+                    {isUploading ? (
+                        <>
+                            <span className="loading-spinner"></span>
+                            Uploading...
+                        </>
+                    ) : (
+                        "Upload & Analyze"
+                    )}
                 </button>
             </div>
 
+            {/* Analysis Result */}
             {analysis && (
                 <div className="analysis-container">
-                    <h3 className="analysis-heading">Analysis:</h3>
-                    <div style={{ textAlign: "left" }} dangerouslySetInnerHTML={{ __html: marked(analysis) }} />
+                    <div className="analysis-header">
+                        <h3 className="analysis-heading">Analysis Result</h3>
+                        <div className="file-indicator">
+                            Analyzing: <strong>{fileName}</strong>
+                        </div>
+                    </div>
+                    <div className="analysis-content scrollable-content">
+                        <div dangerouslySetInnerHTML={{ __html: marked(analysis) }} />
+                    </div>
                 </div>
             )}
         </div>

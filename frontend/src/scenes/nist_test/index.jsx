@@ -15,7 +15,7 @@ const MAX_STACK_SIZE_ESTIMATE = 200 * 1024 * 1024;
 
 const Nist_tests = () => {
   const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
-const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
+  const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -401,6 +401,11 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
     }
   }, [date4, time4]);
 
+  useEffect(() => {
+    if (date5 && time5) {
+      setScheduledTime5(`${date5} ${time5}`);
+    }
+  }, [date5, time5]);
 
 
   const finalResult = result ? result.final_result : " ";
@@ -494,51 +499,50 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const [showRedButton4, setShowRedButton4] = useState(false);
   const [showRedButton5, setShowRedButton5] = useState(false);
 
-   const [isEnabled, setIsEnabled] = useState(true); 
-   const [isEnabled2, setIsEnabled2] = useState(true); 
-   const [isEnabled3, setIsEnabled3] = useState(true); 
-   const [isEnabled4, setIsEnabled4] = useState(true); 
-   const [isEnabled5, setIsEnabled5] = useState(true); 
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [isEnabled2, setIsEnabled2] = useState(true);
+  const [isEnabled3, setIsEnabled3] = useState(true);
+  const [isEnabled4, setIsEnabled4] = useState(true);
+  const [isEnabled5, setIsEnabled5] = useState(true);
   // Handle file upload
   const handleFileUpload = () => {
-    setShowRedButton(true);
+    // setShowRedButton(true);
     setIsEnabled(true);
     fileInputRef.current.click();
   };
   const handleFileUpload2 = () => {
     setIsEnabled2(true);
-    setShowRedButton2(true)
+    // setShowRedButton2(true)
     fileInputRef2.current.click();
   };
   const handleFileUpload3 = () => {
     setIsEnabled3(true);
-    setShowRedButton3(true)
+    // setShowRedButton3(true)
     fileInputRef3.current.click();
   };
   const handleFileUpload4 = () => {
     setIsEnabled4(true);
-    setShowRedButton4(true)
+    // setShowRedButton4(true)
     fileInputRef4.current.click();
   };
   const handleFileUpload5 = () => {
     setIsEnabled5(true);
-    setShowRedButton5(true)
+    // setShowRedButton5(true)
     fileInputRef5.current.click();
   };
- 
+
   const handleFileChange = async (event) => {
     setLoadingProgressGr(0);
     setLoadingProgressRep(0);
+    console.log("hi");
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
       setShowRedButton(false);
       return;
     }
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
-      return;
-    }
+    setSelectedFile(selectedFile);
+    console.log("hi2");
 
     const userId = await fetchUserId();
     if (!userId) return;
@@ -562,16 +566,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
       let binaryString = "";
 
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to binary string
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume .txt file
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
 
       // Update binaryInput state with the processed binary string
       setBinaryInput(binaryString);
@@ -584,7 +578,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
       // Remove the existing row for the line from Supabase
       try {
-        localStorage.setItem('resultFetchedFromSupabase', 'false');
+        // localStorage.setItem('resultFetchedFromSupabase', 'false');
         const { error: deleteError } = await supabase
           .from('results')
           .delete()
@@ -592,11 +586,11 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
         setLoadingProgress(0);
         if (deleteError) {
-          
+
           return;
         }
       } catch (err) {
-          
+
       }
 
       alertShownRef.current = false;
@@ -617,7 +611,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       setShowRedButton2(false);
       return;
     }
-
+    setSelectedFile2(selectedFile);
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -666,7 +660,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setUploadTime2(currentTime);
       try {
-        localStorage.setItem('resultFetchedFromSupabase22b2', 'false');
+        // localStorage.setItem('resultFetchedFromSupabase22b2', 'false');
         const { error: deleteError } = await supabase
           .from('results')
           .delete()
@@ -679,7 +673,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
         }
 
       } catch (err) {
-          
+
       }
       alertShownRef2.current = false;
       // Reset the file input value to allow the same file to be uploaded again
@@ -698,6 +692,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       setShowRedButton3(false);
       return;
     }
+    setSelectedFile3(selectedFile);
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -747,7 +742,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       setUploadTime3(currentTime);
 
       try {
-        localStorage.setItem('resultFetchedFromSupabase22b3', 'false');
+        // localStorage.setItem('resultFetchedFromSupabase22b3', 'false');
         const { error: deleteError } = await supabase
           .from('results')
           .delete()
@@ -759,7 +754,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           return;
         }
       } catch (err) {
-          
+
       }
 
       alertShownRef3.current = false;
@@ -780,7 +775,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       setShowRedButton4(false);
       return;
     }
-
+    setSelectedFile4(selectedFile);
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -831,7 +826,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       setUploadTime4(currentTime);
 
       try {
-        localStorage.setItem('resultFetchedFromSupabase22b4', 'false');
+        // localStorage.setItem('resultFetchedFromSupabase22b4', 'false');
         const { error: deleteError } = await supabase
           .from('results')
           .delete()
@@ -844,7 +839,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
         }
 
       } catch (err) {
-          
+
       }
       alertShownRef4.current = false;
       event.target.value = "";
@@ -863,7 +858,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       setShowRedButton5(false);
       return;
     }
-
+    setSelectedFile5(selectedFile);
+    console.log("called")
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -914,7 +910,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       setUploadTime5(currentTime);
 
       try {
-        localStorage.setItem('resultFetchedFromSupabase22b5', 'false');
+        // localStorage.setItem('resultFetchedFromSupabase22b5', 'false');
         const { error: deleteError } = await supabase
           .from('results')
           .delete()
@@ -927,7 +923,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
         }
 
       } catch (err) {
-          
+
       }
       alertShownRef5.current = false;
       event.target.value = "";
@@ -1052,39 +1048,23 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
     fetchStoredResults();
   }, []);
 
-  const [loadingProgress, setLoadingProgress] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingProgressRep, setLoadingProgressRep] = useState(0);
   const [loadingProgressGr, setLoadingProgressGr] = useState(0);
 
-  const [loadingProgress2, setLoadingProgress2] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase22b2') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
-
+  const [loadingProgress2, setLoadingProgress2] = useState(0);
   const [loadingProgress2Rep, setLoadingProgress2Rep] = useState(0);
   const [loadingProgress2Gr, setLoadingProgress2Gr] = useState(0);
 
-  const [loadingProgress3, setLoadingProgress3] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase22b3') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
+  const [loadingProgress3, setLoadingProgress3] = useState(0);
   const [loadingProgress3Rep, setLoadingProgress3Rep] = useState(0);
   const [loadingProgress3Gr, setLoadingProgress3Gr] = useState(0);
 
-  const [loadingProgress4, setLoadingProgress4] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase22b4') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
+  const [loadingProgress4, setLoadingProgress4] = useState(0);
   const [loadingProgress4Rep, setLoadingProgress4Rep] = useState(0);
   const [loadingProgress4Gr, setLoadingProgress4Gr] = useState(0);
 
-  const [loadingProgress5, setLoadingProgress5] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase22b5') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
+  const [loadingProgress5, setLoadingProgress5] = useState(0);
   const [loadingProgress5Rep, setLoadingProgress5Rep] = useState(0);
   const [loadingProgress5Gr, setLoadingProgress5Gr] = useState(0);
 
@@ -1177,10 +1157,10 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             .select("*")
             .eq("user_id", userId)
             .eq("line", 1)
-            .maybeSingle(); 
+            .maybeSingle();
 
           if (error) {
-             
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1191,12 +1171,12 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
           if (data) {
             const progress = data.progress || 0;
-             
+
             setLoadingProgress(progress);
 
             if (data.result) {
               setResult({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase", "true");
+              // localStorage.setItem("resultFetchedFromSupabase", "true");
             }
 
             // ✅ Stop polling if already complete
@@ -1206,7 +1186,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             }
           }
         } catch (err) {
-         
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -1294,40 +1274,74 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
     jobIdRef5.current = currentJobIdT5;
   }, [currentJobIdT5]);
 
+
+  const binaryInsertedRef = useRef(false); // 🔁 Track binary insert
+  const binaryInsertedRef2 = useRef(false);
+  const binaryInsertedRef3 = useRef(false);
+  const binaryInsertedRef4 = useRef(false);
+  const binaryInsertedRef5 = useRef(false);
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile2, setSelectedFile2] = useState(null);
+  const [selectedFile3, setSelectedFile3] = useState(null);
+  const [selectedFile4, setSelectedFile4] = useState(null);
+  const [selectedFile5, setSelectedFile5] = useState(null);
+
   useEffect(() => {
-    if (!binaryInput || !debouncedScheduledTime) {
+    
+    if (!debouncedScheduledTime) {
       return;
     }
-
-    // const currentJobId = uuidv4();
+   
     const lineNo = 1;
 
     if (result) {
-      localStorage.setItem("resultFetchedFromSupabase", "true");
-      setLoadingProgress(100);
+      //  localStorage.setItem('resultFetchedFromSupabaseNIST', 'true');
+      //  setLoadingProgress(100);
       return;
     }
-
-    // setLoadingProgress(0);
-    let progressIntervalId; // local variable, no window
+  
+    setLoadingProgress(0);
+    let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = null) => {
+      let binaryString = null;
+
+      if (progress === 0 && selectedFile && !binaryInsertedRef.current) {
+        try {
+          const fileReader = new FileReader();
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile);
+          });
+
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
+
+          binaryInsertedRef.current = true; // ✅ Prevent future inserts
+        } catch (err) {
+          return;
+        }
+      }
+  
       const payload = {
         user_id: userId,
-        line: 1,
+        line: lineNo,
         binary_data: " ",
         scheduled_time: debouncedScheduledTime,
         result: result,
         file_name: fileName,
         upload_time: uploadTime,
         progress: progress,
-        updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase.from("results").upsert(payload);
-
+      const { error } = await supabase.from('results').upsert(payload);
+     
       if (error) {
-          
+        console.error("Supabase upsert error:", error.message);
       }
     };
 
@@ -1335,75 +1349,79 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       const userId = await fetchUserId();
       if (!userId) return;
 
-      // Initial DB entry
       await upsertProgress(1, userId);
       setShowRedButton(false);
-      if (!alertShownRef.current) {
-        alert("File uploaded successfully!");
 
+      if (!alertShownRef.current) {
+        alert("File uploaded successfully");
         alertShownRef.current = true;
       }
+     
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
             .from("results")
             .select("*")
             .eq("user_id", userId)
-            .eq("line", 1)
-            .maybeSingle(); 
+            .eq("line", lineNo)
+            .maybeSingle();
 
           if (error) {
-             
+            console.error("Supabase fetch error:", error.message);
             return;
           }
-
+        
           if (data) {
-
             const progress = data.progress || 0;
-               
             setLoadingProgress(progress);
 
-            //  Stop polling once progress is 100%
+            // ✅ Stop polling once progress is 100%
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress(100);
-                
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
+          
         } catch (err) {
-             
+          console.error("Polling error:", err);
         }
       };
 
-      // Start polling
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
-      
+    
       try {
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
-          binary_data: binaryInput,
-          scheduled_time: debouncedScheduledTime,
-          job_id: currentJobIdT,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName,
-        });
-
-
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        const formattedScheduledTime = new Date(debouncedScheduledTime)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+        formData.append("scheduled_time", debouncedScheduledTime);
+        formData.append("job_id", currentJobIdT);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName);
+        
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/run_nist/`, // ✅ <-- your NIST backend URL
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        
+        setIsEnabled(true);
 
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-        setIsEnabled(true);
+
         setLoadingProgress(100);
         setResult(response.data);
-        localStorage.setItem("resultFetchedFromSupabase", "true");
-
+        // localStorage.setItem("resultFetchedFromSupabaseNIST", "true");
         await upsertProgress(100, userId, response.data.final_result);
+        
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
@@ -1412,20 +1430,19 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
         setLoadingProgress(0);
         await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
-
+        alert(`Error while running NIST tests: ${error}`);
       }
     };
 
     startProcess();
-
+   
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
-  }, [binaryInput, debouncedScheduledTime]);
+  }, [selectedFile, debouncedScheduledTime]);
 
 
   useEffect(() => {
@@ -1443,10 +1460,10 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             .select("*")
             .eq("user_id", userId)
             .eq("line", 2)
-            .maybeSingle(); 
+            .maybeSingle();
 
           if (error) {
-             
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1457,7 +1474,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
           if (data) {
             const progress = data.progress || 0;
-             
+
             setLoadingProgress2(progress);
 
             if (data.result) {
@@ -1472,7 +1489,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             }
           }
         } catch (err) {
-             
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -1501,140 +1518,158 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
-    if (!binaryInput2 || !debouncedScheduledTime2) return;
-
+    if (!debouncedScheduledTime2) return;
+  
     const lineNo = 2;
-
+  
     if (result2) {
-      localStorage.setItem('resultFetchedFromSupabase22b2', 'true');
-      setLoadingProgress2(100);
+      // localStorage.setItem('resultFetchedFromSupabase2', 'true');
+      // setLoadingProgress2(100);
       return;
     }
-
-
+  
     setLoadingProgress2(0);
     let progressIntervalId;
-
+  
     const upsertProgress = async (progress, userId, result = null) => {
-
+      let binaryString = null;
+  
+      if (progress === 0 && selectedFile2 && !binaryInsertedRef2.current) {
+        try {
+          const fileReader = new FileReader();
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile2);
+          });
+  
+          // If you want to save binary string later, uncomment this
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
+  
+          binaryInsertedRef2.current = true; // ✅ Prevent multiple inserts
+        } catch (err) {
+          return;
+        }
+      }
+  
       const payload = {
         user_id: userId,
-        line: 2,
+        line: lineNo,
         binary_data: " ",
         scheduled_time: debouncedScheduledTime2,
         result: result,
         file_name: fileName2,
         upload_time: uploadTime2,
         progress: progress,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
-
-
-
-      const { error } = await supabase
-        .from('results')
-        .upsert(payload);
+  
+      const { error } = await supabase.from("results").upsert(payload);
       if (error) {
-          
+        console.error("Supabase upsert error:", error.message);
       }
     };
-
-
+  
     const startProcess = async () => {
       const userId = await fetchUserId();
-      if (!userId) {
-
-        return;
-      }
-      // Initial database entry with 0% progress
+      if (!userId) return;
+  
       await upsertProgress(1, userId);
       setShowRedButton2(false);
+  
       if (!alertShownRef2.current) {
         alert("File uploaded successfully!");
         alertShownRef2.current = true;
       }
-
+  
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
             .from("results")
             .select("*")
             .eq("user_id", userId)
-            .eq("line", 2)
-            .maybeSingle(); 
-
+            .eq("line", lineNo)
+            .maybeSingle();
+  
           if (error) {
-             
+            console.error("Supabase fetch error:", error.message);
             return;
           }
-
+  
           if (data) {
-
             const progress = data.progress || 0;
-               
             setLoadingProgress2(progress);
-
-            //  Stop polling once progress is 100%
+  
+            // ✅ Stop polling once progress reaches 100
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress2(100);
-                
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-             
+          console.error("Polling error:", err);
         }
-
       };
+  
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
+  
       try {
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
-          binary_data: binaryInput2,
-          scheduled_time: debouncedScheduledTime2,
-          job_id: currentJobIdT2,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName2,
-        });
-
-
+        const formData = new FormData();
+        formData.append("file", selectedFile2);
+        const formattedScheduledTime = new Date(debouncedScheduledTime2)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+        formData.append("scheduled_time", debouncedScheduledTime2);
+        formData.append("job_id", currentJobIdT2);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName2);
+  
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/run_nist/`, // ✅ <-- dieharder backend endpoint
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
+        setIsEnabled2(true);
+  
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-         setIsEnabled2(true);
+  
         setLoadingProgress2(100);
         setResult2(response.data);
-        localStorage.setItem("resultFetchedFromSupabase2", "true");
-
+        // localStorage.setItem("resultFetchedFromSupabase2", "true");
         await upsertProgress(100, userId, response.data.final_result);
+  
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress2(0);
         await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
+        alert(`Error while running Dieharder tests: ${error}`);
       }
     };
-
+  
     startProcess();
-
+  
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
-
-  }, [binaryInput2, debouncedScheduledTime2]);
-
+  }, [selectedFile2, debouncedScheduledTime2]);
+  
 
   useEffect(() => {
 
@@ -1651,10 +1686,10 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             .select("*")
             .eq("user_id", userId)
             .eq("line", 3)
-            .maybeSingle(); 
+            .maybeSingle();
 
           if (error) {
-             
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1665,7 +1700,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
           if (data) {
             const progress = data.progress || 0;
-             
+
             setLoadingProgress3(progress);
 
             if (data.result) {
@@ -1680,7 +1715,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             }
           }
         } catch (err) {
-             
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -1709,142 +1744,158 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
-    if (!binaryInput3 || !debouncedScheduledTime3) return;
-
+    if (!debouncedScheduledTime3) return;
   
     const lineNo = 3;
-
+  
     if (result3) {
-      localStorage.setItem('resultFetchedFromSupabase22b3', 'true');
-      setLoadingProgress3(100);
+      // localStorage.setItem('resultFetchedFromSupabase3', 'true');
+      // setLoadingProgress3(100);
       return;
     }
-
-
+  
     setLoadingProgress3(0);
     let progressIntervalId;
-
+  
     const upsertProgress = async (progress, userId, result = null) => {
-
+      let binaryString = null;
+  
+      if (progress === 0 && binaryInput3 && !binaryInsertedRef3.current) {
+        try {
+          const fileReader = new FileReader();
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(binaryInput3);
+          });
+  
+          // Optional binary conversion if needed
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
+  
+          binaryInsertedRef3.current = true; // ✅ Prevent multiple inserts
+        } catch (err) {
+          return;
+        }
+      }
+  
       const payload = {
         user_id: userId,
-        line: 3,
+        line: lineNo,
         binary_data: " ",
         scheduled_time: debouncedScheduledTime3,
         result: result,
         file_name: fileName3,
         upload_time: uploadTime3,
         progress: progress,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
-
-
-
-      const { error } = await supabase
-        .from('results')
-        .upsert(payload);
+  
+      const { error } = await supabase.from("results").upsert(payload);
       if (error) {
-          
+        console.error("Supabase upsert error:", error.message);
       }
     };
-
-
+  
     const startProcess = async () => {
       const userId = await fetchUserId();
-      if (!userId) {
-
-        return;
-      }
-      // Initial database entry with 0% progress
+      if (!userId) return;
+  
+      // Initial DB entry
       await upsertProgress(1, userId);
+  
       setShowRedButton3(false);
       if (!alertShownRef3.current) {
         alert("File uploaded successfully!");
         alertShownRef3.current = true;
       }
+  
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
             .from("results")
             .select("*")
             .eq("user_id", userId)
-            .eq("line", 3)
-            .maybeSingle(); 
-
+            .eq("line", lineNo)
+            .maybeSingle();
+  
           if (error) {
-             
+            console.error("Supabase fetch error:", error.message);
             return;
           }
-
+  
           if (data) {
-
             const progress = data.progress || 0;
-               
             setLoadingProgress3(progress);
-
-            //  Stop polling once progress is 100%
+  
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress3(100);
-                
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-             
+          console.error("Polling error:", err);
         }
-
       };
+  
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
+  
       try {
-
-
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
-          binary_data: binaryInput3,
-          scheduled_time: debouncedScheduledTime3,
-          job_id: currentJobIdT3,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName3,
-        });
-
-
-
+        const formData = new FormData();
+        formData.append("file", selectedFile3);
+        const formattedScheduledTime = new Date(debouncedScheduledTime3)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+  
+        formData.append("scheduled_time", debouncedScheduledTime3);
+        formData.append("job_id", currentJobIdT3);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName3);
+  
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/run_nist/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
+        setIsEnabled3(true);
+  
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-         setIsEnabled3(true);
+  
         setLoadingProgress3(100);
         setResult3(response.data);
-        localStorage.setItem("resultFetchedFromSupabase3", "true");
-
+        // localStorage.setItem("resultFetchedFromSupabase3", "true");
+  
         await upsertProgress(100, userId, response.data.final_result);
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
         setLoadingProgress3(0);
         await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
+        alert(`Error while running test for line 3: ${error}`);
       }
     };
-
+  
     startProcess();
-
+  
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
-
   }, [binaryInput3, debouncedScheduledTime3]);
+  
 
   useEffect(() => {
 
@@ -1861,10 +1912,10 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             .select("*")
             .eq("user_id", userId)
             .eq("line", 4)
-            .maybeSingle(); 
+            .maybeSingle();
 
           if (error) {
-             
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -1875,7 +1926,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
           if (data) {
             const progress = data.progress || 0;
-             
+
             setLoadingProgress4(progress);
 
             if (data.result) {
@@ -1890,7 +1941,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             }
           }
         } catch (err) {
-             
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -1919,140 +1970,158 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
-    if (!binaryInput4 || !debouncedScheduledTime4) return;
-
-   
+    if (!debouncedScheduledTime4) return;
+  
     const lineNo = 4;
-
+  
     if (result4) {
-      localStorage.setItem('resultFetchedFromSupabase22b4', 'true');
-      setLoadingProgress4(100);
+      // localStorage.setItem('resultFetchedFromSupabase4', 'true');
+      // setLoadingProgress4(100);
       return;
     }
-
-
+  
     setLoadingProgress4(0);
     let progressIntervalId;
-
+  
     const upsertProgress = async (progress, userId, result = null) => {
-
+      let binaryString = null;
+  
+      if (progress === 0 && binaryInput4 && !binaryInsertedRef4.current) {
+        try {
+          const fileReader = new FileReader();
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(binaryInput4);
+          });
+  
+          // Optional conversion if needed
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
+  
+          binaryInsertedRef4.current = true; // ✅ Prevent duplicate inserts
+        } catch (err) {
+          return;
+        }
+      }
+  
       const payload = {
         user_id: userId,
-        line: 4,
+        line: lineNo,
         binary_data: " ",
         scheduled_time: debouncedScheduledTime4,
         result: result,
         file_name: fileName4,
         upload_time: uploadTime4,
         progress: progress,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
-
-
-
-      const { error } = await supabase
-        .from('results')
-        .upsert(payload);
+  
+      const { error } = await supabase.from("results").upsert(payload);
       if (error) {
-          
+        console.error("Supabase upsert error:", error.message);
       }
     };
-
-
+  
     const startProcess = async () => {
       const userId = await fetchUserId();
-      if (!userId) {
-
-        return;
-      }
-      // Initial database entry with 0% progress
-      await upsertProgress(0, userId);
+      if (!userId) return;
+  
+      await upsertProgress(1, userId);
+  
       setShowRedButton4(false);
       if (!alertShownRef4.current) {
         alert("File uploaded successfully!");
         alertShownRef4.current = true;
       }
+  
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
             .from("results")
             .select("*")
             .eq("user_id", userId)
-            .eq("line", 4)
-            .maybeSingle(); 
-
+            .eq("line", lineNo)
+            .maybeSingle();
+  
           if (error) {
-             
+            console.error("Supabase fetch error:", error.message);
             return;
           }
-
+  
           if (data) {
-
             const progress = data.progress || 0;
-               
             setLoadingProgress4(progress);
-
-            //  Stop polling once progress is 100%
+  
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress4(100);
-                
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-             
+          console.error("Polling error:", err);
         }
-
       };
+  
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
+  
       try {
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
-          binary_data: binaryInput4,
-          scheduled_time: debouncedScheduledTime4,
-          job_id: currentJobIdT4,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName4,
-        });
-
-
-
+        const formData = new FormData();
+        formData.append("file", selectedFile4);
+  
+        const formattedScheduledTime = new Date(debouncedScheduledTime4)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+  
+        formData.append("scheduled_time", debouncedScheduledTime4);
+        formData.append("job_id", currentJobIdT4);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName4);
+  
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/run_nist/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
+        setIsEnabled4(true);
+  
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-         setIsEnabled4(true);
+  
         setLoadingProgress4(100);
         setResult4(response.data);
-        localStorage.setItem("resultFetchedFromSupabase4", "true");
-
+        // localStorage.setItem("resultFetchedFromSupabase4", "true");
+  
         await upsertProgress(100, userId, response.data.final_result);
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
         setLoadingProgress4(0);
         await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
+        alert(`Error while running test for line 4: ${error}`);
       }
     };
-
+  
     startProcess();
-
+  
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
-
   }, [binaryInput4, debouncedScheduledTime4]);
+  
 
   useEffect(() => {
 
@@ -2069,10 +2138,10 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             .select("*")
             .eq("user_id", userId)
             .eq("line", 5)
-            .maybeSingle(); 
+            .maybeSingle();
 
           if (error) {
-             
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2083,7 +2152,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
           if (data) {
             const progress = data.progress || 0;
-             
+
             setLoadingProgress5(progress);
 
             if (data.result) {
@@ -2098,7 +2167,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
             }
           }
         } catch (err) {
-             
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -2127,177 +2196,163 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
-    if (!binaryInput5 || !debouncedScheduledTime5) return;
-
+    if (!debouncedScheduledTime5) return;
   
     const lineNo = 5;
-
+  
     if (result5) {
-      localStorage.setItem('resultFetchedFromSupabase22b5', 'true');
-      setLoadingProgress5(100);
+      // localStorage.setItem('resultFetchedFromSupabase5', 'true');
+      // setLoadingProgress5(100);
       return;
     }
-
-
+  
     setLoadingProgress5(0);
     let progressIntervalId;
-
+  
     const upsertProgress = async (progress, userId, result = null) => {
-
+      let binaryString = null;
+  
+      if (progress === 0 && binaryInput5 && !binaryInsertedRef5.current) {
+        try {
+          const fileReader = new FileReader();
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(binaryInput5);
+          });
+  
+          // Optional conversion if needed:
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
+  
+          binaryInsertedRef5.current = true; // ✅ Prevent duplicate inserts
+        } catch (err) {
+          return;
+        }
+      }
+  
       const payload = {
         user_id: userId,
-        line: 5,
+        line: lineNo,
         binary_data: " ",
         scheduled_time: debouncedScheduledTime5,
         result: result,
         file_name: fileName5,
         upload_time: uploadTime5,
         progress: progress,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
-
-
-
-      const { error } = await supabase
-        .from('results')
-        .upsert(payload);
+  
+      const { error } = await supabase.from("results").upsert(payload);
       if (error) {
-          
+        console.error("Supabase upsert error:", error.message);
       }
     };
-
-
+  
     const startProcess = async () => {
       const userId = await fetchUserId();
-      if (!userId) {
-
-        return;
-      }
-      // Initial database entry with 0% progress
-      await upsertProgress(0, userId);
+      if (!userId) return;
+  
+      await upsertProgress(1, userId);
+  
       setShowRedButton5(false);
       if (!alertShownRef5.current) {
         alert("File uploaded successfully!");
         alertShownRef5.current = true;
       }
+  
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
             .from("results")
             .select("*")
             .eq("user_id", userId)
-            .eq("line", 5)
-            .maybeSingle(); 
-
+            .eq("line", lineNo)
+            .maybeSingle();
+  
           if (error) {
-             
+            console.error("Supabase fetch error:", error.message);
             return;
           }
-
+  
           if (data) {
-
             const progress = data.progress || 0;
-               
             setLoadingProgress5(progress);
-
-            //  Stop polling once progress is 100%
+  
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress5(100);
-                
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-             
+          console.error("Polling error:", err);
         }
-
       };
+  
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
+  
       try {
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans/`, {
-          binary_data: binaryInput5,
-          scheduled_time: debouncedScheduledTime5,
-          job_id: currentJobIdT5,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName5,
-        });
-
-
-
+        const formData = new FormData();
+        formData.append("file", selectedFile5);
+  
+        const formattedScheduledTime = new Date(debouncedScheduledTime5)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+  
+        formData.append("scheduled_time", debouncedScheduledTime5);
+        formData.append("job_id", currentJobIdT5);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName5);
+  
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/run_nist/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
+        setIsEnabled5(true);
+  
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-         setIsEnabled5(true);
+  
         setLoadingProgress5(100);
         setResult5(response.data);
-        localStorage.setItem("resultFetchedFromSupabase5", "true");
-
+        // localStorage.setItem("resultFetchedFromSupabase5", "true");
+  
         await upsertProgress(100, userId, response.data.final_result);
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress5(0);
         await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
+        alert(`Error while running test for line 5: ${error}`);
       }
     };
-
+  
     startProcess();
-
+  
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
-
   }, [binaryInput5, debouncedScheduledTime5]);
-
+  
 
   const handleButtonClick = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 1)
-        .maybeSingle(); 
-
-      if (fetchError) {
-           
-      }
-
-      if (existingResult && existingResult.report_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgressRep(100);
-        return; // stop here, no need to regenerate
-      }
-
-
       let progressInterval;
       setLoadingProgressRep(5);
 
@@ -2313,11 +2368,11 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           alert(`Error: ${err}`);
         }
       }, 1000);
-
+    
       fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName }),
+        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName, line_number: 1 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2330,22 +2385,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `report-${currentJobIdT}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
 
-          if (error) {
-   
-          } else {
-            
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-              .from("results")
-              .update({ report_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 1)           // condition 2
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2353,37 +2393,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           setLoadingProgressRep(0);
         });
     } else if (type === "graph") {
-
-
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("graph_path")
-        .eq("user_id", userId)
-        .eq("line", 1)
-        .maybeSingle(); 
-
-      if (fetchError) {
-          
-      }
-
-      if (existingResult && existingResult.graph_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("graphs")
-          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgressGr(100);
-        return; // stop here, no need to regenerate
-      }
 
       let progressInterval;
       setLoadingProgressGr(2);
@@ -2404,7 +2413,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT }),
+        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT,line_number: 1  }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2417,23 +2426,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `graph-${currentJobIdT}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
 
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 1)           // condition 2
-
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2446,37 +2439,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const handleButtonClick2 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-     
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 2)
-        .maybeSingle(); 
-
-      if (fetchError) {
-           
-      }
-
-      if (existingResult && existingResult.report_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress2Rep(100);
-        return; // stop here, no need to regenerate
-      }
-
 
       let progressInterval;
       setLoadingProgress2Rep(5);
@@ -2497,7 +2459,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2 }),
+        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2,line_number: 2 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2509,22 +2471,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `report-${currentJobIdT2}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-   
-          } else {
-            
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-              .from("results")
-              .update({ report_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 2)           // condition 2
-          }
+          
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2533,38 +2480,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
         });
 
     } else if (type === "graph") {
-
-    
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("graph_path")
-        .eq("user_id", userId)
-        .eq("line", 2)
-        .maybeSingle(); 
-
-      if (fetchError) {
-          
-      }
-
-      if (existingResult && existingResult.graph_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("graphs")
-          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress2Gr(100);
-        return; // stop here, no need to regenerate
-      }
-
 
       let progressInterval;
       setLoadingProgress2Gr(5);
@@ -2586,7 +2501,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2 }),
+        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2 ,line_number: 2 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2598,23 +2513,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `graph-${currentJobIdT2}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 2)           // condition 2
-
-          }
+         
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2628,36 +2527,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const handleButtonClick3 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-    
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 3)
-        .maybeSingle(); 
 
-      if (fetchError) {
-           
-      }
-
-      if (existingResult && existingResult.report_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress3Rep(100);
-        return; // stop here, no need to regenerate
-      }
+     
 
       let progressInterval;
       setLoadingProgress3Rep(5);
@@ -2678,7 +2549,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3 }),
+        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3, line_number:3 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2690,22 +2561,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `report-${currentJobIdT3}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-   
-          } else {
-            
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-              .from("results")
-              .update({ report_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 3)           // condition 2
-          }
+        
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2713,38 +2569,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           setLoadingProgress3Rep(0);
         });
     } else if (type === "graph") {
-     
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("graph_path")
-        .eq("user_id", userId)
-        .eq("line", 3)
-        .maybeSingle(); 
 
-      if (fetchError) {
-          
-      }
-
-      if (existingResult && existingResult.graph_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("graphs")
-          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress3Gr(100);
-        return; // stop here, no need to regenerate
-      }
-
-
+    
       let progressInterval;
       setLoadingProgress3Gr(0);
 
@@ -2764,7 +2590,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3 }),
+        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3 ,line_number:3}),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2776,23 +2602,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `graph-${currentJobIdT3}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 3)           // condition 2
-
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2806,37 +2615,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const handleButtonClick4 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-      
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 4)
-        .maybeSingle(); 
 
-      if (fetchError) {
-           
-      }
-
-      if (existingResult && existingResult.report_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress4Rep(100);
-        return; // stop here, no need to regenerate
-      }
-
+     
       let progressInterval;
       setLoadingProgress4Rep(5);
 
@@ -2856,7 +2636,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4 }),
+        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4,line_number:4 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2868,22 +2648,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `report-${currentJobIdT4}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-   
-          } else {
-            
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-              .from("results")
-              .update({ report_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 4)           // condition 2
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2891,37 +2655,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           setLoadingProgress4Rep(0);
         });
     } else if (type === "graph") {
-      
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("graph_path")
-        .eq("user_id", userId)
-        .eq("line", 4)
-        .maybeSingle(); 
 
-      if (fetchError) {
-          
-      }
-
-      if (existingResult && existingResult.graph_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("graphs")
-          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress4Gr(100);
-        return; // stop here, no need to regenerate
-      }
-
+   
       let progressInterval;
       setLoadingProgress4Gr(0);
 
@@ -2941,7 +2676,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4 }),
+        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4,line_number:4 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2953,23 +2688,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `graph-${currentJobIdT4}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 4)           // condition 2
-
-          }
+         
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2983,36 +2702,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const handleButtonClick5 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-      
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 5)
-        .maybeSingle(); 
 
-      if (fetchError) {
-           
-      }
-
-      if (existingResult && existingResult.report_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress5Rep(100);
-        return; // stop here, no need to regenerate
-      }
+   
       let progressInterval;
       setLoadingProgress5Rep(5);
 
@@ -3032,7 +2723,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       fetch(`${REACT_APP_BASE_URL}/pdf-report/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5 }),
+        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5,line_number:5 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3044,22 +2735,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `report-${currentJobIdT5}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-   
-          } else {
-            
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-              .from("results")
-              .update({ report_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 5)           // condition 2
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3067,37 +2742,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           setLoadingProgress5Rep(0);
         });
     } else if (type === "graph") {
-     
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 5)
-        .maybeSingle(); 
 
-      if (fetchError) {
-           
-      }
-
-      if (existingResult && existingResult.report_path) {
-          
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-            
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress5Rep(100);
-        return; // stop here, no need to regenerate
-      }
-
+    
       let progressInterval;
       setLoadingProgress5Gr(0);
 
@@ -3117,7 +2763,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       fetch(`${REACT_APP_BASE_URL}/graph-generation/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5 }),
+        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5,line_number:5 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3129,24 +2775,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           const fileName = `graph-${currentJobIdT5}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-               
-          } else {
-               
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 5)           // condition 2
-
-          }
-
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3157,6 +2785,32 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
     }
   };
 
+  const downloadStatsFile = async () => {
+    try {
+     
+      const response = await axios.get("http://localhost:8000/download_nist22b/", {
+        responseType: "text", // ✅ important
+      });
+
+      // Create blob
+      const blob = new Blob([response.data], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      
+      // Trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "nist22b_stats_output.txt"; // ✅ matches backend
+      document.body.appendChild(link);
+      link.click();
+     
+      // Cleanup
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading stats file:", error);
+      alert("Failed to download stats file.");
+    }
+  };
 
 
   return (
@@ -3205,37 +2859,37 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
               <td>
                 <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" mt="10px" gap="10px">
                   <Box display="flex" justifyContent="center" gap="20px">
-<Button
-  variant="contained"
-  onClick={handleFileUpload}
-  disabled={!isEnabled}   // 🔹 Disable button when state is false
-  sx={{
-    backgroundColor: colors.greenAccent[800],
-    color: colors.grey[100],
-    textTransform: "none",
-    padding: "10px 20px",
-    borderRadius: "8px",
-    position: "relative",
-    "&:hover": {
-      backgroundColor: colors.greenAccent[600],
-    },
-  }}
->
-  Upload Binary File
-  {showRedButton && (
-    <Box
-      sx={{
-        position: "absolute",
-        top: 4,
-        right: 4,
-        width: 12,
-        height: 12,
-        backgroundColor: "red",
-        borderRadius: "50%",
-      }}
-    />
-  )}
-</Button>
+                    <Button
+                      variant="contained"
+                      onClick={handleFileUpload}
+                      disabled={!isEnabled}   // 🔹 Disable button when state is false
+                      sx={{
+                        backgroundColor: colors.greenAccent[800],
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        position: "relative",
+                        "&:hover": {
+                          backgroundColor: colors.greenAccent[600],
+                        },
+                      }}
+                    >
+                      Upload Binary File
+                      {showRedButton && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 12,
+                            height: 12,
+                            backgroundColor: "red",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
+                    </Button>
 
                     <input
                       type="file"
@@ -3418,6 +3072,33 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
                         </Box>
                       )}
                     </Box>
+
+                    <Box position="relative" display="inline-flex">
+                      <Button
+                        variant="contained"
+                        onClick={downloadStatsFile}
+                        disabled={loadingProgress < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[600],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Original Output
+                      </Button>
+                    </Box>
                   </Box>
                 </Box>
               </td>
@@ -3528,7 +3209,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
                     <Button
                       variant="contained"
                       onClick={handleFileUpload2}
-                  disabled={!isEnabled2}
+                      disabled={!isEnabled2}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
@@ -3735,6 +3416,33 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
                         </Box>
                       )}
                     </Box>
+
+                    <Box position="relative" display="inline-flex">
+                      <Button
+                        variant="contained"
+                        onClick={downloadStatsFile}
+                        disabled={loadingProgress2 < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[600],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Original Output
+                      </Button>
+                    </Box>
                   </Box>
                 </Box>
               </td>
@@ -3846,7 +3554,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
                     <Button
                       variant="contained"
                       onClick={handleFileUpload3}
-                  disabled={!isEnabled3}
+                      disabled={!isEnabled3}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
@@ -4053,6 +3761,33 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
                         </Box>
                       )}
                     </Box>
+
+                    <Box position="relative" display="inline-flex">
+                      <Button
+                        variant="contained"
+                        onClick={downloadStatsFile}
+                        disabled={loadingProgress3 < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[600],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Original Output
+                      </Button>
+                    </Box>
                   </Box>
                 </Box>
               </td>
@@ -4164,7 +3899,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
                     <Button
                       variant="contained"
                       onClick={handleFileUpload4}
-                  disabled={!isEnabled4}
+                      disabled={!isEnabled4}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
@@ -4371,6 +4106,32 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
                         </Box>
                       )}
                     </Box>
+                    <Box position="relative" display="inline-flex">
+                      <Button
+                        variant="contained"
+                        onClick={downloadStatsFile}
+                        disabled={loadingProgress4 < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[600],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Original Output
+                      </Button>
+                    </Box>
                   </Box>
                 </Box>
               </td>
@@ -4482,7 +4243,7 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
                     <Button
                       variant="contained"
                       onClick={handleFileUpload5}
-                  disabled={!isEnabled5}
+                      disabled={!isEnabled5}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
@@ -4688,6 +4449,32 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
                           </Typography>
                         </Box>
                       )}
+                    </Box>
+                    <Box position="relative" display="inline-flex">
+                      <Button
+                        variant="contained"
+                        onClick={downloadStatsFile}
+                        disabled={loadingProgress5 < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[600],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Original Output
+                      </Button>
                     </Box>
                   </Box>
                 </Box>
@@ -6386,156 +6173,238 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
       </Box>
 
 
-
       <Box
-        sx={{
-          background: "linear-gradient(135deg, #1F2A40 30%, #29314F 100%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "250px",
-          textAlign: "center",
+  sx={{
+    background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1F2A40 50%, #0d1b2a 100%)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "280px",
+    textAlign: "center",
+    mt: 2,
+    boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.4)",
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: "20px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    '&:hover': {
+      boxShadow: "0px 12px 40px rgba(0, 0, 0, 0.6)",
+      transform: "translateY(-2px)",
+    },
+    transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+    '&::before': {
+      content: '""',
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: "linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
+      opacity: 0,
+      transition: "opacity 0.4s ease",
+    },
+    '&:hover::before': {
+      opacity: 1,
+    }
+  }}
+>
+  {/* Animated background grid */}
+  <Box
+    sx={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundImage: `
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+      `,
+      backgroundSize: "50px 50px",
+      animation: "gridMove 20s linear infinite",
+      opacity: 0.4,
+    }}
+  />
 
-          mt: 2,
-          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.3)",
-          position: "relative",
-          overflow: "hidden",
-          '&:hover': {
-            boxShadow: "0px 8px 30px rgba(0, 0, 0, 0.4)",
-          },
-          transition: "all 0.5s ease",
-        }}
-      >
-        {/* Animated background elements */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: -50,
-            left: -50,
-            width: 100,
-            height: 100,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)",
-            animation: "float 15s infinite ease-in-out",
-          }}
-        />
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: -30,
-            right: -30,
-            width: 120,
-            height: 120,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%)",
-            animation: "float 18s infinite ease-in-out 2s",
-          }}
-        />
+  {/* Floating particles */}
+  {[...Array(6)].map((_, i) => (
+    <Box
+      key={i}
+      sx={{
+        position: "absolute",
+        width: 4,
+        height: 4,
+        borderRadius: "50%",
+        background: "rgba(255, 255, 255, 0.6)",
+        top: `${Math.random() * 100}%`,
+        left: `${Math.random() * 100}%`,
+        animation: `floatParticle ${15 + i * 2}s infinite ease-in-out ${i * 0.5}s`,
+        boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
+      }}
+    />
+  ))}
 
-        {/* Floating AI Elements with animation */}
-        <AutoAwesomeIcon
-          sx={{
-            position: "absolute",
-            top: 20,
-            left: 30,
-            fontSize: 40,
-            color: "rgba(255, 255, 255, 0.3)",
-            animation: "pulse 4s infinite ease-in-out",
-          }}
-        />
-        <AutoAwesomeIcon
-          sx={{
-            position: "absolute",
-            bottom: 20,
-            right: 30,
-            fontSize: 40,
-            color: "rgba(255, 255, 255, 0.3)",
-            animation: "pulse 5s infinite ease-in-out 1s",
-          }}
-        />
+  {/* Main content container */}
+  <Box sx={{ position: "relative", zIndex: 2 }}>
+    {/* Animated Gemini Logo */}
+    <Box
+      component="img"
+      src="/image.png"
+      alt="Gemini Logo"
+      sx={{
+        width: 70,
+        height: "auto",
+        mb: 1.5,
+        borderRadius: "16px",
+        transition: "all 0.5s ease",
+        filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))",
+        animation: "logoGlow 4s infinite ease-in-out",
+        '&:hover': {
+          transform: "scale(1.15) rotate(5deg)",
+          filter: "drop-shadow(0 6px 20px rgba(230, 57, 70, 0.4))",
+        }
+      }}
+    />
 
-        {/* Animated Gemini Logo */}
-        <Box
-          component="img"
-          src="/image.png"
-          alt="Gemini Logo"
-          sx={{
-            width: 80,
-            height: "auto",
-            mb: 2,
-            borderRadius: "12px",
-            transition: "all 0.5s ease",
-            transform: "translateY(0)",
-            animation: "floatLogo 6s infinite ease-in-out",
-            '&:hover': {
-              transform: "scale(1.1) rotate(5deg)",
-            }
-          }}
-        />
+    {/* Title text */}
+    <Typography
+      variant="h6"
+      sx={{
+        color: "rgba(255, 255, 255, 0.9)",
+        fontWeight: 600,
+        mb: 1,
+        fontSize: "1.1rem",
+        textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+      }}
+    >
+      Advanced AI Analysis
+    </Typography>
 
-        {/* Button with enhanced animation */}
-        <Button
-          variant="contained"
-          onClick={() => {
-            window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
-          }}
-          sx={{
-            backgroundColor: "#E63946",
-            color: "white",
-            textTransform: "none",
-            padding: "15px 40px",
-            fontSize: "1.5rem",
-            width: "50%",
-            maxWidth: "320px",
-            borderRadius: "8px",
-            transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
-            position: "relative",
-            overflow: "hidden",
-            zIndex: 1,
-            '&:hover': {
-              backgroundColor: "#F77F00",
-              transform: "scale(1.05)",
-              boxShadow: "0px 8px 20px rgba(255, 99, 71, 0.6)",
-            },
-            '&::before': {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: "-100%",
-              width: "100%",
-              height: "100%",
-              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-              transition: "all 0.7s ease",
-              zIndex: -1,
-            },
-            '&:hover::before': {
-              left: "100%",
-            }
-          }}
-        >
-          Analyze with AI
-        </Button>
+    {/* Description */}
+    <Typography
+      variant="body2"
+      sx={{
+        color: "rgba(255, 255, 255, 0.7)",
+        mb: 2.5,
+        maxWidth: "300px",
+        fontSize: "0.85rem",
+        lineHeight: 1.4,
+      }}
+    >
+      Upload your test reports for comprehensive AI-powered analysis and insights
+    </Typography>
 
-        {/* Glow effect on hover */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "radial-gradient(circle at center, rgba(230, 57, 70, 0.1) 0%, transparent 70%)",
-            opacity: 0,
-            transition: "opacity 0.5s ease",
-            pointerEvents: "none",
-            '&:hover': {
-              opacity: 1,
-            }
-          }}
-        />
-      </Box>
+    {/* Enhanced Button */}
+    <Button
+      variant="contained"
+      onClick={() => {
+        window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
+      }}
+      startIcon={<AutoAwesomeIcon sx={{ fontSize: "1.2rem" }} />}
+      sx={{
+        background: "linear-gradient(135deg, #E63946 0%, #F77F00 100%)",
+        color: "white",
+        textTransform: "none",
+        padding: "12px 36px",
+        fontSize: "1.1rem",
+        fontWeight: 600,
+        width: "auto",
+        minWidth: "220px",
+        borderRadius: "12px",
+        transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+        position: "relative",
+        overflow: "hidden",
+        zIndex: 1,
+        boxShadow: "0 4px 15px rgba(230, 57, 70, 0.4)",
+        '&:hover': {
+          background: "linear-gradient(135deg, #F77F00 0%, #E63946 100%)",
+          transform: "scale(1.05) translateY(-2px)",
+          boxShadow: "0 8px 25px rgba(230, 57, 70, 0.6)",
+        },
+        '&::before': {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: "-100%",
+          width: "100%",
+          height: "100%",
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+          transition: "all 0.8s ease",
+          zIndex: -1,
+        },
+        '&:hover::before': {
+          left: "100%",
+        },
+        '&::after': {
+          content: '""',
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: "0",
+          height: "0",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.2)",
+          transform: "translate(-50%, -50%)",
+          transition: "all 0.6s ease",
+          zIndex: -1,
+        },
+        '&:active::after': {
+          width: "300px",
+          height: "300px",
+        }
+      }}
+    >
+      Analyze with AI
+    </Button>
+  </Box>
 
+  {/* Corner accents */}
+  <Box
+    sx={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "60px",
+      height: "60px",
+      borderTop: "2px solid rgba(230, 57, 70, 0.5)",
+      borderLeft: "2px solid rgba(230, 57, 70, 0.5)",
+      borderTopLeftRadius: "20px",
+    }}
+  />
+  <Box
+    sx={{
+      position: "absolute",
+      bottom: 0,
+      right: 0,
+      width: "60px",
+      height: "60px",
+      borderBottom: "2px solid rgba(230, 57, 70, 0.5)",
+      borderRight: "2px solid rgba(230, 57, 70, 0.5)",
+      borderBottomRightRadius: "20px",
+    }}
+  />
+
+  {/* Add these keyframes to your global CSS */}
+  <style jsx>{`
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+    
+    @keyframes floatParticle {
+      0%, 100% { transform: translateY(0px) translateX(0px); }
+      25% { transform: translateY(-20px) translateX(10px); }
+      50% { transform: translateY(-10px) translateX(20px); }
+      75% { transform: translateY(-15px) translateX(-10px); }
+    }
+    
+    @keyframes logoGlow {
+      0%, 100% { filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3)); }
+      50% { filter: drop-shadow(0 4px 20px rgba(230, 57, 70, 0.3)); }
+    }
+  `}</style>
+</Box>
     </Box>
   );
 };

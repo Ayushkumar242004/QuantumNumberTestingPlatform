@@ -563,27 +563,27 @@ const Nist_tests90b = () => {
 
 
   const handleFileUpload = () => {
-    setShowRedButton(true);
+    // setShowRedButton(true);
     setIsEnabled(true);
     fileInputRef.current.click();
   };
   const handleFileUpload2 = () => {
-    setShowRedButton2(true);
+    // setShowRedButton2(true);
     setIsEnabled2(true);
     fileInputRef2.current.click();
   };
   const handleFileUpload3 = () => {
-    setShowRedButton3(true);
+    // setShowRedButton3(true);
     setIsEnabled3(true);
     fileInputRef3.current.click();
   };
   const handleFileUpload4 = () => {
-    setShowRedButton4(true);
+    // setShowRedButton4(true);
     setIsEnabled4(true);
     fileInputRef4.current.click();
   };
   const handleFileUpload5 = () => {
-    setShowRedButton5(true);
+    // setShowRedButton5(true);
     setIsEnabled5(true);
     fileInputRef5.current.click();
   };
@@ -758,8 +758,8 @@ const Nist_tests90b = () => {
 
 
 
-    if (!isBin && !isTxt) {
-      alert("Please upload a .bin or .txt file.");
+    if (!isBin) {
+      alert("Please upload a .bin file.");
       return;
     }
 
@@ -839,8 +839,15 @@ const Nist_tests90b = () => {
       setShowRedButton2(false);
       return;
     }
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
+    setSelectedFile2(selectedFile);
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
+
+
+
+    if (!isBin) {
+      alert("Please upload a .bin file.");
       return;
     }
 
@@ -924,11 +931,17 @@ const Nist_tests90b = () => {
       setShowRedButton3(false);
       return;
     }
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
+    setSelectedFile3(selectedFile);
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
+
+
+
+    if (!isBin) {
+      alert("Please upload a .bin file.");
       return;
     }
-
     // Fetch user ID
     const userId = await fetchUserId();
     if (!userId) {
@@ -1009,10 +1022,15 @@ const Nist_tests90b = () => {
       return;
     }
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
+    setSelectedFile4(selectedFile);
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
+
+
+
+    if (!isBin) {
+      alert("Please upload a .bin file.");
       return;
     }
     const userId = await fetchUserId();
@@ -1090,10 +1108,15 @@ const Nist_tests90b = () => {
       return;
     }
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert(
-        "Warning: The selected file is too large. Please choose a smaller file."
-      );
+    setSelectedFile5(selectedFile);
+    const fileName = selectedFile.name.toLowerCase(); // normalize case
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
+
+
+
+    if (!isBin) {
+      alert("Please upload a .bin file.");
       return;
     }
     const userId = await fetchUserId();
@@ -1561,22 +1584,21 @@ const Nist_tests90b = () => {
     };
   }, []);
 
-  
+
   useEffect(() => {
     if (!binaryInput || !debouncedScheduledTime) {
       return;
     }
-    console.log("1");
-
+   
     const lineNo = 1;
     if (result) {
-      localStorage.setItem('resultFetchedFromSupabase90b', 'true');
-      setLoadingProgress(100);
+      // localStorage.setItem('resultFetchedFromSupabase90b', 'true');
+      // setLoadingProgress(100);
       return;
     }
     setLoadingProgress(0);
     let progressIntervalId;
-    console.log("2");
+ 
     const upsertProgress = async (progress, userId, result = null) => {
       let binaryString = null;
 
@@ -1624,8 +1646,7 @@ const Nist_tests90b = () => {
 
       }
     };
-    console.log("3");
-
+   
     const startProcess = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
@@ -1637,7 +1658,7 @@ const Nist_tests90b = () => {
         alert("File uploaded successfully!");
         alertShownRef.current = true;
       }
-      console.log("4");
+     
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1671,7 +1692,7 @@ const Nist_tests90b = () => {
         }
       };
 
-      console.log("5");
+
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
       await fetchProgressFromSupabase();
       try {
@@ -1690,25 +1711,25 @@ const Nist_tests90b = () => {
         formData.append("line", lineNo);
         formData.append("user_id", userId);
         formData.append("file_name", fileName);
-
+        
         const response = await axios.post(
           `${REACT_APP_BASE_URL}/nist90b_run/`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
-        console.log("7");
+     
         console.log("response", response);
         setIsEnabled(true);
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-        console.log("8");
+       
         setLoadingProgress(100);
         setResult(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b", "true");
         await upsertProgress(100, userId, response.data.final_result);
-        console.log("9");
+       
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
@@ -1806,26 +1827,45 @@ const Nist_tests90b = () => {
 
   useEffect(() => {
     if (!binaryInput2 || !debouncedScheduledTime2) return;
-
-
+  
     const lineNo = 2;
-
+  
     if (result2) {
-      localStorage.setItem('resultFetchedFromSupabase90b2', 'true');
-      setLoadingProgress2(100);
+      // localStorage.setItem('resultFetchedFromSupabase90b2', 'true');
+      // setLoadingProgress2(100);
       return;
     }
-
-
+  
     setLoadingProgress2(0);
     let progressIntervalId;
-
+  
     const upsertProgress = async (progress, userId, result = null) => {
-
+      let binaryString = null;
+  
+      if (progress === 0 && selectedFile2 && !binaryInsertedRef2.current) {
+        try {
+          const fileReader = new FileReader();
+  
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile2);
+          });
+  
+          binaryString = Array.from(fileBuffer)
+            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            .join('');
+  
+          binaryInsertedRef2.current = true; // ✅ Prevent duplicate binary inserts
+        } catch (err) {
+          return;
+        }
+      }
+  
       const payload = {
         user_id: userId,
         line: 2,
-        binary_data: " ",
+        binary_data: " ", // You can replace with binaryString if needed
         scheduled_time: debouncedScheduledTime2,
         result: result,
         file_name: fileName2,
@@ -1833,31 +1873,26 @@ const Nist_tests90b = () => {
         progress: progress,
         updated_at: new Date().toISOString()
       };
-
-
-
-      const { error } = await supabase
-        .from('results2')
-        .upsert(payload);
+  
+      const { error } = await supabase.from("results2").upsert(payload);
+  
       if (error) {
-
+        console.error("Supabase upsert error:", error.message);
       }
     };
-
-
+  
     const startProcess = async () => {
       const userId = await fetchUserId();
-      if (!userId) {
-
-        return;
-      }
-      // Initial database entry with 0% progress
+      if (!userId) return;
+  
       await upsertProgress(1, userId);
+  
       setShowRedButton2(false);
       if (!alertShownRef2.current) {
         alert("File uploaded successfully!");
         alertShownRef2.current = true;
       }
+  
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1866,79 +1901,85 @@ const Nist_tests90b = () => {
             .eq("user_id", userId)
             .eq("line", 2)
             .maybeSingle();
-
+  
           if (error) {
-
+            console.error("Supabase fetch error:", error.message);
             return;
           }
-
+  
           if (data) {
-
             const progress = data.progress || 0;
-
             setLoadingProgress2(progress);
-
-            //  Stop polling once progress is 100%
+  
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress2(100);
-              console.log("U");
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-
+          console.error("Progress fetch error:", err);
         }
-
       };
+  
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
+  
       try {
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
-          binary_data: binaryInput2,
-          scheduled_time: debouncedScheduledTime2,
-          job_id: currentJobIdT2,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName2,
-        });
-
+        const formData = new FormData();
+        formData.append("file", selectedFile2);
+  
+        const formattedScheduledTime = new Date(debouncedScheduledTime2)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+  
+        formData.append("scheduled_time", formattedScheduledTime);
+        formData.append("job_id", currentJobIdT2);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName2);
+        
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/nist90b_run/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
         setIsEnabled2(true);
-
+  
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress2(100);
         setResult2(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b2", "true");
-
+  
         await upsertProgress(100, userId, response.data.final_result);
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress2(0);
         await upsertProgress(0, userId);
-        alert("Error: ${error.message}");
+        alert(`Error: ${error}`);
       }
     };
-
+  
     startProcess();
-
+  
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
-
-  }, [binaryInput2, debouncedScheduledTime2]);
+  }, [selectedFile2, debouncedScheduledTime2]);
+  
 
   useEffect(() => {
 
@@ -2014,26 +2055,45 @@ const Nist_tests90b = () => {
 
   useEffect(() => {
     if (!binaryInput3 || !debouncedScheduledTime3) return;
-
-
+  
     const lineNo = 3;
-
+  
     if (result3) {
-      localStorage.setItem('resultFetchedFromSupabase90b3', 'true');
-      setLoadingProgress3(100);
+      // localStorage.setItem('resultFetchedFromSupabase90b3', 'true');
+      // setLoadingProgress3(100);
       return;
     }
-
-
+  
     setLoadingProgress3(0);
     let progressIntervalId;
-
+  
     const upsertProgress = async (progress, userId, result = null) => {
-
+      let binaryString = null;
+  
+      if (progress === 0 && selectedFile3 && !binaryInsertedRef3.current) {
+        try {
+          const fileReader = new FileReader();
+  
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile3);
+          });
+  
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
+  
+          binaryInsertedRef3.current = true; // ✅ Prevent future inserts
+        } catch (err) {
+          return;
+        }
+      }
+  
       const payload = {
         user_id: userId,
         line: 3,
-        binary_data: " ",
+        binary_data: " ", // Replace with binaryString if needed
         scheduled_time: debouncedScheduledTime3,
         result: result,
         file_name: fileName3,
@@ -2041,31 +2101,26 @@ const Nist_tests90b = () => {
         progress: progress,
         updated_at: new Date().toISOString()
       };
-
-
-
-      const { error } = await supabase
-        .from('results2')
-        .upsert(payload);
+  
+      const { error } = await supabase.from("results2").upsert(payload);
+  
       if (error) {
-
+        console.error("Supabase upsert error:", error.message);
       }
     };
-
-
+  
     const startProcess = async () => {
       const userId = await fetchUserId();
-      if (!userId) {
-
-        return;
-      }
-      // Initial database entry with 0% progress
+      if (!userId) return;
+  
       await upsertProgress(1, userId);
+  
       setShowRedButton3(false);
       if (!alertShownRef3.current) {
         alert("File uploaded successfully!");
         alertShownRef3.current = true;
       }
+  
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2074,80 +2129,85 @@ const Nist_tests90b = () => {
             .eq("user_id", userId)
             .eq("line", 3)
             .maybeSingle();
-
+  
           if (error) {
-
+            console.error("Supabase fetch error:", error.message);
             return;
           }
-
+  
           if (data) {
-
             const progress = data.progress || 0;
-
             setLoadingProgress3(progress);
-
-            //  Stop polling once progress is 100%
+  
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress3(100);
-              console.log("U");
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-
+          console.error("Progress fetch error:", err);
         }
-
       };
+  
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
+  
       try {
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
-          binary_data: binaryInput3,
-          scheduled_time: debouncedScheduledTime3,
-          job_id: currentJobIdT3,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName3,
-        });
-
+        const formData = new FormData();
+        formData.append("file", selectedFile3);
+  
+        const formattedScheduledTime = new Date(debouncedScheduledTime3)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+  
+        formData.append("scheduled_time", formattedScheduledTime);
+        formData.append("job_id", currentJobIdT3);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName3);
+  
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/nist90b_run/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
         setIsEnabled3(true);
-
+  
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress3(100);
         setResult3(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b3", "true");
-
+  
         await upsertProgress(100, userId, response.data.final_result);
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress3(0);
         await upsertProgress(0, userId);
-        alert("Error: ${error.message}");
+        alert(`Error: ${error}`);
       }
     };
-
+  
     startProcess();
-
+  
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
-
-  }, [binaryInput3, debouncedScheduledTime3]);
-
+  }, [selectedFile3, debouncedScheduledTime3]);
+  
 
   useEffect(() => {
 
@@ -2223,25 +2283,45 @@ const Nist_tests90b = () => {
 
   useEffect(() => {
     if (!binaryInput4 || !debouncedScheduledTime4) return;
-
+  
     const lineNo = 4;
-
+  
     if (result4) {
-      localStorage.setItem('resultFetchedFromSupabase90b4', 'true');
-      setLoadingProgress4(100);
+      // localStorage.setItem('resultFetchedFromSupabase90b4', 'true');
+      // setLoadingProgress4(100);
       return;
     }
-
-
+  
     setLoadingProgress4(0);
     let progressIntervalId;
-
+  
     const upsertProgress = async (progress, userId, result = null) => {
-
+      let binaryString = null;
+  
+      if (progress === 0 && selectedFile4 && !binaryInsertedRef4.current) {
+        try {
+          const fileReader = new FileReader();
+  
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile4);
+          });
+  
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
+  
+          binaryInsertedRef4.current = true; // \u2705 Prevent future inserts
+        } catch (err) {
+          return;
+        }
+      }
+  
       const payload = {
         user_id: userId,
         line: 4,
-        binary_data: " ",
+        binary_data: " ", // Replace with binaryString if needed
         scheduled_time: debouncedScheduledTime4,
         result: result,
         file_name: fileName4,
@@ -2249,31 +2329,26 @@ const Nist_tests90b = () => {
         progress: progress,
         updated_at: new Date().toISOString()
       };
-
-
-
-      const { error } = await supabase
-        .from('results2')
-        .upsert(payload);
+  
+      const { error } = await supabase.from("results2").upsert(payload);
+  
       if (error) {
-
+        console.error("Supabase upsert error:", error.message);
       }
     };
-
-
+  
     const startProcess = async () => {
       const userId = await fetchUserId();
-      if (!userId) {
-
-        return;
-      }
-      // Initial database entry with 0% progress
+      if (!userId) return;
+  
       await upsertProgress(1, userId);
+  
       setShowRedButton4(false);
       if (!alertShownRef4.current) {
         alert("File uploaded successfully!");
         alertShownRef4.current = true;
       }
+  
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2282,80 +2357,85 @@ const Nist_tests90b = () => {
             .eq("user_id", userId)
             .eq("line", 4)
             .maybeSingle();
-
+  
           if (error) {
-
+            console.error("Supabase fetch error:", error.message);
             return;
           }
-
+  
           if (data) {
-
             const progress = data.progress || 0;
-
             setLoadingProgress4(progress);
-
-            //  Stop polling once progress is 100%
+  
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress4(100);
-              console.log("U");
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-
+          console.error("Progress fetch error:", err);
         }
-
       };
+  
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
+  
       try {
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
-          binary_data: binaryInput4,
-          scheduled_time: debouncedScheduledTime4,
-          job_id: currentJobIdT4,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName4,
-        });
-
+        const formData = new FormData();
+        formData.append("file", selectedFile4);
+  
+        const formattedScheduledTime = new Date(debouncedScheduledTime4)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+  
+        formData.append("scheduled_time", formattedScheduledTime);
+        formData.append("job_id", currentJobIdT4);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName4);
+  
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/nist90b_run/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
         setIsEnabled4(true);
-
+  
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress4(100);
         setResult4(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b4", "true");
-
+  
         await upsertProgress(100, userId, response.data.final_result);
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress4(0);
         await upsertProgress(0, userId);
-        alert("Error: ${error.message}");
+        alert(`Error: ${error}`);
       }
     };
-
+  
     startProcess();
-
+  
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
-
-  }, [binaryInput4, debouncedScheduledTime4]);
-
+  }, [selectedFile4, debouncedScheduledTime4]);
+  
 
   useEffect(() => {
 
@@ -2431,26 +2511,45 @@ const Nist_tests90b = () => {
 
   useEffect(() => {
     if (!binaryInput5 || !debouncedScheduledTime5) return;
-
-
+  
     const lineNo = 5;
-
+  
     if (result5) {
-      localStorage.setItem('resultFetchedFromSupabase90b5', 'true');
-      setLoadingProgress5(100);
+      // localStorage.setItem('resultFetchedFromSupabase90b5', 'true');
+      // setLoadingProgress5(100);
       return;
     }
-
-
+  
     setLoadingProgress5(0);
     let progressIntervalId;
-
+  
     const upsertProgress = async (progress, userId, result = null) => {
-
+      let binaryString = null;
+  
+      if (progress === 0 && selectedFile5 && !binaryInsertedRef5.current) {
+        try {
+          const fileReader = new FileReader();
+  
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(selectedFile5);
+          });
+  
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
+  
+          binaryInsertedRef5.current = true; // ✅ Prevent future inserts
+        } catch (err) {
+          return;
+        }
+      }
+  
       const payload = {
         user_id: userId,
         line: 5,
-        binary_data: " ",
+        binary_data: " ", // Replace with binaryString if needed
         scheduled_time: debouncedScheduledTime5,
         result: result,
         file_name: fileName5,
@@ -2458,31 +2557,26 @@ const Nist_tests90b = () => {
         progress: progress,
         updated_at: new Date().toISOString()
       };
-
-
-
-      const { error } = await supabase
-        .from('results2')
-        .upsert(payload);
+  
+      const { error } = await supabase.from("results2").upsert(payload);
+  
       if (error) {
-
+        console.error("Supabase upsert error:", error.message);
       }
     };
-
-
+  
     const startProcess = async () => {
       const userId = await fetchUserId();
-      if (!userId) {
-
-        return;
-      }
-      // Initial database entry with 0% progress
+      if (!userId) return;
+  
       await upsertProgress(1, userId);
+  
       setShowRedButton5(false);
       if (!alertShownRef5.current) {
         alert("File uploaded successfully!");
         alertShownRef5.current = true;
       }
+  
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2491,109 +2585,128 @@ const Nist_tests90b = () => {
             .eq("user_id", userId)
             .eq("line", 5)
             .maybeSingle();
-
+  
           if (error) {
-
+            console.error("Supabase fetch error:", error.message);
             return;
           }
-
+  
           if (data) {
-
             const progress = data.progress || 0;
-
             setLoadingProgress5(progress);
-
-            //  Stop polling once progress is 100%
+  
             if (progress >= 100 && progressIntervalId) {
               setLoadingProgress5(100);
-              console.log("U");
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-
+          console.error("Progress fetch error:", err);
         }
-
       };
+  
       progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-
-      // Run one fetch immediately
       await fetchProgressFromSupabase();
+  
       try {
-        const response = await axios.post(`${REACT_APP_BASE_URL}/generate_final_ans_nist90b/`, {
-          binary_data: binaryInput5,
-          scheduled_time: debouncedScheduledTime5,
-          job_id: currentJobIdT5,
-          line: lineNo,
-          user_id: userId,
-          file_name: fileName5,
-        });
-
+        const formData = new FormData();
+        formData.append("file", selectedFile5);
+  
+        const formattedScheduledTime = new Date(debouncedScheduledTime5)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+  
+        formData.append("scheduled_time", formattedScheduledTime);
+        formData.append("job_id", currentJobIdT5);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName5);
+  
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/nist90b_run/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
         setIsEnabled5(true);
-
+  
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress5(100);
         setResult5(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b5", "true");
-
+  
         await upsertProgress(100, userId, response.data.final_result);
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-
+  
         setLoadingProgress5(0);
         await upsertProgress(0, userId);
-        alert("Error: ${error.message}");
+        alert(`Error: ${error}`);
       }
     };
-
+  
     startProcess();
-
+  
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
+  }, [selectedFile5, debouncedScheduledTime5]);
+  
 
-  }, [binaryInput5, debouncedScheduledTime5]);
+  const downloadNist90bOutput = async (lineNumber = 1) => {
+    try {
+      const url = `/download_nist90b/?line=${lineNumber}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        alert('No cached output found or an error occurred.');
+        return;
+      }
+
+      const text = await response.text();
+
+      // Create a blob from the text
+      const blob = new Blob([text], { type: 'text/plain' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${lineNumber}_nist90b_output.txt`;
+
+      // Append to body and trigger click
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading NIST90B output:', error);
+    }
+  };
+
 
 
   const handleButtonClick = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line",1)
-        .maybeSingle();
-
-
-      if (existingResult && existingResult.report_path) {
-
-      //   // ✅ 2. Get a signed URL for direct access
-      //   const { data: signedUrlData, error: urlError } = await supabase.storage
-      //     .from("reports")
-      //     .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-      //   if (urlError) {
-
-      //     return;
-      //   }
-
-      //   // ✅ 3. Open the existing graph
-      //   window.open(signedUrlData.signedUrl, "_blank");
-      //   setLoadingProgressRep(100);
-      //   return; // stop here, no need to regenerate
-      // }
+    
 
       let progressInterval;
       setLoadingProgressRep(5);
@@ -2611,11 +2724,10 @@ const Nist_tests90b = () => {
         }
       }, 1000);
 
-      
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName }),
+        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName, line_number:1 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2652,32 +2764,7 @@ const Nist_tests90b = () => {
 
     } else if (type === "graph") {
 
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("graph_path")
-        .eq("user_id", userId)
-        .eq("line", 1)
-        .maybeSingle();
-      
-
-      if (existingResult && existingResult.graph_path) {
-
-
-      //   // ✅ 2. Get a signed URL for direct access
-      //   const { data: signedUrlData, error: urlError } = await supabase.storage
-      //     .from("graphs")
-      //     .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-      //   if (urlError) {
-
-      //     return;
-      //   }
-
-      //   // ✅ 3. Open the existing graph
-      //   window.open(signedUrlData.signedUrl, "_blank");
-      //   setLoadingProgressGr(100);
-      //   return; // stop here, no need to regenerate
-      // }
+     
 
       let progressInterval;
       setLoadingProgressGr(5);
@@ -2699,7 +2786,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName }),
+        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName,line_number:1  }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2711,23 +2798,7 @@ const Nist_tests90b = () => {
           const fileName = `graph-${currentJobIdT}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-
-          } else {
-
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results2")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 1)          // condition 2
-
-          }
+         
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2738,41 +2809,12 @@ const Nist_tests90b = () => {
     }
   };
 
-  
+
   const handleButtonClick2 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
 
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 2)
-        .maybeSingle();
-
-      if (fetchError) {
-
-      }
-
-      if (existingResult && existingResult.report_path) {
-
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress2Rep(100);
-        return; // stop here, no need to regenerate
-      }
-
+      
 
       let progressInterval;
       setLoadingProgress2Rep(5);
@@ -2793,7 +2835,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2 }),
+        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2,line_number:2 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2805,22 +2847,7 @@ const Nist_tests90b = () => {
           const fileName = `report-${currentJobIdT2}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
 
-          if (error) {
-
-          } else {
-
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-              .from("results2")
-              .update({ report_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 2)           // condition 2
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2830,39 +2857,7 @@ const Nist_tests90b = () => {
 
     } else if (type === "graph") {
 
-      const currentJobId = uuidv4();
-
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("graph_path")
-        .eq("user_id", userId)
-        .eq("line", 2)
-        .maybeSingle();
-
-      if (fetchError) {
-
-      }
-
-      if (existingResult && existingResult.graph_path) {
-
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("graphs")
-          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress2Gr(100);
-        return; // stop here, no need to regenerate
-      }
-
-
+     
       let progressInterval;
       setLoadingProgress2Gr(5);
 
@@ -2883,7 +2878,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2 }),
+        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2,line_number:2 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2895,23 +2890,7 @@ const Nist_tests90b = () => {
           const fileName = `graph-${currentJobIdT2}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-
-          } else {
-
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results2")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 2)           // condition 2
-
-          }
+        
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2926,36 +2905,7 @@ const Nist_tests90b = () => {
     const userId = await fetchUserId();
     if (type === "report") {
 
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 3)
-        .maybeSingle();
-
-      if (fetchError) {
-
-      }
-
-      if (existingResult && existingResult.report_path) {
-
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress3Rep(100);
-        return; // stop here, no need to regenerate
-      }
-
+      
       let progressInterval;
       setLoadingProgress3Rep(5);
 
@@ -2975,7 +2925,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3 }),
+        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3,line_number:3 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2987,22 +2937,6 @@ const Nist_tests90b = () => {
           const fileName = `report-${currentJobIdT3}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-
-          } else {
-
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-              .from("results2")
-              .update({ report_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 3)           // condition 2
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3011,35 +2945,7 @@ const Nist_tests90b = () => {
         });
     } else if (type === "graph") {
 
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("graph_path")
-        .eq("user_id", userId)
-        .eq("line", 3)
-        .maybeSingle();
-
-      if (fetchError) {
-
-      }
-
-      if (existingResult && existingResult.graph_path) {
-
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("graphs")
-          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress3Gr(100);
-        return; // stop here, no need to regenerate
-      }
+    
 
 
       let progressInterval;
@@ -3061,7 +2967,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3 }),
+        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3,line_number:3 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3073,23 +2979,7 @@ const Nist_tests90b = () => {
           const fileName = `graph-${currentJobIdT3}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-
-          } else {
-
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results2")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 3)           // condition 2
-
-          }
+        
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3104,35 +2994,6 @@ const Nist_tests90b = () => {
     const userId = await fetchUserId();
     if (type === "report") {
 
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 4)
-        .maybeSingle();
-
-      if (fetchError) {
-
-      }
-
-      if (existingResult && existingResult.report_path) {
-
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress4Rep(100);
-        return; // stop here, no need to regenerate
-      }
 
       let progressInterval;
       setLoadingProgress4Rep(5);
@@ -3153,7 +3014,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4 }),
+        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4,line_number:4 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3165,22 +3026,7 @@ const Nist_tests90b = () => {
           const fileName = `report-${currentJobIdT4}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-
-          } else {
-
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-              .from("results2")
-              .update({ report_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 4)           // condition 2
-          }
+       
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3189,36 +3035,7 @@ const Nist_tests90b = () => {
         });
     } else if (type === "graph") {
 
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("graph_path")
-        .eq("user_id", userId)
-        .eq("line", 4)
-        .maybeSingle();
-
-      if (fetchError) {
-
-      }
-
-      if (existingResult && existingResult.graph_path) {
-
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("graphs")
-          .createSignedUrl(existingResult.graph_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress4Gr(100);
-        return; // stop here, no need to regenerate
-      }
-
+  
       let progressInterval;
       setLoadingProgress4Gr(0);
 
@@ -3238,7 +3055,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4 }),
+        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4 ,line_number:4}),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3250,23 +3067,7 @@ const Nist_tests90b = () => {
           const fileName = `graph-${currentJobIdT4}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-
-          } else {
-
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results2")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 4)           // condition 2
-
-          }
+       
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3281,35 +3082,7 @@ const Nist_tests90b = () => {
     const userId = await fetchUserId();
     if (type === "report") {
 
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 5)
-        .maybeSingle();
-
-      if (fetchError) {
-
-      }
-
-      if (existingResult && existingResult.report_path) {
-
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress5Rep(100);
-        return; // stop here, no need to regenerate
-      }
+      
       let progressInterval;
       setLoadingProgress5Rep(5);
 
@@ -3329,7 +3102,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5 }),
+        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5,line_number:5 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3341,22 +3114,6 @@ const Nist_tests90b = () => {
           const fileName = `report-${currentJobIdT5}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("reports")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-
-          } else {
-
-
-            // ✅ Only save columns that exist in results table
-            await supabase
-              .from("results2")
-              .update({ report_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 5)           // condition 2
-          }
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3365,36 +3122,7 @@ const Nist_tests90b = () => {
         });
     } else if (type === "graph") {
 
-      const { data: existingResult, error: fetchError } = await supabase
-        .from("results2")
-        .select("report_path")
-        .eq("user_id", userId)
-        .eq("line", 5)
-        .maybeSingle();
-
-      if (fetchError) {
-
-      }
-
-      if (existingResult && existingResult.report_path) {
-
-
-        // ✅ 2. Get a signed URL for direct access
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("reports")
-          .createSignedUrl(existingResult.report_path, 60 * 5); // URL valid for 5 minutes
-
-        if (urlError) {
-
-          return;
-        }
-
-        // ✅ 3. Open the existing graph
-        window.open(signedUrlData.signedUrl, "_blank");
-        setLoadingProgress5Rep(100);
-        return; // stop here, no need to regenerate
-      }
-
+     
       let progressInterval;
       setLoadingProgress5Gr(0);
 
@@ -3414,7 +3142,7 @@ const Nist_tests90b = () => {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5 }),
+        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5,line_number:5 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3426,24 +3154,7 @@ const Nist_tests90b = () => {
           const fileName = `graph-${currentJobIdT5}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          const { data, error } = await supabase.storage
-            .from("graphs")
-            .upload(`jobs/${fileName}`, file, { upsert: false });
-
-          if (error) {
-
-          } else {
-
-
-            // ✅ Only save columns that exist
-            await supabase
-              .from("results2")
-              .update({ graph_path: data.path })
-              .eq("user_id", userId)   // condition 1
-              .eq("line", 5)           // condition 2
-
-          }
-
+        
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3715,6 +3426,32 @@ const Nist_tests90b = () => {
                           </Typography>
                         </Box>
                       )}
+                    </Box>
+                    <Box position="relative" display="inline-flex">
+                      <Button
+                        variant="contained"
+                        onClick={() => downloadNist90bOutput(1)}
+                        disabled={loadingProgress < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[500],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Output
+                      </Button>
                     </Box>
 
                   </Box>
@@ -4042,6 +3779,30 @@ const Nist_tests90b = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                        variant="contained"
+                        onClick={() => downloadNist90bOutput(2)}
+                        disabled={loadingProgress2 < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[500],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Output
+                      </Button>
                   </Box>
                 </Box>
               </td>
@@ -4366,6 +4127,30 @@ const Nist_tests90b = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                        variant="contained"
+                        onClick={() => downloadNist90bOutput(3)}
+                        disabled={loadingProgress3 < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[500],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Output
+                      </Button>
                   </Box>
                 </Box>
               </td>
@@ -4689,6 +4474,30 @@ const Nist_tests90b = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                        variant="contained"
+                        onClick={() => downloadNist90bOutput(4)}
+                        disabled={loadingProgress4 < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[500],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Output
+                      </Button>
                   </Box>
                 </Box>
               </td>
@@ -5013,6 +4822,30 @@ const Nist_tests90b = () => {
                         </Box>
                       )}
                     </Box>
+                    <Button
+                        variant="contained"
+                        onClick={() => downloadNist90bOutput(5)}
+                        disabled={loadingProgress5 < 100}
+                        sx={{
+                          backgroundColor: colors.redAccent[800],
+                          color: colors.grey[100],
+                          textTransform: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          transition: 'all 0.3s ease',
+                          "&:hover": {
+                            backgroundColor: colors.redAccent[500],
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                          },
+                          "&:disabled": {
+                            backgroundColor: colors.grey[700],
+                            color: colors.grey[500],
+                          }
+                        }}
+                      >
+                        Download Output
+                      </Button>
                   </Box>
                 </Box>
               </td>
@@ -6736,157 +6569,237 @@ const Nist_tests90b = () => {
         </Box>
       </Box>
       <Box
-        sx={{
-          background: "linear-gradient(135deg, #1F2A40 30%, #29314F 100%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "250px",
-          textAlign: "center",
+  sx={{
+    background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1F2A40 50%, #0d1b2a 100%)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "280px",
+    textAlign: "center",
+    mt: 2,
+    boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.4)",
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: "20px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    '&:hover': {
+      boxShadow: "0px 12px 40px rgba(0, 0, 0, 0.6)",
+      transform: "translateY(-2px)",
+    },
+    transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+    '&::before': {
+      content: '""',
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: "linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
+      opacity: 0,
+      transition: "opacity 0.4s ease",
+    },
+    '&:hover::before': {
+      opacity: 1,
+    }
+  }}
+>
+  {/* Animated background grid */}
+  <Box
+    sx={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundImage: `
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+      `,
+      backgroundSize: "50px 50px",
+      animation: "gridMove 20s linear infinite",
+      opacity: 0.4,
+    }}
+  />
 
-          mt: 2,
-          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.3)",
-          position: "relative",
-          overflow: "hidden",
-          "&:hover": {
-            boxShadow: "0px 8px 30px rgba(0, 0, 0, 0.4)",
-          },
-          transition: "all 0.5s ease",
-        }}
-      >
-        {/* Animated background elements */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: -50,
-            left: -50,
-            width: 100,
-            height: 100,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)",
-            animation: "float 15s infinite ease-in-out",
-          }}
-        />
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: -30,
-            right: -30,
-            width: 120,
-            height: 120,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%)",
-            animation: "float 18s infinite ease-in-out 2s",
-          }}
-        />
+  {/* Floating particles */}
+  {[...Array(6)].map((_, i) => (
+    <Box
+      key={i}
+      sx={{
+        position: "absolute",
+        width: 4,
+        height: 4,
+        borderRadius: "50%",
+        background: "rgba(255, 255, 255, 0.6)",
+        top: `${Math.random() * 100}%`,
+        left: `${Math.random() * 100}%`,
+        animation: `floatParticle ${15 + i * 2}s infinite ease-in-out ${i * 0.5}s`,
+        boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
+      }}
+    />
+  ))}
 
-        {/* Floating AI Elements with animation */}
-        <AutoAwesomeIcon
-          sx={{
-            position: "absolute",
-            top: 20,
-            left: 30,
-            fontSize: 40,
-            color: "rgba(255, 255, 255, 0.3)",
-            animation: "pulse 4s infinite ease-in-out",
-          }}
-        />
-        <AutoAwesomeIcon
-          sx={{
-            position: "absolute",
-            bottom: 20,
-            right: 30,
-            fontSize: 40,
-            color: "rgba(255, 255, 255, 0.3)",
-            animation: "pulse 5s infinite ease-in-out 1s",
-          }}
-        />
+  {/* Main content container */}
+  <Box sx={{ position: "relative", zIndex: 2 }}>
+    {/* Animated Gemini Logo */}
+    <Box
+      component="img"
+      src="/image.png"
+      alt="Gemini Logo"
+      sx={{
+        width: 70,
+        height: "auto",
+        mb: 1.5,
+        borderRadius: "16px",
+        transition: "all 0.5s ease",
+        filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))",
+        animation: "logoGlow 4s infinite ease-in-out",
+        '&:hover': {
+          transform: "scale(1.15) rotate(5deg)",
+          filter: "drop-shadow(0 6px 20px rgba(230, 57, 70, 0.4))",
+        }
+      }}
+    />
 
-        {/* Animated Gemini Logo */}
-        <Box
-          component="img"
-          src="/image.png"
-          alt="Gemini Logo"
-          sx={{
-            width: 80,
-            height: "auto",
-            mb: 2,
-            borderRadius: "12px",
-            transition: "all 0.5s ease",
-            transform: "translateY(0)",
-            animation: "floatLogo 6s infinite ease-in-out",
-            "&:hover": {
-              transform: "scale(1.1) rotate(5deg)",
-            },
-          }}
-        />
+    {/* Title text */}
+    <Typography
+      variant="h6"
+      sx={{
+        color: "rgba(255, 255, 255, 0.9)",
+        fontWeight: 600,
+        mb: 1,
+        fontSize: "1.1rem",
+        textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+      }}
+    >
+      Advanced AI Analysis
+    </Typography>
 
-        {/* Button with enhanced animation */}
-        <Button
-          variant="contained"
-          onClick={() => {
-            window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
-          }}
-          sx={{
-            backgroundColor: "#E63946",
-            color: "white",
-            textTransform: "none",
-            padding: "15px 40px",
-            fontSize: "1.5rem",
-            width: "50%",
-            maxWidth: "320px",
-            borderRadius: "8px",
-            transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
-            position: "relative",
-            overflow: "hidden",
-            zIndex: 1,
-            "&:hover": {
-              backgroundColor: "#F77F00",
-              transform: "scale(1.05)",
-              boxShadow: "0px 8px 20px rgba(255, 99, 71, 0.6)",
-            },
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: "-100%",
-              width: "100%",
-              height: "100%",
-              background:
-                "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-              transition: "all 0.7s ease",
-              zIndex: -1,
-            },
-            "&:hover::before": {
-              left: "100%",
-            },
-          }}
-        >
-          Analyze with AI
-        </Button>
+    {/* Description */}
+    <Typography
+      variant="body2"
+      sx={{
+        color: "rgba(255, 255, 255, 0.7)",
+        mb: 2.5,
+        maxWidth: "300px",
+        fontSize: "0.85rem",
+        lineHeight: 1.4,
+      }}
+    >
+      Upload your test reports for comprehensive AI-powered analysis and insights
+    </Typography>
 
-        {/* Glow effect on hover */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background:
-              "radial-gradient(circle at center, rgba(230, 57, 70, 0.1) 0%, transparent 70%)",
-            opacity: 0,
-            transition: "opacity 0.5s ease",
-            pointerEvents: "none",
-            "&:hover": {
-              opacity: 1,
-            },
-          }}
-        />
-      </Box>
+    {/* Enhanced Button */}
+    <Button
+      variant="contained"
+      onClick={() => {
+        window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
+      }}
+      startIcon={<AutoAwesomeIcon sx={{ fontSize: "1.2rem" }} />}
+      sx={{
+        background: "linear-gradient(135deg, #E63946 0%, #F77F00 100%)",
+        color: "white",
+        textTransform: "none",
+        padding: "12px 36px",
+        fontSize: "1.1rem",
+        fontWeight: 600,
+        width: "auto",
+        minWidth: "220px",
+        borderRadius: "12px",
+        transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+        position: "relative",
+        overflow: "hidden",
+        zIndex: 1,
+        boxShadow: "0 4px 15px rgba(230, 57, 70, 0.4)",
+        '&:hover': {
+          background: "linear-gradient(135deg, #F77F00 0%, #E63946 100%)",
+          transform: "scale(1.05) translateY(-2px)",
+          boxShadow: "0 8px 25px rgba(230, 57, 70, 0.6)",
+        },
+        '&::before': {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: "-100%",
+          width: "100%",
+          height: "100%",
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+          transition: "all 0.8s ease",
+          zIndex: -1,
+        },
+        '&:hover::before': {
+          left: "100%",
+        },
+        '&::after': {
+          content: '""',
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: "0",
+          height: "0",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.2)",
+          transform: "translate(-50%, -50%)",
+          transition: "all 0.6s ease",
+          zIndex: -1,
+        },
+        '&:active::after': {
+          width: "300px",
+          height: "300px",
+        }
+      }}
+    >
+      Analyze with AI
+    </Button>
+  </Box>
+
+  {/* Corner accents */}
+  <Box
+    sx={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "60px",
+      height: "60px",
+      borderTop: "2px solid rgba(230, 57, 70, 0.5)",
+      borderLeft: "2px solid rgba(230, 57, 70, 0.5)",
+      borderTopLeftRadius: "20px",
+    }}
+  />
+  <Box
+    sx={{
+      position: "absolute",
+      bottom: 0,
+      right: 0,
+      width: "60px",
+      height: "60px",
+      borderBottom: "2px solid rgba(230, 57, 70, 0.5)",
+      borderRight: "2px solid rgba(230, 57, 70, 0.5)",
+      borderBottomRightRadius: "20px",
+    }}
+  />
+
+  {/* Add these keyframes to your global CSS */}
+  <style jsx>{`
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+    
+    @keyframes floatParticle {
+      0%, 100% { transform: translateY(0px) translateX(0px); }
+      25% { transform: translateY(-20px) translateX(10px); }
+      50% { transform: translateY(-10px) translateX(20px); }
+      75% { transform: translateY(-15px) translateX(-10px); }
+    }
+    
+    @keyframes logoGlow {
+      0%, 100% { filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3)); }
+      50% { filter: drop-shadow(0 4px 20px rgba(230, 57, 70, 0.3)); }
+    }
+  `}</style>
+</Box>
     </Box>
   );
 };

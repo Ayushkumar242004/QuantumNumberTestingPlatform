@@ -87,34 +87,17 @@ urlpatterns = [
     path("get_progress90b/<uuid:job_id>/", views.get_progress90b, name="get_progress90b"),
 
 
-    path('run-nist/', views.run_nist_tests, name='run_nist_tests'),
+    path('run_nist/', views.run_nist_tests, name='run_nist_tests'),
     path('aggregate-stats/', views.aggregate_stats, name='aggregate_stats'),
     path("nist90b_run/", views.run_nist90b_on_bin, name="nist90b_run"),
+
+    path('download_nist90b/', views.download_nist90b_output, name='download_nist90b_output'),
+    path('download_nist22b/', views.aggregate_stats, name='download_nist22b_output'),
 
     path('generate_final_ans_dieharder/', views.generate_final_ans_dieharder, name='generate_final_ans_dieharder'),
     path("get_progress_dieharder/<uuid:job_id>/", views.get_progress_dieharder, name="get_progress_dieharder"),
     path("get_output_dieharder/<uuid:job_id>/", views.get_output_dieharder, name="get_output_dieharder"),
 
-    # dieharder tests
-    path('minDist-test/', DieharderMinDistTestView.as_view()),
-    path('operm5-test/', DieharderOperm5TestView.as_view()),
-    path('birthday-test/', DieharderBirthdayTestView.as_view()),
-    path('parking-test/', DieharderParkingLotTestView.as_view()),
-    path('squeeze-test/', DieharderSqueezeTestView.as_view()),
-    path('countOne-test/', DieharderCountOneTestView.as_view()),
-    path('countOneByte-test/', DieharderCountOneStreamTestView.as_view()),
-    path('oqso-test/', DieharderOQSOTestView.as_view()),
-    path('dna-test/', DieharderDnaTestView.as_view()),
-    path('opso-test/', DieharderOPSOTestView.as_view()),
-    path('bitstream-test/', DieharderBitstreamTestView.as_view()),
-    path('6x8rank-test/', Dieharder6x8RankTestView.as_view()),
-    path('tsang-test/', DieharderTsangTestView.as_view()),
-    path('craps-test/', DieharderCrapsTestView.as_view()),
-    path('stsruns-test/', DieharderStsRunsTestView.as_view()),
-    path('stsmonobit-test/', DieharderStsMonoTestView.as_view()),
-    path('laggedSum-test/', DieharderLaggedTestView.as_view()),
-    path('32rank-test/', Dieharder32RankTestView.as_view()),
-    path('x-test/', DieharderxTestView.as_view()),
    
 ]
 
