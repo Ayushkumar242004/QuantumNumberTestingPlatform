@@ -77,11 +77,11 @@ const Nist_tests = () => {
   const fileInputRef10 = useRef(null);
 
 
-  const [result, setResult] = useState(null);
-  const [result2, setResult2] = useState(null);
-  const [result3, setResult3] = useState(null);
-  const [result4, setResult4] = useState(null);
-  const [result5, setResult5] = useState(null);
+  const [result, setResult] = useState("");
+  const [result2, setResult2] = useState("");
+  const [result3, setResult3] = useState("");
+  const [result4, setResult4] = useState("");
+  const [result5, setResult5] = useState("");
   const [result6, setResult6] = useState(null);
   const [result7, setResult7] = useState(null);
   const [result8, setResult8] = useState(null);
@@ -551,7 +551,7 @@ const Nist_tests = () => {
     setBinaryInput("");
     setScheduledTime("");
     setDebouncedScheduledTime("");
-    setResult(null);
+    setResult("");
     setFileName("");
     setUploadTime("");
     setLoadingProgress(0);
@@ -626,7 +626,7 @@ const Nist_tests = () => {
     setBinaryInput2(""); // Clear binary input
     setScheduledTime2(""); // Clear scheduled time
     setDebouncedScheduledTime2(""); // Clear debounced scheduled time
-    setResult2(null); // Clear result
+    setResult2(""); // Clear result
     setFileName2(""); // Clear filename
     setUploadTime2(""); // Clear upload time
     setLoadingProgress2(0); // Reset progress bar
@@ -708,7 +708,7 @@ const Nist_tests = () => {
     setBinaryInput3(""); // Clear binary input
     setScheduledTime3(""); // Clear scheduled time
     setDebouncedScheduledTime3(""); // Clear debounced scheduled time
-    setResult3(null); // Clear result
+    setResult3(""); // Clear result
     setFileName3(""); // Clear filename
     setUploadTime3(""); // Clear upload time
     setLoadingProgress3(0); // Reset progress bar
@@ -791,7 +791,7 @@ const Nist_tests = () => {
     setBinaryInput4("");
     setScheduledTime4("");
     setDebouncedScheduledTime4("");
-    setResult4(null);
+    setResult4("");
     setFileName4("");
     setUploadTime4("");
     setLoadingProgress4(0);
@@ -875,7 +875,7 @@ const Nist_tests = () => {
     setBinaryInput5("");
     setScheduledTime5("");
     setDebouncedScheduledTime5("");
-    setResult5(null);
+    setResult5("");
     setFileName5("");
     setUploadTime5("");
     setLoadingProgress5(0);
@@ -2788,7 +2788,7 @@ const Nist_tests = () => {
   const downloadStatsFile = async () => {
     try {
      
-      const response = await axios.get("http://localhost:8000/download_nist22b/", {
+      const response = await axios.get(`${REACT_APP_BASE_URL}/download_nist22b/`, {
         responseType: "text", // ✅ important
       });
 

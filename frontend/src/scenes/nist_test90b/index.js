@@ -64,11 +64,11 @@ const Nist_tests90b = () => {
   const fileInputRef_nine = useRef(null);
   const fileInputRef10 = useRef(null);
 
-  const [result, setResult] = useState(null);
-  const [result2, setResult2] = useState(null);
-  const [result3, setResult3] = useState(null);
-  const [result4, setResult4] = useState(null);
-  const [result5, setResult5] = useState(null);
+  const [result, setResult] = useState("");
+  const [result2, setResult2] = useState("");
+  const [result3, setResult3] = useState("");
+  const [result4, setResult4] = useState("");
+  const [result5, setResult5] = useState("");
   const [result6, setResult6] = useState(null);
   const [result7, setResult7] = useState(null);
   const [result8, setResult8] = useState(null);
@@ -773,7 +773,7 @@ const Nist_tests90b = () => {
 
     // Reset state
     setBinaryInput("");
-    setResult(null);
+    setResult("");
     setFileName("");
     setUploadTime("");
     setLoadingProgress(0);
@@ -862,7 +862,7 @@ const Nist_tests90b = () => {
     setBinaryInput2(""); // Clear binary input
     setScheduledTime2(""); // Clear scheduled time
     setDebouncedScheduledTime2(""); // Clear debounced scheduled time
-    setResult2(null); // Clear result
+    setResult2(""); // Clear result
     setFileName2(""); // Clear filename
     setUploadTime2(""); // Clear upload time
     setLoadingProgress2(0); // Reset progress bar
@@ -953,7 +953,7 @@ const Nist_tests90b = () => {
     setBinaryInput3(""); // Clear binary input
     setScheduledTime3(""); // Clear scheduled time
     setDebouncedScheduledTime3(""); // Clear debounced scheduled time
-    setResult3(null); // Clear result
+    setResult3(""); // Clear result
     setFileName3(""); // Clear filename
     setUploadTime3(""); // Clear upload time
     setLoadingProgress3(0); // Reset progress bar
@@ -1043,7 +1043,7 @@ const Nist_tests90b = () => {
     setBinaryInput4(""); // Clear binary input
     setScheduledTime4(""); // Clear scheduled time
     setDebouncedScheduledTime4(""); // Clear debounced scheduled time
-    setResult4(null); // Clear result
+    setResult4(""); // Clear result
     setFileName4(""); // Clear filename
     setUploadTime4(""); // Clear upload time
     setLoadingProgress4(0); // Reset progress bar
@@ -1129,7 +1129,7 @@ const Nist_tests90b = () => {
     setBinaryInput5(""); // Clear binary input
     setScheduledTime5(""); // Clear scheduled time
     setDebouncedScheduledTime5(""); // Clear debounced scheduled time
-    setResult5(null); // Clear result
+    setResult5(""); // Clear result
     setFileName5(""); // Clear filename
     setUploadTime5(""); // Clear upload time
     setLoadingProgress5(0); // Reset progress bar
@@ -2663,44 +2663,42 @@ const Nist_tests90b = () => {
       }
     };
   }, [selectedFile5, debouncedScheduledTime5]);
-  
 
   const downloadNist90bOutput = async (lineNumber = 1) => {
-    try {
-      const url = `/download_nist90b/?line=${lineNumber}`;
+  try {
+    const url = `${REACT_APP_BASE_URL}/download_nist90b/?line=${lineNumber}`;
 
-      const response = await fetch(url, {
-        method: 'GET',
-      });
+    const response = await fetch(url, {
+      method: 'GET',
+    });
 
-      if (!response.ok) {
-        alert('No cached output found or an error occurred.');
-        return;
-      }
-
-      const text = await response.text();
-
-      // Create a blob from the text
-      const blob = new Blob([text], { type: 'text/plain' });
-      const downloadUrl = window.URL.createObjectURL(blob);
-
-      // Create a temporary link element
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `${lineNumber}_nist90b_output.txt`;
-
-      // Append to body and trigger click
-      document.body.appendChild(link);
-      link.click();
-
-      // Clean up
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
-    } catch (error) {
-      console.error('Error downloading NIST90B output:', error);
+    if (!response.ok) {
+      alert('No cached output found or an error occurred.');
+      return;
     }
-  };
 
+    const text = await response.text();
+
+    // Create a blob from the text
+    const blob = new Blob([text], { type: 'text/plain' });
+    const downloadUrl = window.URL.createObjectURL(blob);
+
+    // Create a temporary link element
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `${lineNumber}_nist90b_output.txt`;
+
+    // Append to body and trigger click
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error('Error downloading NIST90B output:', error);
+  }
+};
 
 
   const handleButtonClick = async (type) => {

@@ -1,6 +1,6 @@
 ________________________________________________________________________________
 
-		FILE = /home/ayush/Documents/all_material_for_randomness/randomness_anshi/QuantumNumberTestingPlatform/backend/myproject/home/sts-2.1.2/908fa7a9-723e-43ea-8c75-15843a2fcad9_testfile.bin		ALPHA = 0.0100
+		FILE = /home/rao/Documents/test2/backend/myproject/home/sts-2.1.2/ca05ee21-34d8-4f36-ac07-ffe2767e9d4e_binary_5mb.bin		ALPHA = 0.0100
 ________________________________________________________________________________
 
-		BITSREAD = 8388608 0s = 4195422 1s = 4193186
+		BITSREAD = 41943040 0s = 20968210 1s = 20974830

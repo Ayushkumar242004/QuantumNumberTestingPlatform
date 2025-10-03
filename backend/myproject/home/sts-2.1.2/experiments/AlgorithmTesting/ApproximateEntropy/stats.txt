@@ -3,12 +3,12 @@
 		COMPUTATIONAL INFORMATION:
 		--------------------------------------------
 		(a) m (block length)    = 10
-		(b) n (sequence length) = 8388608
-		(c) Chi^2               = 937.702061
-		(d) Phi(m)	       = -6.931410
-		(e) Phi(m+1)	       = -7.624502
-		(f) ApEn                = 0.693091
+		(b) n (sequence length) = 41943040
+		(c) Chi^2               = 1049.340192
+		(d) Phi(m)	       = -6.931459
+		(e) Phi(m+1)	       = -7.624594
+		(f) ApEn                = 0.693135
 		(g) Log(2)              = 0.693147
 		--------------------------------------------
-SUCCESS		p_value = 0.974320
+SUCCESS		p_value = 0.284307
 

@@ -89,11 +89,11 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const fileInputRef10 = useRef(null);
 
 
-  const [result, setResult] = useState(null);
-  const [result2, setResult2] = useState(null);
-  const [result3, setResult3] = useState(null);
-  const [result4, setResult4] = useState(null);
-  const [result5, setResult5] = useState(null);
+  const [result, setResult] = useState("");
+  const [result2, setResult2] = useState("");
+  const [result3, setResult3] = useState("");
+  const [result4, setResult4] = useState("");
+  const [result5, setResult5] = useState("");
   const [result6, setResult6] = useState(null);
   const [result7, setResult7] = useState(null);
   const [result8, setResult8] = useState(null);
@@ -761,27 +761,27 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const [showRedButton10, setShowRedButton10] = useState(false);
 
   const handleFileUpload = () => {
-   setShowRedButton(true)
+  //  setShowRedButton(true)
    setIsEnabled(true);
     fileInputRef.current.click();
   };
   const handleFileUpload2 = () => {
-    setShowRedButton2(true)
+    // setShowRedButton2(true)
     setIsEnabled2(true);
     fileInputRef2.current.click();
   };
   const handleFileUpload3 = () => {
-    setShowRedButton3(true)
+    // setShowRedButton3(true)
     setIsEnabled3(true);
     fileInputRef3.current.click();
   };
   const handleFileUpload4 = () => {
-    setShowRedButton4(true)
+    // setShowRedButton4(true)
     setIsEnabled4(true);
     fileInputRef4.current.click();
   };
   const handleFileUpload5 = () => {
-   setShowRedButton5(true)
+  //  setShowRedButton5(true)
    setIsEnabled5(true);
     fileInputRef5.current.click();
   };
@@ -815,8 +815,8 @@ const isTxt = fileName.endsWith(".txt");
 
 
   
-    if (!isBin && !isTxt) {
-      alert("Please upload a .bin or .txt file.");
+    if (!isBin ) {
+      alert("Please upload a .bin file.");
       return;
     }
   
@@ -830,7 +830,7 @@ const isTxt = fileName.endsWith(".txt");
   
     // Reset state
     setBinaryInput("");
-    setResult(null);
+    setResult("");
     setFileName("");
     setUploadTime("");
     setLoadingProgress(0);
@@ -904,8 +904,8 @@ const isTxt = fileName.endsWith(".txt");
 
 
   
-    if (!isBin && !isTxt) {
-      alert("Please upload a .bin or .txt file.");
+    if (!isBin ) {
+      alert("Please upload a .bin file.");
       return;
     }
   
@@ -924,7 +924,7 @@ const isTxt = fileName.endsWith(".txt");
     setBinaryInput2("");
     setScheduledTime2("");
     setDebouncedScheduledTime2("");
-    setResult2(null);
+    setResult2("");
     setFileName2("");
     setUploadTime2("");
     setLoadingProgress2(0);
@@ -999,8 +999,8 @@ const isTxt = fileName.endsWith(".txt");
 
 
   
-    if (!isBin && !isTxt) {
-      alert("Please upload a .bin or .txt file.");
+    if (!isBin ) {
+      alert("Please upload a .bin file.");
       return;
     }
   
@@ -1024,7 +1024,7 @@ const isTxt = fileName.endsWith(".txt");
     setBinaryInput3("");
     setScheduledTime3("");
     setDebouncedScheduledTime3("");
-    setResult3(null);
+    setResult3("");
     setFileName3("");
     setUploadTime3("");
     setLoadingProgress3(0);
@@ -1104,8 +1104,8 @@ const isTxt = fileName.endsWith(".txt");
 
 
   
-    if (!isBin && !isTxt) {
-      alert("Please upload a .bin or .txt file.");
+    if (!isBin ) {
+      alert("Please upload a .bin file.");
       return;
     }
   
@@ -1124,7 +1124,7 @@ const isTxt = fileName.endsWith(".txt");
     setBinaryInput4("");
     setScheduledTime4("");
     setDebouncedScheduledTime4("");
-    setResult4(null);
+    setResult4("");
     setFileName4("");
     setUploadTime4("");
     setLoadingProgress4(0);
@@ -1202,8 +1202,8 @@ const isTxt = fileName.endsWith(".txt");
 
 
   
-    if (!isBin && !isTxt) {
-      alert("Please upload a .bin or .txt file.");
+    if (!isBin ) {
+      alert("Please upload a .bin file.");
       return;
     }
   
@@ -1222,7 +1222,7 @@ const isTxt = fileName.endsWith(".txt");
     setBinaryInput5("");
     setScheduledTime5("");
     setDebouncedScheduledTime5("");
-    setResult5(null);
+    setResult5("");
     setFileName5("");
     setUploadTime5("");
     setLoadingProgress5(0);
@@ -1644,8 +1644,8 @@ useEffect(() => {
     
     const lineNo = 1;
     if (result) {
-      localStorage.setItem('resultFetchedFromSupabase', 'true');
-      setLoadingProgress(100);
+      // localStorage.setItem('resultFetchedFromSupabase', 'true');
+      // setLoadingProgress(100);
       return;
     }
     setLoadingProgress(0);
@@ -1891,8 +1891,8 @@ useEffect(() => {
     const lineNo = 2;
 
     if (result2) {
-      localStorage.setItem('resultFetchedFromSupabased2', 'true');
-      setLoadingProgress2(100);
+      // localStorage.setItem('resultFetchedFromSupabased2', 'true');
+      // setLoadingProgress2(100);
       return;
     }
 
@@ -2131,8 +2131,8 @@ useEffect(() => {
     const lineNo = 3;
 
     if (result3) {
-      localStorage.setItem('resultFetchedFromSupabased2', 'true');
-      setLoadingProgress3(100);
+      // localStorage.setItem('resultFetchedFromSupabased2', 'true');
+      // setLoadingProgress3(100);
       return;
     }
 
@@ -2371,8 +2371,8 @@ useEffect(() => {
     const lineNo = 4;
 
     if (result4) {
-      localStorage.setItem('resultFetchedFromSupabased2', 'true');
-      setLoadingProgress4(100);
+      // localStorage.setItem('resultFetchedFromSupabased2', 'true');
+      // setLoadingProgress4(100);
       return;
     }
 
@@ -2617,8 +2617,8 @@ useEffect(() => {
     const lineNo = 5;
 
     if (result5) {
-      localStorage.setItem('resultFetchedFromSupabased2', 'true');
-      setLoadingProgress5(100);
+      // localStorage.setItem('resultFetchedFromSupabased2', 'true');
+      // setLoadingProgress5(100);
       return;
     }
 
