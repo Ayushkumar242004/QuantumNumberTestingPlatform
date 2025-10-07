@@ -2,15 +2,15 @@
 		--------------------------------------------
 		COMPUTATIONAL INFORMATION:
 		--------------------------------------------
-		(a) L         = 13
-		(b) Q         = 81920
-		(c) K         = 8306688
-		(d) sum       = 101075275.356705
-		(e) sigma     = 0.000416
-		(f) variance  = 3.410000
-		(g) exp_value = 12.168070
-		(h) phi       = 12.167939
-		(i) WARNING:  0 bits were discarded.
+		(a) L         = 9
+		(b) Q         = 5120
+		(c) K         = 926947
+		(d) sum       = 7580042.080944
+		(e) sigma     = 0.001165
+		(f) variance  = 3.311000
+		(g) exp_value = 8.176425
+		(h) phi       = 8.177428
+		(i) WARNING:  5 bits were discarded.
 		-----------------------------------------
-SUCCESS		p_value = 0.753411
+SUCCESS		p_value = 0.389206
 

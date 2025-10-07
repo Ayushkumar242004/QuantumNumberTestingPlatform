@@ -534,7 +534,7 @@ const Nist_tests = () => {
   const handleFileChange = async (event) => {
     setLoadingProgressGr(0);
     setLoadingProgressRep(0);
-    console.log("hi");
+    
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -542,7 +542,7 @@ const Nist_tests = () => {
       return;
     }
     setSelectedFile(selectedFile);
-    console.log("hi2");
+  
 
     const userId = await fetchUserId();
     if (!userId) return;
@@ -641,17 +641,7 @@ const Nist_tests = () => {
       const decoder = new TextDecoder();
       let binaryString = "";
 
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to binary string
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume .txt file
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
-
+     
       // Update binaryInput state with the processed binary string
       setBinaryInput2(binaryString);
 
@@ -722,16 +712,7 @@ const Nist_tests = () => {
       const decoder = new TextDecoder();
       let binaryString = "";
 
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to binary string
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume .txt file
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
+      
 
       // Update binaryInput state with the processed binary string
       setBinaryInput3(binaryString);
@@ -806,17 +787,7 @@ const Nist_tests = () => {
       const decoder = new TextDecoder();
       let binaryString = "";
 
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to binary string
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume .txt file
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
-
+    
       // Update binaryInput state with the processed binary string
       setBinaryInput4(binaryString);
 
@@ -890,16 +861,7 @@ const Nist_tests = () => {
       const decoder = new TextDecoder();
       let binaryString = "";
 
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to binary string
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume .txt file
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
+      
 
       // Update binaryInput state with the processed binary string
       setBinaryInput5(binaryString);

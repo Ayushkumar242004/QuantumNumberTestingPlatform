@@ -787,31 +787,7 @@ const Nist_tests90b = () => {
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime(currentTime);
 
-    try {
-      if (isBin) {
-        // BIN file logic (unchanged)
-        const buffer = await selectedFile.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        const binaryData = Array.from(bytes)
-          .map(byte => byte.toString(2).padStart(8, '0'))
-          .join('');
-        setBinaryInput(binaryData);
-      } else if (isTxt) {
-        // TXT file logic (newly added)
-        const text = await selectedFile.text();
-        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
-        if (binaryString.length === 0) {
-          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
-          return;
-        }
-        setBinaryInput(binaryString);
-      }
-    } catch (error) {
-
-      alert("Failed to extract binary data from the file.");
-      return;
-    }
-
+   
     // Supabase cleanup
     try {
       localStorage.setItem('resultFetchedFromSupabase3', 'false');
@@ -876,16 +852,7 @@ const Nist_tests90b = () => {
       const byteArray = new Uint8Array(binaryData);
       let binaryString = "";
 
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to its binary representation (8 bits)
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume it's a .txt file containing binary text
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
+     
 
       setBinaryInput2(binaryString);
 
@@ -967,17 +934,7 @@ const Nist_tests90b = () => {
       const byteArray = new Uint8Array(binaryData);
       let binaryString = "";
 
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to its binary representation (8 bits)
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume it's a .txt file containing binary text
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
-
+   
       setBinaryInput3(binaryString);
       // Update binaryInput state with new binary data
 
@@ -1056,16 +1013,6 @@ const Nist_tests90b = () => {
       const byteArray = new Uint8Array(binaryData);
       let binaryString = "";
 
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to its binary representation (8 bits)
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume it's a .txt file containing binary text
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
 
       setBinaryInput4(binaryString);
 
@@ -1141,17 +1088,6 @@ const Nist_tests90b = () => {
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       let binaryString = "";
-
-      if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-        // Convert each byte to its binary representation (8 bits)
-        for (let i = 0; i < byteArray.length; i++) {
-          binaryString += byteArray[i].toString(2).padStart(8, '0');
-        }
-      } else {
-        // Assume it's a .txt file containing binary text
-        const decoder = new TextDecoder();
-        binaryString = decoder.decode(byteArray).trim();
-      }
 
       setBinaryInput5(binaryString);
 
@@ -1599,7 +1535,7 @@ const Nist_tests90b = () => {
     setLoadingProgress(0);
     let progressIntervalId;
  
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
 
       if (progress === 0 && selectedFile && !binaryInsertedRef.current) {
@@ -1839,7 +1775,7 @@ const Nist_tests90b = () => {
     setLoadingProgress2(0);
     let progressIntervalId;
   
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
   
       if (progress === 0 && selectedFile2 && !binaryInsertedRef2.current) {
@@ -2067,7 +2003,7 @@ const Nist_tests90b = () => {
     setLoadingProgress3(0);
     let progressIntervalId;
   
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
   
       if (progress === 0 && selectedFile3 && !binaryInsertedRef3.current) {
@@ -2295,7 +2231,7 @@ const Nist_tests90b = () => {
     setLoadingProgress4(0);
     let progressIntervalId;
   
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
   
       if (progress === 0 && selectedFile4 && !binaryInsertedRef4.current) {
@@ -2523,7 +2459,7 @@ const Nist_tests90b = () => {
     setLoadingProgress5(0);
     let progressIntervalId;
   
-    const upsertProgress = async (progress, userId, result = null) => {
+    const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
   
       if (progress === 0 && selectedFile5 && !binaryInsertedRef5.current) {
