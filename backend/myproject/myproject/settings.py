@@ -235,13 +235,11 @@ SIMPLE_JWT = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-
 # settings.py
 
 # Celery Configuration
 CELERY_BROKER_URL = 'redis://100.97.115.11:6379/0'
 CELERY_RESULT_BACKEND = 'redis://100.97.115.11:6379/0'
-
 
 # Celery Configuration Options
 CELERY_TIMEZONE = "UTC"
@@ -249,16 +247,56 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_RESULT_EXPIRES = 3600
 
-# Optional: Add these if you want to use specific queues
+# Concurrency and Queue Settings
+CELERY_WORKER_CONCURRENCY = 1  # Only one worker process for NIST tests
+CELERY_TASK_ALWAYS_EAGER = False
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1  # Process one task at a time
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 100  # Prevent memory leaks
+
+# Queue configuration
 CELERY_TASK_DEFAULT_QUEUE = 'default'
 CELERY_TASK_DEFAULT_EXCHANGE = 'default'
 CELERY_TASK_DEFAULT_ROUTING_KEY = 'default'
 
+# Task routes for different task types
+CELERY_TASK_ROUTES = {
+    'accounts.tasks.*': {'queue': 'accounts'},
+    'reports.tasks.*': {'queue': 'reports'},
+    '*.execute_nist_tests': {'queue': 'nist_tests'},
+}
 
-@app.task(bind=True)
-def debug_task(self):
-    print(f'Request: {self.request!r}')
+# Rate limiting for heavy tasks
+CELERY_TASK_ANNOTATIONS = {
+    '*.execute_nist_tests': {
+        'rate_limit': '1/m',  # Adjust based on your server capacity
+    },
+    '*': {
+        'rate_limit': '10/m'
+    }
+}
 
+# Redis connection pool settings
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'visibility_timeout': 3600,
+    'fanout_prefix': True,
+    'fanout_patterns': True,
+    'socket_keepalive': True,
+    'socket_timeout': 5,
+    'retry_on_timeout': True,
+    'max_connections': 10,
+}
+
+# Result backend settings
+CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
+    'retry_policy': {
+        'timeout': 5.0
+    },
+    'master_name': 'mymaster',
+}
 
 CACHES = {
     "default": {
