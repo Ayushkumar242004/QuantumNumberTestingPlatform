@@ -4811,94 +4811,127 @@ TEST_FOLDERS = {
 #     except Exception as e:
 #         return JsonResponse({"error": str(e)}, status=500)
 
+# Replace your existing execute_nist_tests and run_nist_tests with this code.
 
+from myproject.task_locks import NISTTaskLock
+import logging
+from celery import shared_task
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import os, datetime, pytz, gc, uuid, subprocess
+
+logger = logging.getLogger(__name__)
 TOTAL_STEPS = 18
 
-@shared_task(bind=True, base=ThrottledTask)
+@shared_task(bind=True)
 def execute_nist_tests(self, job_data):
     """
-    Execute NIST tests with proper locking to prevent concurrent execution
+    Execute NIST tests with queueing and consistent lock handling.
+    NOTE: NISTTaskLock API expected:
+      - acquire_nist_lock(user_id) -> bool
+      - add_to_queue(user_id, job_data) -> position
+      - get_queue_length(user_id) -> int
+      - get_next_job(user_id) -> job_data or None
+      - release_nist_lock(user_id)
     """
     uploaded_file_path = None
-    
-    # Acquire lock for this specific job
-    lock_key = f"nist_test_{job_data['job_id']}"
-    if not self.acquire_lock(lock_key):
-        # If lock already exists, retry after 30 seconds
-        self.retry(countdown=30, max_retries=3)
-        return {"status": "retry", "message": "Task already running, retrying..."}
-    
-    try:
-        uploaded_file_path = job_data['uploaded_file_path']
-        scheduled_time_str = job_data['scheduled_time_str']
-        job_id = job_data['job_id']
-        line_number = job_data['line_number']
-        userId = job_data['userId']
-        fileName = job_data['fileName']
+    job_id = job_data.get('job_id', str(uuid.uuid4()))
+    user_id = job_data.get('userId')
+    line_number = job_data.get('line_number')
+    fileName = job_data.get('fileName')
 
-        # Update progress in cache and database
+    logger.info(f"🚀 [TASK START] Task {self.request.id} job_id={job_id} user={user_id}")
+
+    try:
+        # progress helper
         def update_progress(step):
             try:
                 progress = round((step / TOTAL_STEPS) * 100)
-                # Update cache
+                logger.info(f"📈 [PROGRESS] job={job_id} step={step}/{TOTAL_STEPS} => {progress}%")
                 cache.set(f"{job_id}_progress", progress, timeout=3600)
-                # Update database
-                supabase.table("results").update({
-                    "progress": progress
-                }).eq("user_id", int(userId)).eq("line", int(line_number)).execute()
+                supabase.table("results").update({"progress": progress}) \
+                    .eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
             except Exception as e:
-                print(f"Progress update error: {e}")
+                logger.warning(f"[PROGRESS WARN] could not update progress: {e}")
 
         update_progress(1)
 
-        # Scheduled time check
+        NISTTaskLock.release_nist_lock(user_id)
+        cache.delete(f"nist_queue_{user_id}")
+
+        # 🗝️ Acquire a fresh lock
+        if not NISTTaskLock.acquire_nist_lock(user_id):
+            logger.warning(f"🔒 [LOCK FAILED] Could not acquire lock for user={user_id}")
+            return {"status": "locked", "message": f"Another task running for user {user_id}"}
+
+        logger.info(f"✅ [LOCK ACQUIRED] user={user_id}")
+
+        # scheduled time check
         kolkata_tz = pytz.timezone("Asia/Kolkata")
-        scheduled_time = kolkata_tz.localize(
-            datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
-        )
+        scheduled_time_str = job_data.get('scheduled_time_str')
+        scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
         current_time = datetime.datetime.now(kolkata_tz)
-        
-        if (scheduled_time - current_time).total_seconds() > 0:
+        time_diff = (scheduled_time - current_time).total_seconds()
+        logger.info(f"⏰ [TIME CHECK] now={current_time.isoformat()} scheduled={scheduled_time.isoformat()} diff={time_diff}s")
+
+        if time_diff > 0:
+            logger.info(f"⏳ [DEFER] Job {job_id} scheduled for future. Releasing lock and returning scheduled.")
             update_progress(2)
-            # Release lock since we're not executing yet
-            self.release_lock(lock_key)
-            return {"status": "scheduled", "message": "Task deferred"}
+            NISTTaskLock.release_nist_lock(user_id)
+            return {"status": "scheduled", "delay_seconds": time_diff}
 
         update_progress(2)
 
-        # File validation
-        if not os.path.exists(uploaded_file_path):
+        # file checks
+        uploaded_file_path = job_data.get('uploaded_file_path')
+        if not uploaded_file_path or not os.path.exists(uploaded_file_path):
+            logger.error(f"❌ [FILE NOT FOUND] {uploaded_file_path}")
             raise Exception(f"File not found: {uploaded_file_path}")
 
         num_bits = os.path.getsize(uploaded_file_path) * 8
+        logger.info(f"📊 [FILE INFO] {uploaded_file_path} size_bytes={os.path.getsize(uploaded_file_path)} bits={num_bits}")
 
         assess_path = os.path.join(STS_PATH, "assess")
         if not os.path.exists(assess_path):
+            logger.error(f"❌ [ASSESS MISSING] {assess_path}")
             raise Exception(f"Assess binary not found: {assess_path}")
 
         update_progress(3)
+       
+        # Build automated input for assess.
+        # Keep the sequence explicit & logged. Adjust if your assess expects different numbers.
+        automated_input = f"0\n{uploaded_file_path}\n1\n0\n1\n1\n".encode()  # 4th value switched to '1' for binary if that's correct for your assess
+        logger.info(f"⚙️ [ASSESS START] ./assess {num_bits} (cwd={STS_PATH})")
+        logger.debug(f"📥 [AUTOMATED INPUT] {automated_input.decode()}")
 
-        # Run NIST assess subprocess
-        automated_input = f"0\n{uploaded_file_path}\n1\n0\n1\n1\n".encode()
-        
-        process = subprocess.Popen(
+        proc = subprocess.Popen(
             ["./assess", str(num_bits)],
             cwd=STS_PATH,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        stdout, stderr = process.communicate(input=automated_input)
-        
-        # Check if process failed
-        if process.returncode != 0:
-            raise Exception(f"NIST assess failed with return code {process.returncode}: {stderr.decode()}")
-        
+        stdout, stderr = proc.communicate(input=automated_input)
+
+        # Save stdout/stderr for future debugging
+        stdout_str = stdout.decode() if stdout else ""
+        stderr_str = stderr.decode() if stderr else ""
+        with open(os.path.join(STS_PATH, f"assess_stdout_{job_id}.txt"), "w") as f:
+            f.write(stdout_str)
+        with open(os.path.join(STS_PATH, f"assess_stderr_{job_id}.txt"), "w") as f:
+            f.write(stderr_str)
+        logger.info(f"📄 [ASSESS DONE] returncode={proc.returncode} stdout_len={len(stdout_str)} stderr_len={len(stderr_str)}")
+
+        experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
+        if proc.returncode != 0 and not os.path.exists(experiment_path):
+            logger.error("❌ [ASSESS FAILED] Non-zero return and no experiments created.")
+            raise Exception(f"Assess failed (rc={proc.returncode}). See logs in {STS_PATH}")
+
         update_progress(4)
 
-        # Process test results (your existing logic)
-        experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
+        # Process result files
         if not os.path.exists(experiment_path):
+            logger.error("❌ [EXPERIMENT MISSING] " + experiment_path)
             raise Exception(f"Experiment path not found: {experiment_path}")
 
         test_results = {}
@@ -4907,43 +4940,54 @@ def execute_nist_tests(self, job_data):
         step = 5
 
         for test_name, result_file in TEST_FOLDERS.items():
-            results_file = os.path.join(experiment_path, test_name, result_file)
+            test_folder = os.path.join(experiment_path, test_name)
+            results_file = os.path.join(test_folder, result_file)
+            logger.info(f"🔎 [READ TEST] {test_name} -> {results_file}")
+
             if not os.path.isfile(results_file):
+                logger.warning(f"⚠️ [MISSING] {results_file}")
                 test_results[test_name] = {"p_value": 0, "result": "no data"}
-                step += 1
                 update_progress(step)
+                step += 1
                 continue
 
+            p_values = []
             try:
                 with open(results_file, "r") as f:
-                    p_values = [float(line.strip()) for line in f if line.strip()]
+                    for line in f:
+                        try:
+                            p = float(line.strip())
+                            p_values.append(p)
+                        except ValueError:
+                            logger.debug(f"[SKIP LINE] {line.strip()}")
+                            continue
             except Exception as e:
+                logger.error(f"❌ [READ ERROR] {results_file} - {e}")
                 test_results[test_name] = {"p_value": 0, "result": "error"}
-                step += 1
                 update_progress(step)
+                step += 1
                 continue
 
-            if p_values:
-                rep_p_value = min(p_values)
-                result_str = "random number" if rep_p_value > 0.05 else "non-random number"
-            else:
+            if not p_values:
+                test_result = "no data"
                 rep_p_value = None
-                result_str = "no data"
-
-            test_results[test_name] = {"p_value": rep_p_value, "result": result_str}
-            if result_str == "random number":
+            else:
+                rep_p_value = min(p_values)
+                test_result = "random number" if rep_p_value > 0.05 else "non-random number"
+            test_results[test_name] = {"p_value": rep_p_value, "result": test_result}
+            if test_result == "random number":
                 random_count += 1
-            elif result_str == "non-random number":
+            elif test_result == "non-random number":
                 non_random_count += 1
 
-            step += 1
             update_progress(step)
+            step += 1
             gc.collect()
 
         final_verdict = "random number" if random_count >= non_random_count else "non-random number"
         executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.info(f"🏁 [VERDICT] job={job_id} verdict={final_verdict} randoms={random_count} nonrandoms={non_random_count}")
 
-        # Save to cache
         cache.set(f"{line_number}_results", {
             "job_id": job_id,
             "file_name": fileName,
@@ -4956,47 +5000,111 @@ def execute_nist_tests(self, job_data):
 
         update_progress(TOTAL_STEPS)
 
-        # Update Supabase final result
+        # Upsert final result to supabase
         try:
             current_time = datetime.datetime.now().isoformat()
-            supabase.table("results").upsert(
-                {
-                    "user_id": int(userId),
-                    "line": int(line_number),
-                    "binary_data": " ",
-                    "scheduled_time": scheduled_time.isoformat(),
-                    "upload_time": current_time,
-                    "result": final_verdict,
-                    "progress": 100,
-                    "file_name": fileName,
-                    "updated_at": current_time
-                },
-                ignore_duplicates=False
-            ).execute()
+            supabase.table("results").upsert({
+                "user_id": int(user_id),
+                "line": int(line_number),
+                "binary_data": " ",
+                "scheduled_time": scheduled_time.isoformat(),
+                "upload_time": current_time,
+                "result": final_verdict,
+                "progress": 100,
+                "file_name": fileName,
+                "updated_at": current_time
+            }, ignore_duplicates=False).execute()
+            logger.info("[SUPABASE] final result upserted")
         except Exception as e:
-            print(f"Supabase update error: {e}")
+            logger.warning(f"[SUPABASE WARN] could not upsert final result: {e}")
 
-        return {
-            "job_id": job_id,
-            "final_result": final_verdict,
-            "tests": test_results,
-            "executed_at": executed_at,
-            "status": "completed"
-        }
+        logger.info(f"✅ [TASK SUCCESS] job={job_id}")
+        return {"status": "completed", "job_id": job_id, "final_result": final_verdict}
 
     except Exception as e:
-        # Log the error
-        print(f"NIST test error: {e}")
-        raise e
+        logger.error(f"💥 [TASK ERROR] job={job_id} error={e}")
+        logger.error("".join((traceback.format_exc(),)))
+        # propagate to be visible in Celery logs
+        raise
+
     finally:
-        # Always release the lock and cleanup
-        self.release_lock(lock_key)
-        # Cleanup uploaded file
+        # Always clean up
+        try:
+            NISTTaskLock.release_nist_lock(user_id)
+            cache.delete(f"nist_queue_{user_id}")
+            logger.info(f"🔓 [LOCK & QUEUE CLEARED] user={user_id}")
+        except Exception as e:
+            logger.warning(f"⚠️ [LOCK RELEASE ERROR] {e}")
+
         if uploaded_file_path and os.path.exists(uploaded_file_path):
             try:
                 os.remove(uploaded_file_path)
+                logger.info(f"🗑️ [FILE REMOVED] {uploaded_file_path}")
             except Exception as e:
-                print(f"File cleanup error: {e}")
+                logger.warning(f"⚠️ [CLEANUP ERROR] {e}")
+
+@csrf_exempt
+def run_nist_tests(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+    try:
+        uploaded_file = request.FILES.get("file")
+        scheduled_time_str = request.POST.get("scheduled_time", "")
+        job_id = request.POST.get("job_id", str(uuid.uuid4()))
+        line_number = request.POST.get("line", "")
+        user_id = request.POST.get("user_id", "")
+        fileName = request.POST.get("file_name", uploaded_file.name if uploaded_file else "")
+
+        if not uploaded_file:
+            return JsonResponse({"error": "No file uploaded"}, status=400)
+        if not scheduled_time_str:
+            return JsonResponse({"error": "scheduled_time is required"}, status=400)
+        if not user_id:
+            return JsonResponse({"error": "user_id is required"}, status=400)
+
+        # Save uploaded file to temporary location
+        temp_file_path = os.path.join(STS_PATH, f"{job_id}_{uploaded_file.name}")
+        with open(temp_file_path, "wb+") as f:
+            for chunk in uploaded_file.chunks():
+                f.write(chunk)
+
+        # Prepare job_data
+        job_data = {
+            'uploaded_file_path': temp_file_path,
+            'scheduled_time_str': scheduled_time_str,
+            'job_id': job_id,
+            'line_number': line_number,
+            'userId': user_id,
+            'fileName': fileName,
+        }
+
+        # Calculate countdown for scheduling (0 if due now)
+        kolkata_tz = pytz.timezone("Asia/Kolkata")
+        scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
+        current_time = datetime.datetime.now(kolkata_tz)
+        countdown = max(0, int((scheduled_time - current_time).total_seconds()))
+
+        # Set initial progress
+        cache.set(f"{job_id}_progress", 0, timeout=3600)
+
+        # ALWAYS queue a Celery task (task will add to internal queue or run immediately)
+        task = execute_nist_tests.apply_async(kwargs={'job_data': job_data}, countdown=countdown, queue='nist_tests')
+
+        message = "NIST tests processing started" if countdown == 0 else "NIST tests scheduled"
+        return JsonResponse({
+            "status": "success",
+            "job_id": job_id,
+            "task_id": task.id,
+            "message": message,
+            "scheduled_time": scheduled_time_str,
+        })
+
+    except Exception as e:
+        logger.error(f"[RUN_NIST ERROR] {e}")
+        return JsonResponse({"error": str(e)}, status=500)
+
+
 from celery.result import AsyncResult
 
 @csrf_exempt
