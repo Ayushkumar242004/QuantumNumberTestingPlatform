@@ -7,23 +7,22 @@ import {
   Select,
 } from "@mui/material";
 import { tokens } from "../../theme";
-import { mockTransactions } from "../../data/mockData";
+
 import { Circle } from "@mui/icons-material";
 import Header from "../../components/Header";
 import "./Dashboard.css";
 import StatBox from "../../components/StatBox";
-import DeviceThermostatOutlinedIcon from "@mui/icons-material/DeviceThermostatOutlined";
-import NumbersOutlinedIcon from "@mui/icons-material/NumbersOutlined";
+
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios"; // Make sure axios is imported
 import CircularProgress from "@mui/material/CircularProgress";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 
-import { TextField, MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
+import { TextField } from "@mui/material";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from 'uuid';
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
+
 
 const isLargeScreen = window.innerWidth > 768;
 const BinaryGraphDisplay = ({ binaryInput }) => {

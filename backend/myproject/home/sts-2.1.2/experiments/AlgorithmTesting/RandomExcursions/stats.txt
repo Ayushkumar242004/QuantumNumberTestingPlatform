@@ -2,16 +2,16 @@
 		--------------------------------------------
 		COMPUTATIONAL INFORMATION:
 		--------------------------------------------
-		(a) Number Of Cycles (J) = 3517
-		(b) Sequence Length (n)  = 8388608
+		(a) Number Of Cycles (J) = 19542
+		(b) Sequence Length (n)  = 83886080
 		(c) Rejection Constraint = 500.000000
 		-------------------------------------------
-SUCCESS		x = -4 chi^2 =  5.026996 p_value = 0.412594
-SUCCESS		x = -3 chi^2 =  7.464839 p_value = 0.188300
-SUCCESS		x = -2 chi^2 =  7.323101 p_value = 0.197698
-SUCCESS		x = -1 chi^2 =  5.254194 p_value = 0.385652
-SUCCESS		x =  1 chi^2 =  2.817458 p_value = 0.728103
-SUCCESS		x =  2 chi^2 =  3.703855 p_value = 0.592790
-SUCCESS		x =  3 chi^2 =  4.433884 p_value = 0.488778
-SUCCESS		x =  4 chi^2 =  5.682541 p_value = 0.338344
+SUCCESS		x = -4 chi^2 =  8.086123 p_value = 0.151553
+SUCCESS		x = -3 chi^2 =  2.742085 p_value = 0.739675
+SUCCESS		x = -2 chi^2 =  5.949142 p_value = 0.311199
+SUCCESS		x = -1 chi^2 =  8.093542 p_value = 0.151155
+SUCCESS		x =  1 chi^2 =  4.676901 p_value = 0.456569
+SUCCESS		x =  2 chi^2 =  7.708998 p_value = 0.173019
+SUCCESS		x =  3 chi^2 =  3.553245 p_value = 0.615347
+SUCCESS		x =  4 chi^2 = 10.029491 p_value = 0.074404
 

@@ -106,7 +106,8 @@ from rest_framework.permissions import AllowAny
 import tempfile
 import os
 import re
-
+from django.core.cache import caches
+cache = caches['default']
 
 @csrf_exempt
 def run_frequency_test(request):
@@ -2521,32 +2522,34 @@ global_graph_image=None
 def create_graph(request):
     try:
         data = json.loads(request.body)
-        job_id = data.get('job_id')
+        job_id = str(data.get('job_id', ''))
+        line_number = str(data.get('line_number', ''))
         file_name = data.get('file_name', '')
-        line_number=data.get('line_number', '')
     except json.JSONDecodeError as e:
         print('Error parsing JSON:', e)
         return HttpResponse("Invalid JSON data.", status=400)
 
-    if not job_id:
-        return HttpResponse("job_id is required", status=400)
-
+    # Optional: mark graph generation started
     cache.set(f"{job_id}_progressGraph", 1)
 
     # ✅ Fetch results from cache
-    results = cache.get(f"{line_number}_results")
-    print("results",results)
+    cache_key = f"{line_number}_results"
+    results = cache.get(cache_key)
+    print("Cache key used:", cache_key)
+    print("Cached results:", results)
+
     if not results:
-        return HttpResponse("No cached results found for this job_id", status=404)
+        return HttpResponse("No cached results found for this line_number", status=404)
 
     tests = results.get("tests", {})
-    print("tests",tests)
     if not tests:
         return HttpResponse("No test results available in cache", status=404)
 
     # ✅ Build dictionary of {test_name: p_value} from cached results
-    valid_tests = {test_name: float(test_info.get("p_value") or 0) 
-                   for test_name, test_info in tests.items()}
+    valid_tests = {
+        test_name: float(test_info.get("p_value") or 0)
+        for test_name, test_info in tests.items()
+    }
     if not valid_tests:
         return HttpResponse("No valid p-values found in cached results", status=404)
 
@@ -2572,6 +2575,7 @@ def create_graph(request):
     ]
     ax.legend(handles=legend_elements, loc='upper right', prop={'size': 10})
 
+    # ✅ Mark graph generation done
     cache.set(f"{job_id}_progressGraph", 100)
 
     # ✅ Return as image response
@@ -2581,8 +2585,6 @@ def create_graph(request):
     plt.close(fig)
 
     return HttpResponse(buf, content_type='image/png')
-
-
 
 @csrf_exempt
 def get_progress_graph(request, job_id):
@@ -3698,6 +3700,7 @@ def generate_pdf_report_dieharder(request):
     return response
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpRequest
+from django.test import RequestFactory
 
 @csrf_exempt
 def generate_pdf_report_server(request):
@@ -3730,25 +3733,59 @@ def generate_pdf_report_server(request):
         cache.set(f"{job_id}_progressReportServer", 2)
         print("2")
         
-        # TODO: Fix graph generation functions to work with file path
-        # For now, create empty graph responses or skip them
-        from django.http import HttpResponse
-        empty_svg = b'<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><text x="20" y="150">Graph not available</text></svg>'
-        
-        graph_response1 = HttpResponse(empty_svg, content_type='image/svg+xml')
-        graph_response = HttpResponse(empty_svg, content_type='image/svg+xml')
-        graph_response2 = HttpResponse(empty_svg, content_type='image/svg+xml')
-        
-        cache.set(f"{job_id}_progressReportServer", 5)
+       
+        print("Generating graphs...")
 
-        graph_buffer1 = graph_response1.content
-        graph_buffer = graph_response.content
-        graph_buffer2 = graph_response2.content
+        # rf = RequestFactory()
+        # uploaded_content = open(uploaded_file_path, "rb").read()
 
-        print("5")
-        graph_image_io1 = BytesIO(graph_buffer1)
-        graph_image_io = BytesIO(graph_buffer)
-        graph_image_io2 = BytesIO(graph_buffer2)
+        # fake_req1 = rf.post(
+        #     '/fake1/',
+        #     data=request.POST,
+        #     FILES={'file': BytesIO(uploaded_content)}
+        # )
+        # fake_req2 = rf.post(
+        #     '/fake2/',
+        #     data=request.POST,
+        #     FILES={'file': BytesIO(uploaded_content)}
+        # )
+        # fake_req3 = rf.post(
+        #     '/fake3/',
+        #     data=request.POST,
+        #     FILES={'file': BytesIO(uploaded_content)}
+        # )
+
+        # # First graph - NIST SP800-22 tests visualization
+        # graph_response1 = create_graph(fake_req1)
+        # cache.set(f"{job_id}_progressReportServer", 3)
+        # print("3")
+
+        # # Second graph - Dieharder visualization
+        # graph_response = create_graph_dieharder1(fake_req2)
+        # print("4")
+
+        # # Third graph - NIST SP800-90B visualization
+        # graph_response2 = create_graph_nist90b(fake_req3)
+        # cache.set(f"{job_id}_progressReportServer", 5)
+
+        # # Extract image content from responses
+        # graph_buffer1 = graph_response1.content
+        # graph_buffer = graph_response.content
+        # graph_buffer2 = graph_response2.content
+
+        # print("5")
+        # # Convert to BytesIO for embedding into PDF
+        # graph_image_io1 = BytesIO(graph_buffer1)
+        # graph_image_io = BytesIO(graph_buffer)
+        # graph_image_io2 = BytesIO(graph_buffer2)
+
+        # graph_image1 = Image(graph_image_io1, width=7 * inch, height=4.5 * inch)
+
+        # graph_image = Image(graph_image_io, width=7 * inch, height=4.5 * inch)
+     
+        # graph_image2 = Image(graph_image_io2, width=7 * inch, height=4.5 * inch)
+
+
 
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="report.pdf"'
@@ -4609,70 +4646,241 @@ TEST_FOLDERS = {
     "Universal": "results.txt"
 }
 
-@csrf_exempt
-def run_nist_tests(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+# @csrf_exempt
+# def run_nist_tests(request):
+#     if request.method != "POST":
+#         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
+#     try:
+#         # --- Accept uploaded file + metadata ---
+#         uploaded_file = request.FILES.get("file")
+#         scheduled_time_str = request.POST.get("scheduled_time", "")
+#         job_id = request.POST.get("job_id", str(uuid.uuid4()))
+#         line_number = request.POST.get("line", "")
+#         userId = request.POST.get("user_id", "")
+#         fileName = request.POST.get("file_name", uploaded_file.name if uploaded_file else "")
+
+#         if not uploaded_file:
+#             return JsonResponse({"error": "No file uploaded"}, status=400)
+
+#         if not scheduled_time_str:
+#             return JsonResponse({"error": "scheduled_time is required"}, status=400)
+
+#         # Save progress to cache
+#         cache.set(f"{job_id}_progress", 1)
+
+#         # Parse scheduled time
+#         naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+#         kolkata_tz = pytz.timezone("Asia/Kolkata")
+#         scheduled_time = kolkata_tz.localize(naive_scheduled_time)
+
+#         # Get current aware datetime
+#         current_time = datetime.datetime.now(kolkata_tz)
+#         time_difference = (scheduled_time - current_time).total_seconds()
+#         print(f"[{job_id}] Time difference before run:", time_difference)
+
+#         # Save uploaded .bin file to STS_PATH
+#         temp_file_path = os.path.join(STS_PATH, f"{job_id}_{uploaded_file.name}")
+#         with open(temp_file_path, "wb+") as f:
+#             for chunk in uploaded_file.chunks():
+#                 f.write(chunk)
+
+#         # Count bits
+#         num_bits = os.path.getsize(temp_file_path) * 8
+
+#         # Helper to update progress
+#         def update_progress(step: int):
+#                 try:
+#                     progress_percentage = round((step / 18) * 100)
+#                     supabase.table("results").update({
+#                         "progress": progress_percentage,
+#                     }).eq("user_id", int(userId)).eq("line", line_number).execute()
+#                 except Exception as e:
+#                     print(f"Supabase progress update failed at step {step}: {e}")
+
+
+#         update_progress(1)
+#         if time_difference > 0:
+#             # Scheduled in future → defer execution
+#             return JsonResponse(run_after_delay_nist22b(job_id, scheduled_time, temp_file_path, line_number, userId, fileName))
+
+#         update_progress(2)
+
+#         # Prepare input for NIST assess
+#         automated_input = f"0\n{temp_file_path}\n1\n0\n1\n1\n".encode()
+
+#         # Run NIST test suite
+#         process = subprocess.Popen(
+#             ["./assess", str(num_bits)],
+#             cwd=STS_PATH,
+#             stdin=subprocess.PIPE,
+#             stdout=subprocess.PIPE,
+#             stderr=subprocess.PIPE
+#         )
+#         stdout, stderr = process.communicate(input=automated_input)
+#         print(f"[{job_id}] assess output:", stdout.decode(), stderr.decode())
+
+#         # Path to experiment results
+#         experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
+#         if not os.path.exists(experiment_path):
+#             return JsonResponse({"status": "error", "message": f"{experiment_path} not found"})
+
+#         # Process results
+#         test_results = {}
+#         random_count = 0
+#         non_random_count = 0
+#         step = 3
+
+#         for test_name, result_file in TEST_FOLDERS.items():
+#             test_folder = os.path.join(experiment_path, test_name)
+#             results_file = os.path.join(test_folder, result_file)
+
+#             if not os.path.isfile(results_file):
+#                 test_results[test_name] = {"p_value": 0, "result": "no data"}
+#                 continue
+
+#             p_values = []
+#             with open(results_file, "r") as f:
+#                 for line in f:
+#                     try:
+#                         p = float(line.strip())
+#                         p_values.append(p)
+#                     except:
+#                         continue
+
+#             if not p_values:
+#                 test_result = "no data"
+#                 rep_p_value = None
+#             else:
+#                 rep_p_value = min(p_values)
+#                 test_result = "random number" if rep_p_value > 0.05 else "non-random number"
+
+#             test_results[test_name] = {"p_value": rep_p_value, "result": test_result}
+
+#             if test_result == "random number":
+#                 random_count += 1
+#             elif test_result == "non-random number":
+#                 non_random_count += 1
+
+#             update_progress(step)
+#             step += 1
+#             gc.collect()
+
+#         # Final verdict
+#         final_verdict = "random number" if random_count >= non_random_count else "non-random number"
+#         executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+#         # ✅ Store results in cache
+#         job_results = {
+#             "job_id": job_id,
+#             "file_name": fileName,
+#             "tests": test_results,
+#             "final_result": final_verdict,
+#             "executed_at": executed_at,
+#         }
+#         cache.set(f"{line_number}_results", job_results, timeout=3600)
+#         update_progress(18)
+
+#         try:
+#             current_time = datetime.datetime.now().isoformat()
+#             supabase.table("results").upsert(
+#                 {
+#                     "user_id": int(userId),
+#                     "line": int(line_number),
+#                     "binary_data": " ",  # skip large data
+#                     "scheduled_time": scheduled_time.isoformat(),
+#                     "upload_time": current_time,
+#                     "result": final_verdict,
+#                     "progress": 100,
+#                     "file_name": fileName,
+#                     "updated_at": current_time
+#                 },
+#                 ignore_duplicates=False
+#             ).execute()
+#         except Exception as e:
+#             print("Failed to update Supabase:", e)
+        
+#         # Cleanup uploaded file
+#         try:
+#             os.remove(temp_file_path)
+#         except:
+#             pass
+
+#         return JsonResponse(job_results)
+
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)}, status=500)
+
+
+TOTAL_STEPS = 18
+
+@shared_task(bind=True, base=ThrottledTask)
+def execute_nist_tests(self, job_data):
+    """
+    Execute NIST tests with proper locking to prevent concurrent execution
+    """
+    uploaded_file_path = None
+    
+    # Acquire lock for this specific job
+    lock_key = f"nist_test_{job_data['job_id']}"
+    if not self.acquire_lock(lock_key):
+        # If lock already exists, retry after 30 seconds
+        self.retry(countdown=30, max_retries=3)
+        return {"status": "retry", "message": "Task already running, retrying..."}
+    
     try:
-        # --- Accept uploaded file + metadata ---
-        uploaded_file = request.FILES.get("file")
-        scheduled_time_str = request.POST.get("scheduled_time", "")
-        job_id = request.POST.get("job_id", str(uuid.uuid4()))
-        line_number = request.POST.get("line", "")
-        userId = request.POST.get("user_id", "")
-        fileName = request.POST.get("file_name", uploaded_file.name if uploaded_file else "")
+        uploaded_file_path = job_data['uploaded_file_path']
+        scheduled_time_str = job_data['scheduled_time_str']
+        job_id = job_data['job_id']
+        line_number = job_data['line_number']
+        userId = job_data['userId']
+        fileName = job_data['fileName']
 
-        if not uploaded_file:
-            return JsonResponse({"error": "No file uploaded"}, status=400)
-
-        if not scheduled_time_str:
-            return JsonResponse({"error": "scheduled_time is required"}, status=400)
-
-        # Save progress to cache
-        cache.set(f"{job_id}_progress", 1)
-
-        # Parse scheduled time
-        naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
-        kolkata_tz = pytz.timezone("Asia/Kolkata")
-        scheduled_time = kolkata_tz.localize(naive_scheduled_time)
-
-        # Get current aware datetime
-        current_time = datetime.datetime.now(kolkata_tz)
-        time_difference = (scheduled_time - current_time).total_seconds()
-        print(f"[{job_id}] Time difference before run:", time_difference)
-
-        # Save uploaded .bin file to STS_PATH
-        temp_file_path = os.path.join(STS_PATH, f"{job_id}_{uploaded_file.name}")
-        with open(temp_file_path, "wb+") as f:
-            for chunk in uploaded_file.chunks():
-                f.write(chunk)
-
-        # Count bits
-        num_bits = os.path.getsize(temp_file_path) * 8
-
-        # Helper to update progress
-        def update_progress(step: int):
-                try:
-                    progress_percentage = round((step / 18) * 100)
-                    supabase.table("results").update({
-                        "progress": progress_percentage,
-                    }).eq("user_id", int(userId)).eq("line", line_number).execute()
-                except Exception as e:
-                    print(f"Supabase progress update failed at step {step}: {e}")
-
+        # Update progress in cache and database
+        def update_progress(step):
+            try:
+                progress = round((step / TOTAL_STEPS) * 100)
+                # Update cache
+                cache.set(f"{job_id}_progress", progress, timeout=3600)
+                # Update database
+                supabase.table("results").update({
+                    "progress": progress
+                }).eq("user_id", int(userId)).eq("line", int(line_number)).execute()
+            except Exception as e:
+                print(f"Progress update error: {e}")
 
         update_progress(1)
-        if time_difference > 0:
-            # Scheduled in future → defer execution
-            return JsonResponse(run_after_delay_nist22b(job_id, scheduled_time, temp_file_path, line_number, userId, fileName))
+
+        # Scheduled time check
+        kolkata_tz = pytz.timezone("Asia/Kolkata")
+        scheduled_time = kolkata_tz.localize(
+            datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+        )
+        current_time = datetime.datetime.now(kolkata_tz)
+        
+        if (scheduled_time - current_time).total_seconds() > 0:
+            update_progress(2)
+            # Release lock since we're not executing yet
+            self.release_lock(lock_key)
+            return {"status": "scheduled", "message": "Task deferred"}
 
         update_progress(2)
 
-        # Prepare input for NIST assess
-        automated_input = f"0\n{temp_file_path}\n1\n0\n1\n1\n".encode()
+        # File validation
+        if not os.path.exists(uploaded_file_path):
+            raise Exception(f"File not found: {uploaded_file_path}")
 
-        # Run NIST test suite
+        num_bits = os.path.getsize(uploaded_file_path) * 8
+
+        assess_path = os.path.join(STS_PATH, "assess")
+        if not os.path.exists(assess_path):
+            raise Exception(f"Assess binary not found: {assess_path}")
+
+        update_progress(3)
+
+        # Run NIST assess subprocess
+        automated_input = f"0\n{uploaded_file_path}\n1\n0\n1\n1\n".encode()
+        
         process = subprocess.Popen(
             ["./assess", str(num_bits)],
             cwd=STS_PATH,
@@ -4681,76 +4889,81 @@ def run_nist_tests(request):
             stderr=subprocess.PIPE
         )
         stdout, stderr = process.communicate(input=automated_input)
-        print(f"[{job_id}] assess output:", stdout.decode(), stderr.decode())
+        
+        # Check if process failed
+        if process.returncode != 0:
+            raise Exception(f"NIST assess failed with return code {process.returncode}: {stderr.decode()}")
+        
+        update_progress(4)
 
-        # Path to experiment results
+        # Process test results (your existing logic)
         experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
         if not os.path.exists(experiment_path):
-            return JsonResponse({"status": "error", "message": f"{experiment_path} not found"})
+            raise Exception(f"Experiment path not found: {experiment_path}")
 
-        # Process results
         test_results = {}
         random_count = 0
         non_random_count = 0
-        step = 3
+        step = 5
 
         for test_name, result_file in TEST_FOLDERS.items():
-            test_folder = os.path.join(experiment_path, test_name)
-            results_file = os.path.join(test_folder, result_file)
-
+            results_file = os.path.join(experiment_path, test_name, result_file)
             if not os.path.isfile(results_file):
                 test_results[test_name] = {"p_value": 0, "result": "no data"}
+                step += 1
+                update_progress(step)
                 continue
 
-            p_values = []
-            with open(results_file, "r") as f:
-                for line in f:
-                    try:
-                        p = float(line.strip())
-                        p_values.append(p)
-                    except:
-                        continue
+            try:
+                with open(results_file, "r") as f:
+                    p_values = [float(line.strip()) for line in f if line.strip()]
+            except Exception as e:
+                test_results[test_name] = {"p_value": 0, "result": "error"}
+                step += 1
+                update_progress(step)
+                continue
 
-            if not p_values:
-                test_result = "no data"
-                rep_p_value = None
-            else:
+            if p_values:
                 rep_p_value = min(p_values)
-                test_result = "random number" if rep_p_value > 0.05 else "non-random number"
+                result_str = "random number" if rep_p_value > 0.05 else "non-random number"
+            else:
+                rep_p_value = None
+                result_str = "no data"
 
-            test_results[test_name] = {"p_value": rep_p_value, "result": test_result}
-
-            if test_result == "random number":
+            test_results[test_name] = {"p_value": rep_p_value, "result": result_str}
+            if result_str == "random number":
                 random_count += 1
-            elif test_result == "non-random number":
+            elif result_str == "non-random number":
                 non_random_count += 1
 
-            update_progress(step)
             step += 1
+            update_progress(step)
             gc.collect()
 
-        # Final verdict
         final_verdict = "random number" if random_count >= non_random_count else "non-random number"
         executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # ✅ Store results in cache
-        job_results = {
+        # Save to cache
+        cache.set(f"{line_number}_results", {
             "job_id": job_id,
             "file_name": fileName,
             "tests": test_results,
             "final_result": final_verdict,
             "executed_at": executed_at,
-        }
-        cache.set(f"{line_number}_results", job_results, timeout=3600)
-        update_progress(18)
+            "random_count": random_count,
+            "non_random_count": non_random_count,
+        }, timeout=3600)
 
+        update_progress(TOTAL_STEPS)
+
+        # Update Supabase final result
         try:
             current_time = datetime.datetime.now().isoformat()
             supabase.table("results").upsert(
                 {
                     "user_id": int(userId),
                     "line": int(line_number),
-                    "binary_data": " ",  # skip large data
+                    "binary_data": " ",
                     "scheduled_time": scheduled_time.isoformat(),
                     "upload_time": current_time,
                     "result": final_verdict,
@@ -4761,18 +4974,68 @@ def run_nist_tests(request):
                 ignore_duplicates=False
             ).execute()
         except Exception as e:
-            print("Failed to update Supabase:", e)
-        
-        # Cleanup uploaded file
-        try:
-            os.remove(temp_file_path)
-        except:
-            pass
+            print(f"Supabase update error: {e}")
 
-        return JsonResponse(job_results)
+        return {
+            "job_id": job_id,
+            "final_result": final_verdict,
+            "tests": test_results,
+            "executed_at": executed_at,
+            "status": "completed"
+        }
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        # Log the error
+        print(f"NIST test error: {e}")
+        raise e
+    finally:
+        # Always release the lock and cleanup
+        self.release_lock(lock_key)
+        # Cleanup uploaded file
+        if uploaded_file_path and os.path.exists(uploaded_file_path):
+            try:
+                os.remove(uploaded_file_path)
+            except Exception as e:
+                print(f"File cleanup error: {e}")
+from celery.result import AsyncResult
+
+@csrf_exempt
+def check_task_status(request, task_id):
+    """Check status of a Celery task"""
+    task_result = AsyncResult(task_id)
+    
+    response_data = {
+        'task_id': task_id,
+        'status': task_result.status,
+    }
+    
+    if task_result.status == 'SUCCESS':
+        response_data['result'] = task_result.result
+    elif task_result.status == 'FAILURE':
+        response_data['error'] = str(task_result.result)
+        
+    return JsonResponse(response_data)
+
+@csrf_exempt
+def check_job_status(request, job_id):
+    """Check status by job ID using your existing cache system"""
+    progress = cache.get(f"{job_id}_progress")
+    results = cache.get(f"{job_id}_results")
+    
+    response_data = {
+        'job_id': job_id,
+        'progress': progress or 0,
+    }
+    
+    if results:
+        response_data['results'] = results
+        response_data['status'] = 'completed'
+    elif progress == 100:
+        response_data['status'] = 'processing'
+    else:
+        response_data['status'] = 'queued'
+        
+    return JsonResponse(response_data)
 
 def run_after_delay_nist22b(job_id, scheduled_time, file_path, line, user_id, fileName):
     kolkata_tz = pytz.timezone("Asia/Kolkata")

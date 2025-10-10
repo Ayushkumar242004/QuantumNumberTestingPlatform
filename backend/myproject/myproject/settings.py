@@ -12,10 +12,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-
+import os
+from celery import Celery
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 TESTS_DIR = BASE_DIR / "home"
+
+app = Celery('myproject')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
 
 import os
 
@@ -231,3 +236,38 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
+# settings.py
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://100.97.115.11:6379/0'
+CELERY_RESULT_BACKEND = 'redis://100.97.115.11:6379/0'
+
+
+# Celery Configuration Options
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_RESULT_EXPIRES = 3600
+
+# Optional: Add these if you want to use specific queues
+CELERY_TASK_DEFAULT_QUEUE = 'default'
+CELERY_TASK_DEFAULT_EXCHANGE = 'default'
+CELERY_TASK_DEFAULT_ROUTING_KEY = 'default'
+
+
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://100.97.115.11:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "TIMEOUT": 3600,
+        "KEY_PREFIX": "myapp",
+    }
+}

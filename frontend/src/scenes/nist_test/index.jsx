@@ -1379,7 +1379,7 @@ const Nist_tests = () => {
           progressIntervalId = null;
         }
 
-        setLoadingProgress(100);
+        // setLoadingProgress(100);
         setResult(response.data);
         // localStorage.setItem("resultFetchedFromSupabaseNIST", "true");
         await upsertProgress(100, userId, response.data.final_result);
@@ -1605,7 +1605,7 @@ const Nist_tests = () => {
           progressIntervalId = null;
         }
   
-        setLoadingProgress2(100);
+        // setLoadingProgress2(100);
         setResult2(response.data);
         // localStorage.setItem("resultFetchedFromSupabase2", "true");
         await upsertProgress(100, userId, response.data.final_result);
@@ -1832,7 +1832,7 @@ const Nist_tests = () => {
           progressIntervalId = null;
         }
   
-        setLoadingProgress3(100);
+        // setLoadingProgress3(100);
         setResult3(response.data);
         // localStorage.setItem("resultFetchedFromSupabase3", "true");
   
@@ -2058,7 +2058,7 @@ const Nist_tests = () => {
           progressIntervalId = null;
         }
   
-        setLoadingProgress4(100);
+        // setLoadingProgress4(100);
         setResult4(response.data);
         // localStorage.setItem("resultFetchedFromSupabase4", "true");
   
@@ -2284,7 +2284,7 @@ const Nist_tests = () => {
           progressIntervalId = null;
         }
   
-        setLoadingProgress5(100);
+        // setLoadingProgress5(100);
         setResult5(response.data);
         // localStorage.setItem("resultFetchedFromSupabase5", "true");
   

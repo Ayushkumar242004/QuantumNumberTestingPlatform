@@ -91,6 +91,9 @@ urlpatterns = [
     path('aggregate-stats/', views.aggregate_stats, name='aggregate_stats'),
     path("nist90b_run/", views.run_nist90b_on_bin, name="nist90b_run"),
 
+    path('task_tatus/<str:task_id>/', views.check_task_status, name='check_task_status'),
+    path('job_tatus/<str:job_id>/', views.check_job_status, name='check_job_status'),
+
     path('download_nist90b/', views.download_nist90b_output, name='download_nist90b_output'),
     path('download_nist22b/', views.aggregate_stats, name='download_nist22b_output'),
 
