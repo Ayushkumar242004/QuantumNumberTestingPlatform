@@ -4869,16 +4869,26 @@ def execute_nist_tests(self, job_data):
         # scheduled time check
         kolkata_tz = pytz.timezone("Asia/Kolkata")
         scheduled_time_str = job_data.get('scheduled_time_str')
+        scheduled_time_str1 = job_data.get('scheduled_time_str1')
         scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
         current_time = datetime.datetime.now(kolkata_tz)
         time_diff = (scheduled_time - current_time).total_seconds()
         logger.info(f"⏰ [TIME CHECK] now={current_time.isoformat()} scheduled={scheduled_time.isoformat()} diff={time_diff}s")
 
         if time_diff > 0:
-            logger.info(f"⏳ [DEFER] Job {job_id} scheduled for future. Releasing lock and returning scheduled.")
+            logger.info(f"⏳ [DEFER] Job {job_id} scheduled for future. Scheduling new Celery task after {time_diff}s")
             update_progress(2)
             NISTTaskLock.release_nist_lock(user_id)
+
+            # Schedule the same task to run after the required delay
+            execute_nist_tests.apply_async(
+                kwargs={'job_data': job_data},
+                countdown=int(time_diff),
+                queue='nist_tests'
+            )
+
             return {"status": "scheduled", "delay_seconds": time_diff}
+
 
         update_progress(2)
 
@@ -5007,7 +5017,7 @@ def execute_nist_tests(self, job_data):
                 "user_id": int(user_id),
                 "line": int(line_number),
                 "binary_data": " ",
-                "scheduled_time": scheduled_time.isoformat(),
+                "scheduled_time": scheduled_time_str1,
                 "upload_time": current_time,
                 "result": final_verdict,
                 "progress": 100,
@@ -5051,6 +5061,7 @@ def run_nist_tests(request):
     try:
         uploaded_file = request.FILES.get("file")
         scheduled_time_str = request.POST.get("scheduled_time", "")
+        scheduled_time_str1= request.POST.get("scheduled_time_str", "")
         job_id = request.POST.get("job_id", str(uuid.uuid4()))
         line_number = request.POST.get("line", "")
         user_id = request.POST.get("user_id", "")
@@ -5073,6 +5084,7 @@ def run_nist_tests(request):
         job_data = {
             'uploaded_file_path': temp_file_path,
             'scheduled_time_str': scheduled_time_str,
+            'scheduled_time_str1': scheduled_time_str1,
             'job_id': job_id,
             'line_number': line_number,
             'userId': user_id,
@@ -5145,131 +5157,151 @@ def check_job_status(request, job_id):
         
     return JsonResponse(response_data)
 
-def run_after_delay_nist22b(job_id, scheduled_time, file_path, line, user_id, fileName):
-    kolkata_tz = pytz.timezone("Asia/Kolkata")
-    now = datetime.datetime.now(kolkata_tz)
+@shared_task(bind=True)
+def run_after_delay_nist22b(self, job_data):
+    """Wrapper task that waits until scheduled time and reuses NIST execution flow."""
+    user_id = job_data['userId']
+    job_id = job_data['job_id']
+    scheduled_time_str = job_data['scheduled_time_str']
 
-    # Wait until scheduled time
-    wait_seconds = (scheduled_time - now).total_seconds()
+    kolkata_tz = pytz.timezone("Asia/Kolkata")
+    scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
+    current_time = datetime.datetime.now(kolkata_tz)
+    wait_seconds = (scheduled_time - current_time).total_seconds()
+
     if wait_seconds > 0:
-        print(f"Sleeping for {wait_seconds:.2f} seconds until scheduled time...")
+        logger.info(f"Sleeping for {wait_seconds} seconds before running job {job_id}")
         time.sleep(wait_seconds)
 
-    # Save initial progress
-    cache.set(f"{job_id}_progress", 1)
+    # Once time reached, call the actual test executor
+    execute_nist_tests.delay(job_data)
 
-    # Count bits
-    num_bits = os.path.getsize(file_path) * 8
 
-    # Helper to update progress
-    def update_progress(step: int):
-        try:
-            progress_percentage = round((step / 18) * 100)
-            supabase.table("results").update({
-                "progress": progress_percentage,
-            }).eq("user_id", int(user_id)).eq("line", int(line)).execute()
-        except Exception as e:
-            print(f"Supabase progress update failed at step {step}: {e}")
+# def run_after_delay_nist22b(job_id, scheduled_time, file_path, line, user_id, fileName):
+#     kolkata_tz = pytz.timezone("Asia/Kolkata")
+#     now = datetime.datetime.now(kolkata_tz)
 
-    update_progress(1)
+#     # Wait until scheduled time
+#     wait_seconds = (scheduled_time - now).total_seconds()
+#     if wait_seconds > 0:
+#         print(f"Sleeping for {wait_seconds:.2f} seconds until scheduled time...")
+#         time.sleep(wait_seconds)
 
-    # Run assess
-    automated_input = f"0\n{file_path}\n1\n0\n1\n1\n".encode()
-    process = subprocess.Popen(
-        ["./assess", str(num_bits)],
-        cwd=STS_PATH,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    stdout, stderr = process.communicate(input=automated_input)
-    print(f"[{job_id}] assess output:", stdout.decode(), stderr.decode())
+#     # Save initial progress
+#     cache.set(f"{job_id}_progress", 1)
 
-    # Path to experiment results
-    experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
-    if not os.path.exists(experiment_path):
-        return {"status": "error", "message": f"{experiment_path} not found"}
+#     # Count bits
+#     num_bits = os.path.getsize(file_path) * 8
 
-    # Process results
-    test_results = {}
-    random_count = 0
-    non_random_count = 0
-    step = 3
+#     # Helper to update progress
+#     def update_progress(step: int):
+#         try:
+#             progress_percentage = round((step / 18) * 100)
+#             supabase.table("results").update({
+#                 "progress": progress_percentage,
+#             }).eq("user_id", int(user_id)).eq("line", int(line)).execute()
+#         except Exception as e:
+#             print(f"Supabase progress update failed at step {step}: {e}")
 
-    for test_name, result_file in TEST_FOLDERS.items():
-        test_folder = os.path.join(experiment_path, test_name)
-        results_file = os.path.join(test_folder, result_file)
+#     update_progress(1)
 
-        if not os.path.isfile(results_file):
-            test_results[test_name] = {"p_value": 0, "result": "no data"}
-            continue
+#     # Run assess
+#     automated_input = f"0\n{file_path}\n1\n0\n1\n1\n".encode()
+#     process = subprocess.Popen(
+#         ["./assess", str(num_bits)],
+#         cwd=STS_PATH,
+#         stdin=subprocess.PIPE,
+#         stdout=subprocess.PIPE,
+#         stderr=subprocess.PIPE
+#     )
+#     stdout, stderr = process.communicate(input=automated_input)
+#     print(f"[{job_id}] assess output:", stdout.decode(), stderr.decode())
 
-        p_values = []
-        with open(results_file, "r") as f:
-            for line_content in f:  # <-- renamed variable to avoid overwriting 'line'
-                try:
-                    p = float(line_content.strip())
-                    p_values.append(p)
-                except:
-                    continue
+#     # Path to experiment results
+#     experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
+#     if not os.path.exists(experiment_path):
+#         return {"status": "error", "message": f"{experiment_path} not found"}
 
-        if not p_values:
-            test_result = "no data"
-            rep_p_value = None
-        else:
-            rep_p_value = min(p_values)
-            test_result = "random number" if rep_p_value > 0.05 else "non-random number"
+#     # Process results
+#     test_results = {}
+#     random_count = 0
+#     non_random_count = 0
+#     step = 3
 
-        test_results[test_name] = {"p_value": rep_p_value, "result": test_result}
+#     for test_name, result_file in TEST_FOLDERS.items():
+#         test_folder = os.path.join(experiment_path, test_name)
+#         results_file = os.path.join(test_folder, result_file)
 
-        if test_result == "random number":
-            random_count += 1
-        elif test_result == "non-random number":
-            non_random_count += 1
+#         if not os.path.isfile(results_file):
+#             test_results[test_name] = {"p_value": 0, "result": "no data"}
+#             continue
 
-        update_progress(step)
-        step += 1
+#         p_values = []
+#         with open(results_file, "r") as f:
+#             for line_content in f:  # <-- renamed variable to avoid overwriting 'line'
+#                 try:
+#                     p = float(line_content.strip())
+#                     p_values.append(p)
+#                 except:
+#                     continue
 
-    # Final verdict
-    final_verdict = "random number" if random_count >= non_random_count else "non-random number"
-    executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#         if not p_values:
+#             test_result = "no data"
+#             rep_p_value = None
+#         else:
+#             rep_p_value = min(p_values)
+#             test_result = "random number" if rep_p_value > 0.05 else "non-random number"
 
-    # Store results in cache
-    job_results = {
-        "job_id": job_id,
-        "file_name": fileName,
-        "tests": test_results,
-        "final_result": final_verdict,
-        "executed_at": executed_at,
-    }
-    cache.set(f"{line}_results", job_results, timeout=3600)
-    update_progress(18)
+#         test_results[test_name] = {"p_value": rep_p_value, "result": test_result}
 
-    # Upload to Supabase
-    try:
-        current_time = datetime.datetime.now().isoformat()
-        supabase.table("results").upsert(
-            {
-                "user_id": int(user_id),
-                "line": int(line),
-                "binary_data": " ",  # skip large data
-                "scheduled_time": scheduled_time.isoformat(),
-                "upload_time": current_time,
-                "result": final_verdict,
-                "progress": 100,
-                "file_name": fileName,
-                "updated_at": current_time
-            },
-            ignore_duplicates=False
-        ).execute()
-    except Exception as e:
-        print("Failed to update Supabase:", e)
+#         if test_result == "random number":
+#             random_count += 1
+#         elif test_result == "non-random number":
+#             non_random_count += 1
 
-    return {
-        "message": f"Test executed at {executed_at}",
-        "job_id": job_id,
-        "final_result": final_verdict
-    }
+#         update_progress(step)
+#         step += 1
+
+#     # Final verdict
+#     final_verdict = "random number" if random_count >= non_random_count else "non-random number"
+#     executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+#     # Store results in cache
+#     job_results = {
+#         "job_id": job_id,
+#         "file_name": fileName,
+#         "tests": test_results,
+#         "final_result": final_verdict,
+#         "executed_at": executed_at,
+#     }
+#     cache.set(f"{line}_results", job_results, timeout=3600)
+#     update_progress(18)
+
+#     # Upload to Supabase
+#     try:
+#         current_time = datetime.datetime.now().isoformat()
+#         supabase.table("results").upsert(
+#             {
+#                 "user_id": int(user_id),
+#                 "line": int(line),
+#                 "binary_data": " ",  # skip large data
+#                 "scheduled_time": scheduled_time.isoformat(),
+#                 "upload_time": current_time,
+#                 "result": final_verdict,
+#                 "progress": 100,
+#                 "file_name": fileName,
+#                 "updated_at": current_time
+#             },
+#             ignore_duplicates=False
+#         ).execute()
+#     except Exception as e:
+#         print("Failed to update Supabase:", e)
+
+#     return {
+#         "message": f"Test executed at {executed_at}",
+#         "job_id": job_id,
+#         "final_result": final_verdict
+#     }
 
 
 
@@ -5664,193 +5696,485 @@ MIN_ENTROPY_THRESHOLDS = {
    
 }
 
+# @csrf_exempt
+# def run_nist90b_on_bin(request):
+#     """
+#     Accepts a .bin file via POST and runs all official NIST SP800-90B tests.
+#     Tracks progress, prints test outputs, and stores results in cache.
+#     Uses the correct min-entropy calculation and verdict logic.
+#     """
+#     if request.method != "POST":
+#         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+#     # Read form fields
+#     file = request.FILES.get('file')
+#     scheduled_time_str = request.POST.get('scheduled_time', '')
+#     job_id = request.POST.get('job_id', str(uuid.uuid4()))
+#     line_number = request.POST.get('line', '')
+#     userId = request.POST.get('user_id', '')
+#     fileName = request.POST.get('file_name', '')
+ 
+#     if not file:
+#         return JsonResponse({"error": "No file uploaded. Send a '.bin' file."}, status=400)
+
+#     if not scheduled_time_str:
+#         return JsonResponse({"error": "scheduled_time is required"}, status=400)
+
+#     try:
+#         naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+#         kolkata_tz = pytz.timezone("Asia/Kolkata")
+#         scheduled_time = kolkata_tz.localize(naive_scheduled_time)
+#     except ValueError:
+#         return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
+
+#     current_time = datetime.datetime.now(kolkata_tz)
+#     time_difference = (scheduled_time - current_time).total_seconds()
+#     print("time dif", time_difference)
+
+#     def update_progress(step: int):
+#         try:
+#             progress_percentage = round((step / 8) * 100)  # total 8 steps
+#             supabase.table("results2").update({
+#                 "progress": progress_percentage,
+#             }).eq("user_id", int(userId)).eq("line", int(line_number)).execute()
+#         except Exception as e:
+#             print(f"Supabase progress update failed at step {step}: {e}")
+
+#     # If scheduled in the future, defer execution
+#     if time_difference > 0:
+
+#         result = run_after_delay_90b(job_id, scheduled_time, file, line_number, userId, fileName)
+#         return JsonResponse(result)
+
+#     update_progress(1)
+
+#     # Save uploaded .bin file to temporary location
+#     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+#         for chunk in file.chunks():
+#             tmp_file.write(chunk)
+#         tmp_file_path = tmp_file.name
+
+#     file_size_bytes = os.path.getsize(tmp_file_path)
+#     file_size_bits = file_size_bytes * 8
+#     MAX_BITS = 1_000_000
+#     n_samples = min(file_size_bits, MAX_BITS)
+
+#     update_progress(2)
+   
+#     # Define tests
+#     tests_executables = {
+#         "IID Test": {
+#             "exe": os.path.join(CPP_FOLDER, "ea_iid"),
+#             "args": ["-v", tmp_file_path]
+#         },
+#         "Non-IID Test": {
+#             "exe": os.path.join(CPP_FOLDER, "ea_non_iid"),
+#             "args": ["-v", tmp_file_path]
+#         },
+#     }
+
+#     results = {}
+#     passed_count = 0
+#     step_counter = 3
+   
+#     combined_output = ""
+#     # ✅ Updated single test logic from simpler function
+#     for test_name, test_info in tests_executables.items():
+#         exe_path = test_info["exe"]
+#         args = test_info["args"]
+
+#         if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
+#             results[test_name] = {"min_entropy": 0.0, "result": "executable missing"}
+#             step_counter += 1
+#             update_progress(step_counter)
+#             continue
+
+#         try:
+#             result = subprocess.run([exe_path] + args, capture_output=True, text=True, shell=False)
+#             output = result.stdout.strip()
+#             error_output = result.stderr.strip()
+
+#             print(f"=== {test_name} Output ===")
+#             print(output)
+#             if error_output:
+#                 print(f"=== {test_name} Error ===")
+#                 print(error_output)
+
+#             combined_output += f"=== {test_name} Output ===\n{output}\n\n"
+
+#             # Extract min_entropy from stdout (correct logic)
+#             min_entropy = 0.0
+#             for line in output.splitlines():
+#                 if any(keyword in line.lower() for keyword in ["h_original", "min(", "h_bitstring"]):
+#                     numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
+#                     if numbers:
+#                         min_entropy = float(numbers[0])
+#                         break
+
+#             # Determine verdict based on min-entropy threshold
+#             threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
+#             verdict = "random number" if min_entropy >= threshold else "non-random number"
+
+#             if verdict == "random number":
+#                 passed_count += 1
+
+#         except Exception as e:
+#             print(f"Error running {test_name}: {e}")
+#             min_entropy = 0.0
+#             verdict = "non-random number"
+
+#         results[test_name] = {"min_entropy": min_entropy, "result": verdict}
+#         step_counter += 1
+#         update_progress(step_counter)
+
+#         cache.set(f"{line_number}_download90b", combined_output, timeout=3600)
+#     # Clean up temporary files
+#     try:
+#         os.remove(tmp_file_path)
+#         if os.path.exists(tmp_file_path + ".json"):
+#             os.remove(tmp_file_path + ".json")
+#         if os.path.exists(tmp_file_path + ".column"):
+#             os.remove(tmp_file_path + ".column")
+#     except:
+#         pass
+#     update_progress(6)
+
+#     # Final verdict
+#     final_text = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
+#     executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+   
+#     update_progress(7)
+
+#     # ✅ Store results in cache
+#     job_results = {
+#         "job_id": job_id,
+#         "tests": results,
+#         "final_result": final_text,
+#         "executed_at": executed_at,
+#     }
+#     cache.set(f"{line_number}_results90b", job_results, timeout=3600)
+
+   
+#     update_progress(8)
+#         # ✅ Upload final results to Supabase
+#     try:
+#         current_time = datetime.datetime.now().isoformat()
+#         supabase.table("results2").upsert(
+#             {
+#                 "user_id": int(userId),
+#                 "line": int(line_number),
+#                 "binary_data": " ",  # skip actual binary content
+#                 "scheduled_time": scheduled_time.isoformat(),
+#                 "upload_time": current_time,
+#                 "result": final_text,
+#                 "progress": 100,
+#                 "file_name": fileName,
+#                 "updated_at": current_time
+#             },
+#             ignore_duplicates=False
+#         ).execute()
+#     except Exception as e:
+#         print("Failed to update Supabase:", e)
+
+
+#     return JsonResponse({
+#         "final_result": final_text,
+#         "executed_at": executed_at,
+#         "tests": [{"name": name, "min_entropy": res["min_entropy"], "result": res["result"]}
+#                   for name, res in results.items()]
+#     })
+
+from myproject.task_locks import NIST90BTaskLock
+import logging
+from celery import shared_task
+import os, datetime, pytz, gc, uuid, subprocess, re, tempfile
+
+logger = logging.getLogger(__name__)
+TOTAL_STEPS_90B = 8
+
+@shared_task(bind=True)
+def execute_nist90b_tests(self, job_data):
+    """
+    Execute NIST 90B tests with queueing and consistent lock handling.
+    """
+    uploaded_file_path = None
+    job_id = job_data.get('job_id', str(uuid.uuid4()))
+    user_id = job_data.get('userId')
+    line_number = job_data.get('line_number')
+    fileName = job_data.get('fileName')
+
+    logger.info(f"🚀 [90B TASK START] Task {self.request.id} job_id={job_id} user={user_id}")
+
+    try:
+        # Progress helper
+        def update_progress(step):
+            try:
+                progress = round((step / TOTAL_STEPS_90B) * 100)
+                logger.info(f"📈 [90B PROGRESS] job={job_id} step={step}/{TOTAL_STEPS_90B} => {progress}%")
+                cache.set(f"{job_id}_progress_90b", progress, timeout=3600)
+                # Update Supabase progress
+                supabase.table("results2").update({"progress": progress}) \
+                    .eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+            except Exception as e:
+                logger.warning(f"[90B PROGRESS WARN] could not update progress: {e}")
+
+        update_progress(1)
+
+        # 🗝️ Acquire lock FIRST (don't release it immediately)
+        if not NIST90BTaskLock.acquire_90b_lock(user_id):
+            logger.warning(f"🔒 [90B LOCK FAILED] Could not acquire lock for user={user_id}")
+            return {"status": "locked", "message": f"Another 90B task running for user {user_id}"}
+
+        logger.info(f"✅ [90B LOCK ACQUIRED] user={user_id}")
+
+        # Scheduled time check
+        kolkata_tz = pytz.timezone("Asia/Kolkata")
+        scheduled_time_str = job_data.get('scheduled_time_str')
+        scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
+        current_time = datetime.datetime.now(kolkata_tz)
+        time_diff = (scheduled_time - current_time).total_seconds()
+        logger.info(f"⏰ [90B TIME CHECK] now={current_time.isoformat()} scheduled={scheduled_time.isoformat()} diff={time_diff}s")
+
+        if time_diff > 0:
+            logger.info(f"⏳ [90B DEFER] Job {job_id} scheduled for future. Scheduling new Celery task after {time_diff}s")
+            update_progress(2)
+            NIST90BTaskLock.release_90b_lock(user_id)  # Release only when deferring
+
+            # Schedule the same task to run after the required delay
+            execute_nist90b_tests.apply_async(
+                kwargs={'job_data': job_data},
+                countdown=int(time_diff),
+                queue='nist90b_tests'
+            )
+
+            # ✅ CRITICAL: Return immediately to stop current task execution
+            return {"status": "scheduled", "delay_seconds": time_diff}
+
+        # ✅ Only proceed with test execution if time_diff <= 0
+        update_progress(2)
+
+        # File checks
+        uploaded_file_path = job_data.get('uploaded_file_path')
+        if not uploaded_file_path or not os.path.exists(uploaded_file_path):
+            logger.error(f"❌ [90B FILE NOT FOUND] {uploaded_file_path}")
+            raise Exception(f"File not found: {uploaded_file_path}")
+
+        file_size_bytes = os.path.getsize(uploaded_file_path)
+        file_size_bits = file_size_bytes * 8
+        MAX_BITS = 1_000_000
+        n_samples = min(file_size_bits, MAX_BITS)
+        logger.info(f"📊 [90B FILE INFO] {uploaded_file_path} size_bytes={file_size_bytes} bits={file_size_bits}")
+
+        # Define tests
+        tests_executables = {
+            "IID Test": {
+                "exe": os.path.join(CPP_FOLDER, "ea_iid"),
+                "args": ["-v", uploaded_file_path]
+            },
+            "Non-IID Test": {
+                "exe": os.path.join(CPP_FOLDER, "ea_non_iid"),
+                "args": ["-v", uploaded_file_path]
+            },
+        }
+
+        results = {}
+        passed_count = 0
+        step_counter = 3
+        combined_output = ""
+
+        # Run each test
+        for test_name, test_info in tests_executables.items():
+            exe_path = test_info["exe"]
+            args = test_info["args"]
+
+            if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
+                results[test_name] = {"min_entropy": 0.0, "result": "executable missing"}
+                step_counter += 1
+                update_progress(step_counter)
+                continue
+
+            try:
+                logger.info(f"🔧 [90B RUNNING TEST] {test_name} with {exe_path}")
+                result = subprocess.run([exe_path] + args, capture_output=True, text=True, shell=False)
+                output = result.stdout.strip()
+                error_output = result.stderr.strip()
+
+                logger.info(f"=== {test_name} Output ===")
+                logger.info(output)
+                if error_output:
+                    logger.error(f"=== {test_name} Error ===")
+                    logger.error(error_output)
+
+                combined_output += f"=== {test_name} Output ===\n{output}\n\n"
+
+                # Extract min_entropy from stdout
+                min_entropy = 0.0
+                for line in output.splitlines():
+                    if any(keyword in line.lower() for keyword in ["h_original", "min(", "h_bitstring"]):
+                        numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
+                        if numbers:
+                            min_entropy = float(numbers[0])
+                            break
+
+                # Determine verdict based on min-entropy threshold
+                threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
+                verdict = "random number" if min_entropy >= threshold else "non-random number"
+
+                if verdict == "random number":
+                    passed_count += 1
+
+            except Exception as e:
+                logger.error(f"❌ [90B TEST ERROR] {test_name}: {e}")
+                min_entropy = 0.0
+                verdict = "non-random number"
+
+            results[test_name] = {"min_entropy": min_entropy, "result": verdict}
+            step_counter += 1
+            update_progress(step_counter)
+
+        # Store combined output in cache
+        cache.set(f"{line_number}_download90b", combined_output, timeout=3600)
+        update_progress(6)
+
+        # Final verdict
+        final_text = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
+        executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        logger.info(f"🏁 [90B VERDICT] job={job_id} verdict={final_text} passed={passed_count}/{len(tests_executables)}")
+
+        update_progress(7)
+
+        # Store results in cache
+        job_results = {
+            "job_id": job_id,
+            "tests": results,
+            "final_result": final_text,
+            "executed_at": executed_at,
+        }
+        cache.set(f"{line_number}_results90b", job_results, timeout=3600)
+
+        update_progress(8)
+
+        # Upload final results to Supabase
+        try:
+            current_time = datetime.datetime.now().isoformat()
+            supabase.table("results2").upsert(
+                {
+                    "user_id": int(user_id),
+                    "line": int(line_number),
+                    "binary_data": " ",
+                    "scheduled_time": scheduled_time.isoformat(),
+                    "upload_time": current_time,
+                    "result": final_text,
+                    "progress": 100,
+                    "file_name": fileName,
+                    "updated_at": current_time
+                },
+                ignore_duplicates=False
+            ).execute()
+            logger.info("[90B SUPABASE] final result upserted")
+        except Exception as e:
+            logger.warning(f"[90B SUPABASE WARN] could not upsert final result: {e}")
+
+        logger.info(f"✅ [90B TASK SUCCESS] job={job_id}")
+        return {
+            "status": "completed", 
+            "job_id": job_id, 
+            "final_result": final_text,
+            "tests": results
+        }
+
+    except Exception as e:
+        logger.error(f"💥 [90B TASK ERROR] job={job_id} error={e}")
+        logger.error("".join(traceback.format_exc()))
+        raise
+
+    finally:
+        # Always clean up - release lock and remove temp files
+        try:
+            NIST90BTaskLock.release_90b_lock(user_id)
+            logger.info(f"🔓 [90B LOCK RELEASED] user={user_id}")
+        except Exception as e:
+            logger.warning(f"⚠️ [90B LOCK RELEASE ERROR] {e}")
+
+        if uploaded_file_path and os.path.exists(uploaded_file_path):
+            try:
+                os.remove(uploaded_file_path)
+                logger.info(f"🗑️ [90B FILE REMOVED] {uploaded_file_path}")
+            except Exception as e:
+                logger.warning(f"⚠️ [90B CLEANUP ERROR] {e}")
+
 @csrf_exempt
 def run_nist90b_on_bin(request):
     """
     Accepts a .bin file via POST and runs all official NIST SP800-90B tests.
-    Tracks progress, prints test outputs, and stores results in cache.
-    Uses the correct min-entropy calculation and verdict logic.
+    Uses queue-based execution similar to run_nist_tests.
     """
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
-    # Read form fields
-    file = request.FILES.get('file')
-    scheduled_time_str = request.POST.get('scheduled_time', '')
-    job_id = request.POST.get('job_id', str(uuid.uuid4()))
-    line_number = request.POST.get('line', '')
-    userId = request.POST.get('user_id', '')
-    fileName = request.POST.get('file_name', '')
- 
-    if not file:
-        return JsonResponse({"error": "No file uploaded. Send a '.bin' file."}, status=400)
-
-    if not scheduled_time_str:
-        return JsonResponse({"error": "scheduled_time is required"}, status=400)
-
     try:
-        naive_scheduled_time = datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+        # Read form fields
+        file = request.FILES.get('file')
+        scheduled_time_str = request.POST.get('scheduled_time', '')
+        job_id = request.POST.get('job_id', str(uuid.uuid4()))
+        line_number = request.POST.get('line', '')
+        userId = request.POST.get('user_id', '')
+        fileName = request.POST.get('file_name', file.name if file else '')
+
+        if not file:
+            return JsonResponse({"error": "No file uploaded. Send a '.bin' file."}, status=400)
+
+        if not scheduled_time_str:
+            return JsonResponse({"error": "scheduled_time is required"}, status=400)
+
+        if not userId:
+            return JsonResponse({"error": "user_id is required"}, status=400)
+
+        # Save uploaded file to temporary location
+        temp_file_path = os.path.join(CPP_FOLDER, f"{job_id}_{file.name}")
+        with open(temp_file_path, "wb+") as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+
+        # Prepare job_data
+        job_data = {
+            'uploaded_file_path': temp_file_path,
+            'scheduled_time_str': scheduled_time_str,
+            'job_id': job_id,
+            'line_number': line_number,
+            'userId': userId,
+            'fileName': fileName,
+        }
+
+        # Calculate countdown for scheduling
         kolkata_tz = pytz.timezone("Asia/Kolkata")
-        scheduled_time = kolkata_tz.localize(naive_scheduled_time)
-    except ValueError:
-        return JsonResponse({"error": "Invalid scheduled_time format. Use 'YYYY-MM-DD HH:MM:SS'."}, status=400)
+        scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
+        current_time = datetime.datetime.now(kolkata_tz)
+        countdown = max(0, int((scheduled_time - current_time).total_seconds()))
 
-    current_time = datetime.datetime.now(kolkata_tz)
-    time_difference = (scheduled_time - current_time).total_seconds()
-    print("time dif", time_difference)
+        # Set initial progress
+        cache.set(f"{job_id}_progress_90b", 0, timeout=3600)
 
-    def update_progress(step: int):
-        try:
-            progress_percentage = round((step / 8) * 100)  # total 8 steps
-            supabase.table("results2").update({
-                "progress": progress_percentage,
-            }).eq("user_id", int(userId)).eq("line", int(line_number)).execute()
-        except Exception as e:
-            print(f"Supabase progress update failed at step {step}: {e}")
+        # Queue Celery task
+        task = execute_nist90b_tests.apply_async(
+            kwargs={'job_data': job_data}, 
+            countdown=countdown, 
+            queue='nist90b_tests'
+        )
 
-    # If scheduled in the future, defer execution
-    if time_difference > 0:
+        message = "NIST 90B tests processing started" if countdown == 0 else "NIST 90B tests scheduled"
+        return JsonResponse({
+            "status": "success",
+            "job_id": job_id,
+            "task_id": task.id,
+            "message": message,
+            "scheduled_time": scheduled_time_str,
+        })
 
-        result = run_after_delay_90b(job_id, scheduled_time, file, line_number, userId, fileName)
-        return JsonResponse(result)
-
-    update_progress(1)
-
-    # Save uploaded .bin file to temporary location
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        for chunk in file.chunks():
-            tmp_file.write(chunk)
-        tmp_file_path = tmp_file.name
-
-    file_size_bytes = os.path.getsize(tmp_file_path)
-    file_size_bits = file_size_bytes * 8
-    MAX_BITS = 1_000_000
-    n_samples = min(file_size_bits, MAX_BITS)
-
-    update_progress(2)
-   
-    # Define tests
-    tests_executables = {
-        "IID Test": {
-            "exe": os.path.join(CPP_FOLDER, "ea_iid"),
-            "args": ["-v", tmp_file_path]
-        },
-        "Non-IID Test": {
-            "exe": os.path.join(CPP_FOLDER, "ea_non_iid"),
-            "args": ["-v", tmp_file_path]
-        },
-    }
-
-    results = {}
-    passed_count = 0
-    step_counter = 3
-   
-    combined_output = ""
-    # ✅ Updated single test logic from simpler function
-    for test_name, test_info in tests_executables.items():
-        exe_path = test_info["exe"]
-        args = test_info["args"]
-
-        if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
-            results[test_name] = {"min_entropy": 0.0, "result": "executable missing"}
-            step_counter += 1
-            update_progress(step_counter)
-            continue
-
-        try:
-            result = subprocess.run([exe_path] + args, capture_output=True, text=True, shell=False)
-            output = result.stdout.strip()
-            error_output = result.stderr.strip()
-
-            print(f"=== {test_name} Output ===")
-            print(output)
-            if error_output:
-                print(f"=== {test_name} Error ===")
-                print(error_output)
-
-            combined_output += f"=== {test_name} Output ===\n{output}\n\n"
-
-            # Extract min_entropy from stdout (correct logic)
-            min_entropy = 0.0
-            for line in output.splitlines():
-                if any(keyword in line.lower() for keyword in ["h_original", "min(", "h_bitstring"]):
-                    numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
-                    if numbers:
-                        min_entropy = float(numbers[0])
-                        break
-
-            # Determine verdict based on min-entropy threshold
-            threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
-            verdict = "random number" if min_entropy >= threshold else "non-random number"
-
-            if verdict == "random number":
-                passed_count += 1
-
-        except Exception as e:
-            print(f"Error running {test_name}: {e}")
-            min_entropy = 0.0
-            verdict = "non-random number"
-
-        results[test_name] = {"min_entropy": min_entropy, "result": verdict}
-        step_counter += 1
-        update_progress(step_counter)
-
-        cache.set(f"{line_number}_download90b", combined_output, timeout=3600)
-    # Clean up temporary files
-    try:
-        os.remove(tmp_file_path)
-        if os.path.exists(tmp_file_path + ".json"):
-            os.remove(tmp_file_path + ".json")
-        if os.path.exists(tmp_file_path + ".column"):
-            os.remove(tmp_file_path + ".column")
-    except:
-        pass
-    update_progress(6)
-
-    # Final verdict
-    final_text = "random number" if passed_count >= (len(tests_executables) // 2 + 1) else "non-random number"
-    executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-   
-    update_progress(7)
-
-    # ✅ Store results in cache
-    job_results = {
-        "job_id": job_id,
-        "tests": results,
-        "final_result": final_text,
-        "executed_at": executed_at,
-    }
-    cache.set(f"{line_number}_results90b", job_results, timeout=3600)
-
-   
-    update_progress(8)
-        # ✅ Upload final results to Supabase
-    try:
-        current_time = datetime.datetime.now().isoformat()
-        supabase.table("results2").upsert(
-            {
-                "user_id": int(userId),
-                "line": int(line_number),
-                "binary_data": " ",  # skip actual binary content
-                "scheduled_time": scheduled_time.isoformat(),
-                "upload_time": current_time,
-                "result": final_text,
-                "progress": 100,
-                "file_name": fileName,
-                "updated_at": current_time
-            },
-            ignore_duplicates=False
-        ).execute()
     except Exception as e:
-        print("Failed to update Supabase:", e)
-
-
-    return JsonResponse({
-        "final_result": final_text,
-        "executed_at": executed_at,
-        "tests": [{"name": name, "min_entropy": res["min_entropy"], "result": res["result"]}
-                  for name, res in results.items()]
-    })
+        logger.error(f"[RUN_NIST90B ERROR] {e}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 def run_after_delay_90b(job_id, scheduled_time, file, line, user_id, fileName):
@@ -6013,6 +6337,8 @@ def run_after_delay_90b(job_id, scheduled_time, file, line, user_id, fileName):
         "job_id": job_id,
         "final_result": final_result
     }
+
+
 
 
 @csrf_exempt

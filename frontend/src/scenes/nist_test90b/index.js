@@ -1522,14 +1522,12 @@ const Nist_tests90b = () => {
 
 
   useEffect(() => {
-    if (!binaryInput || !debouncedScheduledTime) {
+    if (!debouncedScheduledTime) {
       return;
     }
    
     const lineNo = 1;
     if (result) {
-      // localStorage.setItem('resultFetchedFromSupabase90b', 'true');
-      // setLoadingProgress(100);
       return;
     }
     setLoadingProgress(0);
@@ -1548,9 +1546,9 @@ const Nist_tests90b = () => {
             fileReader.readAsBinaryString(selectedFile);
           });
 
-          binaryString = Array.from(fileBuffer)
-            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-            .join('');
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
 
           binaryInsertedRef.current = true; // ✅ Prevent future inserts
 
@@ -1578,9 +1576,6 @@ const Nist_tests90b = () => {
         .upsert(payload);
 
 
-      if (error) {
-
-      }
     };
    
     const startProcess = async () => {
@@ -1617,7 +1612,6 @@ const Nist_tests90b = () => {
 
             //  Stop polling once progress is 100%
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress(100);
 
               clearInterval(progressIntervalId);
               progressIntervalId = null;
@@ -1661,7 +1655,6 @@ const Nist_tests90b = () => {
           progressIntervalId = null;
         }
        
-        setLoadingProgress(100);
         setResult(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b", "true");
         await upsertProgress(100, userId, response.data.final_result);
@@ -1762,14 +1755,12 @@ const Nist_tests90b = () => {
   }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
-    if (!binaryInput2 || !debouncedScheduledTime2) return;
+    if (!debouncedScheduledTime2) return;
   
     const lineNo = 2;
   
     if (result2) {
-      // localStorage.setItem('resultFetchedFromSupabase90b2', 'true');
-      // setLoadingProgress2(100);
-      return;
+     return;
     }
   
     setLoadingProgress2(0);
@@ -1788,9 +1779,9 @@ const Nist_tests90b = () => {
             fileReader.readAsBinaryString(selectedFile2);
           });
   
-          binaryString = Array.from(fileBuffer)
-            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-            .join('');
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
   
           binaryInsertedRef2.current = true; // ✅ Prevent duplicate binary inserts
         } catch (err) {
@@ -1812,9 +1803,7 @@ const Nist_tests90b = () => {
   
       const { error } = await supabase.from("results2").upsert(payload);
   
-      if (error) {
-        console.error("Supabase upsert error:", error.message);
-      }
+     
     };
   
     const startProcess = async () => {
@@ -1839,8 +1828,7 @@ const Nist_tests90b = () => {
             .maybeSingle();
   
           if (error) {
-            console.error("Supabase fetch error:", error.message);
-            return;
+          return;
           }
   
           if (data) {
@@ -1848,13 +1836,13 @@ const Nist_tests90b = () => {
             setLoadingProgress2(progress);
   
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress2(100);
+           
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-          console.error("Progress fetch error:", err);
+         
         }
       };
   
@@ -1889,7 +1877,6 @@ const Nist_tests90b = () => {
           progressIntervalId = null;
         }
   
-        setLoadingProgress2(100);
         setResult2(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b2", "true");
   
@@ -1990,7 +1977,7 @@ const Nist_tests90b = () => {
   }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
-    if (!binaryInput3 || !debouncedScheduledTime3) return;
+    if (!debouncedScheduledTime3) return;
   
     const lineNo = 3;
   
@@ -2076,8 +2063,7 @@ const Nist_tests90b = () => {
             setLoadingProgress3(progress);
   
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress3(100);
-              clearInterval(progressIntervalId);
+             clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
@@ -2117,7 +2103,6 @@ const Nist_tests90b = () => {
           progressIntervalId = null;
         }
   
-        setLoadingProgress3(100);
         setResult3(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b3", "true");
   
@@ -2218,14 +2203,12 @@ const Nist_tests90b = () => {
   }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
-    if (!binaryInput4 || !debouncedScheduledTime4) return;
+    if ( !debouncedScheduledTime4) return;
   
     const lineNo = 4;
   
     if (result4) {
-      // localStorage.setItem('resultFetchedFromSupabase90b4', 'true');
-      // setLoadingProgress4(100);
-      return;
+     return;
     }
   
     setLoadingProgress4(0);
@@ -2304,8 +2287,7 @@ const Nist_tests90b = () => {
             setLoadingProgress4(progress);
   
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress4(100);
-              clearInterval(progressIntervalId);
+             clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
@@ -2345,7 +2327,6 @@ const Nist_tests90b = () => {
           progressIntervalId = null;
         }
   
-        setLoadingProgress4(100);
         setResult4(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b4", "true");
   
@@ -2446,14 +2427,12 @@ const Nist_tests90b = () => {
   }, []); // <-- runs only on mount/unmount
 
   useEffect(() => {
-    if (!binaryInput5 || !debouncedScheduledTime5) return;
+    if (!debouncedScheduledTime5) return;
   
     const lineNo = 5;
   
     if (result5) {
-      // localStorage.setItem('resultFetchedFromSupabase90b5', 'true');
-      // setLoadingProgress5(100);
-      return;
+     return;
     }
   
     setLoadingProgress5(0);
@@ -2532,7 +2511,7 @@ const Nist_tests90b = () => {
             setLoadingProgress5(progress);
   
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress5(100);
+            
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
@@ -2573,7 +2552,6 @@ const Nist_tests90b = () => {
           progressIntervalId = null;
         }
   
-        setLoadingProgress5(100);
         setResult5(response.data);
         localStorage.setItem("resultFetchedFromSupabase90b5", "true");
   

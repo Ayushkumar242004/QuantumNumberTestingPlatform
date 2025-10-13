@@ -1258,11 +1258,9 @@ const Nist_tests = () => {
     const lineNo = 1;
 
     if (result) {
-      //  localStorage.setItem('resultFetchedFromSupabaseNIST', 'true');
-      //  setLoadingProgress(100);
       return;
     }
-  
+
     setLoadingProgress(0);
     let progressIntervalId;
 
@@ -1329,7 +1327,7 @@ const Nist_tests = () => {
             .maybeSingle();
 
           if (error) {
-            console.error("Supabase fetch error:", error.message);
+         
             return;
           }
         
@@ -1339,14 +1337,14 @@ const Nist_tests = () => {
 
             // ✅ Stop polling once progress is 100%
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress(100);
+            
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
           
         } catch (err) {
-          console.error("Polling error:", err);
+          
         }
       };
 
@@ -1360,7 +1358,9 @@ const Nist_tests = () => {
           .toISOString()
           .replace("T", " ")
           .split(".")[0];
+        
         formData.append("scheduled_time", debouncedScheduledTime);
+         formData.append("scheduled_time_str", formattedScheduledTime);
         formData.append("job_id", currentJobIdT);
         formData.append("line", lineNo);
         formData.append("user_id", userId);
@@ -1379,7 +1379,7 @@ const Nist_tests = () => {
           progressIntervalId = null;
         }
 
-        // setLoadingProgress(100);
+      
         setResult(response.data);
         // localStorage.setItem("resultFetchedFromSupabaseNIST", "true");
         await upsertProgress(100, userId, response.data.final_result);
@@ -1485,8 +1485,7 @@ const Nist_tests = () => {
     const lineNo = 2;
   
     if (result2) {
-      // localStorage.setItem('resultFetchedFromSupabase2', 'true');
-      // setLoadingProgress2(100);
+     
       return;
     }
   
@@ -1566,7 +1565,7 @@ const Nist_tests = () => {
   
             // ✅ Stop polling once progress reaches 100
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress2(100);
+             
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
@@ -1605,7 +1604,7 @@ const Nist_tests = () => {
           progressIntervalId = null;
         }
   
-        // setLoadingProgress2(100);
+     
         setResult2(response.data);
         // localStorage.setItem("resultFetchedFromSupabase2", "true");
         await upsertProgress(100, userId, response.data.final_result);
