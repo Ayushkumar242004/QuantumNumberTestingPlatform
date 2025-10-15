@@ -4,13 +4,13 @@
 		--------------------------------------------
 		(a) L         = 9
 		(b) Q         = 5120
-		(c) K         = 883768
-		(d) sum       = 7226611.688806
-		(e) sigma     = 0.001193
+		(c) K         = 926947
+		(d) sum       = 7580042.080944
+		(e) sigma     = 0.001165
 		(f) variance  = 3.311000
 		(g) exp_value = 8.176425
-		(h) phi       = 8.177046
-		(i) WARNING:  8 bits were discarded.
+		(h) phi       = 8.177428
+		(i) WARNING:  5 bits were discarded.
 		-----------------------------------------
-SUCCESS		p_value = 0.602511
+SUCCESS		p_value = 0.389206
 

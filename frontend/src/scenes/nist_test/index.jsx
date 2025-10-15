@@ -894,125 +894,166 @@ const Nist_tests = () => {
     reader.readAsArrayBuffer(selectedFile);
   };
 
-
-
-  useEffect(() => {
-    const fetchStoredResults = async () => {
-      const userId = await fetchUserId();
-      if (!userId) {
-
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('results') // Replace 'results' with your Supabase table name
-          .select('*') // Fetch all rows
-          .eq("user_id", userId);
-        if (error) {
-          return;
-        }
-
-        // Update state with fetched data
-        if (data) {
-          data.forEach((row) => {
-            switch (row.line) {
-              case 1:
-                setBinaryInput(row.binary_data);
-                setScheduledTime(row.scheduled_time);
-                setResult({ final_result: row.result });
-                setFileName(row.file_name);
-                setUploadTime(row.upload_time);
-                setLoadingProgress(row.progress);
-                break;
-              case 2:
-                setBinaryInput2(row.binary_data);
-                setScheduledTime2(row.scheduled_time);
-                setResult2({ final_result: row.result });
-                setFileName2(row.file_name);
-                setUploadTime2(row.upload_time);
-                setLoadingProgress2(row.progress);
-                break;
-              case 3:
-                setBinaryInput3(row.binary_data);
-                setScheduledTime3(row.scheduled_time);
-                setResult3({ final_result: row.result });
-                setFileName3(row.file_name);
-                setUploadTime3(row.upload_time);
-                setLoadingProgress3(row.progress);
-                break;
-              case 4:
-                setBinaryInput4(row.binary_data);
-                setScheduledTime4(row.scheduled_time);
-                setResult4({ final_result: row.result });
-                setFileName4(row.file_name);
-                setUploadTime4(row.upload_time);
-                setLoadingProgress4(row.progress);
-                break;
-              case 5:
-                setBinaryInput5(row.binary_data);
-                setScheduledTime5(row.scheduled_time);
-                setResult5({ final_result: row.result });
-                setFileName5(row.file_name);
-                setUploadTime5(row.upload_time);
-                setLoadingProgress5(row.progress);
-                break;
-              case 6:
-                setBinaryInput6(row.binary_data);
-                setScheduledTime6(row.scheduled_time);
-                setResult6({ final_result: row.result });
-                setFileName6(row.file_name);
-                setUploadTime6(row.upload_time);
-                setLoadingProgress6(row.progress);
-                break;
-              case 7:
-                setBinaryInput7(row.binary_data);
-                setScheduledTime7(row.scheduled_time);
-                setResult7({ final_result: row.result });
-                setFileName7(row.file_name);
-                setUploadTime7(row.upload_time);
-                setLoadingProgress7(row.progress);
-                break;
-              case 8:
-                setBinaryInput8(row.binary_data);
-                setScheduledTime8(row.scheduled_time);
-                setResult8({ final_result: row.result });
-                setFileName8(row.file_name);
-                setUploadTime8(row.upload_time);
-                setLoadingProgress8(row.progress);
-                break;
-              case 9:
-                setBinaryInput9(row.binary_data);
-                setScheduledTime9(row.scheduled_time);
-                setResult9({ final_result: row.result });
-                setFileName9(row.file_name);
-                setUploadTime9(row.upload_time);
-                setLoadingProgress9(row.progress);
-                break;
-              case 10:
-                setBinaryInput10(row.binary_data);
-                setScheduledTime10(row.scheduled_time);
-                setResult10({ final_result: row.result });
-                setFileName10(row.file_name);
-                setUploadTime10(row.upload_time);
-                setLoadingProgress10(row.progress);
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      } catch (err) {
-        return;
-      }
-    };
-
-    fetchStoredResults();
-  }, []);
-
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingProgressRep, setLoadingProgressRep] = useState(0);
   const [loadingProgressGr, setLoadingProgressGr] = useState(0);
+
+
+  // useEffect(() => {
+  //   const fetchStoredResults = async () => {
+  //     const userId = await fetchUserId();
+  //     if (!userId) {
+
+  //       return;
+  //     }
+
+  //     try {
+  //       const { data, error } = await supabase
+  //         .from('results') // Replace 'results' with your Supabase table name
+  //         .select('*') // Fetch all rows
+  //         .eq("user_id", userId);
+  //       if (error) {
+  //         return;
+  //       }
+
+  //       // Update state with fetched data
+  //       if (data) {
+  //         data.forEach((row) => {
+  //           switch (row.line) {
+  //             case 1:
+  //               setBinaryInput(row.binary_data);
+  //               setScheduledTime(row.scheduled_time);
+  //               setResult({ final_result: row.result });
+  //               setFileName(row.file_name);
+  //               setUploadTime(row.upload_time);
+  //               setLoadingProgress(row.progress);
+  //               break;
+  //             case 2:
+  //               setBinaryInput2(row.binary_data);
+  //               setScheduledTime2(row.scheduled_time);
+  //               setResult2({ final_result: row.result });
+  //               setFileName2(row.file_name);
+  //               setUploadTime2(row.upload_time);
+  //               setLoadingProgress2(row.progress);
+  //               break;
+  //             case 3:
+  //               setBinaryInput3(row.binary_data);
+  //               setScheduledTime3(row.scheduled_time);
+  //               setResult3({ final_result: row.result });
+  //               setFileName3(row.file_name);
+  //               setUploadTime3(row.upload_time);
+  //               setLoadingProgress3(row.progress);
+  //               break;
+  //             case 4:
+  //               setBinaryInput4(row.binary_data);
+  //               setScheduledTime4(row.scheduled_time);
+  //               setResult4({ final_result: row.result });
+  //               setFileName4(row.file_name);
+  //               setUploadTime4(row.upload_time);
+  //               setLoadingProgress4(row.progress);
+  //               break;
+  //             case 5:
+  //               setBinaryInput5(row.binary_data);
+  //               setScheduledTime5(row.scheduled_time);
+  //               setResult5({ final_result: row.result });
+  //               setFileName5(row.file_name);
+  //               setUploadTime5(row.upload_time);
+  //               setLoadingProgress5(row.progress);
+  //               break;
+              
+  //             default:
+  //               break;
+  //           }
+  //         });
+  //       }
+  //     } catch (err) {
+  //       return;
+  //     }
+  //   };
+
+  //   fetchStoredResults();
+  // }, []);
+
+useEffect(() => {
+  let subscription;
+  
+  const setupSubscription = async () => {
+    const userId = await fetchUserId();
+    if (!userId) return;
+
+    // Set up real-time subscription
+    subscription = supabase
+      .channel('results-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'results',
+          filter: `user_id=eq.${userId}`
+        },
+        (payload) => {
+          // This runs automatically whenever results table changes for this user
+          const row = payload.new;
+          
+          switch (row.line) {
+            case 1:
+              setBinaryInput(row.binary_data);
+              setScheduledTime(row.scheduled_time);
+              setResult({ final_result: row.result });
+              setFileName(row.file_name);
+              setUploadTime(row.upload_time);
+              setLoadingProgress(row.progress);
+              break;
+            case 2:
+              setBinaryInput2(row.binary_data);
+              setScheduledTime2(row.scheduled_time);
+              setResult2({ final_result: row.result });
+              setFileName2(row.file_name);
+              setUploadTime2(row.upload_time);
+              setLoadingProgress2(row.progress);
+              break;
+            case 3:
+              setBinaryInput3(row.binary_data);
+              setScheduledTime3(row.scheduled_time);
+              setResult3({ final_result: row.result });
+              setFileName3(row.file_name);
+              setUploadTime3(row.upload_time);
+              setLoadingProgress3(row.progress);
+              break;
+            case 4:
+              setBinaryInput4(row.binary_data);
+              setScheduledTime4(row.scheduled_time);
+              setResult4({ final_result: row.result });
+              setFileName4(row.file_name);
+              setUploadTime4(row.upload_time);
+              setLoadingProgress4(row.progress);
+              break;
+            case 5:
+              setBinaryInput5(row.binary_data);
+              setScheduledTime5(row.scheduled_time);
+              setResult5({ final_result: row.result });
+              setFileName5(row.file_name);
+              setUploadTime5(row.upload_time);
+              setLoadingProgress5(row.progress);
+              break;
+            default:
+              break;
+          }
+        }
+      )
+      .subscribe();
+  };
+
+  setupSubscription();
+
+  // Cleanup subscription
+  return () => {
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+  };
+}, []); 
 
   const [loadingProgress2, setLoadingProgress2] = useState(0);
   const [loadingProgress2Rep, setLoadingProgress2Rep] = useState(0);
@@ -1309,7 +1350,7 @@ const Nist_tests = () => {
       const userId = await fetchUserId();
       if (!userId) return;
 
-      await upsertProgress(1, userId);
+      await upsertProgress(10, userId);
       setShowRedButton(false);
 
       if (!alertShownRef.current) {
@@ -1537,7 +1578,7 @@ const Nist_tests = () => {
       const userId = await fetchUserId();
       if (!userId) return;
   
-      await upsertProgress(1, userId);
+      await upsertProgress(10, userId);
       setShowRedButton2(false);
   
       if (!alertShownRef2.current) {
@@ -1764,7 +1805,7 @@ const Nist_tests = () => {
       if (!userId) return;
   
       // Initial DB entry
-      await upsertProgress(1, userId);
+      await upsertProgress(10, userId);
   
       setShowRedButton3(false);
       if (!alertShownRef3.current) {
@@ -1791,7 +1832,7 @@ const Nist_tests = () => {
             setLoadingProgress3(progress);
   
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress3(100);
+             
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
@@ -1989,7 +2030,7 @@ const Nist_tests = () => {
       const userId = await fetchUserId();
       if (!userId) return;
   
-      await upsertProgress(1, userId);
+      await upsertProgress(10, userId);
   
       setShowRedButton4(false);
       if (!alertShownRef4.current) {
@@ -2016,7 +2057,7 @@ const Nist_tests = () => {
             setLoadingProgress4(progress);
   
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress4(100);
+            
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
@@ -2215,7 +2256,7 @@ const Nist_tests = () => {
       const userId = await fetchUserId();
       if (!userId) return;
   
-      await upsertProgress(1, userId);
+      await upsertProgress(10, userId);
   
       setShowRedButton5(false);
       if (!alertShownRef5.current) {
@@ -2242,7 +2283,7 @@ const Nist_tests = () => {
             setLoadingProgress5(progress);
   
             if (progress >= 100 && progressIntervalId) {
-              setLoadingProgress5(100);
+             
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
@@ -2424,7 +2465,7 @@ const Nist_tests = () => {
       })
         .then((response) => response.blob())
         .then(async (blob) => {
-          setLoadingProgress2Rep(100); // Done
+        
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");

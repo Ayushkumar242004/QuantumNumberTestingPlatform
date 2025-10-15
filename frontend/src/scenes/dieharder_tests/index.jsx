@@ -1284,117 +1284,200 @@ const isTxt = fileName.endsWith(".txt");
   };
 
 
-  useEffect(() => {
-    const fetchStoredResults = async () => {
-      const userId = await fetchUserId();
-      if (!userId) {
+  // useEffect(() => {
+  //   const fetchStoredResults = async () => {
+  //     const userId = await fetchUserId();
+  //     if (!userId) {
 
-        return;
-      }
-      try {
-        const { data, error } = await supabase
-          .from('results3') // Replace 'results' with your Supabase table name
-          .select('*') // Fetch all rows
-          .eq("user_id", userId);
-        if (error) {
+  //       return;
+  //     }
+  //     try {
+  //       const { data, error } = await supabase
+  //         .from('results3') // Replace 'results' with your Supabase table name
+  //         .select('*') // Fetch all rows
+  //         .eq("user_id", userId);
+  //       if (error) {
 
-          return;
-        }
-        // Update state with fetched data
-        if (data) {
-          data.forEach((row) => {
-            switch (row.line) {
-              case 1:
-                setBinaryInput(row.binary_data);
-                setScheduledTime(row.scheduled_time);
-                setResult({ final_result: row.result });
-                setFileName(row.file_name);
-                setUploadTime(row.upload_time);
-                setLoadingProgress(row.progress);
-                break;
-              case 2:
-                setBinaryInput2(row.binary_data);
-                setScheduledTime2(row.scheduled_time);
-                setResult2({ final_result: row.result });
-                setFileName2(row.file_name);
-                setUploadTime2(row.upload_time);
-                setLoadingProgress2(row.progress);
-                break;
-              case 3:
-                setBinaryInput3(row.binary_data);
-                setScheduledTime3(row.scheduled_time);
-                setResult3({ final_result: row.result });
-                setFileName3(row.file_name);
-                setUploadTime3(row.upload_time);
-                break;
-              case 4:
-                setBinaryInput4(row.binary_data);
-                setScheduledTime4(row.scheduled_time);
-                setResult4({ final_result: row.result });
-                setFileName4(row.file_name);
-                setUploadTime4(row.upload_time);
-                setLoadingProgress3(row.progress);
-                break;
-              case 5:
-                setBinaryInput5(row.binary_data);
-                setScheduledTime5(row.scheduled_time);
-                setResult5({ final_result: row.result });
-                setFileName5(row.file_name);
-                setUploadTime5(row.upload_time);
-                setLoadingProgress4(row.progress);
-                break;
-              case 6:
-                setBinaryInput6(row.binary_data);
-                setScheduledTime6(row.scheduled_time);
-                setResult6({ final_result: row.result });
-                setFileName6(row.file_name);
-                setUploadTime6(row.upload_time);
-                setLoadingProgress6(row.progress);
-                break;
-              case 7:
-                setBinaryInput7(row.binary_data);
-                setScheduledTime7(row.scheduled_time);
-                setResult7({ final_result: row.result });
-                setFileName7(row.file_name);
-                setUploadTime7(row.upload_time);
-                setLoadingProgress7(row.progress);
-                break;
-              case 8:
-                setBinaryInput8(row.binary_data);
-                setScheduledTime8(row.scheduled_time);
-                setResult8({ final_result: row.result });
-                setFileName8(row.file_name);
-                setUploadTime8(row.upload_time);
-                setLoadingProgress8(row.progress);
-                break;
-              case 9:
-                setBinaryInput9(row.binary_data);
-                setScheduledTime9(row.scheduled_time);
-                setResult9({ final_result: row.result });
-                setFileName9(row.file_name);
-                setUploadTime9(row.upload_time);
-                setLoadingProgress9(row.progress);
-                break;
-              case 10:
-                setBinaryInput10(row.binary_data);
-                setScheduledTime10(row.scheduled_time);
-                setResult10({ final_result: row.result });
-                setFileName10(row.file_name);
-                setUploadTime10(row.upload_time);
-                setLoadingProgress10(row.progress);
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      } catch (err) {
+  //         return;
+  //       }
+  //       // Update state with fetched data
+  //       if (data) {
+  //         data.forEach((row) => {
+  //           switch (row.line) {
+  //             case 1:
+  //               setBinaryInput(row.binary_data);
+  //               setScheduledTime(row.scheduled_time);
+  //               setResult({ final_result: row.result });
+  //               setFileName(row.file_name);
+  //               setUploadTime(row.upload_time);
+  //               setLoadingProgress(row.progress);
+  //               break;
+  //             case 2:
+  //               setBinaryInput2(row.binary_data);
+  //               setScheduledTime2(row.scheduled_time);
+  //               setResult2({ final_result: row.result });
+  //               setFileName2(row.file_name);
+  //               setUploadTime2(row.upload_time);
+  //               setLoadingProgress2(row.progress);
+  //               break;
+  //             case 3:
+  //               setBinaryInput3(row.binary_data);
+  //               setScheduledTime3(row.scheduled_time);
+  //               setResult3({ final_result: row.result });
+  //               setFileName3(row.file_name);
+  //               setUploadTime3(row.upload_time);
+  //               break;
+  //             case 4:
+  //               setBinaryInput4(row.binary_data);
+  //               setScheduledTime4(row.scheduled_time);
+  //               setResult4({ final_result: row.result });
+  //               setFileName4(row.file_name);
+  //               setUploadTime4(row.upload_time);
+  //               setLoadingProgress3(row.progress);
+  //               break;
+  //             case 5:
+  //               setBinaryInput5(row.binary_data);
+  //               setScheduledTime5(row.scheduled_time);
+  //               setResult5({ final_result: row.result });
+  //               setFileName5(row.file_name);
+  //               setUploadTime5(row.upload_time);
+  //               setLoadingProgress4(row.progress);
+  //               break;
+  //             case 6:
+  //               setBinaryInput6(row.binary_data);
+  //               setScheduledTime6(row.scheduled_time);
+  //               setResult6({ final_result: row.result });
+  //               setFileName6(row.file_name);
+  //               setUploadTime6(row.upload_time);
+  //               setLoadingProgress6(row.progress);
+  //               break;
+  //             case 7:
+  //               setBinaryInput7(row.binary_data);
+  //               setScheduledTime7(row.scheduled_time);
+  //               setResult7({ final_result: row.result });
+  //               setFileName7(row.file_name);
+  //               setUploadTime7(row.upload_time);
+  //               setLoadingProgress7(row.progress);
+  //               break;
+  //             case 8:
+  //               setBinaryInput8(row.binary_data);
+  //               setScheduledTime8(row.scheduled_time);
+  //               setResult8({ final_result: row.result });
+  //               setFileName8(row.file_name);
+  //               setUploadTime8(row.upload_time);
+  //               setLoadingProgress8(row.progress);
+  //               break;
+  //             case 9:
+  //               setBinaryInput9(row.binary_data);
+  //               setScheduledTime9(row.scheduled_time);
+  //               setResult9({ final_result: row.result });
+  //               setFileName9(row.file_name);
+  //               setUploadTime9(row.upload_time);
+  //               setLoadingProgress9(row.progress);
+  //               break;
+  //             case 10:
+  //               setBinaryInput10(row.binary_data);
+  //               setScheduledTime10(row.scheduled_time);
+  //               setResult10({ final_result: row.result });
+  //               setFileName10(row.file_name);
+  //               setUploadTime10(row.upload_time);
+  //               setLoadingProgress10(row.progress);
+  //               break;
+  //             default:
+  //               break;
+  //           }
+  //         });
+  //       }
+  //     } catch (err) {
    
-      }
-    };
+  //     }
+  //   };
 
-    fetchStoredResults();
-  }, []);
+  //   fetchStoredResults();
+  // }, []);
+
+
+
+useEffect(() => {
+  let subscription;
+  
+  const setupSubscription = async () => {
+    const userId = await fetchUserId();
+    if (!userId) return;
+
+    // Set up real-time subscription
+    subscription = supabase
+      .channel('results-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'results3',
+          filter: `user_id=eq.${userId}`
+        },
+        (payload) => {
+          // This runs automatically whenever results table changes for this user
+          const row = payload.new;
+          
+          switch (row.line) {
+            case 1:
+              setBinaryInput(row.binary_data);
+              setScheduledTime(row.scheduled_time);
+              setResult({ final_result: row.result });
+              setFileName(row.file_name);
+              setUploadTime(row.upload_time);
+              setLoadingProgress(row.progress);
+              break;
+            case 2:
+              setBinaryInput2(row.binary_data);
+              setScheduledTime2(row.scheduled_time);
+              setResult2({ final_result: row.result });
+              setFileName2(row.file_name);
+              setUploadTime2(row.upload_time);
+              setLoadingProgress2(row.progress);
+              break;
+            case 3:
+              setBinaryInput3(row.binary_data);
+              setScheduledTime3(row.scheduled_time);
+              setResult3({ final_result: row.result });
+              setFileName3(row.file_name);
+              setUploadTime3(row.upload_time);
+              setLoadingProgress3(row.progress);
+              break;
+            case 4:
+              setBinaryInput4(row.binary_data);
+              setScheduledTime4(row.scheduled_time);
+              setResult4({ final_result: row.result });
+              setFileName4(row.file_name);
+              setUploadTime4(row.upload_time);
+              setLoadingProgress4(row.progress);
+              break;
+            case 5:
+              setBinaryInput5(row.binary_data);
+              setScheduledTime5(row.scheduled_time);
+              setResult5({ final_result: row.result });
+              setFileName5(row.file_name);
+              setUploadTime5(row.upload_time);
+              setLoadingProgress5(row.progress);
+              break;
+            default:
+              break;
+          }
+        }
+      )
+      .subscribe();
+  };
+
+  setupSubscription();
+
+  // Cleanup subscription
+  return () => {
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+  };
+}, []); 
 
   const [loadingProgress, setLoadingProgress] = useState(() => {
     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase3') === 'true';
@@ -1703,7 +1786,7 @@ useEffect(() => {
       const userId = await fetchUserId();
       if (!userId) return;
 
-      await upsertProgress(1, userId);
+      await upsertProgress(10, userId);
 
       setShowRedButton(false);
       if (!alertShownRef.current) {
@@ -1733,8 +1816,7 @@ useEffect(() => {
     
               //  Stop polling once progress is 100%
               if (progress >= 100 && progressIntervalId) {
-                setLoadingProgress(100);
-                   
+              
                 clearInterval(progressIntervalId);
                 progressIntervalId = null;
               }
@@ -1771,7 +1853,7 @@ useEffect(() => {
             progressIntervalId = null;
           }
          
-          setLoadingProgress(100);
+
           setResult(response.data);
           localStorage.setItem("resultFetchedFromSupabase3", "true");
           await upsertProgress(100, userId, response.data.final_result);
@@ -1985,8 +2067,7 @@ useEffect(() => {
     
               //  Stop polling once progress is 100%
               if (progress >= 100 && progressIntervalId) {
-                setLoadingProgress2(100);
-                   
+                
                 clearInterval(progressIntervalId);
                 progressIntervalId = null;
               }
@@ -2023,7 +2104,6 @@ useEffect(() => {
             progressIntervalId = null;
           }
          
-          setLoadingProgress2(100);
           setResult2(response.data);
           localStorage.setItem("resultFetchedFromSupabase3", "true");
           await upsertProgress2(100, userId, response.data.final_result);
@@ -2195,7 +2275,7 @@ useEffect(() => {
         return;
       }
 
-      await upsertProgress(1, userId);
+      await upsertProgress(10, userId);
 
       setShowRedButton3(false);
       if (!alertShownRef3.current) {
@@ -2224,8 +2304,7 @@ useEffect(() => {
     
               //  Stop polling once progress is 100%
               if (progress >= 100 && progressIntervalId) {
-                setLoadingProgress3(100);
-                   
+                 
                 clearInterval(progressIntervalId);
                 progressIntervalId = null;
               }
@@ -2262,7 +2341,7 @@ useEffect(() => {
             progressIntervalId = null;
           }
          
-          setLoadingProgress3(100);
+         
           setResult3(response.data);
           localStorage.setItem("resultFetchedFromSupabase3", "true");
           await upsertProgress(100, userId, response.data.final_result);
@@ -2469,7 +2548,7 @@ useEffect(() => {
 
               //  Stop polling once progress is 100%
               if (progress >= 100 && progressIntervalId) {
-                setLoadingProgress4(100);
+               
                    
                 clearInterval(progressIntervalId);
                 progressIntervalId = null;
@@ -2507,7 +2586,7 @@ useEffect(() => {
             progressIntervalId = null;
           }
          
-          setLoadingProgress4(100);
+
           setResult4(response.data);
           localStorage.setItem("resultFetchedFromSupabase3", "true");
           await upsertProgress(100, userId, response.data.final_result);
@@ -2681,7 +2760,7 @@ useEffect(() => {
         return;
       }
 
-      await upsertProgress(1, userId);
+      await upsertProgress(10, userId);
 
       setShowRedButton5(false);
       if (!alertShownRef5.current) {
@@ -2710,7 +2789,7 @@ useEffect(() => {
     
               //  Stop polling once progress is 100%
               if (progress >= 100 && progressIntervalId) {
-                setLoadingProgress5(100);
+              
                    
                 clearInterval(progressIntervalId);
                 progressIntervalId = null;
@@ -2748,7 +2827,7 @@ useEffect(() => {
             progressIntervalId = null;
           }
          
-          setLoadingProgress5(100);
+        
           setResult5(response.data);
           localStorage.setItem("resultFetchedFromSupabase3", "true");
           await upsertProgress(100, userId, response.data.final_result);
@@ -3407,7 +3486,6 @@ const [binFile5, setBinFile5] = useState(null);
 
         })
         .catch((error) => {
-
           clearInterval(progressInterval);
           setLoadingProgress5Gr(0);
         });
@@ -3415,96 +3493,55 @@ const [binFile5, setBinFile5] = useState(null);
     }
   };
 
-  const handleDownloadOutput = async () => {
-    const jobId = jobIdRef.current;
-
-    if (!jobId) {
-        
-      return;
-    }
-    const url = `${REACT_APP_BASE_URL}/get_output_dieharder/${currentJobIdT}/`;
+const downloadDieharderOutput = async (line_number) => {
     try {
-      const response = await axios.get(url);
-      const outputText = response.data.output;
+        const url = `${REACT_APP_BASE_URL}/get_output_dieharder/${line_number}/`;
 
-      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
-      saveAs(blob, `dieharder_output_${jobId}.txt`);
-    } catch (error) {
-         
-    }
-  };
-  const handleDownloadOutput2 = async () => {
-    const jobId = jobIdRef2.current;
+        const response = await axios.get(url, {
+            responseType: 'text',
+            transformResponse: [function (data) {
+                return data;
+            }]
+        });
 
-    if (!jobId) {
+        let outputText;
         
-      return;
-    }
-    const url = `${REACT_APP_BASE_URL}/get_output_dieharder/${jobId}/`;
-    try {
-      const response = await axios.get(url);
-      const outputText = response.data.output;
+        if (typeof response.data === 'string' && response.data.trim().startsWith('{')) {
+            try {
+                const jsonData = JSON.parse(response.data);
+                outputText = jsonData.output;
+            } catch (e) {
+                outputText = response.data;
+            }
+        } else {
+            outputText = response.data;
+        }
 
-      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
-      saveAs(blob, `dieharder_output_${jobId}.txt`);
-    } catch (error) {
-         
-    }
-  };
-  const handleDownloadOutput3 = async () => {
-    const jobId = jobIdRef3.current;
+        // Clean the output text
+        if (outputText) {
+            outputText = outputText.replace(/[^\x20-\x7E\n\r\t]/g, '');
+            outputText = outputText.replace(/[ \t]+/g, ' ');
+            outputText = outputText.replace(/\n\s*\n/g, '\n\n');
+        }
 
-    if (!jobId) {
+        const blob = new Blob([outputText], { 
+            type: "text/plain;charset=utf-8" 
+        });
         
-      return;
-    }
-    const url = `${REACT_APP_BASE_URL}/get_output_dieharder/${jobId}/`;
-    try {
-      const response = await axios.get(url);
-      const outputText = response.data.output;
-
-      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
-      saveAs(blob, `dieharder_output_${jobId}.txt`);
-    } catch (error) {
-         
-    }
-  };
-  const handleDownloadOutput4 = async () => {
-    const jobId = jobIdRef4.current;
-
-    if (!jobId) {
+        saveAs(blob, `dieharder_output_line_${line_number}_${Date.now()}.txt`);
         
-      return;
-    }
-    const url = `${REACT_APP_BASE_URL}/get_output_dieharder/${jobId}/`;
-    try {
-      const response = await axios.get(url);
-      const outputText = response.data.output;
-
-      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
-      saveAs(blob, `dieharder_output_${jobId}.txt`);
     } catch (error) {
-         
+        console.error(`Error downloading output for line ${line_number}:`, error);
+        alert(`Failed to download output for line ${line_number}`);
     }
-  };
-  const handleDownloadOutput5 = async () => {
-    const jobId = jobIdRef5.current;
+};
 
-    if (!jobId) {
-        
-      return;
-    }
-    const url = `${REACT_APP_BASE_URL}/get_output_dieharder/${jobId}/`;
-    try {
-      const response = await axios.get(url);
-      const outputText = response.data.output;
-
-      const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
-      saveAs(blob, `dieharder_output_${jobId}.txt`);
-    } catch (error) {
-         
-    }
-  };
+// Then use them like this:
+const handleDownloadOutput = () => downloadDieharderOutput(1);
+const handleDownloadOutput2 = () => downloadDieharderOutput(2);
+const handleDownloadOutput3 = () => downloadDieharderOutput(3);
+const handleDownloadOutput4 = () => downloadDieharderOutput(4);
+const handleDownloadOutput5 = () => downloadDieharderOutput(5);
 
   return (
     <Box m="20px">

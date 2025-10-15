@@ -2,10 +2,10 @@
 		---------------------------------------------
 		COMPUTATIONAL INFORMATION:
 		---------------------------------------------
-		(a) Chi^2           = 62432.312500
-		(b) # of substrings = 62500
+		(a) Chi^2           = 65816.625000
+		(b) # of substrings = 65536
 		(c) block length    = 128
 		(d) Note: 0 bits were discarded.
 		---------------------------------------------
-SUCCESS		p_value = 0.575201
+SUCCESS		p_value = 0.218915
 

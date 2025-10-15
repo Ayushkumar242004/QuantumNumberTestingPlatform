@@ -268,6 +268,7 @@ CELERY_TASK_ROUTES = {
     'reports.tasks.*': {'queue': 'reports'},
     '*.execute_nist_tests': {'queue': 'nist_tests'},
     '*.execute_nist90b_tests': {'queue': 'nist90b_tests'},
+    '*.execute_dieharder_tests': {'queue': 'dieharder_tests'},
 }
 
 # Rate limiting for heavy tasks

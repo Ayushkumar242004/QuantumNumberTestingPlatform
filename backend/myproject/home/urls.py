@@ -98,8 +98,8 @@ urlpatterns = [
     path('download_nist22b/', views.aggregate_stats, name='download_nist22b_output'),
 
     path('generate_final_ans_dieharder/', views.generate_final_ans_dieharder, name='generate_final_ans_dieharder'),
-    path("get_progress_dieharder/<uuid:job_id>/", views.get_progress_dieharder, name="get_progress_dieharder"),
-    path("get_output_dieharder/<uuid:job_id>/", views.get_output_dieharder, name="get_output_dieharder"),
+    path("get_progress_dieharder/<int:line_number>/", views.get_progress_dieharder, name="get_progress_dieharder"),
+    path("get_output_dieharder/<int:line_number>/", views.get_output_dieharder, name="get_output_dieharder"),
 
    
 ]
