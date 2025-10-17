@@ -5906,17 +5906,30 @@ def execute_nist90b_tests(self, job_data):
     logger.info(f"🚀 [90B TASK START] Task {self.request.id} job_id={job_id} user={user_id}")
 
     try:
-        # Progress helper
+        # ✅ IMPROVED Progress helper with better error handling
         def update_progress(step):
             try:
                 progress = round((step / TOTAL_STEPS_90B) * 100)
                 logger.info(f"📈 [90B PROGRESS] job={job_id} step={step}/{TOTAL_STEPS_90B} => {progress}%")
+                
+                # Update cache
                 cache.set(f"{job_id}_progress_90b", progress, timeout=3600)
-                # Update Supabase progress
-                supabase.table("results2").update({"progress": progress}) \
-                    .eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                
+                # ✅ IMPROVED: Update Supabase progress with better error handling
+                response = supabase.table("results2").update({
+                    "progress": progress,
+                    "updated_at": datetime.datetime.now().isoformat()
+                }).eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                
+                # ✅ Check if update was successful
+                if hasattr(response, 'error') and response.error:
+                    logger.error(f"❌ [90B SUPABASE PROGRESS ERROR] Failed to update progress: {response.error}")
+                else:
+                    logger.info(f"✅ [90B SUPABASE PROGRESS] Successfully updated to {progress}%")
+                    
             except Exception as e:
-                logger.warning(f"[90B PROGRESS WARN] could not update progress: {e}")
+                logger.error(f"❌ [90B PROGRESS ERROR] step={step}: {e}")
+                # Don't raise exception here, just log it
 
         update_progress(1)
 
@@ -5982,6 +5995,9 @@ def execute_nist90b_tests(self, job_data):
         step_counter = 3
         combined_output = ""
 
+        # ✅ IMPROVED: Add small delays between progress updates to avoid rate limiting
+        import time
+        
         # Run each test
         for test_name, test_info in tests_executables.items():
             exe_path = test_info["exe"]
@@ -5991,6 +6007,7 @@ def execute_nist90b_tests(self, job_data):
                 results[test_name] = {"min_entropy": 0.0, "result": "executable missing"}
                 step_counter += 1
                 update_progress(step_counter)
+                time.sleep(0.1)  # Small delay to avoid rapid updates
                 continue
 
             try:
@@ -6031,6 +6048,7 @@ def execute_nist90b_tests(self, job_data):
             results[test_name] = {"min_entropy": min_entropy, "result": verdict}
             step_counter += 1
             update_progress(step_counter)
+            time.sleep(0.1)  # Small delay to avoid rapid updates
 
         # Store combined output in cache
         cache.set(f"{line_number}_download90b", combined_output, timeout=3600)
@@ -6055,10 +6073,10 @@ def execute_nist90b_tests(self, job_data):
 
         update_progress(8)
 
-        # Upload final results to Supabase
+        # ✅ IMPROVED: Upload final results to Supabase with better error handling
         try:
             current_time = datetime.datetime.now().isoformat()
-            supabase.table("results2").upsert(
+            response = supabase.table("results2").upsert(
                 {
                     "user_id": int(user_id),
                     "line": int(line_number),
@@ -6072,9 +6090,14 @@ def execute_nist90b_tests(self, job_data):
                 },
                 ignore_duplicates=False
             ).execute()
-            logger.info("[90B SUPABASE] final result upserted")
+            
+            if hasattr(response, 'error') and response.error:
+                logger.error(f"❌ [90B SUPABASE FINAL ERROR] Failed to upsert final result: {response.error}")
+            else:
+                logger.info("[90B SUPABASE] final result upserted successfully")
+                
         except Exception as e:
-            logger.warning(f"[90B SUPABASE WARN] could not upsert final result: {e}")
+            logger.error(f"❌ [90B SUPABASE WARN] could not upsert final result: {e}")
 
         logger.info(f"✅ [90B TASK SUCCESS] job={job_id}")
         return {
@@ -6087,6 +6110,17 @@ def execute_nist90b_tests(self, job_data):
     except Exception as e:
         logger.error(f"💥 [90B TASK ERROR] job={job_id} error={e}")
         logger.error("".join(traceback.format_exc()))
+        
+        # ✅ Update progress to indicate error
+        try:
+            supabase.table("results2").update({
+                "progress": 0,
+                "result": f"Error: {str(e)}",
+                "updated_at": datetime.datetime.now().isoformat()
+            }).eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+        except Exception as update_error:
+            logger.error(f"❌ [90B ERROR PROGRESS UPDATE FAILED] {update_error}")
+            
         raise
 
     finally:
@@ -6103,7 +6137,7 @@ def execute_nist90b_tests(self, job_data):
                 logger.info(f"🗑️ [90B FILE REMOVED] {uploaded_file_path}")
             except Exception as e:
                 logger.warning(f"⚠️ [90B CLEANUP ERROR] {e}")
-
+                
 @csrf_exempt
 def run_nist90b_on_bin(request):
     """
@@ -7149,7 +7183,7 @@ def get_output_dieharder(request, line_number):
     except Exception as e:
         logger.error(f"[GET_OUTPUT_DIEHARDER ERROR] line_number={line_number}: {e}")
         return JsonResponse({"output": f"Error retrieving output: {str(e)}", "line_number": line_number})
-        
+
 class DieharderMinDistTestView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser)

@@ -1,6 +1,6 @@
 ________________________________________________________________________________
 
-		FILE = /home/rao/Documents/test2/backend/myproject/home/sts-2.1.2/456a9862-36fc-40e7-a5a5-a5f01c31bda4_testfile.bin		ALPHA = 0.0100
+		FILE = /home/rao/Documents/test2/backend/myproject/home/sts-2.1.2/7c4a826c-ea1c-4665-915d-1a72ebc7c95e_20Mb.bin		ALPHA = 0.0100
 ________________________________________________________________________________
 
-		BITSREAD = 8388608 0s = 4195422 1s = 4193186
+		BITSREAD = 167772160 0s = 83886021 1s = 83886139

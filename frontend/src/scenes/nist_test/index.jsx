@@ -601,8 +601,11 @@ const Nist_tests = () => {
     reader.readAsArrayBuffer(selectedFile);
   };
 
+const isProcessingFileRef2 = useRef(false);
 
   const handleFileChange2 = async (event) => {
+    isProcessingFileRef2.current = true; // Set flag when processing starts
+    
     setLoadingProgress2Gr(0);
     setLoadingProgress2Rep(0);
     const selectedFile = event.target.files[0];
@@ -656,6 +659,7 @@ const Nist_tests = () => {
           .delete()
           .match({ line: 2, user_id: userId }); // Replace '1' with the line number for this handler
 
+          
         setLoadingProgress2(0);
         if (deleteError) {
 
@@ -664,6 +668,8 @@ const Nist_tests = () => {
 
       } catch (err) {
 
+      }finally {
+        isProcessingFileRef2.current = false; // Reset flag when done
       }
       alertShownRef2.current = false;
       // Reset the file input value to allow the same file to be uploaded again
@@ -673,6 +679,89 @@ const Nist_tests = () => {
     reader.readAsArrayBuffer(selectedFile);
   };
 
+//   const handleFileChange2 = async (event) => {
+//     setLoadingProgress2Gr(0);
+//     setLoadingProgress2Rep(0);
+//     const selectedFile = event.target.files[0];
+//     if (!selectedFile) {
+//         // User closed the file picker without choosing a file
+//         setShowRedButton2(false);
+//         return;
+//     }
+//     setSelectedFile2(selectedFile);
+//     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
+//         alert("Warning: The selected file is too large. Please choose a smaller file.");
+//         return;
+//     }
+
+//     const userId = await fetchUserId();
+//     if (!userId) {
+//         return;
+//     }
+
+//     setBinaryInput2(""); // Clear binary input
+//     setScheduledTime2(""); // Clear scheduled time
+//     setDebouncedScheduledTime2(""); // Clear debounced scheduled time
+//     setResult2(""); // Clear result
+//     setFileName2(""); // Clear filename
+//     setUploadTime2(""); // Clear upload time
+//     setLoadingProgress2(0); // Reset progress bar
+//     setTime2("");
+
+//     setFileName2(selectedFile.name);
+//     const reader = new FileReader();
+//     reader.onload = async (e) => {
+//         const binaryData = e.target.result;
+//         const byteArray = new Uint8Array(binaryData);
+//         const decoder = new TextDecoder();
+//         let binaryString = "";
+
+//         // Update binaryInput state with the processed binary string
+//         setBinaryInput2(binaryString);
+
+//         const now = new Date();
+//         const pad = (n) => String(n).padStart(2, '0');
+//         const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+//         setUploadTime2(currentTime);
+        
+//         try {
+//             // Delete previous entry for line 2
+//             await supabase
+//                 .from('results')
+//                 .delete()
+//                 .match({ line: 2, user_id: userId });
+//             console.log("Previous entry for line 2 deleted successfully.");
+            
+//             // Immediately upsert a new row with progress 0 and empty result
+//             // Use the current values directly instead of state variables
+//             await supabase
+//                 .from('results')
+//                 .upsert({
+//                     user_id: userId,
+//                     line: 2,
+//                     binary_data: "",
+//                     scheduled_time: "",
+//                     result: "",
+//                     file_name: selectedFile.name, // Use selectedFile directly
+//                     upload_time: currentTime, // Use currentTime directly
+//                     progress: 0,
+//                     updated_at: new Date().toISOString(),
+//                 });
+
+//             setLoadingProgress2(0);
+//             console.log("New entry for line 2 created successfully.");
+
+//         } catch (err) {
+//             console.error("Error updating database:", err);
+//         }
+        
+//         alertShownRef2.current = false;
+//         // Reset the file input value to allow the same file to be uploaded again
+//         event.target.value = "";
+//     };
+//     setIsEnabled2(false);
+//     reader.readAsArrayBuffer(selectedFile);
+// };
   const handleFileChange3 = async (event) => {
     setLoadingProgress3Gr(0);
     setLoadingProgress3Rep(0);
@@ -981,7 +1070,202 @@ useEffect(() => {
     const userId = await fetchUserId();
     if (!userId) return;
 
-    // Set up real-time subscription
+    // ✅ FIRST: Fetch initial data for all lines
+    const fetchInitialData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('results')
+          .select('*')
+          .eq('user_id', userId);
+        
+        if (error) {
+          console.error('Error fetching initial data:', error);
+          return;
+        }
+
+        if (data) {
+          data.forEach(async(row) => {
+            switch (row.line) {
+              case 1:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 1);
+                  
+                  setLoadingProgress(0);
+                  console.log('Reset progress to 0 for line 1 on page load');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput(row.binary_data);
+                  setScheduledTime(row.scheduled_time);
+                  setResult({ final_result: row.result });
+                  setFileName(row.file_name);
+                  setUploadTime(row.upload_time);
+                  setLoadingProgress(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput(row.binary_data);
+                  setScheduledTime(row.scheduled_time);
+                  setResult({ final_result: row.result });
+                  setFileName(row.file_name);
+                  setUploadTime(row.upload_time);
+                  setLoadingProgress(row.progress);
+                }
+                break;
+              case 2:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 2);
+                  
+                  setLoadingProgress2(0);
+                  console.log('Reset progress to 0 for line 2 on page load');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput2(row.binary_data);
+                  setScheduledTime2(row.scheduled_time);
+                  setResult2({ final_result: row.result });
+                  setFileName2(row.file_name);
+                  setUploadTime2(row.upload_time);
+                  setLoadingProgress2(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput2(row.binary_data);
+                  setScheduledTime2(row.scheduled_time);
+                  setResult2({ final_result: row.result });
+                  setFileName2(row.file_name);
+                  setUploadTime2(row.upload_time);
+                  setLoadingProgress2(row.progress);
+                }
+                break;
+              case 3:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 3);
+                  
+                  setLoadingProgress3(0);
+                  console.log('Reset progress to 0 for line 3 on page load');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput3(row.binary_data);
+                  setScheduledTime3(row.scheduled_time);
+                  setResult3({ final_result: row.result });
+                  setFileName3(row.file_name);
+                  setUploadTime3(row.upload_time);
+                  setLoadingProgress3(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput3(row.binary_data);
+                  setScheduledTime3(row.scheduled_time);
+                  setResult3({ final_result: row.result });
+                  setFileName3(row.file_name);
+                  setUploadTime3(row.upload_time);
+                  setLoadingProgress3(row.progress);
+                }
+                break;
+              case 4:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 4);
+                  
+                  setLoadingProgress4(0);
+                  console.log('Reset progress to 0 for line 4 on page load');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput4(row.binary_data);
+                  setScheduledTime4(row.scheduled_time);
+                  setResult4({ final_result: row.result });
+                  setFileName4(row.file_name);
+                  setUploadTime4(row.upload_time);
+                  setLoadingProgress4(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput4(row.binary_data);
+                  setScheduledTime4(row.scheduled_time);
+                  setResult4({ final_result: row.result });
+                  setFileName4(row.file_name);
+                  setUploadTime4(row.upload_time);
+                  setLoadingProgress4(row.progress);
+                }
+                break;
+              case 5:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 5);
+                  
+                  setLoadingProgress5(0);
+                  console.log('Reset progress to 0 for line 5 on page load');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput5(row.binary_data);
+                  setScheduledTime5(row.scheduled_time);
+                  setResult5({ final_result: row.result });
+                  setFileName5(row.file_name);
+                  setUploadTime5(row.upload_time);
+                  setLoadingProgress5(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput5(row.binary_data);
+                  setScheduledTime5(row.scheduled_time);
+                  setResult5({ final_result: row.result });
+                  setFileName5(row.file_name);
+                  setUploadTime5(row.upload_time);
+                  setLoadingProgress5(row.progress);
+                }
+                break;
+              default:
+                break;
+            }
+          });
+          console.log('Initial data loaded for user:', userId);
+        }
+      } catch (err) {
+        console.error('Error in initial data fetch:', err);
+      }
+    };
+
+    // Fetch initial data immediately
+    await fetchInitialData();
+
+    // ✅ SECOND: Set up real-time subscription for future changes
     subscription = supabase
       .channel('results-changes')
       .on(
@@ -995,6 +1279,14 @@ useEffect(() => {
         (payload) => {
           // This runs automatically whenever results table changes for this user
           const row = payload.new;
+          console.log('Real-time update received:', row);
+          
+          // Add processing flags for all lines if needed
+          if (isProcessingFileRef2?.current && payload.new?.line === 2) {
+            console.log('Skipping real-time update for line 2 during file processing');
+            return;
+          }
+          // You can add similar checks for other lines if you have processing flags for them
           
           switch (row.line) {
             case 1:
@@ -1042,7 +1334,9 @@ useEffect(() => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
   };
 
   setupSubscription();
@@ -1051,9 +1345,10 @@ useEffect(() => {
   return () => {
     if (subscription) {
       subscription.unsubscribe();
+      console.log('Subscription cleaned up');
     }
   };
-}, []); 
+}, []);
 
   const [loadingProgress2, setLoadingProgress2] = useState(0);
   const [loadingProgress2Rep, setLoadingProgress2Rep] = useState(0);

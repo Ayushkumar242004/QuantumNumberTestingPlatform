@@ -1397,27 +1397,234 @@ const isTxt = fileName.endsWith(".txt");
   // }, []);
 
 
+const [isResults3Subscribed, setIsResults3Subscribed] = useState(false);
+const subscriptionRefResults3 = useRef(null);
 
 useEffect(() => {
-  let subscription;
-  
   const setupSubscription = async () => {
     const userId = await fetchUserId();
     if (!userId) return;
 
+    // ✅ Double check to prevent multiple subscriptions
+    if (isResults3Subscribed || subscriptionRefResults3.current) {
+      console.log('📡 results3 already subscribed, skipping...');
+      return;
+    }
+
+    // ✅ Clean up any existing subscription first
+    if (subscriptionRefResults3.current) {
+      subscriptionRefResults3.current.unsubscribe();
+      subscriptionRefResults3.current = null;
+    }
+
+    // Fetch initial data
+    const fetchInitialData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('results3')
+          .select('*')
+          .eq('user_id', userId);
+        
+        if (error) {
+          console.error('❌ Error fetching initial data from results3:', error);
+          return;
+        }
+
+        if (data) {
+          console.log('📥 Initial data fetched from results3');
+          data.forEach(async (row) => {
+            switch (row.line) {
+              case 1:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results3')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 1);
+                  
+                  setLoadingProgress(0);
+                  console.log('Reset progress to 0 for line 1 on page load in results3');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput(row.binary_data);
+                  setScheduledTime(row.scheduled_time);
+                  setResult({ final_result: row.result });
+                  setFileName(row.file_name);
+                  setUploadTime(row.upload_time);
+                  setLoadingProgress(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput(row.binary_data);
+                  setScheduledTime(row.scheduled_time);
+                  setResult({ final_result: row.result });
+                  setFileName(row.file_name);
+                  setUploadTime(row.upload_time);
+                  setLoadingProgress(row.progress);
+                }
+                break;
+              case 2:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results3')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 2);
+                  
+                  setLoadingProgress2(0);
+                  console.log('Reset progress to 0 for line 2 on page load in results3');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput2(row.binary_data);
+                  setScheduledTime2(row.scheduled_time);
+                  setResult2({ final_result: row.result });
+                  setFileName2(row.file_name);
+                  setUploadTime2(row.upload_time);
+                  setLoadingProgress2(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput2(row.binary_data);
+                  setScheduledTime2(row.scheduled_time);
+                  setResult2({ final_result: row.result });
+                  setFileName2(row.file_name);
+                  setUploadTime2(row.upload_time);
+                  setLoadingProgress2(row.progress);
+                }
+                break;
+              case 3:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results3')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 3);
+                  
+                  setLoadingProgress3(0);
+                  console.log('Reset progress to 0 for line 3 on page load in results3');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput3(row.binary_data);
+                  setScheduledTime3(row.scheduled_time);
+                  setResult3({ final_result: row.result });
+                  setFileName3(row.file_name);
+                  setUploadTime3(row.upload_time);
+                  setLoadingProgress3(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput3(row.binary_data);
+                  setScheduledTime3(row.scheduled_time);
+                  setResult3({ final_result: row.result });
+                  setFileName3(row.file_name);
+                  setUploadTime3(row.upload_time);
+                  setLoadingProgress3(row.progress);
+                }
+                break;
+              case 4:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results3')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 4);
+                  
+                  setLoadingProgress4(0);
+                  console.log('Reset progress to 0 for line 4 on page load in results3');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput4(row.binary_data);
+                  setScheduledTime4(row.scheduled_time);
+                  setResult4({ final_result: row.result });
+                  setFileName4(row.file_name);
+                  setUploadTime4(row.upload_time);
+                  setLoadingProgress4(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput4(row.binary_data);
+                  setScheduledTime4(row.scheduled_time);
+                  setResult4({ final_result: row.result });
+                  setFileName4(row.file_name);
+                  setUploadTime4(row.upload_time);
+                  setLoadingProgress4(row.progress);
+                }
+                break;
+              case 5:
+                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                if (row.progress === 100 && !row.result) {
+                  // Progress is 100% but no result means page was refreshed during idle state
+                  await supabase
+                    .from('results3')
+                    .update({
+                      progress: 10,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', userId)
+                    .eq('line', 5);
+                  
+                  setLoadingProgress5(0);
+                  console.log('Reset progress to 0 for line 5 on page load in results3');
+                } else if (row.progress === 100 && row.result) {
+                  // If progress is 100% AND there's a result, keep it (test completed)
+                  setBinaryInput5(row.binary_data);
+                  setScheduledTime5(row.scheduled_time);
+                  setResult5({ final_result: row.result });
+                  setFileName5(row.file_name);
+                  setUploadTime5(row.upload_time);
+                  setLoadingProgress5(row.progress);
+                } else {
+                  // Normal case - progress is between 0-99
+                  setBinaryInput5(row.binary_data);
+                  setScheduledTime5(row.scheduled_time);
+                  setResult5({ final_result: row.result });
+                  setFileName5(row.file_name);
+                  setUploadTime5(row.upload_time);
+                  setLoadingProgress5(row.progress);
+                }
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      } catch (err) {
+        console.error('❌ Error in initial data fetch:', err);
+      }
+    };
+
+    await fetchInitialData();
+
     // Set up real-time subscription
-    subscription = supabase
-      .channel('results-changes')
+    console.log('📡 Setting up results3 subscription...');
+    subscriptionRefResults3.current = supabase
+      .channel('results3-changes-' + Date.now()) // ✅ Unique channel name with timestamp
       .on(
         'postgres_changes',
         {
-          event: '*', // INSERT, UPDATE, DELETE
+          event: '*',
           schema: 'public',
           table: 'results3',
           filter: `user_id=eq.${userId}`
         },
         (payload) => {
-          // This runs automatically whenever results table changes for this user
+          console.log('🔄 Real-time update from results3');
           const row = payload.new;
           
           switch (row.line) {
@@ -1466,19 +1673,27 @@ useEffect(() => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 results3 Subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          setIsResults3Subscribed(true);
+        } else {
+          setIsResults3Subscribed(false);
+        }
+      });
   };
 
   setupSubscription();
 
-  // Cleanup subscription
   return () => {
-    if (subscription) {
-      subscription.unsubscribe();
+    if (subscriptionRefResults3.current) {
+      console.log('🧹 Cleaning up results3 subscription');
+      subscriptionRefResults3.current.unsubscribe();
+      subscriptionRefResults3.current = null;
+      setIsResults3Subscribed(false);
     }
   };
-}, []); 
-
+}, [isResults3Subscribed]); // Add isResults3Subscribed as dependency
   const [loadingProgress, setLoadingProgress] = useState(() => {
     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase3') === 'true';
     return isFetchedFromSupabase ? 100 : 0;
