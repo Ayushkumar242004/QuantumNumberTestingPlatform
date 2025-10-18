@@ -4846,14 +4846,15 @@ def execute_nist_tests(self, job_data):
         # progress helper
         def update_progress(step):
             try:
-                progress = round((step / TOTAL_STEPS) * 100)
-                logger.info(f"📈 [PROGRESS] job={job_id} step={step}/{TOTAL_STEPS} => {progress}%")
+                # ✅ CAP progress at 100% maximum
+                capped_step = min(step, TOTAL_STEPS)
+                progress = round((capped_step / TOTAL_STEPS) * 100)
+                logger.info(f"📈 [PROGRESS] job={job_id} step={capped_step}/{TOTAL_STEPS} => {progress}%")
                 cache.set(f"{job_id}_progress", progress, timeout=3600)
                 supabase.table("results").update({"progress": progress}) \
                     .eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
             except Exception as e:
                 logger.warning(f"[PROGRESS WARN] could not update progress: {e}")
-
         update_progress(1)
 
         NISTTaskLock.release_nist_lock(user_id)
@@ -4947,7 +4948,7 @@ def execute_nist_tests(self, job_data):
         test_results = {}
         random_count = 0
         non_random_count = 0
-        step = 5
+        step = 4
 
         for test_name, result_file in TEST_FOLDERS.items():
             test_folder = os.path.join(experiment_path, test_name)

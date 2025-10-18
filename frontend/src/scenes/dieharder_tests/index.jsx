@@ -19,7 +19,7 @@ const Dieharder_tests = () => {
   const colors = tokens(theme.palette.mode);
 
   const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
-const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
+  const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
   useEffect(() => {
     // Reset body styles
@@ -47,11 +47,11 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const [binaryInput9, setBinaryInput9] = useState("");
   const [binaryInput10, setBinaryInput10] = useState("");
 
-     const [isEnabled, setIsEnabled] = useState(true); 
-     const [isEnabled2, setIsEnabled2] = useState(true); 
-     const [isEnabled3, setIsEnabled3] = useState(true); 
-     const [isEnabled4, setIsEnabled4] = useState(true); 
-     const [isEnabled5, setIsEnabled5] = useState(true); 
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [isEnabled2, setIsEnabled2] = useState(true);
+  const [isEnabled3, setIsEnabled3] = useState(true);
+  const [isEnabled4, setIsEnabled4] = useState(true);
+  const [isEnabled5, setIsEnabled5] = useState(true);
 
   const fetchUserId = async () => {
     const username = localStorage.getItem("username"); // Retrieve the username from localStorage
@@ -588,22 +588,22 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   };
   useEffect(() => {
     const handler = setTimeout(() => {
-     
+
       if (scheduledTime) {
         const date = new Date(scheduledTime);
         const pad = (n) => String(n).padStart(2, '0');
-  
+
         const formattedScheduledTime = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-       
+
         setDebouncedScheduledTime(formattedScheduledTime);
       }
     }, 3000);
-  
+
     return () => {
       clearTimeout(handler);
     };
   }, [scheduledTime]);
-  
+
 
 
   const finalResult2 = result2 ? result2.final_result : " ";
@@ -761,8 +761,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const [showRedButton10, setShowRedButton10] = useState(false);
 
   const handleFileUpload = () => {
-  //  setShowRedButton(true)
-   setIsEnabled(true);
+    //  setShowRedButton(true)
+    setIsEnabled(true);
     fileInputRef.current.click();
   };
   const handleFileUpload2 = () => {
@@ -781,8 +781,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
     fileInputRef4.current.click();
   };
   const handleFileUpload5 = () => {
-  //  setShowRedButton5(true)
-   setIsEnabled5(true);
+    //  setShowRedButton5(true)
+    setIsEnabled5(true);
     fileInputRef5.current.click();
   };
 
@@ -796,38 +796,38 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const [selectedFile8, setSelectedFile8] = useState(null);
   const [selectedFile9, setSelectedFile9] = useState(null);
   const [selectedFile10, setSelectedFile10] = useState(null);
-  
+
   const handleFileChange = async (event) => {
     setLoadingProgressGr(0);
-   setLoadingProgressRep(0);
+    setLoadingProgressRep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
       setShowRedButton(false);
       return;
     }
-  
+
     setSelectedFile(selectedFile);
-  
+
     const fileName = selectedFile.name.toLowerCase(); // normalize case
-const isBin = fileName.endsWith(".bin");
-const isTxt = fileName.endsWith(".txt");
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
 
 
-  
-    if (!isBin ) {
+
+    if (!isBin) {
       alert("Please upload a .bin file.");
       return;
     }
-  
+
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
     }
-  
+
     const userId = await fetchUserId();
     if (!userId) return;
-  
+
     // Reset state
     setBinaryInput("");
     setResult("");
@@ -837,13 +837,13 @@ const isTxt = fileName.endsWith(".txt");
     setTime("");
     setScheduledTime("");
     setDebouncedScheduledTime("");
-  
+
     setFileName(selectedFile.name);
     const now = new Date();
     const pad = (n) => String(n).padStart(2, '0');
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime(currentTime);
-  
+
     try {
       if (isBin) {
         // BIN file logic (unchanged)
@@ -864,11 +864,11 @@ const isTxt = fileName.endsWith(".txt");
         setBinaryInput(binaryString);
       }
     } catch (error) {
-         
+
       alert("Failed to extract binary data from the file.");
       return;
     }
-  
+
     // Supabase cleanup
     try {
       localStorage.setItem('resultFetchedFromSupabase3', 'false');
@@ -876,21 +876,21 @@ const isTxt = fileName.endsWith(".txt");
         .from('results3')
         .delete()
         .match({ line: 1, user_id: userId });
-  
+
       if (deleteError) {
         return;
       }
     } catch (err) {
-         
+
     }
-  setIsEnabled(false);
+    setIsEnabled(false);
     event.target.value = "";
   };
-  
+
 
   const handleFileChange2 = async (event) => {
-     setLoadingProgress2Gr(0);
-   setLoadingProgress2Rep(0);
+    setLoadingProgress2Gr(0);
+    setLoadingProgress2Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -899,16 +899,16 @@ const isTxt = fileName.endsWith(".txt");
     }
     setSelectedFile2(selectedFile);
     const fileName = selectedFile.name.toLowerCase(); // normalize case
-const isBin = fileName.endsWith(".bin");
-const isTxt = fileName.endsWith(".txt");
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
 
 
-  
-    if (!isBin ) {
+
+    if (!isBin) {
       alert("Please upload a .bin file.");
       return;
     }
-  
+
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -936,7 +936,7 @@ const isTxt = fileName.endsWith(".txt");
     const pad = (n) => String(n).padStart(2, '0');
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime2(currentTime);
-    
+
     try {
       if (isBin) {
         // BIN file logic (unchanged)
@@ -957,11 +957,11 @@ const isTxt = fileName.endsWith(".txt");
         setBinaryInput2(binaryString);
       }
     } catch (error) {
-         
+
       alert("Failed to extract binary data from the file.");
       return;
     }
-   
+
     // Supabase cleanup
     try {
       localStorage.setItem('resultFetchedFromSupabase3', 'false');
@@ -975,16 +975,16 @@ const isTxt = fileName.endsWith(".txt");
         return;
       }
     } catch (err) {
-         
+
     }
-      setIsEnabled2(false);
+    setIsEnabled2(false);
 
     event.target.value = "";
   };
 
   const handleFileChange3 = async (event) => {
-     setLoadingProgress3Gr(0);
-   setLoadingProgress3Rep(0);
+    setLoadingProgress3Gr(0);
+    setLoadingProgress3Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -992,23 +992,23 @@ const isTxt = fileName.endsWith(".txt");
       return;
     }
     setSelectedFile3(selectedFile);
-  
+
     const fileName = selectedFile.name.toLowerCase(); // normalize case
-const isBin = fileName.endsWith(".bin");
-const isTxt = fileName.endsWith(".txt");
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
 
 
-  
-    if (!isBin ) {
+
+    if (!isBin) {
       alert("Please upload a .bin file.");
       return;
     }
-  
+
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
     }
-  
+
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1058,38 +1058,38 @@ const isTxt = fileName.endsWith(".txt");
         setBinaryInput3(binaryString);
       }
     } catch (error) {
-         
+
       alert("Failed to extract binary data from the file.");
       return;
     }
-  
 
-      // Remove previous Supabase row for line 3
-      try {
-        localStorage.setItem('resultFetchedFromSupabased3', 'false');
-        const { error: deleteError } = await supabase
-          .from('results3')
-          .delete()
-          .match({ line: 3, user_id: userId });
 
-        setLoadingProgress3(0);
-        if (deleteError) {
+    // Remove previous Supabase row for line 3
+    try {
+      localStorage.setItem('resultFetchedFromSupabased3', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 3, user_id: userId });
 
-          return;
-        }
-      } catch (err) {
-           
+      setLoadingProgress3(0);
+      if (deleteError) {
+
+        return;
       }
-        setIsEnabled3(false);
+    } catch (err) {
 
-      // Reset the file input
-      event.target.value = "";
+    }
+    setIsEnabled3(false);
+
+    // Reset the file input
+    event.target.value = "";
   };
 
 
   const handleFileChange4 = async (event) => {
-        setLoadingProgress4Gr(0);
-   setLoadingProgress4Rep(0);
+    setLoadingProgress4Gr(0);
+    setLoadingProgress4Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1097,18 +1097,18 @@ const isTxt = fileName.endsWith(".txt");
       return;
     }
     setSelectedFile4(selectedFile);
-  
+
     const fileName = selectedFile.name.toLowerCase(); // normalize case
-const isBin = fileName.endsWith(".bin");
-const isTxt = fileName.endsWith(".txt");
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
 
 
-  
-    if (!isBin ) {
+
+    if (!isBin) {
       alert("Please upload a .bin file.");
       return;
     }
-  
+
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1158,36 +1158,36 @@ const isTxt = fileName.endsWith(".txt");
         setBinaryInput4(binaryString);
       }
     } catch (error) {
-         
+
       alert("Failed to extract binary data from the file.");
       return;
     }
-      // Remove previous Supabase row for line 4
-      try {
-        localStorage.setItem('resultFetchedFromSupabased4', 'false');
-        const { error: deleteError } = await supabase
-          .from('results3')
-          .delete()
-          .match({ line: 4, user_id: userId });
+    // Remove previous Supabase row for line 4
+    try {
+      localStorage.setItem('resultFetchedFromSupabased4', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 4, user_id: userId });
 
-        setLoadingProgress4(0);
-        if (deleteError) {
+      setLoadingProgress4(0);
+      if (deleteError) {
 
-          return;
-        }
-      } catch (err) {
-        
+        return;
       }
-        setIsEnabled4(false);
+    } catch (err) {
 
-      // Reset the file input
-      event.target.value = "";
+    }
+    setIsEnabled4(false);
+
+    // Reset the file input
+    event.target.value = "";
   };
 
 
   const handleFileChange5 = async (event) => {
-     setLoadingProgress5Gr(0);
-   setLoadingProgress5Rep(0);
+    setLoadingProgress5Gr(0);
+    setLoadingProgress5Rep(0);
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -1195,18 +1195,18 @@ const isTxt = fileName.endsWith(".txt");
       return;
     }
     setSelectedFile5(selectedFile);
-  
+
     const fileName = selectedFile.name.toLowerCase(); // normalize case
-const isBin = fileName.endsWith(".bin");
-const isTxt = fileName.endsWith(".txt");
+    const isBin = fileName.endsWith(".bin");
+    const isTxt = fileName.endsWith(".txt");
 
 
-  
-    if (!isBin ) {
+
+    if (!isBin) {
       alert("Please upload a .bin file.");
       return;
     }
-  
+
     if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
       alert("Warning: The selected file is too large. Please choose a smaller file.");
       return;
@@ -1256,31 +1256,31 @@ const isTxt = fileName.endsWith(".txt");
         setBinaryInput5(binaryString);
       }
     } catch (error) {
-         
+
       alert("Failed to extract binary data from the file.");
       return;
     }
 
-      // Remove previous Supabase row for line 5
-      try {
-        localStorage.setItem('resultFetchedFromSupabased5', 'false');
-        const { error: deleteError } = await supabase
-          .from('results3')
-          .delete()
-          .match({ line: 5, user_id: userId });
+    // Remove previous Supabase row for line 5
+    try {
+      localStorage.setItem('resultFetchedFromSupabased5', 'false');
+      const { error: deleteError } = await supabase
+        .from('results3')
+        .delete()
+        .match({ line: 5, user_id: userId });
 
-        setLoadingProgress5(0);
-        if (deleteError) {
+      setLoadingProgress5(0);
+      if (deleteError) {
 
-          return;
-        }
-      } catch (err) {
-       
+        return;
       }
-        setIsEnabled5(false);
+    } catch (err) {
 
-      // Reset the file input
-      event.target.value = "";
+    }
+    setIsEnabled5(false);
+
+    // Reset the file input
+    event.target.value = "";
   };
 
 
@@ -1389,7 +1389,7 @@ const isTxt = fileName.endsWith(".txt");
   //         });
   //       }
   //     } catch (err) {
-   
+
   //     }
   //   };
 
@@ -1397,303 +1397,303 @@ const isTxt = fileName.endsWith(".txt");
   // }, []);
 
 
-const [isResults3Subscribed, setIsResults3Subscribed] = useState(false);
-const subscriptionRefResults3 = useRef(null);
+  const [isResults3Subscribed, setIsResults3Subscribed] = useState(false);
+  const subscriptionRefResults3 = useRef(null);
 
-useEffect(() => {
-  const setupSubscription = async () => {
-    const userId = await fetchUserId();
-    if (!userId) return;
+  useEffect(() => {
+    const setupSubscription = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
 
-    // ✅ Double check to prevent multiple subscriptions
-    if (isResults3Subscribed || subscriptionRefResults3.current) {
-      console.log('📡 results3 already subscribed, skipping...');
-      return;
-    }
+      // ✅ Double check to prevent multiple subscriptions
+      if (isResults3Subscribed || subscriptionRefResults3.current) {
+        console.log('📡 results3 already subscribed, skipping...');
+        return;
+      }
 
-    // ✅ Clean up any existing subscription first
-    if (subscriptionRefResults3.current) {
-      subscriptionRefResults3.current.unsubscribe();
-      subscriptionRefResults3.current = null;
-    }
+      // ✅ Clean up any existing subscription first
+      if (subscriptionRefResults3.current) {
+        subscriptionRefResults3.current.unsubscribe();
+        subscriptionRefResults3.current = null;
+      }
 
-    // Fetch initial data
-    const fetchInitialData = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('results3')
-          .select('*')
-          .eq('user_id', userId);
-        
-        if (error) {
-          console.error('❌ Error fetching initial data from results3:', error);
-          return;
+      // Fetch initial data
+      const fetchInitialData = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('results3')
+            .select('*')
+            .eq('user_id', userId);
+
+          if (error) {
+            console.error('❌ Error fetching initial data from results3:', error);
+            return;
+          }
+
+          if (data) {
+            console.log('📥 Initial data fetched from results3');
+            data.forEach(async (row) => {
+              switch (row.line) {
+                case 1:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && !row.result) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results3')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 1);
+
+                    setLoadingProgress(0);
+                    console.log('Reset progress to 0 for line 1 on page load in results3');
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput(row.binary_data);
+                    setScheduledTime(row.scheduled_time);
+                    setResult({ final_result: row.result });
+                    setFileName(row.file_name);
+                    setUploadTime(row.upload_time);
+                    setLoadingProgress(row.progress);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput(row.binary_data);
+                    setScheduledTime(row.scheduled_time);
+                    setResult({ final_result: row.result });
+                    setFileName(row.file_name);
+                    setUploadTime(row.upload_time);
+                    setLoadingProgress(row.progress);
+                  }
+                  break;
+                case 2:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && !row.result) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results3')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 2);
+
+                    setLoadingProgress2(0);
+                    console.log('Reset progress to 0 for line 2 on page load in results3');
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput2(row.binary_data);
+                    setScheduledTime2(row.scheduled_time);
+                    setResult2({ final_result: row.result });
+                    setFileName2(row.file_name);
+                    setUploadTime2(row.upload_time);
+                    setLoadingProgress2(row.progress);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput2(row.binary_data);
+                    setScheduledTime2(row.scheduled_time);
+                    setResult2({ final_result: row.result });
+                    setFileName2(row.file_name);
+                    setUploadTime2(row.upload_time);
+                    setLoadingProgress2(row.progress);
+                  }
+                  break;
+                case 3:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && !row.result) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results3')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 3);
+
+                    setLoadingProgress3(0);
+                    console.log('Reset progress to 0 for line 3 on page load in results3');
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput3(row.binary_data);
+                    setScheduledTime3(row.scheduled_time);
+                    setResult3({ final_result: row.result });
+                    setFileName3(row.file_name);
+                    setUploadTime3(row.upload_time);
+                    setLoadingProgress3(row.progress);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput3(row.binary_data);
+                    setScheduledTime3(row.scheduled_time);
+                    setResult3({ final_result: row.result });
+                    setFileName3(row.file_name);
+                    setUploadTime3(row.upload_time);
+                    setLoadingProgress3(row.progress);
+                  }
+                  break;
+                case 4:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && !row.result) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results3')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 4);
+
+                    setLoadingProgress4(0);
+                    console.log('Reset progress to 0 for line 4 on page load in results3');
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput4(row.binary_data);
+                    setScheduledTime4(row.scheduled_time);
+                    setResult4({ final_result: row.result });
+                    setFileName4(row.file_name);
+                    setUploadTime4(row.upload_time);
+                    setLoadingProgress4(row.progress);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput4(row.binary_data);
+                    setScheduledTime4(row.scheduled_time);
+                    setResult4({ final_result: row.result });
+                    setFileName4(row.file_name);
+                    setUploadTime4(row.upload_time);
+                    setLoadingProgress4(row.progress);
+                  }
+                  break;
+                case 5:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && !row.result) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results3')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 5);
+
+                    setLoadingProgress5(0);
+                    console.log('Reset progress to 0 for line 5 on page load in results3');
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput5(row.binary_data);
+                    setScheduledTime5(row.scheduled_time);
+                    setResult5({ final_result: row.result });
+                    setFileName5(row.file_name);
+                    setUploadTime5(row.upload_time);
+                    setLoadingProgress5(row.progress);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput5(row.binary_data);
+                    setScheduledTime5(row.scheduled_time);
+                    setResult5({ final_result: row.result });
+                    setFileName5(row.file_name);
+                    setUploadTime5(row.upload_time);
+                    setLoadingProgress5(row.progress);
+                  }
+                  break;
+                default:
+                  break;
+              }
+            });
+          }
+        } catch (err) {
+          console.error('❌ Error in initial data fetch:', err);
         }
+      };
 
-        if (data) {
-          console.log('📥 Initial data fetched from results3');
-          data.forEach(async (row) => {
+      await fetchInitialData();
+
+      // Set up real-time subscription
+      console.log('📡 Setting up results3 subscription...');
+      subscriptionRefResults3.current = supabase
+        .channel('results3-changes-' + Date.now()) // ✅ Unique channel name with timestamp
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'results3',
+            filter: `user_id=eq.${userId}`
+          },
+          (payload) => {
+            console.log('🔄 Real-time update from results3');
+            const row = payload.new;
+
             switch (row.line) {
               case 1:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results3')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 1);
-                  
-                  setLoadingProgress(0);
-                  console.log('Reset progress to 0 for line 1 on page load in results3');
-                } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput(row.binary_data);
-                  setScheduledTime(row.scheduled_time);
-                  setResult({ final_result: row.result });
-                  setFileName(row.file_name);
-                  setUploadTime(row.upload_time);
-                  setLoadingProgress(row.progress);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput(row.binary_data);
-                  setScheduledTime(row.scheduled_time);
-                  setResult({ final_result: row.result });
-                  setFileName(row.file_name);
-                  setUploadTime(row.upload_time);
-                  setLoadingProgress(row.progress);
-                }
+                setBinaryInput(row.binary_data);
+                setScheduledTime(row.scheduled_time);
+                setResult({ final_result: row.result });
+                setFileName(row.file_name);
+                setUploadTime(row.upload_time);
+                setLoadingProgress(row.progress);
                 break;
               case 2:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results3')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 2);
-                  
-                  setLoadingProgress2(0);
-                  console.log('Reset progress to 0 for line 2 on page load in results3');
-                } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput2(row.binary_data);
-                  setScheduledTime2(row.scheduled_time);
-                  setResult2({ final_result: row.result });
-                  setFileName2(row.file_name);
-                  setUploadTime2(row.upload_time);
-                  setLoadingProgress2(row.progress);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput2(row.binary_data);
-                  setScheduledTime2(row.scheduled_time);
-                  setResult2({ final_result: row.result });
-                  setFileName2(row.file_name);
-                  setUploadTime2(row.upload_time);
-                  setLoadingProgress2(row.progress);
-                }
+                setBinaryInput2(row.binary_data);
+                setScheduledTime2(row.scheduled_time);
+                setResult2({ final_result: row.result });
+                setFileName2(row.file_name);
+                setUploadTime2(row.upload_time);
+                setLoadingProgress2(row.progress);
                 break;
               case 3:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results3')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 3);
-                  
-                  setLoadingProgress3(0);
-                  console.log('Reset progress to 0 for line 3 on page load in results3');
-                } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput3(row.binary_data);
-                  setScheduledTime3(row.scheduled_time);
-                  setResult3({ final_result: row.result });
-                  setFileName3(row.file_name);
-                  setUploadTime3(row.upload_time);
-                  setLoadingProgress3(row.progress);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput3(row.binary_data);
-                  setScheduledTime3(row.scheduled_time);
-                  setResult3({ final_result: row.result });
-                  setFileName3(row.file_name);
-                  setUploadTime3(row.upload_time);
-                  setLoadingProgress3(row.progress);
-                }
+                setBinaryInput3(row.binary_data);
+                setScheduledTime3(row.scheduled_time);
+                setResult3({ final_result: row.result });
+                setFileName3(row.file_name);
+                setUploadTime3(row.upload_time);
+                setLoadingProgress3(row.progress);
                 break;
               case 4:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results3')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 4);
-                  
-                  setLoadingProgress4(0);
-                  console.log('Reset progress to 0 for line 4 on page load in results3');
-                } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput4(row.binary_data);
-                  setScheduledTime4(row.scheduled_time);
-                  setResult4({ final_result: row.result });
-                  setFileName4(row.file_name);
-                  setUploadTime4(row.upload_time);
-                  setLoadingProgress4(row.progress);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput4(row.binary_data);
-                  setScheduledTime4(row.scheduled_time);
-                  setResult4({ final_result: row.result });
-                  setFileName4(row.file_name);
-                  setUploadTime4(row.upload_time);
-                  setLoadingProgress4(row.progress);
-                }
+                setBinaryInput4(row.binary_data);
+                setScheduledTime4(row.scheduled_time);
+                setResult4({ final_result: row.result });
+                setFileName4(row.file_name);
+                setUploadTime4(row.upload_time);
+                setLoadingProgress4(row.progress);
                 break;
               case 5:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results3')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 5);
-                  
-                  setLoadingProgress5(0);
-                  console.log('Reset progress to 0 for line 5 on page load in results3');
-                } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput5(row.binary_data);
-                  setScheduledTime5(row.scheduled_time);
-                  setResult5({ final_result: row.result });
-                  setFileName5(row.file_name);
-                  setUploadTime5(row.upload_time);
-                  setLoadingProgress5(row.progress);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput5(row.binary_data);
-                  setScheduledTime5(row.scheduled_time);
-                  setResult5({ final_result: row.result });
-                  setFileName5(row.file_name);
-                  setUploadTime5(row.upload_time);
-                  setLoadingProgress5(row.progress);
-                }
+                setBinaryInput5(row.binary_data);
+                setScheduledTime5(row.scheduled_time);
+                setResult5({ final_result: row.result });
+                setFileName5(row.file_name);
+                setUploadTime5(row.upload_time);
+                setLoadingProgress5(row.progress);
                 break;
               default:
                 break;
             }
-          });
-        }
-      } catch (err) {
-        console.error('❌ Error in initial data fetch:', err);
-      }
+          }
+        )
+        .subscribe((status) => {
+          console.log('📡 results3 Subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            setIsResults3Subscribed(true);
+          } else {
+            setIsResults3Subscribed(false);
+          }
+        });
     };
 
-    await fetchInitialData();
+    setupSubscription();
 
-    // Set up real-time subscription
-    console.log('📡 Setting up results3 subscription...');
-    subscriptionRefResults3.current = supabase
-      .channel('results3-changes-' + Date.now()) // ✅ Unique channel name with timestamp
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'results3',
-          filter: `user_id=eq.${userId}`
-        },
-        (payload) => {
-          console.log('🔄 Real-time update from results3');
-          const row = payload.new;
-          
-          switch (row.line) {
-            case 1:
-              setBinaryInput(row.binary_data);
-              setScheduledTime(row.scheduled_time);
-              setResult({ final_result: row.result });
-              setFileName(row.file_name);
-              setUploadTime(row.upload_time);
-              setLoadingProgress(row.progress);
-              break;
-            case 2:
-              setBinaryInput2(row.binary_data);
-              setScheduledTime2(row.scheduled_time);
-              setResult2({ final_result: row.result });
-              setFileName2(row.file_name);
-              setUploadTime2(row.upload_time);
-              setLoadingProgress2(row.progress);
-              break;
-            case 3:
-              setBinaryInput3(row.binary_data);
-              setScheduledTime3(row.scheduled_time);
-              setResult3({ final_result: row.result });
-              setFileName3(row.file_name);
-              setUploadTime3(row.upload_time);
-              setLoadingProgress3(row.progress);
-              break;
-            case 4:
-              setBinaryInput4(row.binary_data);
-              setScheduledTime4(row.scheduled_time);
-              setResult4({ final_result: row.result });
-              setFileName4(row.file_name);
-              setUploadTime4(row.upload_time);
-              setLoadingProgress4(row.progress);
-              break;
-            case 5:
-              setBinaryInput5(row.binary_data);
-              setScheduledTime5(row.scheduled_time);
-              setResult5({ final_result: row.result });
-              setFileName5(row.file_name);
-              setUploadTime5(row.upload_time);
-              setLoadingProgress5(row.progress);
-              break;
-            default:
-              break;
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('📡 results3 Subscription status:', status);
-        if (status === 'SUBSCRIBED') {
-          setIsResults3Subscribed(true);
-        } else {
-          setIsResults3Subscribed(false);
-        }
-      });
-  };
-
-  setupSubscription();
-
-  return () => {
-    if (subscriptionRefResults3.current) {
-      console.log('🧹 Cleaning up results3 subscription');
-      subscriptionRefResults3.current.unsubscribe();
-      subscriptionRefResults3.current = null;
-      setIsResults3Subscribed(false);
-    }
-  };
-}, [isResults3Subscribed]); // Add isResults3Subscribed as dependency
+    return () => {
+      if (subscriptionRefResults3.current) {
+        console.log('🧹 Cleaning up results3 subscription');
+        subscriptionRefResults3.current.unsubscribe();
+        subscriptionRefResults3.current = null;
+        setIsResults3Subscribed(false);
+      }
+    };
+  }, [isResults3Subscribed]); // Add isResults3Subscribed as dependency
   const [loadingProgress, setLoadingProgress] = useState(() => {
     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase3') === 'true';
     return isFetchedFromSupabase ? 100 : 0;
@@ -1861,85 +1861,85 @@ useEffect(() => {
     jobIdRef5.current = currentJobIdT5;
   }, [currentJobIdT5]);
 
-  
-useEffect(() => {
 
-  let progressIntervalId;
+  useEffect(() => {
 
-  const resumeProgressCheck = async () => {
-    const userId = await fetchUserId();
-    if (!userId) return;
+    let progressIntervalId;
 
-    const fetchProgressFromSupabase = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("results3")
-          .select("*")
-          .eq("user_id", userId)
-          .eq("line", 1)
-          .maybeSingle(); 
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
 
-        if (error) {
-            
-          // ❌ stop polling on error
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 1)
+            .maybeSingle();
+
+          if (error) {
+
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
+
+          if (data) {
+            const progress = data.progress || 0;
+
+            setLoadingProgress(progress);
+
+            if (data.result) {
+              setResult({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
+
+          // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
             progressIntervalId = null;
           }
-          return;
         }
+      };
 
-        if (data) {
-          const progress = data.progress || 0;
-          
-          setLoadingProgress(progress);
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
 
-          if (data.result) {
-            setResult({ final_result: data.result });
-            localStorage.setItem("resultFetchedFromSupabase", "true");
-          }
-
-          // ✅ Stop polling if already complete
-          if (progress >= 100 && progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          }
-        }
-      } catch (err) {
-          
-        // ❌ stop polling on unexpected error
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-      }
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
     };
 
-    // Start polling again
-    progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+    // On mount → resume progress check
+    resumeProgressCheck();
 
-    // Do one immediate fetch
-    await fetchProgressFromSupabase();
-  };
-
-  // On mount → resume progress check
-  resumeProgressCheck();
-
-  // On unmount → clear polling
-  return () => {
-    if (progressIntervalId) {
-      clearInterval(progressIntervalId);
-      progressIntervalId = null;
-    }
-  };
-}, []); 
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!binaryInput || !debouncedScheduledTime) {
       return;
     }
 
-    
+
     const lineNo = 1;
     if (result) {
       // localStorage.setItem('resultFetchedFromSupabase', 'true');
@@ -1967,9 +1967,9 @@ useEffect(() => {
             .join('');
 
           binaryInsertedRef.current = true; // ✅ Prevent future inserts
-        
+
         } catch (err) {
-   
+
           return;
         }
       }
@@ -1986,15 +1986,15 @@ useEffect(() => {
         updated_at: new Date().toISOString()
       };
 
-     
+
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
 
 
-        if (error) {
-            
-        }
+      if (error) {
+
+      }
     };
 
     const startProcess = async () => {
@@ -2005,85 +2005,85 @@ useEffect(() => {
 
       setShowRedButton(false);
       if (!alertShownRef.current) {
-     alert("File uploaded successfully!");
-     alertShownRef.current = true;
-   }
+        alert("File uploaded successfully!");
+        alertShownRef.current = true;
+      }
 
-        const fetchProgressFromSupabase = async () => {
-          try {
-            const { data, error } = await supabase
-              .from("results3")
-              .select("*")
-              .eq("user_id", userId)
-              .eq("line", 1)
-              .maybeSingle(); 
-    
-            if (error) {
-                
-              return;
-            }
-    
-            if (data) {
-             
-              const progress = data.progress || 0;
-                 
-              setLoadingProgress(progress);
-    
-              //  Stop polling once progress is 100%
-              if (progress >= 100 && progressIntervalId) {
-              
-                clearInterval(progressIntervalId);
-                progressIntervalId = null;
-              }
-            }
-          } catch (err) {
-              
-          }
-        };
-        progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-        await fetchProgressFromSupabase();
+      const fetchProgressFromSupabase = async () => {
         try {
-        
-          const formData = new FormData();
-          formData.append("file", selectedFile);
-          const formattedScheduledTime = new Date(debouncedScheduledTime)
-            .toISOString()
-            .replace("T", " ")
-            .split(".")[0];
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 1)
+            .maybeSingle();
 
-          formData.append("scheduled_time", debouncedScheduledTime);
-          formData.append("job_id", currentJobIdT);
-          formData.append("line", lineNo);
-          formData.append("user_id", userId);
-          formData.append("file_name", fileName);
+          if (error) {
 
-          const response = await axios.post(
-            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          );
-          setIsEnabled(true);
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
+            return;
           }
-         
 
-          setResult(response.data);
-          localStorage.setItem("resultFetchedFromSupabase3", "true");
-          await upsertProgress(100, userId, response.data.final_result);
-             
-        } catch (error) {
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          } 
-          setLoadingProgress(0);
-          await upsertProgress(0, userId);
-         alert(`Error: ${error}`);
+          if (data) {
+
+            const progress = data.progress || 0;
+
+            setLoadingProgress(progress);
+
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
 
         }
       };
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+      await fetchProgressFromSupabase();
+      try {
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        const formattedScheduledTime = new Date(debouncedScheduledTime)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+
+        formData.append("scheduled_time", debouncedScheduledTime);
+        formData.append("job_id", currentJobIdT);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName);
+
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        setIsEnabled(true);
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+
+        setResult(response.data);
+        localStorage.setItem("resultFetchedFromSupabase3", "true");
+        await upsertProgress(100, userId, response.data.final_result);
+
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+        setLoadingProgress(0);
+        await upsertProgress(0, userId);
+        alert(`Error: ${error}`);
+
+      }
+    };
 
     startProcess();
 
@@ -2110,11 +2110,11 @@ useEffect(() => {
   useEffect(() => {
 
     let progressIntervalId;
-  
+
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2122,10 +2122,10 @@ useEffect(() => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 2)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2133,17 +2133,17 @@ useEffect(() => {
             }
             return;
           }
-  
+
           if (data) {
             const progress = data.progress || 0;
-              
+
             setLoadingProgress2(progress);
-  
+
             if (data.result) {
               setResult2({ final_result: data.result });
               localStorage.setItem("resultFetchedFromSupabase", "true");
             }
-  
+
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2151,7 +2151,7 @@ useEffect(() => {
             }
           }
         } catch (err) {
-            
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -2159,17 +2159,17 @@ useEffect(() => {
           }
         }
       };
-  
+
       // Start polling again
       progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-  
+
       // Do one immediate fetch
       await fetchProgressFromSupabase();
     };
-  
+
     // On mount → resume progress check
     resumeProgressCheck();
-  
+
     // On unmount → clear polling
     return () => {
       if (progressIntervalId) {
@@ -2177,14 +2177,14 @@ useEffect(() => {
         progressIntervalId = null;
       }
     };
-  }, []); 
+  }, []);
 
-  
+
 
   useEffect(() => {
     if (!binaryInput2 || !debouncedScheduledTime2) return;
 
-    
+
     const lineNo = 2;
 
     if (result2) {
@@ -2214,14 +2214,14 @@ useEffect(() => {
             .join('');
 
           binaryInsertedRef2.current = true; // ✅ Prevent future inserts
-         
+
 
         } catch (err) {
-   
+
           return;
         }
       }
-;
+      ;
 
       const payload = {
         user_id: userId,
@@ -2235,15 +2235,15 @@ useEffect(() => {
         updated_at: new Date().toISOString()
       };
 
-    
+
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
 
 
-        if (error) {
-            
-        }
+      if (error) {
+
+      }
     };
 
     const startProcess = async () => {
@@ -2257,104 +2257,104 @@ useEffect(() => {
 
       setShowRedButton2(false);
       if (!alertShownRef2.current) {
-     alert("File uploaded successfully!");
-     alertShownRef2.current = true;
-   }
+        alert("File uploaded successfully!");
+        alertShownRef2.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
-          try {
-            const { data, error } = await supabase
-              .from("results3")
-              .select("*")
-              .eq("user_id", userId)
-              .eq("line", 2)
-              .maybeSingle(); 
-    
-            if (error) {
-                
-              return;
-            }
-    
-            if (data) {
-             
-              const progress = data.progress || 0;
-                 
-              setLoadingProgress2(progress);
-    
-              //  Stop polling once progress is 100%
-              if (progress >= 100 && progressIntervalId) {
-                
-                clearInterval(progressIntervalId);
-                progressIntervalId = null;
-              }
-            }
-          } catch (err) {
-              
-          }
-        };
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 2)
+            .maybeSingle();
 
-          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-          await fetchProgressFromSupabase();
-          try {
-        
-          const formData = new FormData();
-          formData.append("file", selectedFile2);
-          const formattedScheduledTime = new Date(debouncedScheduledTime2)
-            .toISOString()
-            .replace("T", " ")
-            .split(".")[0];
+          if (error) {
 
-          formData.append("scheduled_time", debouncedScheduledTime2);
-          formData.append("job_id", currentJobIdT2);
-          formData.append("line", lineNo);
-          formData.append("user_id", userId);
-          formData.append("file_name", fileName2);
-          const response = await axios.post(
-            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          );
-         setIsEnabled2(true);
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
+            return;
           }
-         
-          setResult2(response.data);
-          localStorage.setItem("resultFetchedFromSupabase3", "true");
-          await upsertProgress2(100, userId, response.data.final_result);
-             
-        } catch (error) {
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          } 
-          setLoadingProgress2(0);
-          await upsertProgress2(0, userId);
-         alert(`Error: ${error}`);
+
+          if (data) {
+
+            const progress = data.progress || 0;
+
+            setLoadingProgress2(progress);
+
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
 
         }
       };
 
-      startProcess();
-    
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+      await fetchProgressFromSupabase();
+      try {
 
-      return () => {
+        const formData = new FormData();
+        formData.append("file", selectedFile2);
+        const formattedScheduledTime = new Date(debouncedScheduledTime2)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+
+        formData.append("scheduled_time", debouncedScheduledTime2);
+        formData.append("job_id", currentJobIdT2);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName2);
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        setIsEnabled2(true);
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-      };
+
+        setResult2(response.data);
+        localStorage.setItem("resultFetchedFromSupabase3", "true");
+        await upsertProgress2(100, userId, response.data.final_result);
+
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+        setLoadingProgress2(0);
+        await upsertProgress2(0, userId);
+        alert(`Error: ${error}`);
+
+      }
+    };
+
+    startProcess();
+
+
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
   }, [selectedFile2, debouncedScheduledTime2]);
 
 
   useEffect(() => {
 
     let progressIntervalId;
-  
+
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2362,10 +2362,10 @@ useEffect(() => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 3)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2373,17 +2373,17 @@ useEffect(() => {
             }
             return;
           }
-  
+
           if (data) {
             const progress = data.progress || 0;
-              
+
             setLoadingProgress3(progress);
-  
+
             if (data.result) {
               setResult3({ final_result: data.result });
               localStorage.setItem("resultFetchedFromSupabase", "true");
             }
-  
+
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2391,7 +2391,7 @@ useEffect(() => {
             }
           }
         } catch (err) {
-            
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -2399,17 +2399,17 @@ useEffect(() => {
           }
         }
       };
-  
+
       // Start polling again
       progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-  
+
       // Do one immediate fetch
       await fetchProgressFromSupabase();
     };
-  
+
     // On mount → resume progress check
     resumeProgressCheck();
-  
+
     // On unmount → clear polling
     return () => {
       if (progressIntervalId) {
@@ -2417,12 +2417,12 @@ useEffect(() => {
         progressIntervalId = null;
       }
     };
-  }, []); 
+  }, []);
 
   useEffect(() => {
     if (!binaryInput3 || !debouncedScheduledTime3) return;
 
-   
+
     const lineNo = 3;
 
     if (result3) {
@@ -2452,13 +2452,13 @@ useEffect(() => {
             .join('');
 
           binaryInsertedRef3.current = true; // ✅ Prevent future inserts
-        
+
         } catch (err) {
-   
+
           return;
         }
       }
-;
+      ;
 
       const payload = {
         user_id: userId,
@@ -2472,15 +2472,15 @@ useEffect(() => {
         updated_at: new Date().toISOString()
       };
 
-    
+
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
 
 
-        if (error) {
-            
-        }
+      if (error) {
+
+      }
     };
 
     const startProcess = async () => {
@@ -2494,94 +2494,94 @@ useEffect(() => {
 
       setShowRedButton3(false);
       if (!alertShownRef3.current) {
-     alert("File uploaded successfully!");
-     alertShownRef3.current = true;
-   }
+        alert("File uploaded successfully!");
+        alertShownRef3.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
-          try {
-            const { data, error } = await supabase
-              .from("results3")
-              .select("*")
-              .eq("user_id", userId)
-              .eq("line", 3)
-              .maybeSingle(); 
-    
-            if (error) {
-                
-              return;
-            }
-    
-            if (data) {
-             
-              const progress = data.progress || 0;
-                 
-              setLoadingProgress3(progress);
-    
-              //  Stop polling once progress is 100%
-              if (progress >= 100 && progressIntervalId) {
-                 
-                clearInterval(progressIntervalId);
-                progressIntervalId = null;
-              }
-            }
-          } catch (err) {
-              
-          }
-        };
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 3)
+            .maybeSingle();
 
-          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-          await fetchProgressFromSupabase();
-          try {
-        
-          const formData = new FormData();
-          formData.append("file", selectedFile3);
-          const formattedScheduledTime = new Date(debouncedScheduledTime3)
-            .toISOString()
-            .replace("T", " ")
-            .split(".")[0];
+          if (error) {
 
-          formData.append("scheduled_time", debouncedScheduledTime3);
-          formData.append("job_id", currentJobIdT3);
-          formData.append("line", lineNo);
-          formData.append("user_id", userId);
-          formData.append("file_name", fileName3);
-          const response = await axios.post(
-            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          );
-         setIsEnabled3(true);
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
+            return;
           }
-         
-         
-          setResult3(response.data);
-          localStorage.setItem("resultFetchedFromSupabase3", "true");
-          await upsertProgress(100, userId, response.data.final_result);
-             
-        } catch (error) {
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          } 
-          setLoadingProgress3(0);
-          await upsertProgress(0, userId);
-         alert(`Error: ${error}`);
+
+          if (data) {
+
+            const progress = data.progress || 0;
+
+            setLoadingProgress3(progress);
+
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
 
         }
       };
 
-      startProcess();
-    
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+      await fetchProgressFromSupabase();
+      try {
 
-      return () => {
+        const formData = new FormData();
+        formData.append("file", selectedFile3);
+        const formattedScheduledTime = new Date(debouncedScheduledTime3)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+
+        formData.append("scheduled_time", debouncedScheduledTime3);
+        formData.append("job_id", currentJobIdT3);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName3);
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        setIsEnabled3(true);
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-      };
+
+
+        setResult3(response.data);
+        localStorage.setItem("resultFetchedFromSupabase3", "true");
+        await upsertProgress(100, userId, response.data.final_result);
+
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+        setLoadingProgress3(0);
+        await upsertProgress(0, userId);
+        alert(`Error: ${error}`);
+
+      }
+    };
+
+    startProcess();
+
+
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
   }, [selectedFile3, debouncedScheduledTime3]);
 
 
@@ -2589,11 +2589,11 @@ useEffect(() => {
   useEffect(() => {
 
     let progressIntervalId;
-  
+
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2601,10 +2601,10 @@ useEffect(() => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 4)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2612,17 +2612,17 @@ useEffect(() => {
             }
             return;
           }
-  
+
           if (data) {
             const progress = data.progress || 0;
-              
+
             setLoadingProgress4(progress);
-  
+
             if (data.result) {
               setResult4({ final_result: data.result });
               localStorage.setItem("resultFetchedFromSupabase", "true");
             }
-  
+
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2630,7 +2630,7 @@ useEffect(() => {
             }
           }
         } catch (err) {
-            
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -2638,17 +2638,17 @@ useEffect(() => {
           }
         }
       };
-  
+
       // Start polling again
       progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-  
+
       // Do one immediate fetch
       await fetchProgressFromSupabase();
     };
-  
+
     // On mount → resume progress check
     resumeProgressCheck();
-  
+
     // On unmount → clear polling
     return () => {
       if (progressIntervalId) {
@@ -2656,12 +2656,12 @@ useEffect(() => {
         progressIntervalId = null;
       }
     };
-  }, []); 
+  }, []);
 
   useEffect(() => {
     if (!binaryInput4 || !debouncedScheduledTime4) return;
 
-  
+
     const lineNo = 4;
 
     if (result4) {
@@ -2691,13 +2691,13 @@ useEffect(() => {
             .join('');
 
           binaryInsertedRef4.current = true; // ✅ Prevent future inserts
-        
+
         } catch (err) {
-   
+
           return;
         }
       }
-;
+      ;
 
       const payload = {
         user_id: userId,
@@ -2711,15 +2711,15 @@ useEffect(() => {
         updated_at: new Date().toISOString()
       };
 
-    
+
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
 
 
-        if (error) {
-            
-        }
+      if (error) {
+
+      }
     };
 
     const startProcess = async () => {
@@ -2733,111 +2733,111 @@ useEffect(() => {
 
       setShowRedButton4(false);
       if (!alertShownRef4.current) {
-     alert("File uploaded successfully!");
-     alertShownRef4.current = true;
-   }
+        alert("File uploaded successfully!");
+        alertShownRef4.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
-          try {
-            const { data, error } = await supabase
-              .from("results3")
-              .select("*")
-              .eq("user_id", userId)
-              .eq("line", 4)
-              .maybeSingle(); 
-    
-            if (error) {
-                
-              return;
-            }
-    
-            if (data) {
-             
-              const progress = data.progress || 0;
-                 
-              setLoadingProgress4(progress);
-              
-              if (data.result) {
-                setResult4({ final_result: data.result });
-                localStorage.setItem("resultFetchedFromSupabase", "true");
-              }
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 4)
+            .maybeSingle();
 
-              //  Stop polling once progress is 100%
-              if (progress >= 100 && progressIntervalId) {
-               
-                   
-                clearInterval(progressIntervalId);
-                progressIntervalId = null;
-              }
-            }
-          } catch (err) {
-              
+          if (error) {
+
+            return;
           }
-        };
 
-          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-          await fetchProgressFromSupabase();
-          try {
-        
-          const formData = new FormData();
-          formData.append("file", selectedFile4);
-          const formattedScheduledTime = new Date(debouncedScheduledTime4)
-            .toISOString()
-            .replace("T", " ")
-            .split(".")[0];
+          if (data) {
 
-          formData.append("scheduled_time", debouncedScheduledTime4);
-          formData.append("job_id", currentJobIdT4);
-          formData.append("line", lineNo);
-          formData.append("user_id", userId);
-          formData.append("file_name", fileName4);
-          const response = await axios.post(
-            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          );
-          setIsEnabled4(true);
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
+            const progress = data.progress || 0;
+
+            setLoadingProgress4(progress);
+
+            if (data.result) {
+              setResult4({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase", "true");
+            }
+
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+
+
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
           }
-         
-
-          setResult4(response.data);
-          localStorage.setItem("resultFetchedFromSupabase3", "true");
-          await upsertProgress(100, userId, response.data.final_result);
-             
-        } catch (error) {
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          } 
-          setLoadingProgress4(0);
-          await upsertProgress(0, userId);
-         alert(`Error: ${error}`);
+        } catch (err) {
 
         }
       };
 
-      startProcess();
-    
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+      await fetchProgressFromSupabase();
+      try {
 
-      return () => {
+        const formData = new FormData();
+        formData.append("file", selectedFile4);
+        const formattedScheduledTime = new Date(debouncedScheduledTime4)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+
+        formData.append("scheduled_time", debouncedScheduledTime4);
+        formData.append("job_id", currentJobIdT4);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName4);
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        setIsEnabled4(true);
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-      };
+
+
+        setResult4(response.data);
+        localStorage.setItem("resultFetchedFromSupabase3", "true");
+        await upsertProgress(100, userId, response.data.final_result);
+
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+        setLoadingProgress4(0);
+        await upsertProgress(0, userId);
+        alert(`Error: ${error}`);
+
+      }
+    };
+
+    startProcess();
+
+
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
   }, [selectedFile4, debouncedScheduledTime4]);
 
 
   useEffect(() => {
 
     let progressIntervalId;
-  
+
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-  
+
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2845,10 +2845,10 @@ useEffect(() => {
             .select("*")
             .eq("user_id", userId)
             .eq("line", 5)
-            .maybeSingle(); 
-  
+            .maybeSingle();
+
           if (error) {
-              
+
             // ❌ stop polling on error
             if (progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2856,17 +2856,17 @@ useEffect(() => {
             }
             return;
           }
-  
+
           if (data) {
             const progress = data.progress || 0;
-              
+
             setLoadingProgress5(progress);
-  
+
             if (data.result) {
               setResult5({ final_result: data.result });
               localStorage.setItem("resultFetchedFromSupabase", "true");
             }
-  
+
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalId) {
               clearInterval(progressIntervalId);
@@ -2874,7 +2874,7 @@ useEffect(() => {
             }
           }
         } catch (err) {
-            
+
           // ❌ stop polling on unexpected error
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
@@ -2882,17 +2882,17 @@ useEffect(() => {
           }
         }
       };
-  
+
       // Start polling again
       progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-  
+
       // Do one immediate fetch
       await fetchProgressFromSupabase();
     };
-  
+
     // On mount → resume progress check
     resumeProgressCheck();
-  
+
     // On unmount → clear polling
     return () => {
       if (progressIntervalId) {
@@ -2900,14 +2900,14 @@ useEffect(() => {
         progressIntervalId = null;
       }
     };
-  }, []); 
+  }, []);
 
-  
+
 
   useEffect(() => {
     if (!binaryInput5 || !debouncedScheduledTime5) return;
 
-   
+
     const lineNo = 5;
 
     if (result5) {
@@ -2937,13 +2937,13 @@ useEffect(() => {
             .join('');
 
           binaryInsertedRef5.current = true; // ✅ Prevent future inserts
-          
+
         } catch (err) {
-   
+
           return;
         }
       }
-;
+      ;
 
       const payload = {
         user_id: userId,
@@ -2957,15 +2957,15 @@ useEffect(() => {
         updated_at: new Date().toISOString()
       };
 
-    
+
       const { error } = await supabase
         .from('results3')
         .upsert(payload);
 
 
-        if (error) {
-            
-        }
+      if (error) {
+
+      }
     };
 
     const startProcess = async () => {
@@ -2979,107 +2979,107 @@ useEffect(() => {
 
       setShowRedButton5(false);
       if (!alertShownRef5.current) {
-     alert("File uploaded successfully!");
-     alertShownRef5.current = true;
-   }
+        alert("File uploaded successfully!");
+        alertShownRef5.current = true;
+      }
       const fetchProgressFromSupabase = async () => {
-          try {
-            const { data, error } = await supabase
-              .from("results3")
-              .select("*")
-              .eq("user_id", userId)
-              .eq("line", 5)
-              .maybeSingle(); 
-    
-            if (error) {
-                
-              return;
-            }
-    
-            if (data) {
-             
-              const progress = data.progress || 0;
-                 
-              setLoadingProgress5(progress);
-    
-              //  Stop polling once progress is 100%
-              if (progress >= 100 && progressIntervalId) {
-              
-                   
-                clearInterval(progressIntervalId);
-                progressIntervalId = null;
-              }
-            }
-          } catch (err) {
-              
-          }
-        };
+        try {
+          const { data, error } = await supabase
+            .from("results3")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 5)
+            .maybeSingle();
 
-          progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-          await fetchProgressFromSupabase();
-          try {
-        
-          const formData = new FormData();
-          formData.append("file", selectedFile5);
-          const formattedScheduledTime = new Date(debouncedScheduledTime5)
-            .toISOString()
-            .replace("T", " ")
-            .split(".")[0];
+          if (error) {
 
-          formData.append("scheduled_time", debouncedScheduledTime5);
-          formData.append("job_id", currentJobIdT5);
-          formData.append("line", lineNo);
-          formData.append("user_id", userId);
-          formData.append("file_name", fileName5);
-          const response = await axios.post(
-            `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          );
-         setIsEnabled5(true);
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
+            return;
           }
-         
-        
-          setResult5(response.data);
-          localStorage.setItem("resultFetchedFromSupabase3", "true");
-          await upsertProgress(100, userId, response.data.final_result);
-             
-        } catch (error) {
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          } 
-          setLoadingProgress5(0);
-          await upsertProgress(0, userId);
-         alert(`Error: ${error}`);
+
+          if (data) {
+
+            const progress = data.progress || 0;
+
+            setLoadingProgress5(progress);
+
+            //  Stop polling once progress is 100%
+            if (progress >= 100 && progressIntervalId) {
+
+
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        } catch (err) {
 
         }
       };
 
-      startProcess();
-    
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+      await fetchProgressFromSupabase();
+      try {
 
-      return () => {
+        const formData = new FormData();
+        formData.append("file", selectedFile5);
+        const formattedScheduledTime = new Date(debouncedScheduledTime5)
+          .toISOString()
+          .replace("T", " ")
+          .split(".")[0];
+
+        formData.append("scheduled_time", debouncedScheduledTime5);
+        formData.append("job_id", currentJobIdT5);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", fileName5);
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        setIsEnabled5(true);
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-      };
+
+
+        setResult5(response.data);
+        localStorage.setItem("resultFetchedFromSupabase3", "true");
+        await upsertProgress(100, userId, response.data.final_result);
+
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+        setLoadingProgress5(0);
+        await upsertProgress(0, userId);
+        alert(`Error: ${error}`);
+
+      }
+    };
+
+    startProcess();
+
+
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
   }, [selectedFile5, debouncedScheduledTime5]);
 
 
   const [binFile, setBinFile] = useState(null);   // will hold the generated .bin file
   const [binFile2, setBinFile2] = useState(null);
-const [binFile3, setBinFile3] = useState(null);
-const [binFile4, setBinFile4] = useState(null);
-const [binFile5, setBinFile5] = useState(null);
+  const [binFile3, setBinFile3] = useState(null);
+  const [binFile4, setBinFile4] = useState(null);
+  const [binFile5, setBinFile5] = useState(null);
 
   useEffect(() => {
     if (!binaryInput || binaryInput.length % 8 !== 0) {
-    
+
       return;
     }
 
@@ -3096,13 +3096,13 @@ const [binFile5, setBinFile5] = useState(null);
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile(file);
-   
+
 
   }, [binaryInput]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (!binaryInput2 || binaryInput2.length % 8 !== 0) {
-     
+
       return;
     }
 
@@ -3119,13 +3119,13 @@ const [binFile5, setBinFile5] = useState(null);
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile2(file);
-    
+
 
   }, [binaryInput2]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (!binaryInput3 || binaryInput3.length % 8 !== 0) {
-     
+
       return;
     }
 
@@ -3142,12 +3142,12 @@ const [binFile5, setBinFile5] = useState(null);
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile3(file);
-    
+
 
   }, [binaryInput3]);
-   useEffect(() => {
+  useEffect(() => {
     if (!binaryInput4 || binaryInput4.length % 8 !== 0) {
-     
+
       return;
     }
 
@@ -3164,13 +3164,13 @@ const [binFile5, setBinFile5] = useState(null);
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile4(file);
-    
+
 
   }, [binaryInput4]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (!binaryInput5 || binaryInput5.length % 8 !== 0) {
-     
+
       return;
     }
 
@@ -3187,15 +3187,15 @@ const [binFile5, setBinFile5] = useState(null);
     const file = new File([blob], "output.bin", { type: "application/octet-stream" });
 
     setBinFile5(file);
-   
+
 
   }, [binaryInput5]);
 
-  const handleButtonClick = async(type) => {
+  const handleButtonClick = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-      
-     
+
+
 
       let progressInterval;
       setLoadingProgressRep(0);
@@ -3208,7 +3208,7 @@ const [binFile5, setBinFile5] = useState(null);
           const percent = Math.round((completed / 30) * 100);
           setLoadingProgressRep((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-            
+
         }
       }, 500);
 
@@ -3226,7 +3226,7 @@ const [binFile5, setBinFile5] = useState(null);
         body: formData,
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgressRep(100);
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3243,8 +3243,8 @@ const [binFile5, setBinFile5] = useState(null);
         });
     }
     else if (type === "graph") {
-   
-    
+
+
       let progressInterval;
       setLoadingProgressGr(0);
 
@@ -3256,7 +3256,7 @@ const [binFile5, setBinFile5] = useState(null);
           const percent = Math.round((completed / 20) * 100);
           setLoadingProgressGr((prev) => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-             
+
         }
       }, 1000);
 
@@ -3280,7 +3280,7 @@ const [binFile5, setBinFile5] = useState(null);
           }
           return response.blob();
         })
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgressGr(100);
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3289,10 +3289,10 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `graph-${currentJobIdT}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-         
+
         })
         .catch((error) => {
-             
+
           clearInterval(progressInterval);
           setLoadingProgressGr(0);
           alert(`Error generating graph: ${error.message}`);
@@ -3301,14 +3301,14 @@ const [binFile5, setBinFile5] = useState(null);
   };
 
 
-  const handleButtonClick2 = async(type) => {
+  const handleButtonClick2 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-     
+
       let progressInterval;
       setLoadingProgress2Rep(0);
 
-    
+
       progressInterval = setInterval(async () => {
         try {
           const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobIdT2}`);
@@ -3335,7 +3335,7 @@ const [binFile5, setBinFile5] = useState(null);
         body: formData,
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress2Rep(100);
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3344,10 +3344,10 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `report-${currentJobIdT2}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-         
+
         })
         .catch((error) => {
-             
+
           clearInterval(progressInterval);
           setLoadingProgress2Rep(0);
         });
@@ -3357,8 +3357,8 @@ const [binFile5, setBinFile5] = useState(null);
         return;
       }
 
-      
-     
+
+
 
       let progressInterval;
       setLoadingProgress2Gr(0);
@@ -3375,7 +3375,7 @@ const [binFile5, setBinFile5] = useState(null);
         }
       }, 1000);
 
-       const formData = new FormData();
+      const formData = new FormData();
       if (selectedFile2) {
         formData.append("file", selectedFile2);
       } else if (binFile2) {
@@ -3386,10 +3386,10 @@ const [binFile5, setBinFile5] = useState(null);
 
       fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
-         body: formData,
+        body: formData,
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress2Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3398,7 +3398,7 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `graph-${currentJobIdT2}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-      
+
         })
         .catch((error) => {
 
@@ -3409,11 +3409,11 @@ const [binFile5, setBinFile5] = useState(null);
     }
   };
 
-  const handleButtonClick3 = async(type) => {
+  const handleButtonClick3 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
 
-     
+
 
 
       let progressInterval;
@@ -3432,7 +3432,7 @@ const [binFile5, setBinFile5] = useState(null);
         }
       }, 1000);
 
-       const formData = new FormData();
+      const formData = new FormData();
       if (selectedFile3) {
         formData.append("file", selectedFile3);
       } else if (binFile3) {
@@ -3446,7 +3446,7 @@ const [binFile5, setBinFile5] = useState(null);
         body: formData,
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress3Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3462,7 +3462,7 @@ const [binFile5, setBinFile5] = useState(null);
           setLoadingProgress3Rep(0);
         });
     } else if (type === "graph") {
-   
+
       let progressInterval;
       setLoadingProgress3Gr(0);
 
@@ -3488,10 +3488,10 @@ const [binFile5, setBinFile5] = useState(null);
 
       fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
         method: "POST",
-         body: formData,
+        body: formData,
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress3Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3500,7 +3500,7 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `graph-${currentJobIdT3}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-         
+
         })
         .catch((error) => {
 
@@ -3511,11 +3511,11 @@ const [binFile5, setBinFile5] = useState(null);
     }
   };
 
-  const handleButtonClick4 = async(type) => {
+  const handleButtonClick4 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-    
-      
+
+
       let progressInterval;
       setLoadingProgress4Rep(0);
 
@@ -3532,7 +3532,7 @@ const [binFile5, setBinFile5] = useState(null);
         }
       }, 1000);
 
-       const formData = new FormData();
+      const formData = new FormData();
       if (selectedFile4) {
         formData.append("file", selectedFile4);
       } else if (binFile4) {
@@ -3543,10 +3543,10 @@ const [binFile5, setBinFile5] = useState(null);
 
       fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
-         body: formData,
+        body: formData,
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress4Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3562,7 +3562,7 @@ const [binFile5, setBinFile5] = useState(null);
           setLoadingProgress4Rep(0);
         });
     } else if (type === "graph") {
-     
+
       let progressInterval;
       setLoadingProgress4Gr(0);
 
@@ -3578,7 +3578,7 @@ const [binFile5, setBinFile5] = useState(null);
         }
       }, 1000);
 
-       const formData = new FormData();
+      const formData = new FormData();
       if (selectedFile4) {
         formData.append("file", selectedFile4);
       } else if (binFile) {
@@ -3606,14 +3606,14 @@ const [binFile5, setBinFile5] = useState(null);
     }
   };
 
-  const handleButtonClick5 = async(type) => {
+  const handleButtonClick5 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-     
+
       let progressInterval;
       setLoadingProgress5Rep(0);
 
-     
+
       progressInterval = setInterval(async () => {
         try {
           const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_ReportDieharder/${currentJobIdT5}`);
@@ -3641,7 +3641,7 @@ const [binFile5, setBinFile5] = useState(null);
         body: formData,
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress5Rep(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3650,7 +3650,7 @@ const [binFile5, setBinFile5] = useState(null);
           const fileName = `report-${currentJobIdT5}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-          
+
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3658,8 +3658,8 @@ const [binFile5, setBinFile5] = useState(null);
           setLoadingProgress5Rep(0);
         });
     } else if (type === "graph") {
-      
-      
+
+
       let progressInterval;
       setLoadingProgress5Gr(0);
 
@@ -3690,7 +3690,7 @@ const [binFile5, setBinFile5] = useState(null);
         body: formData,
       })
         .then((response) => response.blob())
-        .then(async(blob) => {
+        .then(async (blob) => {
           setLoadingProgress5Gr(100); // Done
           clearInterval(progressInterval);
           const url = URL.createObjectURL(blob);
@@ -3708,55 +3708,55 @@ const [binFile5, setBinFile5] = useState(null);
     }
   };
 
-const downloadDieharderOutput = async (line_number) => {
+  const downloadDieharderOutput = async (line_number) => {
     try {
-        const url = `${REACT_APP_BASE_URL}/get_output_dieharder/${line_number}/`;
+      const url = `${REACT_APP_BASE_URL}/get_output_dieharder/${line_number}/`;
 
-        const response = await axios.get(url, {
-            responseType: 'text',
-            transformResponse: [function (data) {
-                return data;
-            }]
-        });
+      const response = await axios.get(url, {
+        responseType: 'text',
+        transformResponse: [function (data) {
+          return data;
+        }]
+      });
 
-        let outputText;
-        
-        if (typeof response.data === 'string' && response.data.trim().startsWith('{')) {
-            try {
-                const jsonData = JSON.parse(response.data);
-                outputText = jsonData.output;
-            } catch (e) {
-                outputText = response.data;
-            }
-        } else {
-            outputText = response.data;
+      let outputText;
+
+      if (typeof response.data === 'string' && response.data.trim().startsWith('{')) {
+        try {
+          const jsonData = JSON.parse(response.data);
+          outputText = jsonData.output;
+        } catch (e) {
+          outputText = response.data;
         }
+      } else {
+        outputText = response.data;
+      }
 
-        // Clean the output text
-        if (outputText) {
-            outputText = outputText.replace(/[^\x20-\x7E\n\r\t]/g, '');
-            outputText = outputText.replace(/[ \t]+/g, ' ');
-            outputText = outputText.replace(/\n\s*\n/g, '\n\n');
-        }
+      // Clean the output text
+      if (outputText) {
+        outputText = outputText.replace(/[^\x20-\x7E\n\r\t]/g, '');
+        outputText = outputText.replace(/[ \t]+/g, ' ');
+        outputText = outputText.replace(/\n\s*\n/g, '\n\n');
+      }
 
-        const blob = new Blob([outputText], { 
-            type: "text/plain;charset=utf-8" 
-        });
-        
-        saveAs(blob, `dieharder_output_line_${line_number}_${Date.now()}.txt`);
-        
+      const blob = new Blob([outputText], {
+        type: "text/plain;charset=utf-8"
+      });
+
+      saveAs(blob, `dieharder_output_line_${line_number}_${Date.now()}.txt`);
+
     } catch (error) {
-        console.error(`Error downloading output for line ${line_number}:`, error);
-        alert(`Failed to download output for line ${line_number}`);
+      console.error(`Error downloading output for line ${line_number}:`, error);
+      alert(`Failed to download output for line ${line_number}`);
     }
-};
+  };
 
-// Then use them like this:
-const handleDownloadOutput = () => downloadDieharderOutput(1);
-const handleDownloadOutput2 = () => downloadDieharderOutput(2);
-const handleDownloadOutput3 = () => downloadDieharderOutput(3);
-const handleDownloadOutput4 = () => downloadDieharderOutput(4);
-const handleDownloadOutput5 = () => downloadDieharderOutput(5);
+  // Then use them like this:
+  const handleDownloadOutput = () => downloadDieharderOutput(1);
+  const handleDownloadOutput2 = () => downloadDieharderOutput(2);
+  const handleDownloadOutput3 = () => downloadDieharderOutput(3);
+  const handleDownloadOutput4 = () => downloadDieharderOutput(4);
+  const handleDownloadOutput5 = () => downloadDieharderOutput(5);
 
   return (
     <Box m="20px">
@@ -3813,7 +3813,7 @@ const handleDownloadOutput5 = () => downloadDieharderOutput(5);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled}  
+                      disabled={!isEnabled}
                       onClick={handleFileUpload}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4157,7 +4157,7 @@ const handleDownloadOutput5 = () => downloadDieharderOutput(5);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled2}  
+                      disabled={!isEnabled2}
                       onClick={handleFileUpload2}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4502,7 +4502,7 @@ const handleDownloadOutput5 = () => downloadDieharderOutput(5);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled3}  
+                      disabled={!isEnabled3}
                       onClick={handleFileUpload3}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4846,7 +4846,7 @@ const handleDownloadOutput5 = () => downloadDieharderOutput(5);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled4}  
+                      disabled={!isEnabled4}
                       onClick={handleFileUpload4}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -5190,7 +5190,7 @@ const handleDownloadOutput5 = () => downloadDieharderOutput(5);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled5}  
+                      disabled={!isEnabled5}
                       onClick={handleFileUpload5}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -5519,1940 +5519,225 @@ const handleDownloadOutput5 = () => downloadDieharderOutput(5);
                 </Typography>
               </td>
             </tr>
-            {/*
-<>
-            <tr>
-              <td>6</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload6}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload binary file
-                      {showRedButton6 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef6}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange6}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick6("graph")}
-                        disabled={loadingProgress6 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress6Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress6Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
 
-                      {loadingProgress6Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress6Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress6Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress6Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress6Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick6("report")}
-                        disabled={loadingProgress6 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress6Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress6Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress6Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress6Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress6Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress6Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress6Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Button
-                      variant="contained"
-                      onClick={handleDownloadOutput6}
-                      disabled={loadingProgress6 < 100}
-                      sx={{
-
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        backgroundColor: colors.blueAccent[500],
-                        "&:hover": {
-                          backgroundColor: colors.blueAccent[600],
-                        }
-
-                      }}
-                    >
-                      Download Original Output
-                    </Button>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult6}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress6} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress6}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime6 || ""}</td>
-              <td>{fileName6 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date6}
-                  onChange={handleDateChange6}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-               
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time6}
-                  onChange={handleTimeChange6}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime6}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-              
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime6 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-
-            <tr>
-              <td>7</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload7}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload binary file
-                      {showRedButton7 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef7}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange7}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick7("graph")}
-                        disabled={loadingProgress7 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress7Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress7Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress7Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress7Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress7Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress7Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress7Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick7("report")}
-                        disabled={loadingProgress7 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress7Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress7Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress7Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress7Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress7Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress7Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress7Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Button
-                      variant="contained"
-                      onClick={handleDownloadOutput7}
-                      disabled={loadingProgress7 < 100}
-                      sx={{
-
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        backgroundColor: colors.blueAccent[500],
-                        "&:hover": {
-                          backgroundColor: colors.blueAccent[600],
-                        }
-
-                      }}
-                    >
-                      Download Original Output
-                    </Button>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult7}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress7} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress7}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime7 || ""}</td>
-              <td>{fileName7 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date7}
-                  onChange={handleDateChange7}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time7}
-                  onChange={handleTimeChange7}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime7}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime7 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-
-            <tr>
-              <td>8</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload8}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload binary file
-                      {showRedButton8 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef8}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange8}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick8("graph")}
-                        disabled={loadingProgress8 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress8Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress8Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress8Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress8Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress8Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress8Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress8Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick8("report")}
-                        disabled={loadingProgress8 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress8Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress8Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress8Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress8Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress8Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress8Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress8Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Button
-                      variant="contained"
-                      onClick={handleDownloadOutput8}
-                      disabled={loadingProgress8 < 100}
-                      sx={{
-
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        backgroundColor: colors.blueAccent[500],
-                        "&:hover": {
-                          backgroundColor: colors.blueAccent[600],
-                        }
-
-                      }}
-                    >
-                      Download Original Output
-                    </Button>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult8}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress8} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress8}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime8 || ""}</td>
-              <td>{fileName8 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date8}
-                  onChange={handleDateChange8}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time8}
-                  onChange={handleTimeChange8}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime8}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime8 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-
-            <tr>
-              <td>9</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload9}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload binary file
-                      {showRedButton9 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef_nine}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange9}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick9("graph")}
-                        disabled={loadingProgress9 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress9Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress9Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress9Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress9Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress9Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress9Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress9Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick9("report")}
-                        disabled={loadingProgress9 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress9Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress9Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress9Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress9Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress9Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress9Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress9Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Button
-                      variant="contained"
-                      onClick={handleDownloadOutput9}
-                      disabled={loadingProgress9 < 100}
-                      sx={{
-
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        backgroundColor: colors.blueAccent[500],
-                        "&:hover": {
-                          backgroundColor: colors.blueAccent[600],
-                        }
-
-                      }}
-                    >
-                      Download Original Output
-                    </Button>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult9}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress9} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress9}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime9 || ""}</td>
-              <td>{fileName9 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date9}
-                  onChange={handleDateChange9}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-              
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time9}
-                  onChange={handleTimeChange9}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime9}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-               
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime9 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-
-            <tr>
-              <td>10</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload10}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload binary file
-                      {showRedButton10 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef10}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange10}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick10("graph")}
-                        disabled={loadingProgress10 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress10Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress10Gr}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress10Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress10Gr > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress10Gr > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress10Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            {loadingProgress10Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick10("report")}
-                        disabled={loadingProgress10 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress10Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              height: '3px',
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress10Rep}%`,
-                              transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              borderRadius: '0 0 8px 8px',
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress10Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform: loadingProgress10Rep > 0 ? 'scale(1)' : 'scale(0)',
-                            opacity: loadingProgress10Rep > 0 ? 1 : 0,
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress10Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-
-                              color: colors.greenAccent[500],
-
-
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: 'absolute',
-                              fontSize: '0.75rem',
-
-                            }}
-                          >
-                            {loadingProgress10Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Button
-                      variant="contained"
-                      onClick={handleDownloadOutput10}
-                      disabled={loadingProgress10 < 100}
-                      sx={{
-
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        backgroundColor: colors.blueAccent[500],
-                        "&:hover": {
-                          backgroundColor: colors.blueAccent[600],
-                        }
-
-                      }}
-                    >
-                      Download Original Output
-                    </Button>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult10}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress10} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress10}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime10 || ""}</td>
-              <td>{fileName10 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date10}
-                  onChange={handleDateChange10}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time10}
-                  onChange={handleTimeChange10}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime10}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-               
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime10 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-</>
-*/}
           </tbody>
         </Box>
       </Box>
 
       <Box
-  sx={{
-    background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1F2A40 50%, #0d1b2a 100%)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "280px",
-    textAlign: "center",
-    mt: 2,
-    boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.4)",
-    position: "relative",
-    overflow: "hidden",
-    borderRadius: "20px",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    '&:hover': {
-      boxShadow: "0px 12px 40px rgba(0, 0, 0, 0.6)",
-      transform: "translateY(-2px)",
-    },
-    transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-    '&::before': {
-      content: '""',
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
-      opacity: 0,
-      transition: "opacity 0.4s ease",
-    },
-    '&:hover::before': {
-      opacity: 1,
-    }
-  }}
->
-  {/* Animated background grid */}
-  <Box
-    sx={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundImage: `
+        sx={{
+          background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1F2A40 50%, #0d1b2a 100%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "280px",
+          textAlign: "center",
+          mt: 2,
+          boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.4)",
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: "20px",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          '&:hover': {
+            boxShadow: "0px 12px 40px rgba(0, 0, 0, 0.6)",
+            transform: "translateY(-2px)",
+          },
+          transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+          '&::before': {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
+            opacity: 0,
+            transition: "opacity 0.4s ease",
+          },
+          '&:hover::before': {
+            opacity: 1,
+          }
+        }}
+      >
+        {/* Animated background grid */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
         linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
       `,
-      backgroundSize: "50px 50px",
-      animation: "gridMove 20s linear infinite",
-      opacity: 0.4,
-    }}
-  />
+            backgroundSize: "50px 50px",
+            animation: "gridMove 20s linear infinite",
+            opacity: 0.4,
+          }}
+        />
 
-  {/* Floating particles */}
-  {[...Array(6)].map((_, i) => (
-    <Box
-      key={i}
-      sx={{
-        position: "absolute",
-        width: 4,
-        height: 4,
-        borderRadius: "50%",
-        background: "rgba(255, 255, 255, 0.6)",
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-        animation: `floatParticle ${15 + i * 2}s infinite ease-in-out ${i * 0.5}s`,
-        boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
-      }}
-    />
-  ))}
+        {/* Floating particles */}
+        {[...Array(6)].map((_, i) => (
+          <Box
+            key={i}
+            sx={{
+              position: "absolute",
+              width: 4,
+              height: 4,
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.6)",
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `floatParticle ${15 + i * 2}s infinite ease-in-out ${i * 0.5}s`,
+              boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
+            }}
+          />
+        ))}
 
-  {/* Main content container */}
-  <Box sx={{ position: "relative", zIndex: 2 }}>
-    {/* Animated Gemini Logo */}
-    <Box
-      component="img"
-      src="/image.png"
-      alt="Gemini Logo"
-      sx={{
-        width: 70,
-        height: "auto",
-        mb: 1.5,
-        borderRadius: "16px",
-        transition: "all 0.5s ease",
-        filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))",
-        animation: "logoGlow 4s infinite ease-in-out",
-        '&:hover': {
-          transform: "scale(1.15) rotate(5deg)",
-          filter: "drop-shadow(0 6px 20px rgba(230, 57, 70, 0.4))",
-        }
-      }}
-    />
+        {/* Main content container */}
+        <Box sx={{ position: "relative", zIndex: 2 }}>
+          {/* Animated Gemini Logo */}
+          <Box
+            component="img"
+            src="/image.png"
+            alt="Gemini Logo"
+            sx={{
+              width: 70,
+              height: "auto",
+              mb: 1.5,
+              borderRadius: "16px",
+              transition: "all 0.5s ease",
+              filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))",
+              animation: "logoGlow 4s infinite ease-in-out",
+              '&:hover': {
+                transform: "scale(1.15) rotate(5deg)",
+                filter: "drop-shadow(0 6px 20px rgba(230, 57, 70, 0.4))",
+              }
+            }}
+          />
 
-    {/* Title text */}
-    <Typography
-      variant="h6"
-      sx={{
-        color: "rgba(255, 255, 255, 0.9)",
-        fontWeight: 600,
-        mb: 1,
-        fontSize: "1.1rem",
-        textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
-      }}
-    >
-      Advanced AI Analysis
-    </Typography>
+          {/* Title text */}
+          <Typography
+            variant="h6"
+            sx={{
+              color: "rgba(255, 255, 255, 0.9)",
+              fontWeight: 600,
+              mb: 1,
+              fontSize: "1.1rem",
+              textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            Advanced AI Analysis
+          </Typography>
 
-    {/* Description */}
-    <Typography
-      variant="body2"
-      sx={{
-        color: "rgba(255, 255, 255, 0.7)",
-        mb: 2.5,
-        maxWidth: "300px",
-        fontSize: "0.85rem",
-        lineHeight: 1.4,
-      }}
-    >
-      Upload your test reports for comprehensive AI-powered analysis and insights
-    </Typography>
+          {/* Description */}
+          <Typography
+            variant="body2"
+            sx={{
+              color: "rgba(255, 255, 255, 0.7)",
+              mb: 2.5,
+              maxWidth: "300px",
+              fontSize: "0.85rem",
+              lineHeight: 1.4,
+            }}
+          >
+            Upload your test reports for comprehensive AI-powered analysis and insights
+          </Typography>
 
-    {/* Enhanced Button */}
-    <Button
-      variant="contained"
-      onClick={() => {
-        window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
-      }}
-      startIcon={<AutoAwesomeIcon sx={{ fontSize: "1.2rem" }} />}
-      sx={{
-        background: "linear-gradient(135deg, #E63946 0%, #F77F00 100%)",
-        color: "white",
-        textTransform: "none",
-        padding: "12px 36px",
-        fontSize: "1.1rem",
-        fontWeight: 600,
-        width: "auto",
-        minWidth: "220px",
-        borderRadius: "12px",
-        transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
-        position: "relative",
-        overflow: "hidden",
-        zIndex: 1,
-        boxShadow: "0 4px 15px rgba(230, 57, 70, 0.4)",
-        '&:hover': {
-          background: "linear-gradient(135deg, #F77F00 0%, #E63946 100%)",
-          transform: "scale(1.05) translateY(-2px)",
-          boxShadow: "0 8px 25px rgba(230, 57, 70, 0.6)",
-        },
-        '&::before': {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: "-100%",
-          width: "100%",
-          height: "100%",
-          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
-          transition: "all 0.8s ease",
-          zIndex: -1,
-        },
-        '&:hover::before': {
-          left: "100%",
-        },
-        '&::after': {
-          content: '""',
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          width: "0",
-          height: "0",
-          borderRadius: "50%",
-          background: "rgba(255, 255, 255, 0.2)",
-          transform: "translate(-50%, -50%)",
-          transition: "all 0.6s ease",
-          zIndex: -1,
-        },
-        '&:active::after': {
-          width: "300px",
-          height: "300px",
-        }
-      }}
-    >
-      Analyze with AI
-    </Button>
-  </Box>
+          {/* Enhanced Button */}
+          <Button
+            variant="contained"
+            onClick={() => {
+              window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
+            }}
+            startIcon={<AutoAwesomeIcon sx={{ fontSize: "1.2rem" }} />}
+            sx={{
+              background: "linear-gradient(135deg, #E63946 0%, #F77F00 100%)",
+              color: "white",
+              textTransform: "none",
+              padding: "12px 36px",
+              fontSize: "1.1rem",
+              fontWeight: 600,
+              width: "auto",
+              minWidth: "220px",
+              borderRadius: "12px",
+              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+              position: "relative",
+              overflow: "hidden",
+              zIndex: 1,
+              boxShadow: "0 4px 15px rgba(230, 57, 70, 0.4)",
+              '&:hover': {
+                background: "linear-gradient(135deg, #F77F00 0%, #E63946 100%)",
+                transform: "scale(1.05) translateY(-2px)",
+                boxShadow: "0 8px 25px rgba(230, 57, 70, 0.6)",
+              },
+              '&::before': {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                transition: "all 0.8s ease",
+                zIndex: -1,
+              },
+              '&:hover::before': {
+                left: "100%",
+              },
+              '&::after': {
+                content: '""',
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: "0",
+                height: "0",
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.2)",
+                transform: "translate(-50%, -50%)",
+                transition: "all 0.6s ease",
+                zIndex: -1,
+              },
+              '&:active::after': {
+                width: "300px",
+                height: "300px",
+              }
+            }}
+          >
+            Analyze with AI
+          </Button>
+        </Box>
 
-  {/* Corner accents */}
-  <Box
-    sx={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "60px",
-      height: "60px",
-      borderTop: "2px solid rgba(230, 57, 70, 0.5)",
-      borderLeft: "2px solid rgba(230, 57, 70, 0.5)",
-      borderTopLeftRadius: "20px",
-    }}
-  />
-  <Box
-    sx={{
-      position: "absolute",
-      bottom: 0,
-      right: 0,
-      width: "60px",
-      height: "60px",
-      borderBottom: "2px solid rgba(230, 57, 70, 0.5)",
-      borderRight: "2px solid rgba(230, 57, 70, 0.5)",
-      borderBottomRightRadius: "20px",
-    }}
-  />
+        {/* Corner accents */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "60px",
+            height: "60px",
+            borderTop: "2px solid rgba(230, 57, 70, 0.5)",
+            borderLeft: "2px solid rgba(230, 57, 70, 0.5)",
+            borderTopLeftRadius: "20px",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            right: 0,
+            width: "60px",
+            height: "60px",
+            borderBottom: "2px solid rgba(230, 57, 70, 0.5)",
+            borderRight: "2px solid rgba(230, 57, 70, 0.5)",
+            borderBottomRightRadius: "20px",
+          }}
+        />
 
-  {/* Add these keyframes to your global CSS */}
-  <style jsx>{`
+        {/* Add these keyframes to your global CSS */}
+        <style jsx>{`
     @keyframes gridMove {
       0% { transform: translate(0, 0); }
       100% { transform: translate(50px, 50px); }
@@ -7470,7 +5755,7 @@ const handleDownloadOutput5 = () => downloadDieharderOutput(5);
       50% { filter: drop-shadow(0 4px 20px rgba(230, 57, 70, 0.3)); }
     }
   `}</style>
-</Box>
+      </Box>
     </Box>
   );
 };
