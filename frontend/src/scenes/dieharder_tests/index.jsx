@@ -82,11 +82,6 @@ const Dieharder_tests = () => {
   const fileInputRef3 = useRef(null);
   const fileInputRef4 = useRef(null);
   const fileInputRef5 = useRef(null);
-  const fileInputRef6 = useRef(null);
-  const fileInputRef7 = useRef(null);
-  const fileInputRef8 = useRef(null);
-  const fileInputRef_nine = useRef(null);
-  const fileInputRef10 = useRef(null);
 
 
   const [result, setResult] = useState("");
@@ -94,11 +89,7 @@ const Dieharder_tests = () => {
   const [result3, setResult3] = useState("");
   const [result4, setResult4] = useState("");
   const [result5, setResult5] = useState("");
-  const [result6, setResult6] = useState(null);
-  const [result7, setResult7] = useState(null);
-  const [result8, setResult8] = useState(null);
-  const [result9, setResult9] = useState(null);
-  const [result10, setResult10] = useState(null);
+
 
 
   const [uploadTime, setUploadTime] = useState("");
@@ -106,11 +97,6 @@ const Dieharder_tests = () => {
   const [uploadTime3, setUploadTime3] = useState("");
   const [uploadTime4, setUploadTime4] = useState("");
   const [uploadTime5, setUploadTime5] = useState("");
-  const [uploadTime6, setUploadTime6] = useState("");
-  const [uploadTime7, setUploadTime7] = useState("");
-  const [uploadTime8, setUploadTime8] = useState("");
-  const [uploadTime9, setUploadTime9] = useState("");
-  const [uploadTime10, setUploadTime10] = useState("");
 
 
   const [fileName, setFileName] = useState(""); // New state to store filename
@@ -118,11 +104,6 @@ const Dieharder_tests = () => {
   const [fileName3, setFileName3] = useState(""); // New state to store filename
   const [fileName4, setFileName4] = useState(""); // New state to store filename
   const [fileName5, setFileName5] = useState(""); // New state to store filename
-  const [fileName6, setFileName6] = useState(""); // New state to store filename
-  const [fileName7, setFileName7] = useState(""); // New state to store filename
-  const [fileName8, setFileName8] = useState(""); // New state to store filename
-  const [fileName9, setFileName9] = useState(""); // New state to store filename
-  const [fileName10, setFileName10] = useState(""); // New state to store filename
 
   const [scheduledTime, setScheduledTime] = useState("");
   const [debouncedScheduledTime, setDebouncedScheduledTime] = useState("");
@@ -139,21 +120,6 @@ const Dieharder_tests = () => {
   const [scheduledTime5, setScheduledTime5] = useState("");
   const [debouncedScheduledTime5, setDebouncedScheduledTime5] = useState("");
 
-  const [scheduledTime6, setScheduledTime6] = useState("");
-  const [debouncedScheduledTime6, setDebouncedScheduledTime6] = useState("");
-
-  const [scheduledTime7, setScheduledTime7] = useState("");
-  const [debouncedScheduledTime7, setDebouncedScheduledTime7] = useState("");
-
-  const [scheduledTime8, setScheduledTime8] = useState("");
-  const [debouncedScheduledTime8, setDebouncedScheduledTime8] = useState("");
-
-  const [scheduledTime9, setScheduledTime9] = useState("");
-  const [debouncedScheduledTime9, setDebouncedScheduledTime9] = useState("");
-
-  const [scheduledTime10, setScheduledTime10] = useState("");
-  const [debouncedScheduledTime10, setDebouncedScheduledTime10] = useState("");
-
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
 
@@ -168,21 +134,6 @@ const Dieharder_tests = () => {
 
   const [date5, setDate5] = useState("");
   const [time5, setTime5] = useState("");
-
-  const [date6, setDate6] = useState("");
-  const [time6, setTime6] = useState("");
-
-  const [date7, setDate7] = useState("");
-  const [time7, setTime7] = useState("");
-
-  const [date8, setDate8] = useState("");
-  const [time8, setTime8] = useState("");
-
-  const [date9, setDate9] = useState("");
-  const [time9, setTime9] = useState("");
-
-  const [date10, setDate10] = useState("");
-  const [time10, setTime10] = useState("");
 
 
   const handleDateChange = (event) => {
@@ -230,50 +181,6 @@ const Dieharder_tests = () => {
     }
   };
 
-  const handleDateChange6 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate6(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
-
-  const handleDateChange7 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate7(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
-
-  const handleDateChange8 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate8(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
-
-  const handleDateChange9 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate9(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
-
-  const handleDateChange10 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate10(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
 
 
 
@@ -327,54 +234,6 @@ const Dieharder_tests = () => {
     setTime5(formattedTime);
   };
 
-  const handleTimeChange6 = (event) => {
-    const inputTime = event.target.value;
-    setTime6(inputTime); // Update the time state immediately
-  };
-  const handleUseCurrentTime6 = () => {
-    const now = new Date();
-    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
-    setTime6(formattedTime);
-  };
-
-  const handleTimeChange7 = (event) => {
-    const inputTime = event.target.value;
-    setTime7(inputTime); // Update the time state immediately
-  };
-  const handleUseCurrentTime7 = () => {
-    const now = new Date();
-    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
-    setTime7(formattedTime);
-  };
-  const handleTimeChange8 = (event) => {
-    const inputTime = event.target.value;
-    setTime8(inputTime); // Update the time state immediately
-  };
-  const handleUseCurrentTime8 = () => {
-    const now = new Date();
-    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
-    setTime8(formattedTime);
-  };
-
-  const handleTimeChange9 = (event) => {
-    const inputTime = event.target.value;
-    setTime9(inputTime); // Update the time state immediately
-  };
-  const handleUseCurrentTime9 = () => {
-    const now = new Date();
-    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
-    setTime9(formattedTime);
-  };
-
-  const handleTimeChange10 = (event) => {
-    const inputTime = event.target.value;
-    setTime10(inputTime); // Update the time state immediately
-  };
-  const handleUseCurrentTime10 = () => {
-    const now = new Date();
-    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
-    setTime10(formattedTime);
-  };
 
   useEffect(() => {
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
@@ -446,77 +305,6 @@ const Dieharder_tests = () => {
     };
   }, [time5]);
 
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time6 && !timeRegex.test(time6)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time6]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time7 && !timeRegex.test(time7)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time7]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time8 && !timeRegex.test(time8)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time8]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time9 && !timeRegex.test(time9)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time9]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time10 && !timeRegex.test(time10)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time10]);
-
-
 
   useEffect(() => {
     if (date && time) {
@@ -548,44 +336,10 @@ const Dieharder_tests = () => {
     }
   }, [date5, time5]);
 
-  useEffect(() => {
-    if (date6 && time6) {
-      setScheduledTime6(`${date6} ${time6}`);
-    }
-  }, [date6, time6]);
-
-  useEffect(() => {
-    if (date7 && time7) {
-      setScheduledTime7(`${date7} ${time7}`);
-    }
-  }, [date7, time7]);
-
-  useEffect(() => {
-    if (date8 && time8) {
-      setScheduledTime8(`${date8} ${time8}`);
-    }
-  }, [date8, time8]);
-
-  useEffect(() => {
-    if (date9 && time9) {
-      setScheduledTime9(`${date9} ${time9}`);
-    }
-  }, [date9, time9]);
-
-  useEffect(() => {
-    if (date10 && time10) {
-      setScheduledTime10(`${date10} ${time10}`);
-    }
-  }, [date10, time10]);
-
-
 
   const finalResult = result ? result.final_result : " ";
 
-  const handleScheduledTimeChange = (event) => {
-    setScheduledTime(event.target.value);
 
-  };
   useEffect(() => {
     const handler = setTimeout(() => {
 
@@ -608,9 +362,7 @@ const Dieharder_tests = () => {
 
   const finalResult2 = result2 ? result2.final_result : " ";
 
-  const handleScheduledTimeChange2 = (event) => {
-    setScheduledTime2(event.target.value);
-  };
+ 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime2(scheduledTime2);
@@ -623,10 +375,7 @@ const Dieharder_tests = () => {
 
   const finalResult3 = result3 ? result3.final_result : " ";
 
-  const handleScheduledTimeChange3 = (event) => {
-    setScheduledTime3(event.target.value);
-    console.log(scheduledTime3);
-  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime3(scheduledTime3);
@@ -639,10 +388,7 @@ const Dieharder_tests = () => {
 
   const finalResult4 = result4 ? result4.final_result : " ";
 
-  const handleScheduledTimeChange4 = (event) => {
-    setScheduledTime4(event.target.value);
-    console.log(scheduledTime4);
-  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime4(scheduledTime4);
@@ -655,10 +401,7 @@ const Dieharder_tests = () => {
 
   const finalResult5 = result5 ? result5.final_result : " ";
 
-  const handleScheduledTimeChange5 = (event) => {
-    setScheduledTime5(event.target.value);
-    console.log(scheduledTime5);
-  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime5(scheduledTime5);
@@ -669,96 +412,14 @@ const Dieharder_tests = () => {
     };
   }, [scheduledTime5]);
 
-  const finalResult6 = result6 ? result6.final_result : " ";
-
-  const handleScheduledTimeChange6 = (event) => {
-    setScheduledTime6(event.target.value);
-    console.log(scheduledTime6);
-  };
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime6(scheduledTime6);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime6]);
-
-  const finalResult7 = result7 ? result7.final_result : " ";
-
-  const handleScheduledTimeChange7 = (event) => {
-    setScheduledTime7(event.target.value);
-    console.log(scheduledTime7);
-  };
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime7(scheduledTime7);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime7]);
-
-  const finalResult8 = result8 ? result8.final_result : " ";
-
-  const handleScheduledTimeChange8 = (event) => {
-    setScheduledTime8(event.target.value);
-    console.log(scheduledTime8);
-  };
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime8(scheduledTime8);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime8]);
-
-  const finalResult9 = result9 ? result9.final_result : " ";
-
-  const handleScheduledTimeChange9 = (event) => {
-    setScheduledTime9(event.target.value);
-    console.log(scheduledTime9);
-  };
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime9(scheduledTime9);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime9]);
-
-  const finalResult10 = result10 ? result10.final_result : " ";
-
-  const handleScheduledTimeChange10 = (event) => {
-    setScheduledTime10(event.target.value);
-    console.log(scheduledTime10);
-  };
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime10(scheduledTime10);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime10]);
+  
 
   const [showRedButton, setShowRedButton] = useState(false);
   const [showRedButton2, setShowRedButton2] = useState(false);
   const [showRedButton3, setShowRedButton3] = useState(false);
   const [showRedButton4, setShowRedButton4] = useState(false);
   const [showRedButton5, setShowRedButton5] = useState(false);
-  const [showRedButton6, setShowRedButton6] = useState(false);
-  const [showRedButton7, setShowRedButton7] = useState(false);
-  const [showRedButton8, setShowRedButton8] = useState(false);
-  const [showRedButton9, setShowRedButton9] = useState(false);
-  const [showRedButton10, setShowRedButton10] = useState(false);
+
 
   const handleFileUpload = () => {
     //  setShowRedButton(true)
@@ -791,13 +452,11 @@ const Dieharder_tests = () => {
   const [selectedFile3, setSelectedFile3] = useState(null);
   const [selectedFile4, setSelectedFile4] = useState(null);
   const [selectedFile5, setSelectedFile5] = useState(null);
-  const [selectedFile6, setSelectedFile6] = useState(null);
-  const [selectedFile7, setSelectedFile7] = useState(null);
-  const [selectedFile8, setSelectedFile8] = useState(null);
-  const [selectedFile9, setSelectedFile9] = useState(null);
-  const [selectedFile10, setSelectedFile10] = useState(null);
 
+  const isProcessingFileRef = useRef(false);
   const handleFileChange = async (event) => {
+    isProcessingFileRef.current = true;
+    
     setLoadingProgressGr(0);
     setLoadingProgressRep(0);
     const selectedFile = event.target.files[0];
@@ -820,10 +479,7 @@ const Dieharder_tests = () => {
       return;
     }
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
-      return;
-    }
+   
 
     const userId = await fetchUserId();
     if (!userId) return;
@@ -844,34 +500,11 @@ const Dieharder_tests = () => {
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime(currentTime);
 
-    try {
-      if (isBin) {
-        // BIN file logic (unchanged)
-        const buffer = await selectedFile.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        const binaryData = Array.from(bytes)
-          .map(byte => byte.toString(2).padStart(8, '0'))
-          .join('');
-        setBinaryInput(binaryData);
-      } else if (isTxt) {
-        // TXT file logic (newly added)
-        const text = await selectedFile.text();
-        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
-        if (binaryString.length === 0) {
-          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
-          return;
-        }
-        setBinaryInput(binaryString);
-      }
-    } catch (error) {
-
-      alert("Failed to extract binary data from the file.");
-      return;
-    }
+  
 
     // Supabase cleanup
     try {
-      localStorage.setItem('resultFetchedFromSupabase3', 'false');
+    
       const { error: deleteError } = await supabase
         .from('results3')
         .delete()
@@ -882,13 +515,18 @@ const Dieharder_tests = () => {
       }
     } catch (err) {
 
-    }
+    } finally {
+        isProcessingFileRef.current = false; // Reset flag when done
+      }
     setIsEnabled(false);
     event.target.value = "";
   };
 
+const isProcessingFileRef2 = useRef(false);
 
   const handleFileChange2 = async (event) => {
+    isProcessingFileRef2.current = true; // Set flag when processing starts
+    
     setLoadingProgress2Gr(0);
     setLoadingProgress2Rep(0);
     const selectedFile = event.target.files[0];
@@ -909,11 +547,7 @@ const Dieharder_tests = () => {
       return;
     }
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
-      return;
-    }
-
+ 
     const userId = await fetchUserId();
     if (!userId) {
 
@@ -937,31 +571,6 @@ const Dieharder_tests = () => {
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime2(currentTime);
 
-    try {
-      if (isBin) {
-        // BIN file logic (unchanged)
-        const buffer = await selectedFile.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        const binaryData = Array.from(bytes)
-          .map(byte => byte.toString(2).padStart(8, '0'))
-          .join('');
-        setBinaryInput2(binaryData);
-      } else if (isTxt) {
-        // TXT file logic (newly added)
-        const text = await selectedFile.text();
-        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
-        if (binaryString.length === 0) {
-          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
-          return;
-        }
-        setBinaryInput2(binaryString);
-      }
-    } catch (error) {
-
-      alert("Failed to extract binary data from the file.");
-      return;
-    }
-
     // Supabase cleanup
     try {
       localStorage.setItem('resultFetchedFromSupabase3', 'false');
@@ -976,13 +585,17 @@ const Dieharder_tests = () => {
       }
     } catch (err) {
 
-    }
+    }finally {
+        isProcessingFileRef2.current = false; // Reset flag when done
+      }
     setIsEnabled2(false);
 
     event.target.value = "";
   };
-
+const isProcessingFileRef3 = useRef(false);
   const handleFileChange3 = async (event) => {
+     isProcessingFileRef3.current = true; // Set flag when processing starts
+    
     setLoadingProgress3Gr(0);
     setLoadingProgress3Rep(0);
     const selectedFile = event.target.files[0];
@@ -1004,15 +617,7 @@ const Dieharder_tests = () => {
       return;
     }
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
-      return;
-    }
-
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
-      return;
-    }
+    
 
     const userId = await fetchUserId();
     if (!userId) {
@@ -1038,35 +643,9 @@ const Dieharder_tests = () => {
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime3(currentTime);
 
-    try {
-      if (isBin) {
-        // BIN file logic (unchanged)
-        const buffer = await selectedFile.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        const binaryData = Array.from(bytes)
-          .map(byte => byte.toString(2).padStart(8, '0'))
-          .join('');
-        setBinaryInput3(binaryData);
-      } else if (isTxt) {
-        // TXT file logic (newly added)
-        const text = await selectedFile.text();
-        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
-        if (binaryString.length === 0) {
-          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
-          return;
-        }
-        setBinaryInput3(binaryString);
-      }
-    } catch (error) {
-
-      alert("Failed to extract binary data from the file.");
-      return;
-    }
-
-
     // Remove previous Supabase row for line 3
     try {
-      localStorage.setItem('resultFetchedFromSupabased3', 'false');
+     
       const { error: deleteError } = await supabase
         .from('results3')
         .delete()
@@ -1079,15 +658,18 @@ const Dieharder_tests = () => {
       }
     } catch (err) {
 
-    }
+    }finally {
+        isProcessingFileRef3.current = false; // Reset flag when done
+      }
     setIsEnabled3(false);
 
     // Reset the file input
     event.target.value = "";
   };
 
-
+ const isProcessingFileRef4 = useRef(false);
   const handleFileChange4 = async (event) => {
+     isProcessingFileRef4.current = true; 
     setLoadingProgress4Gr(0);
     setLoadingProgress4Rep(0);
     const selectedFile = event.target.files[0];
@@ -1109,10 +691,7 @@ const Dieharder_tests = () => {
       return;
     }
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
-      return;
-    }
+   
 
     const userId = await fetchUserId();
     if (!userId) {
@@ -1138,33 +717,10 @@ const Dieharder_tests = () => {
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime4(currentTime);
 
-    try {
-      if (isBin) {
-        // BIN file logic (unchanged)
-        const buffer = await selectedFile.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        const binaryData = Array.from(bytes)
-          .map(byte => byte.toString(2).padStart(8, '0'))
-          .join('');
-        setBinaryInput4(binaryData);
-      } else if (isTxt) {
-        // TXT file logic (newly added)
-        const text = await selectedFile.text();
-        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
-        if (binaryString.length === 0) {
-          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
-          return;
-        }
-        setBinaryInput4(binaryString);
-      }
-    } catch (error) {
-
-      alert("Failed to extract binary data from the file.");
-      return;
-    }
+    
     // Remove previous Supabase row for line 4
     try {
-      localStorage.setItem('resultFetchedFromSupabased4', 'false');
+   
       const { error: deleteError } = await supabase
         .from('results3')
         .delete()
@@ -1177,15 +733,18 @@ const Dieharder_tests = () => {
       }
     } catch (err) {
 
-    }
+    }finally {
+        isProcessingFileRef4.current = false; // Reset flag when done
+      }
     setIsEnabled4(false);
 
     // Reset the file input
     event.target.value = "";
   };
 
-
+ const isProcessingFileRef5 = useRef(false);
   const handleFileChange5 = async (event) => {
+    isProcessingFileRef5.current = true; 
     setLoadingProgress5Gr(0);
     setLoadingProgress5Rep(0);
     const selectedFile = event.target.files[0];
@@ -1207,11 +766,7 @@ const Dieharder_tests = () => {
       return;
     }
 
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
-      return;
-    }
-
+   
     const userId = await fetchUserId();
     if (!userId) {
 
@@ -1236,31 +791,7 @@ const Dieharder_tests = () => {
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime5(currentTime);
 
-    try {
-      if (isBin) {
-        // BIN file logic (unchanged)
-        const buffer = await selectedFile.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        const binaryData = Array.from(bytes)
-          .map(byte => byte.toString(2).padStart(8, '0'))
-          .join('');
-        setBinaryInput5(binaryData);
-      } else if (isTxt) {
-        // TXT file logic (newly added)
-        const text = await selectedFile.text();
-        const binaryString = text.replace(/[^01]/g, ''); // Keep only 0s and 1s
-        if (binaryString.length === 0) {
-          alert("The .txt file does not contain valid binary data (only 0s and 1s).");
-          return;
-        }
-        setBinaryInput5(binaryString);
-      }
-    } catch (error) {
-
-      alert("Failed to extract binary data from the file.");
-      return;
-    }
-
+   
     // Remove previous Supabase row for line 5
     try {
       localStorage.setItem('resultFetchedFromSupabased5', 'false');
@@ -1276,7 +807,9 @@ const Dieharder_tests = () => {
       }
     } catch (err) {
 
-    }
+    }finally {
+        isProcessingFileRef5.current = false; // Reset flag when done
+      }
     setIsEnabled5(false);
 
     // Reset the file input
@@ -1407,7 +940,7 @@ const Dieharder_tests = () => {
 
       // ✅ Double check to prevent multiple subscriptions
       if (isResults3Subscribed || subscriptionRefResults3.current) {
-        console.log('📡 results3 already subscribed, skipping...');
+      
         return;
       }
 
@@ -1426,17 +959,16 @@ const Dieharder_tests = () => {
             .eq('user_id', userId);
 
           if (error) {
-            console.error('❌ Error fetching initial data from results3:', error);
-            return;
+           return;
           }
 
           if (data) {
-            console.log('📥 Initial data fetched from results3');
+            
             data.forEach(async (row) => {
               switch (row.line) {
                 case 1:
                   // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                  if (row.progress === 100 && !row.result) {
+                   if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                     // Progress is 100% but no result means page was refreshed during idle state
                     await supabase
                       .from('results3')
@@ -1448,8 +980,7 @@ const Dieharder_tests = () => {
                       .eq('line', 1);
 
                     setLoadingProgress(0);
-                    console.log('Reset progress to 0 for line 1 on page load in results3');
-                  } else if (row.progress === 100 && row.result) {
+                   } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput(row.binary_data);
                     setScheduledTime(row.scheduled_time);
@@ -1469,7 +1000,7 @@ const Dieharder_tests = () => {
                   break;
                 case 2:
                   // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                  if (row.progress === 100 && !row.result) {
+                 if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                     // Progress is 100% but no result means page was refreshed during idle state
                     await supabase
                       .from('results3')
@@ -1481,8 +1012,7 @@ const Dieharder_tests = () => {
                       .eq('line', 2);
 
                     setLoadingProgress2(0);
-                    console.log('Reset progress to 0 for line 2 on page load in results3');
-                  } else if (row.progress === 100 && row.result) {
+                    } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput2(row.binary_data);
                     setScheduledTime2(row.scheduled_time);
@@ -1502,7 +1032,7 @@ const Dieharder_tests = () => {
                   break;
                 case 3:
                   // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                  if (row.progress === 100 && !row.result) {
+                   if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                     // Progress is 100% but no result means page was refreshed during idle state
                     await supabase
                       .from('results3')
@@ -1514,8 +1044,7 @@ const Dieharder_tests = () => {
                       .eq('line', 3);
 
                     setLoadingProgress3(0);
-                    console.log('Reset progress to 0 for line 3 on page load in results3');
-                  } else if (row.progress === 100 && row.result) {
+                     } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput3(row.binary_data);
                     setScheduledTime3(row.scheduled_time);
@@ -1535,7 +1064,7 @@ const Dieharder_tests = () => {
                   break;
                 case 4:
                   // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                  if (row.progress === 100 && !row.result) {
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                     // Progress is 100% but no result means page was refreshed during idle state
                     await supabase
                       .from('results3')
@@ -1547,8 +1076,7 @@ const Dieharder_tests = () => {
                       .eq('line', 4);
 
                     setLoadingProgress4(0);
-                    console.log('Reset progress to 0 for line 4 on page load in results3');
-                  } else if (row.progress === 100 && row.result) {
+                    } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput4(row.binary_data);
                     setScheduledTime4(row.scheduled_time);
@@ -1568,7 +1096,7 @@ const Dieharder_tests = () => {
                   break;
                 case 5:
                   // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                  if (row.progress === 100 && !row.result) {
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                     // Progress is 100% but no result means page was refreshed during idle state
                     await supabase
                       .from('results3')
@@ -1580,8 +1108,7 @@ const Dieharder_tests = () => {
                       .eq('line', 5);
 
                     setLoadingProgress5(0);
-                    console.log('Reset progress to 0 for line 5 on page load in results3');
-                  } else if (row.progress === 100 && row.result) {
+                   } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput5(row.binary_data);
                     setScheduledTime5(row.scheduled_time);
@@ -1611,8 +1138,7 @@ const Dieharder_tests = () => {
 
       await fetchInitialData();
 
-      // Set up real-time subscription
-      console.log('📡 Setting up results3 subscription...');
+     
       subscriptionRefResults3.current = supabase
         .channel('results3-changes-' + Date.now()) // ✅ Unique channel name with timestamp
         .on(
@@ -1624,9 +1150,32 @@ const Dieharder_tests = () => {
             filter: `user_id=eq.${userId}`
           },
           (payload) => {
-            console.log('🔄 Real-time update from results3');
+          
             const row = payload.new;
+              if (isProcessingFileRef?.current && payload.new?.line === 1) {
 
+            return;
+          }
+          if (isProcessingFileRef2?.current && payload.new?.line === 2) {
+
+            return;
+          }
+          if (isProcessingFileRef3?.current && payload.new?.line === 3) {
+
+            return;
+          }
+        if (isProcessingFileRef4?.current && payload.new?.line === 4) {
+
+            return;
+          }
+          if (isProcessingFileRef5?.current && payload.new?.line === 5) {
+
+            return;
+          }
+      if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
+      
+        return; // Don't update state for misleading 100% progress
+      }
             switch (row.line) {
               case 1:
                 setBinaryInput(row.binary_data);
@@ -1687,7 +1236,7 @@ const Dieharder_tests = () => {
 
     return () => {
       if (subscriptionRefResults3.current) {
-        console.log('🧹 Cleaning up results3 subscription');
+       
         subscriptionRefResults3.current.unsubscribe();
         subscriptionRefResults3.current = null;
         setIsResults3Subscribed(false);
@@ -1733,37 +1282,6 @@ const Dieharder_tests = () => {
     const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased6') === 'true';
     return isFetchedFromSupabase ? 100 : 0;
   });
-  const [loadingProgress6Rep, setLoadingProgress6Rep] = useState(0);
-  const [loadingProgress6Gr, setLoadingProgress6Gr] = useState(0);
-
-  const [loadingProgress7, setLoadingProgress7] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased7') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
-  const [loadingProgress7Rep, setLoadingProgress7Rep] = useState(0);
-  const [loadingProgress7Gr, setLoadingProgress7Gr] = useState(0);
-
-  const [loadingProgress8, setLoadingProgress8] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased8') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
-  const [loadingProgress8Rep, setLoadingProgress8Rep] = useState(0);
-  const [loadingProgress8Gr, setLoadingProgress8Gr] = useState(0);
-
-  const [loadingProgress9, setLoadingProgress9] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased9') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
-  const [loadingProgress9Rep, setLoadingProgress9Rep] = useState(0);
-  const [loadingProgress9Gr, setLoadingProgress9Gr] = useState(0);
-
-  const [loadingProgress10, setLoadingProgress10] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased10') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
-  const [loadingProgress10Rep, setLoadingProgress10Rep] = useState(0);
-  const [loadingProgress10Gr, setLoadingProgress10Gr] = useState(0);
-
 
 
 
@@ -1772,11 +1290,6 @@ const Dieharder_tests = () => {
   const binaryInsertedRef3 = useRef(false);
   const binaryInsertedRef4 = useRef(false);
   const binaryInsertedRef5 = useRef(false);
-  const binaryInsertedRef6 = useRef(false);
-  const binaryInsertedRef7 = useRef(false);
-  const binaryInsertedRef8 = useRef(false);
-  const binaryInsertedRef9 = useRef(false);
-  const binaryInsertedRef10 = useRef(false);
 
 
   let binaryDataSent = false;
@@ -1784,22 +1297,12 @@ const Dieharder_tests = () => {
   let binaryDataSent3 = false;
   let binaryDataSent4 = false;
   let binaryDataSent5 = false;
-  let binaryDataSent6 = false;
-  let binaryDataSent7 = false;
-  let binaryDataSent8 = false;
-  let binaryDataSent9 = false;
-  let binaryDataSent10 = false;
 
   const alertShownRef = useRef(false);
   const alertShownRef2 = useRef(false);
   const alertShownRef3 = useRef(false);
   const alertShownRef4 = useRef(false);
   const alertShownRef5 = useRef(false);
-  const alertShownRef6 = useRef(false);
-  const alertShownRef7 = useRef(false);
-  const alertShownRef8 = useRef(false);
-  const alertShownRef9 = useRef(false);
-  const alertShownRef10 = useRef(false);
 
   const [currentJobIdT, setCurrentJobIdT] = useState(() => {
     const saved = localStorage.getItem("currentJobId_D");
@@ -1891,7 +1394,7 @@ const Dieharder_tests = () => {
 
           if (data) {
             const progress = data.progress || 0;
-
+             if (data.line === 1) {
             setLoadingProgress(progress);
 
             if (data.result) {
@@ -1905,6 +1408,7 @@ const Dieharder_tests = () => {
               progressIntervalId = null;
             }
           }
+        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -1935,16 +1439,14 @@ const Dieharder_tests = () => {
   }, []);
 
   useEffect(() => {
-    if (!binaryInput || !debouncedScheduledTime) {
+    if (!debouncedScheduledTime) {
       return;
     }
 
 
     const lineNo = 1;
     if (result) {
-      // localStorage.setItem('resultFetchedFromSupabase', 'true');
-      // setLoadingProgress(100);
-      return;
+     return;
     }
     setLoadingProgress(0);
     let progressIntervalId;
@@ -1962,10 +1464,7 @@ const Dieharder_tests = () => {
             fileReader.readAsBinaryString(selectedFile);
           });
 
-          binaryString = Array.from(fileBuffer)
-            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-            .join('');
-
+          
           binaryInsertedRef.current = true; // ✅ Prevent future inserts
 
         } catch (err) {
@@ -2101,11 +1600,6 @@ const Dieharder_tests = () => {
   const jobIdRef3 = useRef(null);
   const jobIdRef4 = useRef(null);
   const jobIdRef5 = useRef(null);
-  const jobIdRef6 = useRef(null);
-  const jobIdRef7 = useRef(null);
-  const jobIdRef8 = useRef(null);
-  const jobIdRef9 = useRef(null);
-  const jobIdRef10 = useRef(null);
 
   useEffect(() => {
 
@@ -2136,7 +1630,7 @@ const Dieharder_tests = () => {
 
           if (data) {
             const progress = data.progress || 0;
-
+             if (data.line === 2) {
             setLoadingProgress2(progress);
 
             if (data.result) {
@@ -2150,6 +1644,7 @@ const Dieharder_tests = () => {
               progressIntervalId = null;
             }
           }
+        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2182,7 +1677,7 @@ const Dieharder_tests = () => {
 
 
   useEffect(() => {
-    if (!binaryInput2 || !debouncedScheduledTime2) return;
+    if ( !debouncedScheduledTime2) return;
 
 
     const lineNo = 2;
@@ -2208,10 +1703,6 @@ const Dieharder_tests = () => {
             fileReader.onerror = () => reject(fileReader.error);
             fileReader.readAsBinaryString(selectedFile2);
           });
-
-          binaryString = Array.from(fileBuffer)
-            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-            .join('');
 
           binaryInsertedRef2.current = true; // ✅ Prevent future inserts
 
@@ -2376,7 +1867,7 @@ const Dieharder_tests = () => {
 
           if (data) {
             const progress = data.progress || 0;
-
+ if (data.line === 3) {
             setLoadingProgress3(progress);
 
             if (data.result) {
@@ -2390,6 +1881,7 @@ const Dieharder_tests = () => {
               progressIntervalId = null;
             }
           }
+        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2420,7 +1912,7 @@ const Dieharder_tests = () => {
   }, []);
 
   useEffect(() => {
-    if (!binaryInput3 || !debouncedScheduledTime3) return;
+    if (!debouncedScheduledTime3) return;
 
 
     const lineNo = 3;
@@ -2446,10 +1938,6 @@ const Dieharder_tests = () => {
             fileReader.onerror = () => reject(fileReader.error);
             fileReader.readAsBinaryString(selectedFile3);
           });
-
-          binaryString = Array.from(fileBuffer)
-            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-            .join('');
 
           binaryInsertedRef3.current = true; // ✅ Prevent future inserts
 
@@ -2615,7 +2103,7 @@ const Dieharder_tests = () => {
 
           if (data) {
             const progress = data.progress || 0;
-
+             if (data.line === 4) {
             setLoadingProgress4(progress);
 
             if (data.result) {
@@ -2629,6 +2117,7 @@ const Dieharder_tests = () => {
               progressIntervalId = null;
             }
           }
+        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2659,14 +2148,12 @@ const Dieharder_tests = () => {
   }, []);
 
   useEffect(() => {
-    if (!binaryInput4 || !debouncedScheduledTime4) return;
+    if (!debouncedScheduledTime4) return;
 
 
     const lineNo = 4;
 
     if (result4) {
-      // localStorage.setItem('resultFetchedFromSupabased2', 'true');
-      // setLoadingProgress4(100);
       return;
     }
 
@@ -2685,10 +2172,6 @@ const Dieharder_tests = () => {
             fileReader.onerror = () => reject(fileReader.error);
             fileReader.readAsBinaryString(selectedFile4);
           });
-
-          binaryString = Array.from(fileBuffer)
-            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-            .join('');
 
           binaryInsertedRef4.current = true; // ✅ Prevent future inserts
 
@@ -2753,7 +2236,7 @@ const Dieharder_tests = () => {
           if (data) {
 
             const progress = data.progress || 0;
-
+            
             setLoadingProgress4(progress);
 
             if (data.result) {
@@ -2769,6 +2252,7 @@ const Dieharder_tests = () => {
               progressIntervalId = null;
             }
           }
+        
         } catch (err) {
 
         }
@@ -2859,7 +2343,7 @@ const Dieharder_tests = () => {
 
           if (data) {
             const progress = data.progress || 0;
-
+             if (data.line === 5) {
             setLoadingProgress5(progress);
 
             if (data.result) {
@@ -2873,6 +2357,7 @@ const Dieharder_tests = () => {
               progressIntervalId = null;
             }
           }
+        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2931,10 +2416,6 @@ const Dieharder_tests = () => {
             fileReader.onerror = () => reject(fileReader.error);
             fileReader.readAsBinaryString(selectedFile5);
           });
-
-          binaryString = Array.from(fileBuffer)
-            .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-            .join('');
 
           binaryInsertedRef5.current = true; // ✅ Prevent future inserts
 
@@ -3077,120 +2558,7 @@ const Dieharder_tests = () => {
   const [binFile4, setBinFile4] = useState(null);
   const [binFile5, setBinFile5] = useState(null);
 
-  useEffect(() => {
-    if (!binaryInput || binaryInput.length % 8 !== 0) {
-
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile(file);
-
-
-  }, [binaryInput]);
-
-  useEffect(() => {
-    if (!binaryInput2 || binaryInput2.length % 8 !== 0) {
-
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput2.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile2(file);
-
-
-  }, [binaryInput2]);
-
-  useEffect(() => {
-    if (!binaryInput3 || binaryInput3.length % 8 !== 0) {
-
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput3.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile3(file);
-
-
-  }, [binaryInput3]);
-  useEffect(() => {
-    if (!binaryInput4 || binaryInput4.length % 8 !== 0) {
-
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput4.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile4(file);
-
-
-  }, [binaryInput4]);
-
-  useEffect(() => {
-    if (!binaryInput5 || binaryInput5.length % 8 !== 0) {
-
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput5.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile5(file);
-
-
-  }, [binaryInput5]);
-
+ 
   const handleButtonClick = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {

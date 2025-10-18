@@ -586,7 +586,11 @@ const Nist_tests90b = () => {
   const binaryInsertedRef4 = useRef(false);
   const binaryInsertedRef5 = useRef(false);
 
+
+const isProcessingFileRef = useRef(false);
   const handleFileChange = async (event) => {
+    isProcessingFileRef.current = true; // Set flag when processing starts
+    
     setLoadingProgressGr(0);
     setLoadingProgressRep(0);
     const selectedFile = event.target.files[0];
@@ -648,11 +652,18 @@ const Nist_tests90b = () => {
     } catch (err) {
 
     }
+ finally {
+        isProcessingFileRef.current = false; // Reset flag when done
+      }
     setIsEnabled(false);
     event.target.value = "";
   };
 
+  const isProcessingFileRef2 = useRef(false);
+
   const handleFileChange2 = async (event) => {
+    isProcessingFileRef2.current = true; // Set flag when processing starts
+    
     setLoadingProgress2Gr(0);
     setLoadingProgress2Rep(0);
     const selectedFile = event.target.files[0];
@@ -725,6 +736,8 @@ const Nist_tests90b = () => {
 
       } catch (err) {
 
+      }finally {
+        isProcessingFileRef2.current = false; // Reset flag when done
       }
 
       // Reset the file input value to allow the same file to be uploaded again
@@ -734,8 +747,10 @@ const Nist_tests90b = () => {
     reader.readAsArrayBuffer(selectedFile);
   };
 
-
+const isProcessingFileRef3 = useRef(false);
   const handleFileChange3 = async (event) => {
+     isProcessingFileRef3.current = true; // Set flag when processing starts
+    
     const selectedFile = event.target.files[0];
     setLoadingProgress3Gr(0);
     setLoadingProgress3Rep(0);
@@ -806,6 +821,8 @@ const Nist_tests90b = () => {
 
       } catch (err) {
 
+      }finally {
+        isProcessingFileRef3.current = false; // Reset flag when done
       }
 
       // Reset the file input value to allow the same file to be uploaded again
@@ -814,8 +831,9 @@ const Nist_tests90b = () => {
     setIsEnabled3(false);
     reader.readAsArrayBuffer(selectedFile);
   };
-
+ const isProcessingFileRef4 = useRef(false);
   const handleFileChange4 = async (event) => {
+       isProcessingFileRef4.current = true; 
     const selectedFile = event.target.files[0];
     setLoadingProgress4Gr(0);
     setLoadingProgress4Rep(0);
@@ -882,6 +900,8 @@ const Nist_tests90b = () => {
 
       } catch (err) {
 
+      }finally {
+        isProcessingFileRef4.current = false; // Reset flag when done
       }
 
       // Reset the file input value to allow the same file to be uploaded again
@@ -890,8 +910,9 @@ const Nist_tests90b = () => {
     setIsEnabled4(false);
     reader.readAsArrayBuffer(selectedFile);
   };
-
+ const isProcessingFileRef5 = useRef(false);
   const handleFileChange5 = async (event) => {
+    isProcessingFileRef5.current = true; 
     const selectedFile = event.target.files[0];
     setLoadingProgress5Gr(0);
     setLoadingProgress5Rep(0);
@@ -957,6 +978,8 @@ const Nist_tests90b = () => {
 
       } catch (err) {
 
+      }finally {
+        isProcessingFileRef5.current = false; // Reset flag when done
       }
       // Reset the file input value to allow the same file to be uploaded again
       event.target.value = "";
@@ -1061,18 +1084,16 @@ useEffect(() => {
           .eq('user_id', userId);
         
         if (error) {
-          console.error('❌ Error fetching initial data from results2:', error);
-          return;
+         return;
         }
 
         if (data) {
-          console.log('📥 Initial data fetched from results2:', data);
-          data.forEach(async (row) => {
+         data.forEach(async (row) => {
             const progress = row.progress || 0;
             switch (row.line) {
               case 1:
                 // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
+                if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                   // Progress is 100% but no result means page was refreshed during idle state
                   await supabase
                     .from('results2')
@@ -1084,8 +1105,7 @@ useEffect(() => {
                     .eq('line', 1);
                   
                   setLoadingProgress(0);
-                  console.log('Reset progress to 0 for line 1 on page load in results2');
-                } else if (row.progress === 100 && row.result) {
+                 } else if (row.progress === 100 && row.result) {
                   // If progress is 100% AND there's a result, keep it (test completed)
                   setBinaryInput(row.binary_data);
                   setScheduledTime(row.scheduled_time);
@@ -1107,7 +1127,7 @@ useEffect(() => {
                 break;
               case 2:
                 // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
+               if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                   // Progress is 100% but no result means page was refreshed during idle state
                   await supabase
                     .from('results2')
@@ -1119,8 +1139,7 @@ useEffect(() => {
                     .eq('line', 2);
                   
                   setLoadingProgress2(0);
-                  console.log('Reset progress to 0 for line 2 on page load in results2');
-                } else if (row.progress === 100 && row.result) {
+                  } else if (row.progress === 100 && row.result) {
                   // If progress is 100% AND there's a result, keep it (test completed)
                   setBinaryInput2(row.binary_data);
                   setScheduledTime2(row.scheduled_time);
@@ -1142,7 +1161,7 @@ useEffect(() => {
                 break;
               case 3:
                 // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
+               if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                   // Progress is 100% but no result means page was refreshed during idle state
                   await supabase
                     .from('results2')
@@ -1154,8 +1173,7 @@ useEffect(() => {
                     .eq('line', 3);
                   
                   setLoadingProgress3(0);
-                  console.log('Reset progress to 0 for line 3 on page load in results2');
-                } else if (row.progress === 100 && row.result) {
+                  } else if (row.progress === 100 && row.result) {
                   // If progress is 100% AND there's a result, keep it (test completed)
                   setBinaryInput3(row.binary_data);
                   setScheduledTime3(row.scheduled_time);
@@ -1175,7 +1193,7 @@ useEffect(() => {
                 break;
               case 4:
                 // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
+                if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                   // Progress is 100% but no result means page was refreshed during idle state
                   await supabase
                     .from('results2')
@@ -1187,8 +1205,7 @@ useEffect(() => {
                     .eq('line', 4);
                   
                   setLoadingProgress4(0);
-                  console.log('Reset progress to 0 for line 4 on page load in results2');
-                } else if (row.progress === 100 && row.result) {
+                  } else if (row.progress === 100 && row.result) {
                   // If progress is 100% AND there's a result, keep it (test completed)
                   setBinaryInput4(row.binary_data);
                   setScheduledTime4(row.scheduled_time);
@@ -1208,7 +1225,7 @@ useEffect(() => {
                 break;
               case 5:
                 // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && !row.result) {
+                if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                   // Progress is 100% but no result means page was refreshed during idle state
                   await supabase
                     .from('results2')
@@ -1220,8 +1237,7 @@ useEffect(() => {
                     .eq('line', 5);
                   
                   setLoadingProgress5(0);
-                  console.log('Reset progress to 0 for line 5 on page load in results2');
-                } else if (row.progress === 100 && row.result) {
+                  } else if (row.progress === 100 && row.result) {
                   // If progress is 100% AND there's a result, keep it (test completed)
                   setBinaryInput5(row.binary_data);
                   setScheduledTime5(row.scheduled_time);
@@ -1251,8 +1267,7 @@ useEffect(() => {
 
     await fetchInitialData();
 
-    // ✅ SECOND: Set up real-time subscription for ALL updates
-    console.log('📡 Setting up results2 subscription...');
+   
     subscriptionRef.current = supabase
       .channel('results2-changes')
       .on(
@@ -1264,14 +1279,38 @@ useEffect(() => {
           filter: `user_id=eq.${userId}`
         },
         (payload) => {
-          console.log('🔄 Real-time update received from results2:', payload);
-          const row = payload.new;
+         const row = payload.new;
+
+          if (isProcessingFileRef?.current && payload.new?.line === 1) {
+
+            return;
+          }
+          if (isProcessingFileRef2?.current && payload.new?.line === 2) {
+
+            return;
+          }
+          if (isProcessingFileRef3?.current && payload.new?.line === 3) {
+
+            return;
+          }
+        if (isProcessingFileRef4?.current && payload.new?.line === 4) {
+
+            return;
+          }
+          if (isProcessingFileRef5?.current && payload.new?.line === 5) {
+
+            return;
+          }
+      if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
+      
+        return; // Don't update state for misleading 100% progress
+      }
+
           const progress = row.progress || 0;
           
           switch (row.line) {
             case 1:
-              console.log(`🔄 Line 1 progress update: ${progress}%`);
-              setBinaryInput(row.binary_data);
+             setBinaryInput(row.binary_data);
               setScheduledTime(row.scheduled_time);
               setResult({ final_result: row.result });
               setFileName(row.file_name);
@@ -1279,8 +1318,7 @@ useEffect(() => {
               setLoadingProgress(progress);
               break;
             case 2:
-              console.log(`🔄 Line 2 progress update: ${progress}%`);
-              setBinaryInput2(row.binary_data);
+             setBinaryInput2(row.binary_data);
               setScheduledTime2(row.scheduled_time);
               setResult2({ final_result: row.result });
               setFileName2(row.file_name);
@@ -1317,7 +1355,7 @@ useEffect(() => {
         }
       )
       .subscribe((status) => {
-        console.log('📡 results2 Subscription status:', status);
+       
         if (status === 'SUBSCRIBED') {
           console.log('✅ Successfully subscribed to results2 real-time updates');
         }
@@ -1329,7 +1367,7 @@ useEffect(() => {
   // ✅ Cleanup subscription on component unmount
   return () => {
     if (subscriptionRef.current) {
-      console.log('🧹 Cleaning up results2 subscription');
+   
       subscriptionRef.current.unsubscribe();
       subscriptionRef.current = null;
     }
@@ -1376,10 +1414,7 @@ useEffect(() => {
   const finalResult = result ? result.final_result : " ";
 
 
-  const handleScheduledTimeChange = (event) => {
-    setScheduledTime(event.target.value);
-
-  };
+ 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime(scheduledTime);
@@ -1392,9 +1427,7 @@ useEffect(() => {
 
   const finalResult2 = result2 ? result2.final_result : " ";
 
-  const handleScheduledTimeChange2 = (event) => {
-    setScheduledTime2(event.target.value);
-  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime2(scheduledTime2);
@@ -1407,10 +1440,6 @@ useEffect(() => {
 
   const finalResult3 = result3 ? result3.final_result : " ";
 
-  const handleScheduledTimeChange3 = (event) => {
-    setScheduledTime3(event.target.value);
-    console.log(scheduledTime3);
-  };
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime3(scheduledTime3);
@@ -1423,10 +1452,6 @@ useEffect(() => {
 
   const finalResult4 = result4 ? result4.final_result : " ";
 
-  const handleScheduledTimeChange4 = (event) => {
-    setScheduledTime4(event.target.value);
-    console.log(scheduledTime4);
-  };
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime4(scheduledTime4);
@@ -1439,10 +1464,7 @@ useEffect(() => {
 
   const finalResult5 = result5 ? result5.final_result : " ";
 
-  const handleScheduledTimeChange5 = (event) => {
-    setScheduledTime5(event.target.value);
-    console.log(scheduledTime5);
-  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedScheduledTime5(scheduledTime5);
@@ -1456,100 +1478,85 @@ useEffect(() => {
 
   const jobIdRef = useRef(null);
 
-  let binaryDataSent = false;
-  let binaryDataSent2 = false;
-  let binaryDataSent3 = false;
-  let binaryDataSent4 = false;
-  let binaryDataSent5 = false;
-  let binaryDataSent6 = false;
-  let binaryDataSent7 = false;
-  let binaryDataSent8 = false;
-  let binaryDataSent9 = false;
-  let binaryDataSent10 = false;
 
   const alertShownRef = useRef(false);
   const alertShownRef2 = useRef(false);
   const alertShownRef3 = useRef(false);
   const alertShownRef4 = useRef(false);
   const alertShownRef5 = useRef(false);
-  const alertShownRef6 = useRef(false);
-  const alertShownRef7 = useRef(false);
-  const alertShownRef8 = useRef(false);
-  const alertShownRef9 = useRef(false);
-  const alertShownRef10 = useRef(false);
 
+  useEffect(() => {
 
-  // useEffect(() => {
+    let progressIntervalId;
 
-  //   let progressIntervalId;
+    const resumeProgressCheck = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
 
-  //   const resumeProgressCheck = async () => {
-  //     const userId = await fetchUserId();
-  //     if (!userId) return;
+      const fetchProgressFromSupabase = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("results2")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("line", 1)
+            .maybeSingle();
 
-  //     const fetchProgressFromSupabase = async () => {
-  //       try {
-  //         const { data, error } = await supabase
-  //           .from("results2")
-  //           .select("*")
-  //           .eq("user_id", userId)
-  //           .eq("line", 1)
-  //           .maybeSingle();
+          if (error) {
 
-  //         if (error) {
+            // ❌ stop polling on error
+            if (progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+            return;
+          }
 
-  //           // ❌ stop polling on error
-  //           if (progressIntervalId) {
-  //             clearInterval(progressIntervalId);
-  //             progressIntervalId = null;
-  //           }
-  //           return;
-  //         }
+          if (data) {
+            const progress = data.progress || 0;
+             if (data.line === 1) {
+            setLoadingProgress(progress);
 
-  //         if (data) {
-  //           const progress = data.progress || 0;
+            if (data.result) {
+              setResult({ final_result: data.result });
+              localStorage.setItem("resultFetchedFromSupabase90b", "true");
+            }
 
-  //           setLoadingProgress(progress);
+            // ✅ Stop polling if already complete
+            if (progress >= 100 && progressIntervalId) {
+              clearInterval(progressIntervalId);
+              progressIntervalId = null;
+            }
+          }
+        }
+        } catch (err) {
 
-  //           if (data.result) {
-  //             setResult({ final_result: data.result });
-  //             localStorage.setItem("resultFetchedFromSupabase90b", "true");
-  //           }
+          // ❌ stop polling on unexpected error
+          if (progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      };
 
-  //           // ✅ Stop polling if already complete
-  //           if (progress >= 100 && progressIntervalId) {
-  //             clearInterval(progressIntervalId);
-  //             progressIntervalId = null;
-  //           }
-  //         }
-  //       } catch (err) {
+      // Start polling again
+      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
 
-  //         // ❌ stop polling on unexpected error
-  //         if (progressIntervalId) {
-  //           clearInterval(progressIntervalId);
-  //           progressIntervalId = null;
-  //         }
-  //       }
-  //     };
+      // Do one immediate fetch
+      await fetchProgressFromSupabase();
+    };
 
-  //     // Start polling again
-  //     progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
+    // On mount → resume progress check
+    resumeProgressCheck();
 
-  //     // Do one immediate fetch
-  //     await fetchProgressFromSupabase();
-  //   };
-
-  //   // On mount → resume progress check
-  //   resumeProgressCheck();
-
-  //   // On unmount → clear polling
-  //   return () => {
-  //     if (progressIntervalId) {
-  //       clearInterval(progressIntervalId);
-  //       progressIntervalId = null;
-  //     }
-  //   };
-  // }, []);
+    // On unmount → clear polling
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+  }, []);
 
 
   useEffect(() => {
@@ -1606,7 +1613,9 @@ useEffect(() => {
         .from('results2')
         .upsert(payload);
 
-
+if (error) {
+        console.error("Supabase upsert error:", error.message);
+      }
     };
    
     const startProcess = async () => {
@@ -1741,7 +1750,7 @@ useEffect(() => {
 
           if (data) {
             const progress = data.progress || 0;
-
+             if (data.line === 2) {
             setLoadingProgress2(progress);
 
             if (data.result) {
@@ -1755,6 +1764,7 @@ useEffect(() => {
               progressIntervalId = null;
             }
           }
+        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -1963,7 +1973,7 @@ useEffect(() => {
 
           if (data) {
             const progress = data.progress || 0;
-
+             if (data.line === 3) {
             setLoadingProgress3(progress);
 
             if (data.result) {
@@ -1977,6 +1987,7 @@ useEffect(() => {
               progressIntervalId = null;
             }
           }
+        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2189,7 +2200,7 @@ useEffect(() => {
 
           if (data) {
             const progress = data.progress || 0;
-
+             if (data.line === 4) {
             setLoadingProgress4(progress);
 
             if (data.result) {
@@ -2203,6 +2214,7 @@ useEffect(() => {
               progressIntervalId = null;
             }
           }
+        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2413,7 +2425,7 @@ useEffect(() => {
 
           if (data) {
             const progress = data.progress || 0;
-
+             if (data.line === 5) {
             setLoadingProgress5(progress);
 
             if (data.result) {
@@ -2427,6 +2439,7 @@ useEffect(() => {
               progressIntervalId = null;
             }
           }
+        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2607,6 +2620,7 @@ useEffect(() => {
       }
     };
   }, [selectedFile5, debouncedScheduledTime5]);
+
 
   const downloadNist90bOutput = async (lineNumber = 1) => {
   try {

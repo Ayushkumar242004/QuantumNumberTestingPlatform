@@ -1252,7 +1252,7 @@ useEffect(() => {
               break;
             case 2:
               if (row.line === 2) {
-                console.log("Updating line 2 state from subscription",row.progress);
+             
                 setBinaryInput2(row.binary_data);
                 setScheduledTime2(row.scheduled_time);
                 setResult2({ final_result: row.result });
