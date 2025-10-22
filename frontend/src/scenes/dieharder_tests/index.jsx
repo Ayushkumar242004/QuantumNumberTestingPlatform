@@ -2686,7 +2686,7 @@ const isProcessingFileRef3 = useRef(false);
 
           setLoadingProgress2Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-          alert(`Error: ${err}`);
+         
         }
       }, 1000);
 
@@ -2720,13 +2720,6 @@ const isProcessingFileRef3 = useRef(false);
           setLoadingProgress2Rep(0);
         });
     } else if (type === "graph") {
-      if (!selectedFile2 && !binFile2) {
-        alert("Please select a binary file before generating the graph.");
-        return;
-      }
-
-
-
 
       let progressInterval;
       setLoadingProgress2Gr(0);
@@ -2736,7 +2729,7 @@ const isProcessingFileRef3 = useRef(false);
           const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobIdT2}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 20) * 100);
           setLoadingProgress2Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -2780,9 +2773,6 @@ const isProcessingFileRef3 = useRef(false);
   const handleButtonClick3 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-
-
-
 
       let progressInterval;
       setLoadingProgress3Rep(0);
@@ -2839,7 +2829,7 @@ const isProcessingFileRef3 = useRef(false);
           const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobIdT3}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 20) * 100);
           setLoadingProgress3Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -2882,8 +2872,6 @@ const isProcessingFileRef3 = useRef(false);
   const handleButtonClick4 = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-
-
       let progressInterval;
       setLoadingProgress4Rep(0);
 
@@ -2939,7 +2927,7 @@ const isProcessingFileRef3 = useRef(false);
           const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobIdT4}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 20) * 100);
           setLoadingProgress4Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
@@ -3036,7 +3024,7 @@ const isProcessingFileRef3 = useRef(false);
           const progressRes = await fetch(`${REACT_APP_BASE_URL}/get_progress_graphDieharder/${currentJobIdT5}`);
           const progressData = await progressRes.json();
           const completed = progressData.progress || 0;
-          const percent = Math.round((completed / 22) * 100);
+          const percent = Math.round((completed / 20) * 100);
           setLoadingProgress5Gr(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
 
