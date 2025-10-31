@@ -91,3 +91,5 @@ test-results/
 *.tar
 
 **/venv/
+# SSH / PEM keys
+*.pem

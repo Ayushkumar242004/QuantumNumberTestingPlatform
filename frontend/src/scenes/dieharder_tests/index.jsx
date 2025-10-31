@@ -3103,7 +3103,7 @@ const isProcessingFileRef3 = useRef(false);
 
     } catch (error) {
       console.error(`Error downloading output for line ${line_number}:`, error);
-      alert(`Failed to download output for line ${line_number}`);
+     
     }
   };
 
@@ -3115,7 +3115,23 @@ const isProcessingFileRef3 = useRef(false);
   const handleDownloadOutput5 = () => downloadDieharderOutput(5);
 
   return (
-    <Box m="20px">
+    <Box m="20px" sx={{
+    overflowX: 'auto',
+    '&::-webkit-scrollbar': {
+      height: '8px',
+    },
+    '&::-webkit-scrollbar-track': {
+      background: colors.primary[700],
+      borderRadius: '4px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: colors.blueAccent[500],
+      borderRadius: '4px',
+      '&:hover': {
+        background: colors.blueAccent[400],
+      }
+    }
+  }}>
       {/* Header Section */}
       <Header title="Dieharder Tests" />
       <Box

@@ -2,59 +2,9 @@
 
 from django.urls import path
 from . import views
-# from .views import sse_binary_view,sse_binary_example_view
-from .views import DieharderMinDistTestView
-from .views import DieharderBirthdayTestView
-from .views import DieharderOperm5TestView
-from .views import DieharderParkingLotTestView
-from .views import DieharderSqueezeTestView
-from .views import DieharderCountOneTestView
-from .views import DieharderCountOneStreamTestView
-from .views import DieharderOQSOTestView
-from .views import DieharderDnaTestView
-from .views import DieharderOPSOTestView
-from .views import DieharderBitstreamTestView
-from .views import Dieharder6x8RankTestView
-from .views import DieharderTsangTestView
-from .views import DieharderTsangTestView
-from .views import DieharderCrapsTestView
-from .views import DieharderStsRunsTestView
-from .views import DieharderStsMonoTestView
-from .views import DieharderLaggedTestView
-from .views import DieharderxTestView
-from .views import Dieharder32RankTestView
-from .views import run_nist90b_on_bin
 
 urlpatterns = [
-    # nist sp 800-22
-    path('run_frequency_test/', views.run_frequency_test, name='run_frequency_test'),
-    path('run_frequency_block_test/', views.run_frequency_block_test, name='run_frequency_block_test'),
-    path('run_runs_test/', views.run_runs_test, name='run_runs_test'),
-    path('run_longest_one_block_test/', views.run_longest_one_block_test, name='run_longest_one_block_test'),
-    path('run_approximate_entropy_test/',views.run_approximate_entropy_test, name='run_approximate_entropy_test'),
-    path('run_linear_complexity_test/',views.run_linear_complexity_test, name='run_linear_test'),
-    path('run_non_overlapping_test/',views.run_non_overlapping_test, name='run_non_overlapping_test'),
-    path('run_overlapping_test/',views.run_overlapping_test, name='run_overlapping_test'),
-    path('run_serial_test/',views.run_serial_test, name='run_serial_test'),
-    path('run_cumulative_sums_test/',views.run_cumulative_sums_test, name='run_cumulative_sums_test'),
-    path('random_excursions_test/',views.run_random_excursions_test, name='run_random_excursions_test'),
-    path('random_excursions_variant_test/',views.random_excursions_variant_test, name='random_excursions_variant_test'),
-    path('run_binary_matrix_rank_text/',views.run_binary_matrix_rank_text, name='run_binary_matrix_rank_test'),
-    path('run_universal_test/',views.run_universal_test, name='run_universal_test'),
-    path('run_dft_test/',views.run_dft_test, name='run_dft_test'),
-   
-    # # nist sp 800-90b
-    path('run_collision_test/', views.run_collision_test, name='run_collision_test'),
-    path('run_markov_test/',views.run_markov_test, name='run_markov_test'),
-    path('run_compression_test/',views.run_compression_test, name='run_compression_test'),
-    path('run_lag_test/',views.run_lag_test, name='run_lag_test'),
-    path('run_mcw_test/',views.run_mcw_test, name='run_mcw_test'),
-    path('run_mmc_test/',views.run_mmc_test, name='run_mmc_test'),
-    path('run_lz78y_test/',views.run_lz78y_test, name='run_lz78y_test'),
-    path('run_chiSq_test/',views.run_chiSq_test, name='run_chiSq_test'),
-    path('run_permutation_test/',views.run_permutation_test, name='run_permutation_test'),
-    path('run_lrs_test/',views.run_lrs_test, name='run_lrs_test'),
- 
+    
     # #report generation
     path('pdf-report/', views.generate_pdf_report, name='generate_pdf_report'),
     path("get_progress_nist/<uuid:job_id>/", views.get_progress_nist, name="get_progress_nist"),
@@ -101,7 +51,5 @@ urlpatterns = [
     path("get_progress_dieharder/<int:line_number>/", views.get_progress_dieharder, name="get_progress_dieharder"),
     path("get_output_dieharder/<int:line_number>/", views.get_output_dieharder, name="get_output_dieharder"),
 
-   
+   path('fetch-qrng/', views.fetch_qrng, name='fetch-qrng'),
 ]
-
-# http://127.0.0.1:8000/sse_binary_example/

@@ -24,11 +24,6 @@ const Nist_tests = () => {
   const [binaryInput3, setBinaryInput3] = useState("");
   const [binaryInput4, setBinaryInput4] = useState("");
   const [binaryInput5, setBinaryInput5] = useState("");
-  const [binaryInput6, setBinaryInput6] = useState("");
-  const [binaryInput7, setBinaryInput7] = useState("");
-  const [binaryInput8, setBinaryInput8] = useState("");
-  const [binaryInput9, setBinaryInput9] = useState("");
-  const [binaryInput10, setBinaryInput10] = useState("");
 
   const fetchUserId = async () => {
     const username = localStorage.getItem("username"); // Retrieve the username from localStorage
@@ -70,11 +65,6 @@ const Nist_tests = () => {
   const fileInputRef3 = useRef(null);
   const fileInputRef4 = useRef(null);
   const fileInputRef5 = useRef(null);
-  const fileInputRef6 = useRef(null);
-  const fileInputRef7 = useRef(null);
-  const fileInputRef8 = useRef(null);
-  const fileInputRef_nine = useRef(null);
-  const fileInputRef10 = useRef(null);
 
 
   const [result, setResult] = useState("");
@@ -82,33 +72,19 @@ const Nist_tests = () => {
   const [result3, setResult3] = useState("");
   const [result4, setResult4] = useState("");
   const [result5, setResult5] = useState("");
-  const [result6, setResult6] = useState(null);
-  const [result7, setResult7] = useState(null);
-  const [result8, setResult8] = useState(null);
-  const [result9, setResult9] = useState(null);
-  const [result10, setResult10] = useState(null);
+
 
   const [uploadTime, setUploadTime] = useState("");
   const [uploadTime2, setUploadTime2] = useState("");
   const [uploadTime3, setUploadTime3] = useState("");
   const [uploadTime4, setUploadTime4] = useState("");
   const [uploadTime5, setUploadTime5] = useState("");
-  const [uploadTime6, setUploadTime6] = useState("");
-  const [uploadTime7, setUploadTime7] = useState("");
-  const [uploadTime8, setUploadTime8] = useState("");
-  const [uploadTime9, setUploadTime9] = useState("");
-  const [uploadTime10, setUploadTime10] = useState("");
 
   const [fileName, setFileName] = useState(""); // New state to store filename
   const [fileName2, setFileName2] = useState(""); // New state to store filename
   const [fileName3, setFileName3] = useState(""); // New state to store filename
   const [fileName4, setFileName4] = useState(""); // New state to store filename
   const [fileName5, setFileName5] = useState(""); // New state to store filename
-  const [fileName6, setFileName6] = useState(""); // New state to store filename
-  const [fileName7, setFileName7] = useState(""); // New state to store filename
-  const [fileName8, setFileName8] = useState(""); // New state to store filename
-  const [fileName9, setFileName9] = useState(""); // New state to store filename
-  const [fileName10, setFileName10] = useState(""); // New state to store filename
 
   const [scheduledTime, setScheduledTime] = useState("");
   const [debouncedScheduledTime, setDebouncedScheduledTime] = useState("");
@@ -149,9 +125,24 @@ const Nist_tests = () => {
   // Add these states and refs for date/time
   const [isDateEnabled, setIsDateEnabled] = useState(true);
   const [isTimeEnabled, setIsTimeEnabled] = useState(true);
+
+  const [isDateEnabled2, setIsDateEnabled2] = useState(true);
+  const [isTimeEnabled2, setIsTimeEnabled2] = useState(true);
+
+  const [isDateEnabled3, setIsDateEnabled3] = useState(true);
+  const [isTimeEnabled3, setIsTimeEnabled3] = useState(true);
+
+  const [isDateEnabled4, setIsDateEnabled4] = useState(true);
+  const [isTimeEnabled4, setIsTimeEnabled4] = useState(true);
+
+  const [isDateEnabled5, setIsDateEnabled5] = useState(true);
+  const [isTimeEnabled5, setIsTimeEnabled5] = useState(true);
+
   const timeDebounceRef = useRef(null);
-
-
+const timeDebounceRef2 = useRef(null);
+const timeDebounceRef3 = useRef(null);
+const timeDebounceRef4= useRef(null);
+const timeDebounceRef5 = useRef(null);
 
   const handleDateChange = (event) => {
     const inputDate = event.target.value;
@@ -238,8 +229,24 @@ const Nist_tests = () => {
   const handleTimeChange2 = (event) => {
     const inputTime = event.target.value;
     setTime2(inputTime); // Update the time state immediately
+
+    if (timeDebounceRef2.current) {
+      clearTimeout(timeDebounceRef2.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef2.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload2');
+      const storedProgress = sessionStorage.getItem('uploadProgress2');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled2(false);
+      }
+    }, 500);
   };
+
   const handleUseCurrentTime2 = () => {
+     if (!isTimeEnabled2) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime2(formattedTime);
@@ -250,8 +257,24 @@ const Nist_tests = () => {
   const handleTimeChange3 = (event) => {
     const inputTime = event.target.value;
     setTime3(inputTime); // Update the time state immediately
+
+        // Clear existing timeout
+    if (timeDebounceRef3.current) {
+      clearTimeout(timeDebounceRef3.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef3.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload3');
+      const storedProgress = sessionStorage.getItem('uploadProgress3');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled3(false);
+      }
+    }, 500);
   };
   const handleUseCurrentTime3 = () => {
+     if (!isTimeEnabled3) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime3(formattedTime);
@@ -262,8 +285,24 @@ const Nist_tests = () => {
   const handleTimeChange4 = (event) => {
     const inputTime = event.target.value;
     setTime4(inputTime); // Update the time state immediately
+
+        // Clear existing timeout
+    if (timeDebounceRef4.current) {
+      clearTimeout(timeDebounceRef4.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef4.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload4');
+      const storedProgress = sessionStorage.getItem('uploadProgress4');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled4(false);
+      }
+    }, 500);
   };
   const handleUseCurrentTime4 = () => {
+     if (!isTimeEnabled4) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime4(formattedTime);
@@ -273,8 +312,25 @@ const Nist_tests = () => {
   const handleTimeChange5 = (event) => {
     const inputTime = event.target.value;
     setTime5(inputTime); // Update the time state immediately
+
+        // Clear existing timeout
+    if (timeDebounceRef5.current) {
+      clearTimeout(timeDebounceRef5.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef5.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload5');
+      const storedProgress = sessionStorage.getItem('uploadProgress5');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled5(false);
+      }
+    }, 500);
   };
+
   const handleUseCurrentTime5 = () => {
+     if (!isTimeEnabled5) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime5(formattedTime);
@@ -285,180 +341,87 @@ const Nist_tests = () => {
 
   useEffect(() => {
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
+    const timeouts = [];
 
-    const handler = setTimeout(() => {
-      if (time && !timeRegex.test(time) && isTimeEnabled) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
+    // Array of time values and their corresponding enabled states
+    const timeValidations = [
+      { time: time, isEnabled: isTimeEnabled },
+      { time: time2, isEnabled: isTimeEnabled2 },
+      { time: time3, isEnabled: isTimeEnabled3 },
+      { time: time4, isEnabled: isTimeEnabled4 },
+      { time: time5, isEnabled: isTimeEnabled5 }
+    ];
+
+    // Set up validation timeouts for each time input
+    timeValidations.forEach(({ time: currentTime, isEnabled }) => {
+      if (currentTime && isEnabled) {
+        const timeout = setTimeout(() => {
+          if (!timeRegex.test(currentTime)) {
+            alert("Invalid time format. Use HH:mm:ss (24-hour format).");
+          }
+        }, 5000); // Wait 5000ms after the user stops typing
+
+        timeouts.push(timeout);
       }
-    }, 5000); // Wait 500ms after the user stops typing
+    });
 
+    // Cleanup function to clear all timeouts
     return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
+      timeouts.forEach(timeout => clearTimeout(timeout));
     };
-  }, [time, isTimeEnabled]);
-
+  }, [time, isTimeEnabled, time2, isTimeEnabled2, time3, isTimeEnabled3, time4, isTimeEnabled4, time5, isTimeEnabled5]);
 
   useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time2 && !timeRegex.test(time2)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time2]);
-
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time3 && !timeRegex.test(time3)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time3]);
-
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time4 && !timeRegex.test(time4)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time4]);
-
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time5 && !timeRegex.test(time5)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time5]);
-
-
-
-  useEffect(() => {
+    // Combine date and time for each instance when both are available
     if (date && time) {
-      const formattedDateTime = `${date} ${time}`; // already in 'YYYY-MM-DD HH:mm:ss'
-      setScheduledTime(formattedDateTime);
-
+      setScheduledTime(`${date} ${time}`);
     }
-  }, [date, time]);
-
-
-  useEffect(() => {
     if (date2 && time2) {
       setScheduledTime2(`${date2} ${time2}`);
     }
-  }, [date2, time2]);
-
-
-  useEffect(() => {
     if (date3 && time3) {
       setScheduledTime3(`${date3} ${time3}`);
     }
-  }, [date3, time3]);
-
-
-  useEffect(() => {
     if (date4 && time4) {
       setScheduledTime4(`${date4} ${time4}`);
     }
-  }, [date4, time4]);
-
-  useEffect(() => {
     if (date5 && time5) {
       setScheduledTime5(`${date5} ${time5}`);
     }
-  }, [date5, time5]);
+  }, [date, time, date2, time2, date3, time3, date4, time4, date5, time5]);
 
 
   const finalResult = result ? result.final_result : " ";
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime(scheduledTime);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime]);
-
-
   const finalResult2 = result2 ? result2.final_result : " ";
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime2(scheduledTime2);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime2]);
-
-
   const finalResult3 = result3 ? result3.final_result : " ";
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime3(scheduledTime3);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime3]);
-
-
   const finalResult4 = result4 ? result4.final_result : " ";
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime4(scheduledTime4);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime4]);
-
-
   const finalResult5 = result5 ? result5.final_result : " ";
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime5(scheduledTime5);
-    }, 3000);
+    const handlers = [];
 
-    return () => {
-      clearTimeout(handler);
+    // Helper function to create debounced handler
+    const createDebouncedHandler = (scheduledTime, setDebouncedScheduledTime) => {
+      const handler = setTimeout(() => {
+        setDebouncedScheduledTime(scheduledTime);
+      }, 3000);
+      handlers.push(handler);
     };
-  }, [scheduledTime5]);
 
+    // Create debounced handlers for all scheduled times
+    createDebouncedHandler(scheduledTime, setDebouncedScheduledTime);
+    createDebouncedHandler(scheduledTime2, setDebouncedScheduledTime2);
+    createDebouncedHandler(scheduledTime3, setDebouncedScheduledTime3);
+    createDebouncedHandler(scheduledTime4, setDebouncedScheduledTime4);
+    createDebouncedHandler(scheduledTime5, setDebouncedScheduledTime5);
+
+    // Cleanup function to clear all timeouts
+    return () => {
+      handlers.forEach(handler => {
+        clearTimeout(handler);
+      });
+    };
+  }, [scheduledTime, scheduledTime2, scheduledTime3, scheduledTime4, scheduledTime5]);
 
 
   const [showRedButton, setShowRedButton] = useState(false);
@@ -472,6 +435,7 @@ const Nist_tests = () => {
   const [isEnabled3, setIsEnabled3] = useState(true);
   const [isEnabled4, setIsEnabled4] = useState(true);
   const [isEnabled5, setIsEnabled5] = useState(true);
+
   // Handle file upload
   const handleFileUpload = () => {
     if (isUploadButtonEnabled) {
@@ -479,32 +443,41 @@ const Nist_tests = () => {
     }
   };
   const handleFileUpload2 = () => {
-    setIsEnabled2(true);
-    // setShowRedButton2(true)
-    fileInputRef2.current.click();
+    if (isUploadButtonEnabled2) {
+      fileInputRef2.current.click();
+    }
+
   };
   const handleFileUpload3 = () => {
-    setIsEnabled3(true);
-    // setShowRedButton3(true)
-    fileInputRef3.current.click();
+    if (isUploadButtonEnabled3) {
+      fileInputRef3.current.click();
+    }
+
   };
   const handleFileUpload4 = () => {
-    setIsEnabled4(true);
-    // setShowRedButton4(true)
-    fileInputRef4.current.click();
+    if (isUploadButtonEnabled4) {
+      fileInputRef4.current.click();
+    }
+
   };
   const handleFileUpload5 = () => {
-    setIsEnabled5(true);
-    // setShowRedButton5(true)
-    fileInputRef5.current.click();
+    if (isUploadButtonEnabled5) {
+      fileInputRef5.current.click();
+    }
+
   };
   const isProcessingFileRef = useRef(false);
   const [isUploadButtonEnabled, setIsUploadButtonEnabled] = useState(true);
+  const [isUploadButtonEnabled2, setIsUploadButtonEnabled2] = useState(true);
+  const [isUploadButtonEnabled3, setIsUploadButtonEnabled3] = useState(true);
+  const [isUploadButtonEnabled4, setIsUploadButtonEnabled4] = useState(true);
+  const [isUploadButtonEnabled5, setIsUploadButtonEnabled5] = useState(true);
+
 
   const handleFileChange = async (event) => {
     isProcessingFileRef.current = true; // Set flag when processing starts
     setIsUploadButtonEnabled(false); // Immediately disable button
-  
+
     setLoadingProgressGr(0);
     setLoadingProgressRep(0);
     sessionStorage.setItem('ongoingFileUpload', 'true');
@@ -583,28 +556,35 @@ const Nist_tests = () => {
   const isProcessingFileRef2 = useRef(false);
 
   const handleFileChange2 = async (event) => {
+   
     isProcessingFileRef2.current = true; // Set flag when processing starts
+    setIsUploadButtonEnabled2(false); // Immediately disable button
 
     setLoadingProgress2Gr(0);
     setLoadingProgress2Rep(0);
+
+  
+    sessionStorage.setItem('ongoingFileUpload2', 'true');
+
     const selectedFile = event.target.files[0];
+   
     if (!selectedFile) {
-      // User closed the file picker without choosing a file
-      setShowRedButton2(false);
+      
       return;
     }
+
+   
     setSelectedFile2(selectedFile);
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
-      return;
-    }
 
+   
     const userId = await fetchUserId();
+  
     if (!userId) {
-
+    
       return;
     }
 
+   
     setBinaryInput2(""); // Clear binary input
     setScheduledTime2(""); // Clear scheduled time
     setDebouncedScheduledTime2(""); // Clear debounced scheduled time
@@ -614,49 +594,71 @@ const Nist_tests = () => {
     setLoadingProgress2(0); // Reset progress bar
     setTime2("");
 
-
+    
     setFileName2(selectedFile.name);
+
+   
     const reader = new FileReader();
+
     reader.onload = async (e) => {
+     
       const binaryData = e.target.result;
       const byteArray = new Uint8Array(binaryData);
       const decoder = new TextDecoder();
       let binaryString = "";
 
-
-      // Update binaryInput state with the processed binary string
+     
       setBinaryInput2(binaryString);
 
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      setUploadTime2(currentTime);
+     setUploadTime2(currentTime);
+
       try {
-        // ✅ STEP 1: First delete the existing row to ensure clean state
+        
         const { error: deleteError } = await supabase
           .from('results')
           .delete()
           .match({ line: 2, user_id: userId });
 
-        if (deleteError) {
-          console.error('Error deleting row:', deleteError);
-
-        }
-
-
+     
+        
         setLoadingProgress2(0);
 
       } catch (err) {
-
+      
+        isProcessingFileRef2.current = false;
+        setIsUploadButtonEnabled2(true);
       } finally {
+       
         isProcessingFileRef2.current = false; // Reset flag when done
       }
+
+    
       alertShownRef2.current = false;
-      // Reset the file input value to allow the same file to be uploaded again
+
+   
       event.target.value = "";
+   
     };
-    setIsEnabled2(false);
+
+    reader.onerror = () => {
+   
+      // Enable button on file reading error
+      isProcessingFileRef2.current = false;
+      setIsUploadButtonEnabled2(true);
+    };
+
+    reader.onabort = () => {
+   
+      isProcessingFileRef2.current = false;
+      setIsUploadButtonEnabled2(true);
+    };
+
+    
     reader.readAsArrayBuffer(selectedFile);
+   
   };
   const isProcessingFileRef3 = useRef(false);
   const handleFileChange3 = async (event) => {
@@ -723,7 +725,8 @@ const Nist_tests = () => {
           return;
         }
       } catch (err) {
-
+        isProcessingFileRef3.current = false;
+        setIsUploadButtonEnabled3(true);
       } finally {
         isProcessingFileRef3.current = false; // Reset flag when done
       }
@@ -801,7 +804,8 @@ const Nist_tests = () => {
         }
 
       } catch (err) {
-
+        isProcessingFileRef4.current = false;
+        setIsUploadButtonEnabled4(true);
       } finally {
         isProcessingFileRef4.current = false; // Reset flag when done
       }
@@ -879,7 +883,8 @@ const Nist_tests = () => {
         }
 
       } catch (err) {
-
+        isProcessingFileRef5.current = false;
+        setIsUploadButtonEnabled5(true);
       } finally {
         isProcessingFileRef5.current = false; // Reset flag when done
       }
@@ -889,10 +894,6 @@ const Nist_tests = () => {
     setIsEnabled5(false);
     reader.readAsArrayBuffer(selectedFile);
   };
-
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [loadingProgressRep, setLoadingProgressRep] = useState(0);
-  const [loadingProgressGr, setLoadingProgressGr] = useState(0);
 
 
   useEffect(() => {
@@ -1212,6 +1213,11 @@ const Nist_tests = () => {
     };
   }, []);
 
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingProgressRep, setLoadingProgressRep] = useState(0);
+  const [loadingProgressGr, setLoadingProgressGr] = useState(0);
+
+
   const [loadingProgress2, setLoadingProgress2] = useState(0);
   const [loadingProgress2Rep, setLoadingProgress2Rep] = useState(0);
   const [loadingProgress2Gr, setLoadingProgress2Gr] = useState(0);
@@ -1228,41 +1234,54 @@ const Nist_tests = () => {
   const [loadingProgress5Rep, setLoadingProgress5Rep] = useState(0);
   const [loadingProgress5Gr, setLoadingProgress5Gr] = useState(0);
 
-
-    // Effect to handle date/time enabling/disabling based on upload progress
+  // Effect to handle loading progress changes for all uploads
   useEffect(() => {
-    if (loadingProgress === 100) {
-      // Upload completed - enable both inputs
-      setIsDateEnabled(true);
-      setIsTimeEnabled(true);
-      sessionStorage.removeItem('ongoingFileUpload');
-      sessionStorage.removeItem('uploadProgress');
-    } else if (loadingProgress > 0 && loadingProgress < 100) {
-      // Upload in progress - disable both inputs
-      setIsDateEnabled(false);
-      setIsTimeEnabled(false);
-      sessionStorage.setItem('ongoingFileUpload', 'true');
-      sessionStorage.setItem('uploadProgress', loadingProgress.toString());
-    }
-  }, [loadingProgress]);
+    const handleProgressUpdate = (progress, storageKey, setIsDateEnabled, setIsTimeEnabled) => {
+      if (progress === 100) {
+        // Upload completed - enable both inputs
+        setIsDateEnabled(true);
+        setIsTimeEnabled(true);
+        sessionStorage.removeItem(`ongoingFileUpload${storageKey}`);
+        sessionStorage.removeItem(`uploadProgress${storageKey}`);
+      } else if (progress > 0 && progress < 100) {
+        // Upload in progress - disable both inputs
+        setIsDateEnabled(false);
+        setIsTimeEnabled(false);
+        sessionStorage.setItem(`ongoingFileUpload${storageKey}`, 'true');
+        sessionStorage.setItem(`uploadProgress${storageKey}`, progress.toString());
+      }
+    };
 
-  // Effect to check persistent state when component mounts (for date/time)
+    handleProgressUpdate(loadingProgress, '', setIsDateEnabled, setIsTimeEnabled);
+    handleProgressUpdate(loadingProgress2, '2', setIsDateEnabled2, setIsTimeEnabled2);
+    handleProgressUpdate(loadingProgress3, '3', setIsDateEnabled3, setIsTimeEnabled3);
+    handleProgressUpdate(loadingProgress4, '4', setIsDateEnabled4, setIsTimeEnabled4);
+    handleProgressUpdate(loadingProgress5, '5', setIsDateEnabled5, setIsTimeEnabled5);
+  }, [loadingProgress, loadingProgress2, loadingProgress3, loadingProgress4, loadingProgress5]);
+
+  // Effect to check persistent state when component mounts for all uploads
   useEffect(() => {
-    const ongoingUpload = sessionStorage.getItem('ongoingFileUpload');
-    const storedProgress = sessionStorage.getItem('uploadProgress');
+    const checkPersistentState = (storageKey, setIsDateEnabled, setIsTimeEnabled) => {
+      const ongoingUpload = sessionStorage.getItem(`ongoingFileUpload${storageKey}`);
+      const storedProgress = sessionStorage.getItem(`uploadProgress${storageKey}`);
 
-    if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
-      // There's an ongoing upload - disable inputs
-      setIsDateEnabled(false);
-      setIsTimeEnabled(false);
-    } else {
-      // No ongoing upload - enable inputs
-      setIsDateEnabled(true);
-      setIsTimeEnabled(true);
-    }
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        // There's an ongoing upload - disable inputs
+        setIsDateEnabled(false);
+        setIsTimeEnabled(false);
+      } else {
+        // No ongoing upload - enable inputs
+        setIsDateEnabled(true);
+        setIsTimeEnabled(true);
+      }
+    };
+
+    checkPersistentState('', setIsDateEnabled, setIsTimeEnabled);
+    checkPersistentState('2', setIsDateEnabled2, setIsTimeEnabled2);
+    checkPersistentState('3', setIsDateEnabled3, setIsTimeEnabled3);
+    checkPersistentState('4', setIsDateEnabled4, setIsTimeEnabled4);
+    checkPersistentState('5', setIsDateEnabled5, setIsTimeEnabled5);
   }, []);
-
-
 
   const jobIdRef = useRef(null);
   const jobIdRef2 = useRef(null);
@@ -1279,119 +1298,82 @@ const Nist_tests = () => {
   const alertShownRef4 = useRef(false);
   const alertShownRef5 = useRef(false);
 
+  // Effect to check persistent state when component mounts for all uploads
   useEffect(() => {
-    // Check if there's an ongoing upload in sessionStorage
-    const ongoingUpload = sessionStorage.getItem('ongoingFileUpload');
-    const storedProgress = sessionStorage.getItem('uploadProgress');
+    const checkPersistentState = (storageKey, isProcessingFileRef, setIsUploadButtonEnabled) => {
+      const ongoingUpload = sessionStorage.getItem(`ongoingFileUpload${storageKey}`);
+      const storedProgress = sessionStorage.getItem(`uploadProgress${storageKey}`);
 
-    if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
-      // There's an ongoing upload that hasn't completed
-      isProcessingFileRef.current = true;
-      setIsUploadButtonEnabled(false);
-    } else {
-      // No ongoing upload or upload was completed
-      isProcessingFileRef.current = false;
-      setIsUploadButtonEnabled(true);
-      // Clean up sessionStorage
-      sessionStorage.removeItem('ongoingFileUpload');
-      sessionStorage.removeItem('uploadProgress');
-    }
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        // There's an ongoing upload that hasn't completed
+        isProcessingFileRef.current = true;
+        setIsUploadButtonEnabled(false);
+      } else {
+        // No ongoing upload or upload was completed
+        isProcessingFileRef.current = false;
+        setIsUploadButtonEnabled(true);
+        // Clean up sessionStorage
+        sessionStorage.removeItem(`ongoingFileUpload${storageKey}`);
+        sessionStorage.removeItem(`uploadProgress${storageKey}`);
+      }
+    };
+
+    // Check persistent state for all upload instances
+    checkPersistentState('', isProcessingFileRef, setIsUploadButtonEnabled);
+    checkPersistentState('2', isProcessingFileRef2, setIsUploadButtonEnabled2);
+    checkPersistentState('3', isProcessingFileRef3, setIsUploadButtonEnabled3);
+    checkPersistentState('4', isProcessingFileRef4, setIsUploadButtonEnabled4);
+    checkPersistentState('5', isProcessingFileRef5, setIsUploadButtonEnabled5);
   }, []);
 
+  // Effect to handle loading progress changes for all uploads
   useEffect(() => {
-    if (loadingProgress === 100) {
-      // Upload completed
-      isProcessingFileRef.current = false;
-      setIsUploadButtonEnabled(true);
-      sessionStorage.removeItem('ongoingFileUpload');
-      sessionStorage.removeItem('uploadProgress');
-    } else if (loadingProgress > 0 && loadingProgress < 100) {
-      // Upload in progress
-      isProcessingFileRef.current = true;
-      setIsUploadButtonEnabled(false);
-      sessionStorage.setItem('ongoingFileUpload', 'true');
-      sessionStorage.setItem('uploadProgress', loadingProgress.toString());
-    }
-  }, [loadingProgress]);
+    const handleProgressUpdate = (progress, storageKey, isProcessingFileRef, setIsUploadButtonEnabled) => {
+      if (progress === 100) {
+        // Upload completed
+        isProcessingFileRef.current = false;
+        setIsUploadButtonEnabled(true);
+        sessionStorage.removeItem(`ongoingFileUpload${storageKey}`);
+        sessionStorage.removeItem(`uploadProgress${storageKey}`);
+      } else if (progress > 0 && progress < 100) {
+        // Upload in progress
+        isProcessingFileRef.current = true;
+        setIsUploadButtonEnabled(false);
+        sessionStorage.setItem(`ongoingFileUpload${storageKey}`, 'true');
+        sessionStorage.setItem(`uploadProgress${storageKey}`, progress.toString());
+      }
+    };
 
+    // Handle progress updates for all upload instances
+    handleProgressUpdate(loadingProgress, '', isProcessingFileRef, setIsUploadButtonEnabled);
+    handleProgressUpdate(loadingProgress2, '2', isProcessingFileRef2, setIsUploadButtonEnabled2);
+    handleProgressUpdate(loadingProgress3, '3', isProcessingFileRef3, setIsUploadButtonEnabled3);
+    handleProgressUpdate(loadingProgress4, '4', isProcessingFileRef4, setIsUploadButtonEnabled4);
+    handleProgressUpdate(loadingProgress5, '5', isProcessingFileRef5, setIsUploadButtonEnabled5);
+  }, [loadingProgress, loadingProgress2, loadingProgress3, loadingProgress4, loadingProgress5]);
 
   const handleUploadComplete = () => {
     isProcessingFileRef.current = false;
     setIsUploadButtonEnabled(true);
   };
+  const handleUploadComplete2 = () => {
+    isProcessingFileRef2.current = false;
+    setIsUploadButtonEnabled2(true);
+  };
+  const handleUploadComplete3 = () => {
+    isProcessingFileRef3.current = false;
+    setIsUploadButtonEnabled3(true);
+  };
+  const handleUploadComplete4 = () => {
+    isProcessingFileRef4.current = false;
+    setIsUploadButtonEnabled4(true);
+  };
+  const handleUploadComplete5 = () => {
+    isProcessingFileRef5.current = false;
+    setIsUploadButtonEnabled5(true);
+  };
 
 
-  useEffect(() => {
-
-    let progressIntervalId;
-
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 1)
-            .maybeSingle();
-
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-
-            setLoadingProgress(progress);
-
-            if (data.result) {
-              setResult({ final_result: data.result });
-              // localStorage.setItem("resultFetchedFromSupabase", "true");
-            }
-
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-
-          // ❌ stop polling on unexpected error
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          }
-        }
-      };
-
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
-    };
-
-    // On mount → resume progress check
-    resumeProgressCheck();
-
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, []); // <-- runs only on mount/unmount
 
   const [currentJobIdT, setCurrentJobIdT] = useState(() => {
     const saved = localStorage.getItem("currentJobId");
@@ -1401,9 +1383,6 @@ const Nist_tests = () => {
     return newId;
   });
 
-  useEffect(() => {
-    jobIdRef.current = currentJobIdT;
-  }, [currentJobIdT]);
 
   const [currentJobIdT2, setCurrentJobIdT2] = useState(() => {
     const saved = localStorage.getItem("currentJobId2");
@@ -1413,9 +1392,6 @@ const Nist_tests = () => {
     return newId;
   });
 
-  useEffect(() => {
-    jobIdRef2.current = currentJobIdT2;
-  }, [currentJobIdT2]);
 
   const [currentJobIdT3, setCurrentJobIdT3] = useState(() => {
     const saved = localStorage.getItem("currentJobId3");
@@ -1425,9 +1401,6 @@ const Nist_tests = () => {
     return newId;
   });
 
-  useEffect(() => {
-    jobIdRef3.current = currentJobIdT3;
-  }, [currentJobIdT3]);
 
   const [currentJobIdT4, setCurrentJobIdT4] = useState(() => {
     const saved = localStorage.getItem("currentJobId4");
@@ -1437,9 +1410,7 @@ const Nist_tests = () => {
     return newId;
   });
 
-  useEffect(() => {
-    jobIdRef4.current = currentJobIdT4;
-  }, [currentJobIdT4]);
+
 
   const [currentJobIdT5, setCurrentJobIdT5] = useState(() => {
     const saved = localStorage.getItem("currentJobId5");
@@ -1449,9 +1420,14 @@ const Nist_tests = () => {
     return newId;
   });
 
-  useEffect(() => {
-    jobIdRef5.current = currentJobIdT5;
-  }, [currentJobIdT5]);
+
+useEffect(() => {
+  jobIdRef.current = currentJobIdT;
+  jobIdRef2.current = currentJobIdT2;
+  jobIdRef3.current = currentJobIdT3;
+  jobIdRef4.current = currentJobIdT4;
+  jobIdRef5.current = currentJobIdT5;
+}, [currentJobIdT, currentJobIdT2, currentJobIdT3, currentJobIdT4, currentJobIdT5]);
 
 
   const binaryInsertedRef = useRef(false); // 🔁 Track binary insert
@@ -1467,487 +1443,222 @@ const Nist_tests = () => {
   const [selectedFile5, setSelectedFile5] = useState(null);
 
   useEffect(() => {
+  const progressIntervalIds = {};
 
-    if (!debouncedScheduledTime) {
-      return;
-    }
+  const resumeProgressCheck = async (lineNumber) => {
+    const userId = await fetchUserId();
+    if (!userId) return;
 
-    const lineNo = 1;
+    const fetchProgressFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("results")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("line", lineNumber)
+          .maybeSingle();
 
-    if (result) {
-      return;
-    }
-
-    setLoadingProgress(0);
-    let progressIntervalId;
-
-    const upsertProgress = async (progress, userId, result = "") => {
-      let binaryString = null;
-
-      if (progress === 0 && selectedFile && !binaryInsertedRef.current) {
-        try {
-          const fileReader = new FileReader();
-          const fileBuffer = await new Promise((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(selectedFile);
-          });
-
-          // binaryString = Array.from(fileBuffer)
-          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-          //   .join('');
-
-          binaryInsertedRef.current = true; // ✅ Prevent future inserts
-        } catch (err) {
+        if (error) {
+          // ❌ stop polling on error
+          if (progressIntervalIds[lineNumber]) {
+            clearInterval(progressIntervalIds[lineNumber]);
+            delete progressIntervalIds[lineNumber];
+          }
           return;
         }
-      }
 
-      const payload = {
-        user_id: userId,
-        line: lineNo,
-        binary_data: " ",
-        scheduled_time: debouncedScheduledTime,
-        result: result,
-        file_name: fileName,
-        upload_time: uploadTime,
-        progress: progress,
-        updated_at: new Date().toISOString()
-      };
+        if (data) {
+          const progress = data.progress || 0;
 
-      const { error } = await supabase.from('results').upsert(payload);
-
-      if (error) {
-        console.error("Supabase upsert error:", error.message);
-      }
-    };
-
-    const startProcess = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      await upsertProgress(10, userId);
-      setShowRedButton(false);
-
-      if (!alertShownRef.current) {
-        alert("File uploaded successfully");
-        alertShownRef.current = true;
-      }
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", lineNo)
-            .maybeSingle();
-
-          if (error) {
-
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-            setLoadingProgress(progress);
-
-            // ✅ Stop polling once progress is 100%
-            if (progress >= 100 && progressIntervalId) {
-
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-
-        } catch (err) {
-
-        }
-      };
-
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-      await fetchProgressFromSupabase();
-
-      try {
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        const formattedScheduledTime = new Date(debouncedScheduledTime)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-
-        formData.append("scheduled_time", debouncedScheduledTime);
-        formData.append("scheduled_time_str", formattedScheduledTime);
-        formData.append("job_id", currentJobIdT);
-        formData.append("line", lineNo);
-        formData.append("user_id", userId);
-        formData.append("file_name", fileName);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/run_nist/`, // ✅ <-- your NIST backend URL
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        setIsEnabled(true);
-
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-
-
-        setResult(response.data);
-        // localStorage.setItem("resultFetchedFromSupabaseNIST", "true");
-        await upsertProgress(100, userId, response.data.final_result);
-        handleUploadComplete();
-      } catch (error) {
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-
-        setLoadingProgress(0);
-        await upsertProgress(0, userId);
-        alert(`Error while running NIST tests: ${error}`);
-      }
-    };
-
-    startProcess();
-
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, [selectedFile, debouncedScheduledTime]);
-
-
-  useEffect(() => {
-
-    let progressIntervalId;
-
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 2)
-            .maybeSingle();
-
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-
-            // ✅ Only update if progress is actually for line 2 and not from other lines
-            if (data.line === 2) {
-              console.lg("resumed line 2 progress:", progress);
+          // Update progress based on line number
+          switch (lineNumber) {
+            case 1:
+              setLoadingProgress(progress);
+              if (data.result) {
+                setResult({ final_result: data.result });
+              }
+              break;
+            case 2:
               setLoadingProgress2(progress);
-
               if (data.result) {
                 setResult2({ final_result: data.result });
-
               }
-
-              // ✅ Stop polling if already complete
-              if (progress >= 100 && progressIntervalId) {
-                clearInterval(progressIntervalId);
-                progressIntervalId = null;
+              break;
+            case 3:
+              setLoadingProgress3(progress);
+              if (data.result) {
+                setResult3({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase2", "true");
               }
-            }
+              break;
+            case 4:
+              setLoadingProgress4(progress);
+              if (data.result) {
+                setResult4({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase2", "true");
+              }
+              break;
+            case 5:
+              setLoadingProgress5(progress);
+              if (data.result) {
+                setResult5({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase5", "true");
+              }
+              break;
           }
-        } catch (err) {
 
-          // ❌ stop polling on unexpected error
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
+          // ✅ Stop polling if already complete
+          if (progress >= 100 && progressIntervalIds[lineNumber]) {
+            clearInterval(progressIntervalIds[lineNumber]);
+            delete progressIntervalIds[lineNumber];
           }
         }
-      };
-
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
-    };
-
-    // On mount → resume progress check
-    resumeProgressCheck();
-
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
+      } catch (err) {
+        // ❌ stop polling on unexpected error
+        if (progressIntervalIds[lineNumber]) {
+          clearInterval(progressIntervalIds[lineNumber]);
+          delete progressIntervalIds[lineNumber];
+        }
       }
     };
-  }, []); // <-- runs only on mount/unmount
 
-  useEffect(() => {
-    if (!debouncedScheduledTime2) return;
+    // Start polling for this line
+    progressIntervalIds[lineNumber] = setInterval(fetchProgressFromSupabase, 2000);
 
-    const lineNo = 2;
+    // Do one immediate fetch
+    await fetchProgressFromSupabase();
+  };
 
-    if (result2) {
-      return;
+  // Start progress checks for all lines
+  const lines = [1, 2, 3, 4, 5];
+  lines.forEach(line => {
+    resumeProgressCheck(line);
+  });
+
+  // On unmount → clear all polling intervals
+  return () => {
+    Object.values(progressIntervalIds).forEach(intervalId => {
+      clearInterval(intervalId);
+    });
+  };
+}, []); 
+
+useEffect(() => {
+  const processLine = async (lineNumber) => {
+    // Get line-specific values
+    const getLineValues = (lineNo) => {
+      switch (lineNo) {
+        case 1:
+          return {
+            debouncedTime: debouncedScheduledTime,
+            result: result,
+            selectedFile: selectedFile,
+            fileName: fileName,
+            uploadTime: uploadTime,
+            currentJobId: currentJobIdT,
+            setLoadingProgress: setLoadingProgress,
+            setResult: setResult,
+            setShowRedButton: setShowRedButton,
+            alertShownRef: alertShownRef,
+            binaryInsertedRef: binaryInsertedRef,
+            setIsEnabled: setIsEnabled,
+            handleUploadComplete: handleUploadComplete,
+            binaryInput: null
+          };
+        case 2:
+          return {
+            debouncedTime: debouncedScheduledTime2,
+            result: result2,
+            selectedFile: selectedFile2,
+            fileName: fileName2,
+            uploadTime: uploadTime2,
+            currentJobId: currentJobIdT2,
+            setLoadingProgress: setLoadingProgress2,
+            setResult: setResult2,
+            setShowRedButton: setShowRedButton2,
+            alertShownRef: alertShownRef2,
+            binaryInsertedRef: binaryInsertedRef2,
+            setIsEnabled: setIsEnabled2,
+            handleUploadComplete: handleUploadComplete2,
+            binaryInput: null
+          };
+        case 3:
+          return {
+            debouncedTime: debouncedScheduledTime3,
+            result: result3,
+            selectedFile: selectedFile3,
+            fileName: fileName3,
+            uploadTime: uploadTime3,
+            currentJobId: currentJobIdT3,
+            setLoadingProgress: setLoadingProgress3,
+            setResult: setResult3,
+            setShowRedButton: setShowRedButton3,
+            alertShownRef: alertShownRef3,
+            binaryInsertedRef: binaryInsertedRef3,
+            setIsEnabled: setIsEnabled3,
+            handleUploadComplete: handleUploadComplete3,
+            binaryInput: binaryInput3
+          };
+        case 4:
+          return {
+            debouncedTime: debouncedScheduledTime4,
+            result: result4,
+            selectedFile: selectedFile4,
+            fileName: fileName4,
+            uploadTime: uploadTime4,
+            currentJobId: currentJobIdT4,
+            setLoadingProgress: setLoadingProgress4,
+            setResult: setResult4,
+            setShowRedButton: setShowRedButton4,
+            alertShownRef: alertShownRef4,
+            binaryInsertedRef: binaryInsertedRef4,
+            setIsEnabled: setIsEnabled4,
+            handleUploadComplete: handleUploadComplete4,
+            binaryInput: binaryInput4
+          };
+        case 5:
+          return {
+            debouncedTime: debouncedScheduledTime5,
+            result: result5,
+            selectedFile: selectedFile5,
+            fileName: fileName5,
+            uploadTime: uploadTime5,
+            currentJobId: currentJobIdT5,
+            setLoadingProgress: setLoadingProgress5,
+            setResult: setResult5,
+            setShowRedButton: setShowRedButton5,
+            alertShownRef: alertShownRef5,
+            binaryInsertedRef: binaryInsertedRef5,
+            setIsEnabled: setIsEnabled5,
+            handleUploadComplete: handleUploadComplete5,
+            binaryInput: binaryInput5
+          };
+        default:
+          return null;
+      }
+    };
+
+    const lineValues = getLineValues(lineNumber);
+    if (!lineValues || !lineValues.debouncedTime || lineValues.result) {
+      return null;
     }
 
-    setLoadingProgress2(0);
+    lineValues.setLoadingProgress(0);
     let progressIntervalId;
 
     const upsertProgress = async (progress, userId, result = "") => {
       let binaryString = null;
 
-      if (progress === 0 && selectedFile2 && !binaryInsertedRef2.current) {
+      if (progress === 0 && 
+          ((lineValues.selectedFile && !lineValues.binaryInsertedRef.current) || 
+           (lineValues.binaryInput && !lineValues.binaryInsertedRef.current))) {
         try {
           const fileReader = new FileReader();
+          const fileSource = lineValues.selectedFile || lineValues.binaryInput;
           const fileBuffer = await new Promise((resolve, reject) => {
             fileReader.onload = () => resolve(fileReader.result);
             fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(selectedFile2);
-          });
-
-          // If you want to save binary string later, uncomment this
-          // binaryString = Array.from(fileBuffer)
-          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-          //   .join('');
-
-          binaryInsertedRef2.current = true; // ✅ Prevent multiple inserts
-        } catch (err) {
-          return;
-        }
-      }
-
-      const payload = {
-        user_id: userId,
-        line: lineNo,
-        binary_data: " ",
-        scheduled_time: debouncedScheduledTime2,
-        result: result,
-        file_name: fileName2,
-        upload_time: uploadTime2,
-        progress: progress,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error } = await supabase.from("results").upsert(payload);
-      if (error) {
-        console.error("Supabase upsert error:", error.message);
-      }
-    };
-
-    const startProcess = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      await upsertProgress(10, userId);
-      setShowRedButton2(false);
-
-      if (!alertShownRef2.current) {
-        alert("File uploaded successfully!");
-        alertShownRef2.current = true;
-      }
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", lineNo)
-            .maybeSingle();
-
-          if (error) {
-            console.error("Supabase fetch error:", error.message);
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-            setLoadingProgress2(progress);
-            console.log("Polled line 2 progress:", progress);
-            // ✅ Stop polling once progress reaches 100
-            if (progress >= 100 && progressIntervalId) {
-
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-          console.error("Polling error:", err);
-        }
-      };
-
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-      await fetchProgressFromSupabase();
-
-      try {
-        const formData = new FormData();
-        formData.append("file", selectedFile2);
-        const formattedScheduledTime = new Date(debouncedScheduledTime2)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-        formData.append("scheduled_time", debouncedScheduledTime2);
-        formData.append("job_id", currentJobIdT2);
-        formData.append("line", lineNo);
-        formData.append("user_id", userId);
-        formData.append("file_name", fileName2);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/run_nist/`, // ✅ <-- dieharder backend endpoint
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        setIsEnabled2(true);
-
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-
-
-        setResult2(response.data);
-        // localStorage.setItem("resultFetchedFromSupabase2", "true");
-        await upsertProgress(100, userId, response.data.final_result);
-
-      } catch (error) {
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-
-        setLoadingProgress2(0);
-        await upsertProgress(0, userId);
-        alert(`Error while running Dieharder tests: ${error}`);
-      }
-    };
-
-    startProcess();
-
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, [selectedFile2, debouncedScheduledTime2]);
-
-
-  useEffect(() => {
-
-    let progressIntervalId;
-
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 3)
-            .maybeSingle();
-
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-
-            setLoadingProgress3(progress);
-
-            if (data.result) {
-              setResult3({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase2", "true");
-            }
-
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-
-          // ❌ stop polling on unexpected error
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          }
-        }
-      };
-
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
-    };
-
-    // On mount → resume progress check
-    resumeProgressCheck();
-
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, []); // <-- runs only on mount/unmount
-
-  useEffect(() => {
-    if (!debouncedScheduledTime3) return;
-
-    const lineNo = 3;
-
-    if (result3) {
-      // localStorage.setItem('resultFetchedFromSupabase3', 'true');
-      // setLoadingProgress3(100);
-      return;
-    }
-
-    setLoadingProgress3(0);
-    let progressIntervalId;
-
-    const upsertProgress = async (progress, userId, result = "") => {
-      let binaryString = null;
-
-      if (progress === 0 && binaryInput3 && !binaryInsertedRef3.current) {
-        try {
-          const fileReader = new FileReader();
-          const fileBuffer = await new Promise((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(binaryInput3);
+            fileReader.readAsBinaryString(fileSource);
           });
 
           // Optional binary conversion if needed
@@ -1955,7 +1666,7 @@ const Nist_tests = () => {
           //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
           //   .join('');
 
-          binaryInsertedRef3.current = true; // ✅ Prevent multiple inserts
+          lineValues.binaryInsertedRef.current = true;
         } catch (err) {
           return;
         }
@@ -1963,17 +1674,17 @@ const Nist_tests = () => {
 
       const payload = {
         user_id: userId,
-        line: lineNo,
+        line: lineNumber,
         binary_data: " ",
-        scheduled_time: debouncedScheduledTime3,
+        scheduled_time: lineValues.debouncedTime,
         result: result,
-        file_name: fileName3,
-        upload_time: uploadTime3,
+        file_name: lineValues.fileName,
+        upload_time: lineValues.uploadTime,
         progress: progress,
-        updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase.from("results").upsert(payload);
+      const { error } = await supabase.from('results').upsert(payload);
       if (error) {
         console.error("Supabase upsert error:", error.message);
       }
@@ -1983,13 +1694,12 @@ const Nist_tests = () => {
       const userId = await fetchUserId();
       if (!userId) return;
 
-      // Initial DB entry
       await upsertProgress(10, userId);
+      lineValues.setShowRedButton(false);
 
-      setShowRedButton3(false);
-      if (!alertShownRef3.current) {
-        alert("File uploaded successfully!");
-        alertShownRef3.current = true;
+      if (!lineValues.alertShownRef.current) {
+        alert("File uploaded successfully");
+        lineValues.alertShownRef.current = true;
       }
 
       const fetchProgressFromSupabase = async () => {
@@ -1998,26 +1708,24 @@ const Nist_tests = () => {
             .from("results")
             .select("*")
             .eq("user_id", userId)
-            .eq("line", lineNo)
+            .eq("line", lineNumber)
             .maybeSingle();
 
           if (error) {
-            console.error("Supabase fetch error:", error.message);
             return;
           }
 
           if (data) {
             const progress = data.progress || 0;
-            setLoadingProgress3(progress);
+            lineValues.setLoadingProgress(progress);
 
             if (progress >= 100 && progressIntervalId) {
-
               clearInterval(progressIntervalId);
               progressIntervalId = null;
             }
           }
         } catch (err) {
-          console.error("Polling error:", err);
+          // Error handling
         }
       };
 
@@ -2026,17 +1734,18 @@ const Nist_tests = () => {
 
       try {
         const formData = new FormData();
-        formData.append("file", selectedFile3);
-        const formattedScheduledTime = new Date(debouncedScheduledTime3)
+        formData.append("file", lineValues.selectedFile);
+        const formattedScheduledTime = new Date(lineValues.debouncedTime)
           .toISOString()
           .replace("T", " ")
           .split(".")[0];
 
-        formData.append("scheduled_time", debouncedScheduledTime3);
-        formData.append("job_id", currentJobIdT3);
-        formData.append("line", lineNo);
+        formData.append("scheduled_time", lineValues.debouncedTime);
+        formData.append("scheduled_time_str", formattedScheduledTime);
+        formData.append("job_id", lineValues.currentJobId);
+        formData.append("line", lineNumber);
         formData.append("user_id", userId);
-        formData.append("file_name", fileName3);
+        formData.append("file_name", lineValues.fileName);
 
         const response = await axios.post(
           `${REACT_APP_BASE_URL}/run_nist/`,
@@ -2044,492 +1753,68 @@ const Nist_tests = () => {
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        setIsEnabled3(true);
+        if (lineValues.setIsEnabled) {
+          lineValues.setIsEnabled(true);
+        }
 
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
 
-        // setLoadingProgress3(100);
-        setResult3(response.data);
-        // localStorage.setItem("resultFetchedFromSupabase3", "true");
-
+        lineValues.setResult(response.data);
+        lineValues.handleUploadComplete();
         await upsertProgress(100, userId, response.data.final_result);
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-        setLoadingProgress3(0);
+
+        lineValues.setLoadingProgress(0);
         await upsertProgress(0, userId);
-        alert(`Error while running test for line 3: ${error}`);
+        alert(`Error while running NIST tests for line ${lineNumber}: ${error}`);
       }
     };
 
-    startProcess();
-
+    await startProcess();
     return () => {
       if (progressIntervalId) {
         clearInterval(progressIntervalId);
         progressIntervalId = null;
       }
     };
-  }, [binaryInput3, debouncedScheduledTime3]);
+  };
 
+  // Process all lines that have debounced scheduled time and no result yet
+  const lines = [1, 2, 3, 4, 5];
+  const cleanupFunctions = [];
 
-  useEffect(() => {
-
-    let progressIntervalId;
-
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 4)
-            .maybeSingle();
-
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-
-            setLoadingProgress4(progress);
-
-            if (data.result) {
-              setResult4({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase2", "true");
-            }
-
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-
-          // ❌ stop polling on unexpected error
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          }
-        }
-      };
-
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
-    };
-
-    // On mount → resume progress check
-    resumeProgressCheck();
-
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, []); // <-- runs only on mount/unmount
-
-  useEffect(() => {
-    if (!debouncedScheduledTime4) return;
-
-    const lineNo = 4;
-
-    if (result4) {
-      // localStorage.setItem('resultFetchedFromSupabase4', 'true');
-      // setLoadingProgress4(100);
-      return;
+  lines.forEach(line => {
+    const cleanup = processLine(line);
+    if (cleanup) {
+      cleanupFunctions.push(cleanup);
     }
+  });
 
-    setLoadingProgress4(0);
-    let progressIntervalId;
-
-    const upsertProgress = async (progress, userId, result = "") => {
-      let binaryString = null;
-
-      if (progress === 0 && binaryInput4 && !binaryInsertedRef4.current) {
-        try {
-          const fileReader = new FileReader();
-          const fileBuffer = await new Promise((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(binaryInput4);
-          });
-
-          // Optional conversion if needed
-          // binaryString = Array.from(fileBuffer)
-          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-          //   .join('');
-
-          binaryInsertedRef4.current = true; // ✅ Prevent duplicate inserts
-        } catch (err) {
-          return;
-        }
+  // Cleanup function
+  return () => {
+    cleanupFunctions.forEach(cleanup => {
+      if (typeof cleanup === 'function') {
+        cleanup();
       }
-
-      const payload = {
-        user_id: userId,
-        line: lineNo,
-        binary_data: " ",
-        scheduled_time: debouncedScheduledTime4,
-        result: result,
-        file_name: fileName4,
-        upload_time: uploadTime4,
-        progress: progress,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error } = await supabase.from("results").upsert(payload);
-      if (error) {
-        console.error("Supabase upsert error:", error.message);
-      }
-    };
-
-    const startProcess = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      await upsertProgress(10, userId);
-
-      setShowRedButton4(false);
-      if (!alertShownRef4.current) {
-        alert("File uploaded successfully!");
-        alertShownRef4.current = true;
-      }
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", lineNo)
-            .maybeSingle();
-
-          if (error) {
-            console.error("Supabase fetch error:", error.message);
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-            setLoadingProgress4(progress);
-
-            if (progress >= 100 && progressIntervalId) {
-
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-          console.error("Polling error:", err);
-        }
-      };
-
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-      await fetchProgressFromSupabase();
-
-      try {
-        const formData = new FormData();
-        formData.append("file", selectedFile4);
-
-        const formattedScheduledTime = new Date(debouncedScheduledTime4)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-
-        formData.append("scheduled_time", debouncedScheduledTime4);
-        formData.append("job_id", currentJobIdT4);
-        formData.append("line", lineNo);
-        formData.append("user_id", userId);
-        formData.append("file_name", fileName4);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/run_nist/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        setIsEnabled4(true);
-
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-
-        // setLoadingProgress4(100);
-        setResult4(response.data);
-        // localStorage.setItem("resultFetchedFromSupabase4", "true");
-
-        await upsertProgress(100, userId, response.data.final_result);
-      } catch (error) {
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-        setLoadingProgress4(0);
-        await upsertProgress(0, userId);
-        alert(`Error while running test for line 4: ${error}`);
-      }
-    };
-
-    startProcess();
-
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, [binaryInput4, debouncedScheduledTime4]);
-
-
-  useEffect(() => {
-
-    let progressIntervalId;
-
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 5)
-            .maybeSingle();
-
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-
-            setLoadingProgress5(progress);
-
-            if (data.result) {
-              setResult5({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase5", "true");
-            }
-
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-
-          // ❌ stop polling on unexpected error
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          }
-        }
-      };
-
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
-    };
-
-    // On mount → resume progress check
-    resumeProgressCheck();
-
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, []); // <-- runs only on mount/unmount
-
-  useEffect(() => {
-    if (!debouncedScheduledTime5) return;
-
-    const lineNo = 5;
-
-    if (result5) {
-      // localStorage.setItem('resultFetchedFromSupabase5', 'true');
-      // setLoadingProgress5(100);
-      return;
-    }
-
-    setLoadingProgress5(0);
-    let progressIntervalId;
-
-    const upsertProgress = async (progress, userId, result = "") => {
-      let binaryString = null;
-
-      if (progress === 0 && binaryInput5 && !binaryInsertedRef5.current) {
-        try {
-          const fileReader = new FileReader();
-          const fileBuffer = await new Promise((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(binaryInput5);
-          });
-
-          // Optional conversion if needed:
-          // binaryString = Array.from(fileBuffer)
-          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-          //   .join('');
-
-          binaryInsertedRef5.current = true; // ✅ Prevent duplicate inserts
-        } catch (err) {
-          return;
-        }
-      }
-
-      const payload = {
-        user_id: userId,
-        line: lineNo,
-        binary_data: " ",
-        scheduled_time: debouncedScheduledTime5,
-        result: result,
-        file_name: fileName5,
-        upload_time: uploadTime5,
-        progress: progress,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error } = await supabase.from("results").upsert(payload);
-      if (error) {
-        console.error("Supabase upsert error:", error.message);
-      }
-    };
-
-    const startProcess = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      await upsertProgress(10, userId);
-
-      setShowRedButton5(false);
-      if (!alertShownRef5.current) {
-        alert("File uploaded successfully!");
-        alertShownRef5.current = true;
-      }
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", lineNo)
-            .maybeSingle();
-
-          if (error) {
-            console.error("Supabase fetch error:", error.message);
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-            setLoadingProgress5(progress);
-
-            if (progress >= 100 && progressIntervalId) {
-
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-          console.error("Polling error:", err);
-        }
-      };
-
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-      await fetchProgressFromSupabase();
-
-      try {
-        const formData = new FormData();
-        formData.append("file", selectedFile5);
-
-        const formattedScheduledTime = new Date(debouncedScheduledTime5)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-
-        formData.append("scheduled_time", debouncedScheduledTime5);
-        formData.append("job_id", currentJobIdT5);
-        formData.append("line", lineNo);
-        formData.append("user_id", userId);
-        formData.append("file_name", fileName5);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/run_nist/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        setIsEnabled5(true);
-
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-
-        // setLoadingProgress5(100);
-        setResult5(response.data);
-        // localStorage.setItem("resultFetchedFromSupabase5", "true");
-
-        await upsertProgress(100, userId, response.data.final_result);
-      } catch (error) {
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-
-        setLoadingProgress5(0);
-        await upsertProgress(0, userId);
-        alert(`Error while running test for line 5: ${error}`);
-      }
-    };
-
-    startProcess();
-
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, [binaryInput5, debouncedScheduledTime5]);
-
+    });
+  };
+}, [
+  // All dependencies
+  debouncedScheduledTime, debouncedScheduledTime2, debouncedScheduledTime3, debouncedScheduledTime4, debouncedScheduledTime5,
+  result, result2, result3, result4, result5,
+  selectedFile, selectedFile2, selectedFile3, selectedFile4, selectedFile5,
+  fileName, fileName2, fileName3, fileName4, fileName5,
+  uploadTime, uploadTime2, uploadTime3, uploadTime4, uploadTime5,
+  currentJobIdT, currentJobIdT2, currentJobIdT3, currentJobIdT4, currentJobIdT5,
+  binaryInput3, binaryInput4, binaryInput5
+]);
 
   const handleButtonClick = async (type) => {
     const userId = await fetchUserId();
@@ -2995,7 +2280,23 @@ const Nist_tests = () => {
 
 
   return (
-    <Box m="20px">
+    <Box m="20px" sx={{
+    overflowX: 'auto',
+    '&::-webkit-scrollbar': {
+      height: '8px',
+    },
+    '&::-webkit-scrollbar-track': {
+      background: colors.primary[700],
+      borderRadius: '4px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: colors.blueAccent[500],
+      borderRadius: '4px',
+      '&:hover': {
+        background: colors.blueAccent[400],
+      }
+    }
+  }}>
       {/* Header Section */}
       <Header title="NIST Statistical Tests" />
       <Box
@@ -3325,7 +2626,7 @@ const Nist_tests = () => {
                   placeholder="e.g., 14:30:00"
                   value={time}
                   onChange={handleTimeChange}
-                   disabled={!isTimeEnabled} 
+                  disabled={!isTimeEnabled}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3381,7 +2682,7 @@ const Nist_tests = () => {
                     <Button
                       variant="contained"
                       onClick={handleFileUpload2}
-                      disabled={!isEnabled2}
+                      disabled={!isUploadButtonEnabled2}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
@@ -3394,19 +2695,7 @@ const Nist_tests = () => {
                       }}
                     >
                       Upload Binary File
-                      {showRedButton2 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
+
                     </Button>
                     <input
                       type="file"
@@ -3654,6 +2943,7 @@ const Nist_tests = () => {
                   type="date"
                   value={date2}
                   onChange={handleDateChange2}
+                  disabled={!isDateEnabled2}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3671,6 +2961,7 @@ const Nist_tests = () => {
                   placeholder="e.g., 14:30:00"
                   value={time2}
                   onChange={handleTimeChange2}
+                  disabled={!isTimeEnabled2}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3726,7 +3017,7 @@ const Nist_tests = () => {
                     <Button
                       variant="contained"
                       onClick={handleFileUpload3}
-                      disabled={!isEnabled3}
+                      disabled={!isUploadButtonEnabled3}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
@@ -3739,19 +3030,7 @@ const Nist_tests = () => {
                       }}
                     >
                       Upload Binary File
-                      {showRedButton3 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
+                     
                     </Button>
                     <input
                       type="file"
@@ -3999,6 +3278,8 @@ const Nist_tests = () => {
                   type="date"
                   value={date3}
                   onChange={handleDateChange3}
+                 
+                  disabled={!isDateEnabled3}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4016,6 +3297,7 @@ const Nist_tests = () => {
                   placeholder="e.g., 14:30:00"
                   value={time3}
                   onChange={handleTimeChange3}
+                  disabled={!isTimeEnabled3}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4071,7 +3353,7 @@ const Nist_tests = () => {
                     <Button
                       variant="contained"
                       onClick={handleFileUpload4}
-                      disabled={!isEnabled4}
+                      disabled={!isUploadButtonEnabled4}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
@@ -4343,6 +3625,7 @@ const Nist_tests = () => {
                   type="date"
                   value={date4}
                   onChange={handleDateChange4}
+                  disabled={!isDateEnabled4}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4360,6 +3643,7 @@ const Nist_tests = () => {
                   placeholder="e.g., 14:30:00"
                   value={time4}
                   onChange={handleTimeChange4}
+                  disabled={!isTimeEnabled4}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4415,7 +3699,7 @@ const Nist_tests = () => {
                     <Button
                       variant="contained"
                       onClick={handleFileUpload5}
-                      disabled={!isEnabled5}
+                      disabled={!isUploadButtonEnabled5}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
@@ -4687,6 +3971,7 @@ const Nist_tests = () => {
                   type="date"
                   value={date5}
                   onChange={handleDateChange5}
+                  disabled={!isDateEnabled5}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4704,6 +3989,7 @@ const Nist_tests = () => {
                   placeholder="e.g., 14:30:00"
                   value={time5}
                   onChange={handleTimeChange5}
+                  disabled={!isTimeEnabled5}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"

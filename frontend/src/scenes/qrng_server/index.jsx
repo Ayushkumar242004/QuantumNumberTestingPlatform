@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme, TextField, Button } from "@mui/material";
+import { Box, Typography, useTheme, TextField, Button, Card, CardContent, Grid, Paper, Chip } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { useState, useEffect, useRef } from "react";
@@ -8,15 +8,21 @@ import dayjs from "dayjs";
 import CircularProgress from "@mui/material/CircularProgress";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { v4 as uuidv4 } from 'uuid';
-
-const MAX_STACK_SIZE_ESTIMATE = 1 * 1024 * 1024;
+import { supabase } from '../../utils/supabaseClient';
+import DownloadIcon from "@mui/icons-material/Download";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import AnalyticsIcon from "@mui/icons-material/Analytics";
+import ArticleIcon from "@mui/icons-material/Article";
+import ServerIcon from "@mui/icons-material/Storage";
+import SecurityIcon from "@mui/icons-material/Security";
+import ScienceIcon from "@mui/icons-material/Science";
 
 const Qrng_Server = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
   const REACT_APP_PROXY_URL = process.env.REACT_APP_PROXY_URL;
-const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
+  const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
 
   const [binaryInput, setBinaryInput] = useState(""); // State to store fetched binary data
   const [binaryInput2, setBinaryInput2] = useState(""); // State to store fetched binary data
@@ -24,46 +30,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const [binaryInput4, setBinaryInput4] = useState(""); // State to store fetched binary data
   const [binaryInput5, setBinaryInput5] = useState(""); // State to store fetched binary data
 
-  const [isFetching, setIsFetching] = useState(false); // Fetching status
-  const [isFetching2, setIsFetching2] = useState(false); // Fetching status
-  const [isFetching3, setIsFetching3] = useState(false); // Fetching status
-  const [isFetching4, setIsFetching4] = useState(false); // Fetching status
-  const [isFetching5, setIsFetching5] = useState(false); // Fetching status
-
-  const [length, setLength] = useState(8);
-  const [length2, setLength2] = useState(8);
-  const [length3, setLength3] = useState(8);
-  const [length4, setLength4] = useState(8);
-  const [length5, setLength5] = useState(8);
-
-  const [resultNIST, setResultNIST] = useState(null);
-  const [resultDieharder, setResultDieharder] = useState(null);
-  const [resultNIST2, setResultNIST2] = useState(null);
-  const [resultDieharder2, setResultDieharder2] = useState(null);
-  const [resultNIST3, setResultNIST3] = useState(null);
-  const [resultDieharder3, setResultDieharder3] = useState(null);
-  const [resultNIST4, setResultNIST4] = useState(null);
-  const [resultDieharder4, setResultDieharder4] = useState(null);
-  const [resultNIST5, setResultNIST5] = useState(null);
-  const [resultDieharder5, setResultDieharder5] = useState(null);
-
-  const intervalRef = useRef(null);
-  const intervalRef2 = useRef(null);
-  const intervalRef3 = useRef(null);
-  const intervalRef4 = useRef(null);
-  const intervalRef5 = useRef(null);
-
-  const [selectedServer, setSelectedServer] = useState("Server 1"); // State for selected server
-  const [selectedServer2, setSelectedServer2] = useState("Server 1"); // State for selected server
-  const [selectedServer3, setSelectedServer3] = useState("Server 1"); // State for selected server
-  const [selectedServer4, setSelectedServer4] = useState("Server 1"); // State for selected server
-  const [selectedServer5, setSelectedServer5] = useState("Server 1"); // State for selected server
-
-  const [scheduledTime, setScheduledTime] = useState("2025-04-10 11:31:08");
-  const [scheduledTime2, setScheduledTime2] = useState("2025-04-10 11:31:08");
-  const [scheduledTime3, setScheduledTime3] = useState("2025-04-10 11:31:08");
-  const [scheduledTime4, setScheduledTime4] = useState("2025-04-10 11:31:08");
-  const [scheduledTime5, setScheduledTime5] = useState("2025-04-10 11:31:08");
 
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingProgressn, setLoadingProgressn] = useState(0);
@@ -76,1144 +42,6 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
   const [loadingProgress5, setLoadingProgress5] = useState(0);
   const [loadingProgress5n, setLoadingProgress5n] = useState(0);
 
-  const [ipAddress, setIpAddress] = useState("");
-  const [hostNumber, setHostNumber] = useState("");
-
-  // Handle server selection change
-  const handleServerChange = (event) => {
-    setSelectedServer(event.target.value);
-  };
-  const handleServerChange2 = (event) => {
-    setSelectedServer2(event.target.value);
-  };
-  const handleServerChange3 = (event) => {
-    setSelectedServer3(event.target.value);
-  };
-  const handleServerChange4 = (event) => {
-    setSelectedServer4(event.target.value);
-  };
-  const handleServerChange5 = (event) => {
-    setSelectedServer5(event.target.value);
-  };
-
-  const startFetching = () => {
-    if (!isFetching) {
-
-      setIsFetching(true);
-      handleConnect();
-    }
-  };
-  const startFetching2 = () => {
-    if (!isFetching2) {
-         
-      setIsFetching2(true);
-      fetchRandomNumber2();
-    }
-  };
-  const startFetching3 = () => {
-    if (!isFetching3) {
-         
-      setIsFetching3(true);
-      fetchRandomNumber3();
-    }
-  };
-  const startFetching4 = () => {
-    if (!isFetching4) {
-         
-      setIsFetching4(true);
-      fetchRandomNumber4();
-    }
-  };
-  const startFetching5 = () => {
-    if (!isFetching5) {
-         
-      setIsFetching5(true);
-      fetchRandomNumber5();
-    }
-  };
-
-
-
-
-  useEffect(() => {
-    if (isFetching) {
-      if (loadingProgress === 100 && loadingProgressn === 100) {
-        handleConnect(); // Fetch again only when both progress bars are 100
-      }
-    } else {
-      clearInterval(intervalRef.current); // optional cleanup
-    }
-
-    return () => clearInterval(intervalRef.current);
-  }, [isFetching, loadingProgress, loadingProgressn]);
-
-
-  useEffect(() => {
-    if (isFetching2) {
-
-      if (loadingProgress2 === 100 && loadingProgress2n === 100) {
-    
-        fetchRandomNumber2(); // Fetch again only when both progress bars are 100
-      }
-
-    } else {
-      clearInterval(intervalRef2.current);
-    }
-
-    return () => clearInterval(intervalRef2.current);
-  }, [isFetching2, loadingProgress2, loadingProgress2n]);
-
-  useEffect(() => {
-    if (isFetching3) {
-
-      if (loadingProgress3 === 100 && loadingProgress3n === 100) {
-
-        fetchRandomNumber3(); // Fetch again only when both progress bars are 100
-      }
-    } else {
-      clearInterval(intervalRef3.current);
-    }
-
-    return () => clearInterval(intervalRef3.current);
-  }, [isFetching3, loadingProgress3, loadingProgress3n]);
-
-  useEffect(() => {
-    if (isFetching4) {
-
-      if (loadingProgress4 === 100 && loadingProgress4n === 100) {
-       
-        fetchRandomNumber4(); // Fetch again only when both progress bars are 100
-      }
-    } else {
-      clearInterval(intervalRef4.current);
-    }
-
-    return () => clearInterval(intervalRef4.current);
-  }, [isFetching4, loadingProgress4, loadingProgress4n]);
-
-  useEffect(() => {
-    if (isFetching5) {
-
-      if (loadingProgress5 === 100 && loadingProgress5n === 100) {
-
-        fetchRandomNumber5(); // Fetch again only when both progress bars are 100
-      }
-    } else {
-      clearInterval(intervalRef5.current);
-    }
-
-    return () => clearInterval(intervalRef5.current);
-  }, [isFetching5, loadingProgress5, loadingProgress5n]);
-
-  // Stop fetching binary data
-  const stopFetching = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    setIsFetching(false);
-  };
-
-  const stopFetching2 = () => {
-    if (intervalRef2.current) {
-      clearInterval(intervalRef2.current);
-      intervalRef2.current = null;
-    }
-    setIsFetching2(false);
-  };
-  const stopFetching3 = () => {
-    if (intervalRef3.current) {
-      clearInterval(intervalRef3.current);
-      intervalRef3.current = null;
-    }
-    setIsFetching3(false);
-  };
-  const stopFetching4 = () => {
-    if (intervalRef4.current) {
-      clearInterval(intervalRef4.current);
-      intervalRef4.current = null;
-    }
-    setIsFetching4(false);
-  };
-  const stopFetching5 = () => {
-    if (intervalRef5.current) {
-      clearInterval(intervalRef5.current);
-      intervalRef5.current = null;
-    }
-    setIsFetching5(false);
-  };
-
-  useEffect(() => {
-    return () => stopFetching();
-  }, []);
-  useEffect(() => {
-    return () => stopFetching2();
-  }, []);
-  useEffect(() => {
-    return () => stopFetching3();
-  }, []);
-  useEffect(() => {
-    return () => stopFetching4();
-  }, []);
-  useEffect(() => {
-    return () => stopFetching5();
-  }, []);
-
-  const fetchRandomNumber = async () => {
-   
-    // Default values for internal variables
-    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
-    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
-    const Rand_type = 1; // Request binary data
-    const Length = length || 8; // If length is not provided, use the passed value or default to 64
-    
-    try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        API_Key,
-        APISalt,
-        Rand_type,
-        Length,
-      });
-      
-      if (response.data?.random) {
-        const randomValue = response.data.random; // extract random binary
-        setBinaryInput(randomValue);
-        
-
-      } else {
-       
-      }
-    } catch (error) {
-      alert("Error: server down");
-      setBinaryInput(""); // Optionally handle the error state
-    }
-    
-  };
-
-  const fetchRandomNumber2 = async () => {
-
-    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
-    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
-    const Rand_type = 1;
-    const Length = length2 || 8;
-
-    try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        API_Key,
-        APISalt,
-        Rand_type,
-        Length,
-      });
-
-
-      if (response.data?.random) {
-        setBinaryInput2(response.data.random); // Update the state with random binary data
-
-      } else {
-           
-      }
-    } catch (error) {
-      alert("Error: server down");
-      setBinaryInput(""); // Optionally handle the error state
-    }
-  };
-
-  const fetchRandomNumber3 = async () => {
-
-    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
-    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
-    const Rand_type = 1; // Request binary data
-    const Length = length3 || 8;
-    try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        API_Key,
-        APISalt,
-        Rand_type,
-        Length,
-      });
-
-      if (response.data?.random) {
-        setBinaryInput3(response.data.random); // Update the state with random binary data
-      } else {
-           
-      }
-    } catch (error) {
-      alert("Error: server down");
-      setBinaryInput(""); // Optionally handle the error state
-    }
-
-  };
-
-  const fetchRandomNumber4 = async () => {
-
-    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
-    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
-    const Rand_type = 1; // Request binary data
-    const Length = length4 || 8;
-
-    try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        API_Key,
-        APISalt,
-        Rand_type,
-        Length,
-      });
-
-      if (response.data?.random) {
-        setBinaryInput4(response.data.random); // Update the state with random binary data
-      } else {
-           
-      }
-    } catch (error) {
-      alert("Error: server down");
-      setBinaryInput(""); // Optionally handle the error state
-    }
-
-  };
-
-  const fetchRandomNumber5 = async () => {
-
-    const API_Key = "6625a404-fcf7-aa22-595f-1ce908fc5ebb";
-    const APISalt = "$2a$04$nArWqsGVKLmYJ3ob48c2/.fL8hULjZTJLWdtTEstM4Ss8oqagInmu";
-    const Rand_type = 1; // Request binary data
-    const Length = length5 || 8;
-    try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        API_Key,
-        APISalt,
-        Rand_type,
-        Length,
-      });
-
-      if (response.data?.random) {
-        setBinaryInput5(response.data.random); // Update the state with random binary data
-      } else {
-           
-      }
-    } catch (error) {
-      alert("Error: server down");
-      setBinaryInput(""); // Optionally handle the error state
-    }
-  };
-  const [isSaveEnabled, setIsSaveEnabled] = useState(false);
-  const [isSaveEnabled2, setIsSaveEnabled2] = useState(false);
-  const [isSaveEnabled3, setIsSaveEnabled3] = useState(false);
-  const [isSaveEnabled4, setIsSaveEnabled4] = useState(false);
-  const [isSaveEnabled5, setIsSaveEnabled5] = useState(false);
-
-  const saveBinaryNumber = async () => {
-    // Use the binaryInput state which holds the fetched binary data
-    const binaryNumber = binaryInput;
-    if (!binaryNumber) {
-      return;
-    }
-    try {
-      // Fetch the username from the API
-
-      const username = localStorage.getItem("username");
-
-      // Format the current date and time
-      const now = new Date();
-      const formattedDate = `${now.getFullYear()}_${(now.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}_${now.getDate().toString().padStart(2, "0")}`;
-      const formattedTime = `${now.getHours().toString().padStart(2, "0")}_${now
-        .getMinutes()
-        .toString()
-        .padStart(2, "0")}_${now.getSeconds().toString().padStart(2, "0")}`;
-
-      // Combine to form the filename
-      const fileName = `${username}_${formattedDate}_${formattedTime}.txt`;
-
-      // Create a Blob with the binary number
-      const blob = new Blob([binaryNumber], { type: "text/plain" });
-
-      // Create a link element to trigger the file download
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName; // Filename for the downloaded file
-      
-      
-      // Programmatically click the link to trigger the download
-      link.click();
-        alert("Binary Number saved")
-      // Clean up the URL object after the download is triggered
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-         
-      alert("Failed to fetch username or save file.");
-    }
-  };
-
-  const saveBinaryNumber2 = async () => {
-    // Use the binaryInput state which holds the fetched binary data
-    const binaryNumber = binaryInput2;
-
-    if (!binaryNumber) {
-      return;
-    }
-
-    try {
-      // Fetch the username from the API
-
-      const username = localStorage.getItem("username");
-
-      // Format the current date and time
-      const now = new Date();
-      const formattedDate = `${now.getFullYear()}_${(now.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}_${now.getDate().toString().padStart(2, "0")}`;
-      const formattedTime = `${now.getHours().toString().padStart(2, "0")}_${now
-        .getMinutes()
-        .toString()
-        .padStart(2, "0")}_${now.getSeconds().toString().padStart(2, "0")}`;
-
-      // Combine to form the filename
-      const fileName = `${username}_${formattedDate}_${formattedTime}.txt`;
-
-      // Create a Blob with the binary number
-      const blob = new Blob([binaryNumber], { type: "text/plain" });
-
-      // Create a link element to trigger the file download
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName; // Filename for the downloaded file
-
-      // Programmatically click the link to trigger the download
-      link.click();
-      alert("Binary Number saved")
-      // Clean up the URL object after the download is triggered
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-         
-      alert("Failed to fetch username or save file.");
-    }
-  };
-
-  const saveBinaryNumber3 = async () => {
-    // Use the binaryInput state which holds the fetched binary data
-    const binaryNumber = binaryInput3;
-
-    if (!binaryNumber) {
-      return;
-    }
-
-    try {
-      // Fetch the username from the API
-
-      const username = localStorage.getItem("username");
-
-      // Format the current date and time
-      const now = new Date();
-      const formattedDate = `${now.getFullYear()}_${(now.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}_${now.getDate().toString().padStart(2, "0")}`;
-      const formattedTime = `${now.getHours().toString().padStart(2, "0")}_${now
-        .getMinutes()
-        .toString()
-        .padStart(2, "0")}_${now.getSeconds().toString().padStart(2, "0")}`;
-
-      // Combine to form the filename
-      const fileName = `${username}_${formattedDate}_${formattedTime}.txt`;
-
-      // Create a Blob with the binary number
-      const blob = new Blob([binaryNumber], { type: "text/plain" });
-
-      // Create a link element to trigger the file download
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName; // Filename for the downloaded file
-
-      // Programmatically click the link to trigger the download
-      link.click();
-      alert("Binary Number saved")
-      // Clean up the URL object after the download is triggered
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-         
-      alert("Failed to fetch username or save file.");
-    }
-  };
-
-  const saveBinaryNumber4 = async () => {
-    // Use the binaryInput state which holds the fetched binary data
-    const binaryNumber = binaryInput4;
-
-    if (!binaryNumber) {
-      return;
-    }
-
-    try {
-      // Fetch the username from the API
-
-      const username = localStorage.getItem("username");
-
-      // Format the current date and time
-      const now = new Date();
-      const formattedDate = `${now.getFullYear()}_${(now.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}_${now.getDate().toString().padStart(2, "0")}`;
-      const formattedTime = `${now.getHours().toString().padStart(2, "0")}_${now
-        .getMinutes()
-        .toString()
-        .padStart(2, "0")}_${now.getSeconds().toString().padStart(2, "0")}`;
-
-      // Combine to form the filename
-      const fileName = `${username}_${formattedDate}_${formattedTime}.txt`;
-
-      // Create a Blob with the binary number
-      const blob = new Blob([binaryNumber], { type: "text/plain" });
-
-      // Create a link element to trigger the file download
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName; // Filename for the downloaded file
-
-      // Programmatically click the link to trigger the download
-      link.click();
-      alert("Binary Number saved")
-      // Clean up the URL object after the download is triggered
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-         
-      alert("Failed to fetch username or save file.");
-    }
-  };
-
-  const saveBinaryNumber5 = async () => {
-    // Use the binaryInput state which holds the fetched binary data
-    const binaryNumber = binaryInput5;
-
-    if (!binaryNumber) {
-      return;
-    }
-
-    try {
-      // Fetch the username from the API
-
-      const username = localStorage.getItem("username");
-
-      // Format the current date and time
-      const now = new Date();
-      const formattedDate = `${now.getFullYear()}_${(now.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}_${now.getDate().toString().padStart(2, "0")}`;
-      const formattedTime = `${now.getHours().toString().padStart(2, "0")}_${now
-        .getMinutes()
-        .toString()
-        .padStart(2, "0")}_${now.getSeconds().toString().padStart(2, "0")}`;
-
-      // Combine to form the filename
-      const fileName = `${username}_${formattedDate}_${formattedTime}.txt`;
-
-      // Create a Blob with the binary number
-      const blob = new Blob([binaryNumber], { type: "text/plain" });
-
-      // Create a link element to trigger the file download
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName; // Filename for the downloaded file
-
-      // Programmatically click the link to trigger the download
-      link.click();
-      alert("Binary Number saved")
-      // Clean up the URL object after the download is triggered
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-         
-      alert("Failed to fetch username or save file.");
-    }
-  };
-
-
-  const jobIdRef = useRef(null);
-  const jobIdRefn = useRef(null);
-  const jobIdRef2 = useRef(null);
-  const jobIdRef2n = useRef(null);
-  const jobIdRef3 = useRef(null);
-  const jobIdRef3n = useRef(null);
-  const jobIdRef4 = useRef(null);
-  const jobIdRef4n = useRef(null);
-  const jobIdRef5 = useRef(null);
-  const jobIdRef5n = useRef(null);
-  ///bin file creation
-  const [binFile, setBinFile] = useState(null);   // will hold the generated .bin file
-  const [binFile2, setBinFile2] = useState(null);   
-  const [binFile3, setBinFile3] = useState(null);   
-  const [binFile4, setBinFile4] = useState(null);   
-  const [binFile5, setBinFile5] = useState(null);   
-
-  useEffect(() => {
-    if (!binaryInput || binaryInput.length % 8 !== 0) {
-      
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile(file);
-   
-
-  }, [binaryInput]);
-  ////
-
-  useEffect(() => {
-    if (!binaryInput2 || binaryInput2.length % 8 !== 0) {
-      
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput2.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile2(file);
-    
-
-  }, [binaryInput2]);
-
-  useEffect(() => {
-    if (!binaryInput3 || binaryInput3.length % 8 !== 0) {
-      
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput3.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile3(file);
-    
-
-  }, [binaryInput3]);
-
-  useEffect(() => {
-    if (!binaryInput4 || binaryInput4.length % 8 !== 0) {
-      
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput4.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile4(file);
-    
-
-  }, [binaryInput]);
-
-  useEffect(() => {
-    if (!binaryInput5 || binaryInput5.length % 8 !== 0) {
-      
-      return;
-    }
-
-    // Step 1: Split binaryInput into 8-bit chunks
-    const byteChunks = binaryInput5.match(/.{8}/g); // each element is like "01000001"
-
-    // Step 2: Convert chunks to characters using fromCharCode
-    const byteString = byteChunks
-      .map(bin => String.fromCharCode(parseInt(bin, 2))) // binary → number → char
-      .join("");
-
-    // Step 3: Create a Blob and File from the byteString
-    const blob = new Blob([byteString], { type: "application/octet-stream" });
-    const file = new File([blob], "output.bin", { type: "application/octet-stream" });
-
-    setBinFile5(file);
-   
-
-  }, [binaryInput5]);
-
-  useEffect(() => {
-    if (!binaryInput) return; // Do not fetch if binaryInput is empty
-
-    const currentJobId = uuidv4();
-    jobIdRefn.current = currentJobId;
-    setLoadingProgressn(0);
-    let progressInterval;
-
-    const fetchResult = async () => {
-
-      try {
-
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 18) * 100);
-            setLoadingProgressn(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans/`,
-          {
-            binary_data: binaryInput,
-            scheduled_time: scheduledTime,
-            job_id: currentJobId,
-          }
-        );
-
-        clearInterval(progressInterval);
-        setLoadingProgressn(100);
-
-        setResultNIST(response.data); // Set the result data
-      } catch (error) {
-           
-        clearInterval(progressInterval);
-        setLoadingProgressn(0);
-
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput]);
-
-  useEffect(() => {
-    if (!binaryInput) return; // Do not fetch if binaryInput is empty
-    const currentJobId = uuidv4();
-    jobIdRef.current = currentJobId;
-    let progressInterval;
-    const fetchResult = async () => {
-      setLoadingProgress(0); // Start loading from 0%
-
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 15) * 100);
-            
-            setLoadingProgress(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-        const formData = new FormData();
-        formData.append("file", binFile);
-        const formattedScheduledTime = "2024-07-07 11:30:00"
-
-        formData.append("scheduled_time", formattedScheduledTime);
-        formData.append("job_id", currentJobId);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress(100); // Set progress to 100% after response is received
-        setResultDieharder(response.data); // Set the result data
-      } catch (error) {
-           
-        setLoadingProgress(0); // Reset progress in case of failure
-        clearInterval(progressInterval);
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput]);
-
-
-  useEffect(() => {
-    if (!binaryInput2) return; // Do not fetch if binaryInput is empty
-    const currentJobId = uuidv4();
-    jobIdRef2n.current = currentJobId;
-    setLoadingProgress2n(0);
-    let progressInterval;
-
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 18) * 100);
-            setLoadingProgress2n(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans/`,
-          {
-            binary_data: binaryInput2,
-            scheduled_time: scheduledTime2,
-            job_id: currentJobId,
-          }
-        );
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress2n(100);
-        setResultNIST2(response.data); // Set the response data
-      } catch (error) {
-           
-        setLoadingProgress2n(0);
-        clearInterval(progressInterval);
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput2]);
-
-  useEffect(() => {
-    if (!binaryInput2) return; // Do not fetch if binaryInput is empty
-    const currentJobId = uuidv4();
-    jobIdRef2.current = currentJobId;
-    let progressInterval;
-
-    const fetchResult = async () => {
-      setLoadingProgress2(0);
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 15) * 100);
-            setLoadingProgress2(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-        const formData = new FormData();
-        formData.append("file", binFile2);
-        const formattedScheduledTime = "2024-07-07 11:30:00"
-
-        formData.append("scheduled_time", formattedScheduledTime);
-        formData.append("job_id", currentJobId);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress2(100); // Set progress to 100% after response is received
-        setResultDieharder2(response.data); // Set the result data
-      } catch (error) {
-        setLoadingProgress2(0);
-        clearInterval(progressInterval);
-           
-
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput2]);
-
-  useEffect(() => {
-    if (!binaryInput3) return; // Do not fetch if binaryInput is empty
-
-    const currentJobId = uuidv4();
-    jobIdRef3n.current = currentJobId;
-    setLoadingProgress3n(0);
-    let progressInterval;
-
-    const fetchResult = async () => {
-
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 18) * 100);
-            setLoadingProgress3n(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans/`,
-          {
-            binary_data: binaryInput3,
-            scheduled_time: scheduledTime3,
-            job_id: currentJobId,
-
-          }
-        );
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress3n(100);
-        setResultNIST3(response.data); // Set the response data
-      } catch (error) {
-           
-        setLoadingProgress3n(0);
-        clearInterval(progressInterval);
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput3]);
-
-  useEffect(() => {
-    if (!binaryInput3) return; // Do not fetch if binaryInput is empty
-    const currentJobId = uuidv4();
-    jobIdRef3.current = currentJobId;
-    setLoadingProgress3(0);
-    let progressInterval;
-
-    const fetchResult = async () => {
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 15) * 100);
-            setLoadingProgress3(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-        const formData = new FormData();
-        formData.append("file", binFile3);
-        const formattedScheduledTime = "2024-07-07 11:30:00"
-
-        formData.append("scheduled_time", formattedScheduledTime);
-        formData.append("job_id", currentJobId);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress3(100); // Set progress to 100% after response is received
-        setResultDieharder3(response.data); // Set the result data
-      } catch (error) {
-           
-        setLoadingProgress3(0);
-        clearInterval(progressInterval);
-
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput3]);
-
-  useEffect(() => {
-    if (!binaryInput4) return; // Do not fetch if binaryInput is empty
-    const currentJobId = uuidv4();
-    jobIdRef4n.current = currentJobId;
-    setLoadingProgress4n(0);
-    let progressInterval;
-
-    const fetchResult = async () => {
-
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 18) * 100);
-            setLoadingProgress4n(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans/`,
-          {
-            binary_data: binaryInput4,
-            scheduled_time: scheduledTime4,
-            job_id: currentJobId,
-
-          }
-        );
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress4n(100);
-        setResultNIST4(response.data); // Set the response data
-      } catch (error) {
-           
-        setLoadingProgress4n(0);
-        clearInterval(progressInterval);
-
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput4]);
-
-  useEffect(() => {
-    if (!binaryInput4) return; // Do not fetch if binaryInput is empty
-    const currentJobId = uuidv4();
-    jobIdRef4.current = currentJobId;
-    let progressInterval;
-    const fetchResult = async () => {
-      setLoadingProgress4(0);
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 15) * 100);
-            setLoadingProgress4(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-        const formData = new FormData();
-        formData.append("file", binFile4);
-        const formattedScheduledTime = "2024-07-07 11:30:00"
-
-        formData.append("scheduled_time", formattedScheduledTime);
-        formData.append("job_id", currentJobId);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress4(100); // Set progress to 100% after response is received
-        setResultDieharder4(response.data); // Set the result data
-      } catch (error) {
-        setLoadingProgress4(0);
-        clearInterval(progressInterval);
-           
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput4]);
-
-  useEffect(() => {
-    if (!binaryInput5) return; // Do not fetch if binaryInput is empty
-    const currentJobId = uuidv4();
-    jobIdRef5n.current = currentJobId;
-    setLoadingProgress5n(0);
-    let progressInterval;
-
-    const fetchResult = async () => {
-      setLoadingProgress5n(0);
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 18) * 100);
-            setLoadingProgress5n(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans/`,
-          {
-            binary_data: binaryInput5,
-            scheduled_time: scheduledTime5,
-            job_id: currentJobId,
-          }
-        );
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress5n(100);
-        setResultNIST5(response.data); // Set the response data
-      } catch (error) {
-           
-        setLoadingProgress5n(0);
-        clearInterval(progressInterval);
-
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput5]);
-
-  useEffect(() => {
-    if (!binaryInput5) return; // Do not fetch if binaryInput is empty
-    const currentJobId = uuidv4();
-    jobIdRef5.current = currentJobId;
-    let progressInterval;
-
-    const fetchResult = async () => {
-      setLoadingProgress5(0);
-      try {
-        progressInterval = setInterval(async () => {
-          try {
-            const progressRes = await axios.get(`${REACT_APP_BASE_URL}/get_progress_dieharder/${currentJobId}`);
-            const completed = progressRes.data.progress || 0;
-            const percent = Math.round((completed / 15) * 100);
-            setLoadingProgress5(prev => (percent > prev ? percent : prev)); // Prevent regressions
-          } catch (err) {
-            console.warn("Error fetching progress:", err);
-          }
-        }, 1000);
-
-        const formData = new FormData();
-        formData.append("file", binFile5);
-        const formattedScheduledTime = "2024-07-07 11:30:00"
-
-        formData.append("scheduled_time", formattedScheduledTime);
-        formData.append("job_id", currentJobId);
-
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        clearInterval(progressInterval); // Stop the interval
-        setLoadingProgress5(100); // Set progress to 100% after response is received
-        setResultDieharder5(response.data); // Set the result data
-      } catch (error) {
-        setLoadingProgress5(0);
-        clearInterval(progressInterval);
-           
-      }
-    };
-
-    fetchResult();
-  }, [binaryInput5]);
 
 
   const [isGeneratingReportT, setIsGeneratingReportT] = useState(false);
@@ -1238,8 +66,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
+          return;
+        });
 
     } else if (type === "graph") {
       fetch("${REACT_APP_BASE_URL}/graph-generation/", {
@@ -1253,9 +81,9 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
-;
+          return;
+        });
+      ;
     }
   };
 
@@ -1274,8 +102,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
+          return;
+        });
 
     } else if (type === "graph") {
       fetch("${REACT_APP_BASE_URL}/graph-generation/", {
@@ -1289,9 +117,9 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
-;
+          return;
+        });
+      ;
     }
   };
 
@@ -1310,8 +138,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
+          return;
+        });
 
     } else if (type === "graph") {
       fetch("${REACT_APP_BASE_URL}/graph-generation/", {
@@ -1325,9 +153,9 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
-;
+          return;
+        });
+      ;
     }
   };
 
@@ -1346,8 +174,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
+          return;
+        });
 
     } else if (type === "graph") {
       fetch("${REACT_APP_BASE_URL}/graph-generation/", {
@@ -1361,9 +189,9 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
-;
+          return;
+        });
+      ;
     }
   };
 
@@ -1382,8 +210,8 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
+          return;
+        });
 
     } else if (type === "graph") {
       fetch("${REACT_APP_BASE_URL}/graph-generation/", {
@@ -1397,1434 +225,1487 @@ const REACT_APP_FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL;
           window.open(url, "_blank");
         })
         .catch(() => {
-  return;
-});
-;
+          return;
+        });
+      ;
     }
   };
-  const [hostname, setHostname] = useState("");
-  const [port, setPort] = useState("");
+  
+  const [hostIP, setHostIP] = useState("");
 
 
-  const [hostname3, setHostname3] = useState("");
-  const [port3, setPort3] = useState("");
+  const [binaryDownloaded, setBinaryDownloaded] = useState(false);
+  const [downloadedFile, setDownloadedFile] = useState(null);
 
-  const [hostname4, setHostname4] = useState("");
-  const [port4, setPort4] = useState("");
+  const [nistResult, setNistResult] = useState(null); // result of NIST test
+  const [dieharderResult, setDieharderResult] = useState(null); // result of Dieharder test
+  const [nist90bResult, setNist90bResult] = useState(null); // result of NIST 90B test
 
-  const [hostname5, setHostname5] = useState("");
-  const [port5, setPort5] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [size, setSize] = useState(1);
 
-  const handleConnect = async () => {
-    if (!hostname || !port || !length) {
-      alert("Please enter hostname, port, and length");
+  useEffect(() => {
+    let subscription;
+
+    const setupSubscription = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+
+      // ✅ FIRST: Fetch initial data for line 1
+      const fetchInitialData = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('results')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('line', 1); // Only fetch line 1
+
+          if (error) {
+            console.error("Supabase fetch error:", error);
+            return;
+          }
+
+          if (data && data.length > 0) {
+            const row = data[0];
+
+            // Reset progress if 100% but no result
+            if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
+              await supabase
+                .from('results')
+                .update({
+                  progress: 0,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId)
+                .eq('line', 1);
+
+              setLoadingProgress(0);
+              setNistResult(null);
+            } else if (row.progress === 100 && row.result) {
+              // Test completed
+              setNistResult({ final_result: row.result });
+              setLoadingProgress(row.progress);
+            } else {
+              // Test in progress or not started
+              setNistResult(row.result ? { final_result: row.result } : null);
+              setLoadingProgress(row.progress);
+            }
+          }
+        } catch (err) {
+          console.error('Error in initial data fetch:', err);
+        }
+      };
+
+      await fetchInitialData();
+
+      // ✅ SECOND: Set up real-time subscription for line 1 changes
+      subscription = supabase
+        .channel('results-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'results',
+            filter: `user_id=eq.${userId} AND line=eq.1` // ✅ FIXED: Filter for line 1 only
+          },
+          (payload) => {
+            const row = payload.new;
+
+            if (!row) return; // Handle DELETE events
+
+            // ✅ FIXED: Remove the early return for line 1
+            if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
+              return; // Skip misleading 100% progress
+            }
+
+            // ✅ Now this will execute for line 1 changes
+            if (row.progress === 100 && row.result) {
+              // Test completed
+              setNistResult({ final_result: row.result });
+              setLoadingProgress(row.progress);
+            } else if (row.progress > 0 && row.progress < 100) {
+              // Test in progress
+              setNistResult(null);
+              setLoadingProgress(row.progress);
+            } else {
+              // Test not started or reset
+              setNistResult(row.result ? { final_result: row.result } : null);
+              setLoadingProgress(row.progress || 0);
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('Subscription status:', status);
+        });
+    };
+
+    setupSubscription();
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
+  }, []);
+
+
+  const fetchUserId = async () => {
+    const username = localStorage.getItem("username"); // Retrieve the username from localStorage
+    if (!username) {
+      return null;
+    }
+    try {
+      const { data, error } = await supabase
+        .from("users") // Replace "users" with your Supabase table name
+        .select("id") // Fetch the user ID
+        .eq("username", username); // Filter by username
+
+      if (error || data.length === 0) {
+        return null;
+      }
+      return data[0].id; // Return the user ID
+    } catch (err) {
+      return null;
+    }
+  };
+
+  const upsertProgress = async (progress, userId, result = "") => {
+    let binaryString = null;
+
+
+    const payload = {
+      user_id: userId,
+      line: 1,
+      binary_data: " ",
+      scheduled_time: "2025-04-10 11:31:08", // Hardcoded time
+      result: result,
+      file_name: downloadedFile.name,
+      upload_time: new Date().toISOString(),
+      progress: progress,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabase.from('results').upsert(payload);
+
+    if (error) {
+      console.error("Supabase upsert error:", error.message);
+    }
+  };
+  const upsertProgress2 = async (progress, userId, result = "") => {
+    let binaryString = null;
+
+    const payload = {
+      user_id: userId,
+      line: 1,
+      binary_data: " ",
+      scheduled_time: "2025-04-10 11:31:08", // Hardcoded time
+      result: result,
+      file_name: downloadedFile.name,
+      upload_time: new Date().toISOString(),
+      progress: progress,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabase
+      .from('results3')
+      .upsert(payload);
+
+    if (error) {
+      console.error("Supabase upsert error:", error.message);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!hostIP) {
+      alert("Please enter Host IP Address");
       return;
     }
 
+    if (size < 1 || size > 10) {
+      alert("Please enter size between 1 and 10 MB");
+      return;
+    }
+    const userId = await fetchUserId();
+    setLoading(true);
+
     try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        hostname,      // string, e.g. "202.83.17.121"
-        port: Number(port),  // make sure it’s a number
-        length: Number(length) // make sure it’s a number
+      const response = await fetch(`${REACT_APP_BASE_URL}/fetch-qrng/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          size_mb: size,
+          host: hostIP
+        }),
       });
 
-       
-
-      if (response.data?.random) {
-        const randomValue = response.data.random;
-        setBinaryInput(randomValue);
-        setIsSaveEnabled(true);
-      
-        alert("Connected! Random value received.");
-      } else {
-       
-        alert("Incorrect credentials or invalid response.");
-        setBinaryInput("");
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert("Error: " + (errorData.error || "Unknown error"));
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      
-      alert("Connection failed. See console for details.");
-      setBinaryInput("");
+
+      // Convert response to blob and trigger download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Create and save the file for NIST testing
+      const file = new File([blob], "qrng.bin", { type: "application/octet-stream" });
+      setDownloadedFile(file);
+      setBinaryDownloaded(true);
+
+      // Also trigger download to user
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "qrng.bin";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      await upsertProgress(0, userId, "");
+      await upsertProgress2(0, userId, "");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download file.");
+      setLoading(false);
     }
+
+    setLoading(false);
   };
 
-
-
-  const [hostname2, setHostname2] = useState("");
-  const [port2, setPort2] = useState("");
-
-  const handleConnect2 = async () => {
-    if (!hostname2 || !port2 || !length2) {
-      alert("Please enter hostname, port and length");
+  const runNISTTest = async () => {
+    if (!downloadedFile) {
+      alert("Please download a file first using the Download File button");
       return;
     }
 
-    try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        hostname:hostname2,      // string, e.g. "202.83.17.121"
-        port: Number(port2),  // make sure it’s a number
-        length: Number(length2) // make sure it’s a number
-      });
+    const lineNo = 1;
 
-       
+    setNistResult(null);
+    setLoadingProgress(0);
 
-      if (response.data?.random) {
-        const randomValue = response.data.random;
-        setBinaryInput2(randomValue);
-        setIsSaveEnabled2(true);
-      
-        alert("Connected! Random value received.");
-      } else {
-       
-        alert("Incorrect credentials or invalid response.");
-        setBinaryInput2("");
+    let progressIntervalId;
+    const binaryInsertedRef = { current: false }; // Local ref for this function
+
+    // Upsert progress function (same as in useEffect)
+    const upsertProgress = async (progress, userId, result = "") => {
+      let binaryString = null;
+
+      if (progress === 0 && downloadedFile && !binaryInsertedRef.current) {
+        try {
+          const fileReader = new FileReader();
+          const fileBuffer = await new Promise((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = () => reject(fileReader.error);
+            fileReader.readAsBinaryString(downloadedFile);
+          });
+
+          // binaryString = Array.from(fileBuffer)
+          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+          //   .join('');
+
+          binaryInsertedRef.current = true;
+        } catch (err) {
+          return;
+        }
       }
-    } catch (error) {
-      
-      alert("Connection failed. See console for details.");
-      setBinaryInput2("");
-    }
+
+      const payload = {
+        user_id: userId,
+        line: lineNo,
+        binary_data: " ",
+        scheduled_time: "2025-04-10 11:31:08", // Hardcoded time
+        result: result,
+        file_name: downloadedFile.name,
+        upload_time: new Date().toISOString(),
+        progress: progress,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase.from('results').upsert(payload);
+
+      if (error) {
+        console.error("Supabase upsert error:", error.message);
+      }
+    };
+
+    // Progress polling function
+    const fetchProgressFromSupabase = async (userId) => {
+      try {
+        const { data, error } = await supabase
+          .from("results")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("line", lineNo)
+          .maybeSingle();
+
+        if (error) {
+          return;
+        }
+
+        if (data) {
+          const progress = data.progress || 0;
+          setLoadingProgress(progress);
+
+          // Stop polling once progress is 100%
+          if (progress >= 100 && progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching progress:", err);
+      }
+    };
+
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
+
+        return;
+      }
+
+      // Initial progress update
+      await upsertProgress(10, userId);
+
+      // Show success alert
+      alert("File uploaded successfully for NIST testing");
+
+      // Start progress polling
+      progressIntervalId = setInterval(() => fetchProgressFromSupabase(userId), 1000);
+      await fetchProgressFromSupabase(userId);
+
+      try {
+        const formData = new FormData();
+        formData.append("file", downloadedFile);
+
+        // Hardcoded time values
+        const hardcodedTime = "2025-04-10 11:31:08";
+
+        formData.append("scheduled_time", hardcodedTime);
+        formData.append("scheduled_time_str", hardcodedTime);
+        formData.append("job_id", `nist_${Date.now()}`);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", downloadedFile.name);
+
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/run_nist/`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+            timeout: 300000
+          }
+        );
+
+        // Stop progress polling
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        // Set result and update final progress
+        setNistResult(response.data);
+        await upsertProgress(100, userId, response.data.final_result);
+
+      } catch (error) {
+        // Stop progress polling on error
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress(0);
+        await upsertProgress(0, userId);
+
+        console.error("Error running NIST tests:", error);
+        alert(`Error while running NIST tests: ${error.response?.data?.error || error.message}`);
+
+        setNistResult({
+          final_result: "Test Failed",
+          error: error.response?.data?.error || error.message
+        });
+      } finally {
+
+      }
+    };
+
+    // Cleanup function
+    const cleanup = () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+
+    // Start the process
+    startProcess();
+
+    // Return cleanup function
+    return cleanup;
   };
 
-  const handleConnect3 = async () => {
-    if (!hostname3 || !port3 || !length3) {
-      alert("Please enter hostname, port, and length");
+  const runDieharderTest = async () => {
+    if (!binaryDownloaded || !downloadedFile) {
+      alert("Please download a file first using the Download File button");
       return;
     }
 
-    try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        hostname:hostname3,       // string, e.g. "202.83.17.121"
-        port: Number(port3),  // make sure it’s a number
-        length: Number(length3) // make sure it’s a number
-      });
+    const lineNo = 1; // Using line 1 for Dieharder tests
 
-       
+    setDieharderResult(null);
+    setLoadingProgress2(0);
 
-      if (response.data?.random) {
-        const randomValue = response.data.random;
-        setBinaryInput3(randomValue);
-        setIsSaveEnabled3(true);
-      
-        alert("Connected! Random value received.");
-      } else {
-       
-        alert("Incorrect credentials or invalid response.");
-        setBinaryInput3("");
+    let progressIntervalId;
+    const binaryInsertedRef = { current: false }; // Local ref for this function
+
+    // Upsert progress function
+    const upsertProgress = async (progress, userId, result = "") => {
+      let binaryString = null;
+
+  
+
+      const payload = {
+        user_id: userId,
+        line: lineNo,
+        binary_data: " ",
+        scheduled_time: "2025-04-10 11:31:08", // Hardcoded time
+        result: result,
+        file_name: downloadedFile.name,
+        upload_time: new Date().toISOString(),
+        progress: progress,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('results3')
+        .upsert(payload);
+
+      if (error) {
+        console.error("Supabase upsert error:", error.message);
       }
-    } catch (error) {
+    };
+
+    // Progress polling function
+    const fetchProgressFromSupabase = async (userId) => {
+      try {
+        const { data, error } = await supabase
+          .from("results3")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("line", lineNo)
+          .maybeSingle();
+
+        if (error) {
+          return;
+        }
+
+        if (data) {
+          const progress = data.progress || 0;
+          setLoadingProgress2(progress);
+
+          // Stop polling once progress is 100%
+          if (progress >= 100 && progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching progress:", err);
+      }
+    };
+
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) {
+
+        return;
+      }
+
+      // Initial progress update
+      await upsertProgress(10, userId);
+
       
-      alert("Connection failed. See console for details.");
-      setBinaryInput3("");
-    }
+      // Start progress polling
+      progressIntervalId = setInterval(() => fetchProgressFromSupabase(userId), 1000);
+      await fetchProgressFromSupabase(userId);
+
+      try {
+        const formData = new FormData();
+        formData.append("file", downloadedFile);
+
+        // Hardcoded time values
+        const hardcodedTime = "2025-04-10 11:31:08";
+
+        formData.append("scheduled_time", hardcodedTime);
+        formData.append("job_id", `dieharder_${Date.now()}`);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", downloadedFile.name);
+
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/generate_final_ans_dieharder/`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+            timeout: 300000
+          }
+        );
+
+        // Stop progress polling
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        // Set result and update final progress
+        setDieharderResult(response.data);
+        await upsertProgress(100, userId, response.data.final_result);
+
+        console.log("Dieharder Test completed:", response.data);
+
+      } catch (error) {
+        // Stop progress polling on error
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress2(0);
+        await upsertProgress(0, userId);
+
+        console.error("Error running Dieharder tests:", error);
+        alert(`Error while running Dieharder tests: ${error.response?.data?.error || error.message}`);
+
+        setDieharderResult({
+          final_result: "Test Failed",
+          error: error.response?.data?.error || error.message
+        });
+      } finally {
+
+      }
+    };
+
+    // Cleanup function
+    const cleanup = () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+        progressIntervalId = null;
+      }
+    };
+
+    // Start the process
+    startProcess();
+
+    // Return cleanup function
+    return cleanup;
   };
-  const handleConnect4 = async () => {
-    if (!hostname4 || !port4 || !length4) {
-      alert("Please enter hostname, port, and length");
+
+  // Add the new function for NIST 800-90B test
+  const runNIST90BTest = async () => {
+    if (!binaryDownloaded || !downloadedFile) {
+      alert("Please download a file first using the Download File button");
       return;
     }
 
-    try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        hostname:hostname4,     // string, e.g. "202.83.17.121"
-        port: Number(port4),  // make sure it’s a number
-        length: Number(length4) // make sure it’s a number
-      });
+    const lineNo = 1;
+    setNist90bResult(null);
+    setLoadingProgress3(0);
 
-       
+    let progressIntervalId;
+    const binaryInsertedRef = { current: false };
 
-      if (response.data?.random) {
-        const randomValue = response.data.random;
-        setBinaryInput4(randomValue);
-        setIsSaveEnabled4(true);
-      
-        alert("Connected! Random value received.");
-      } else {
-       
-        alert("Incorrect credentials or invalid response.");
-        setBinaryInput4("");
+    // Upsert progress function for NIST 90B
+    const upsertProgress3 = async (progress, userId, result = "") => {
+      const payload = {
+        user_id: userId,
+        line: lineNo,
+        binary_data: " ",
+        scheduled_time: "2025-04-10 11:31:08",
+        result: result,
+        file_name: downloadedFile.name,
+        upload_time: new Date().toISOString(),
+        progress: progress,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase.from('results_nist90b').upsert(payload);
+      if (error) {
+        console.error("Supabase upsert error:", error.message);
       }
-    } catch (error) {
-      
-      alert("Connection failed. See console for details.");
-      setBinaryInput4("");
-    }
+    };
+
+    // Progress polling function for NIST 90B
+    const fetchProgressFromSupabase3 = async (userId) => {
+      try {
+        const { data, error } = await supabase
+          .from("results_nist90b")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("line", lineNo)
+          .maybeSingle();
+
+        if (error) return;
+
+        if (data) {
+          const progress = data.progress || 0;
+          setLoadingProgress3(progress);
+
+          if (progress >= 100 && progressIntervalId) {
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching progress:", err);
+      }
+    };
+
+    const startProcess = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+
+      await upsertProgress3(10, userId);
+      alert("File uploaded successfully for NIST 800-90B testing");
+
+      progressIntervalId = setInterval(() => fetchProgressFromSupabase3(userId), 1000);
+      await fetchProgressFromSupabase3(userId);
+
+      try {
+        const formData = new FormData();
+        formData.append("file", downloadedFile);
+
+        const hardcodedTime = "2025-04-10 11:31:08";
+        formData.append("scheduled_time", hardcodedTime);
+        formData.append("scheduled_time_str", hardcodedTime);
+        formData.append("job_id", `nist90b_${Date.now()}`);
+        formData.append("line", lineNo);
+        formData.append("user_id", userId);
+        formData.append("file_name", downloadedFile.name);
+
+        const response = await axios.post(
+          `${REACT_APP_BASE_URL}/run_nist90b/`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+            timeout: 300000
+          }
+        );
+
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setNist90bResult(response.data);
+        await upsertProgress3(100, userId, response.data.final_result);
+
+      } catch (error) {
+        if (progressIntervalId) {
+          clearInterval(progressIntervalId);
+          progressIntervalId = null;
+        }
+
+        setLoadingProgress3(0);
+        await upsertProgress3(0, userId);
+
+        console.error("Error running NIST 800-90B tests:", error);
+        alert(`Error while running NIST 800-90B tests: ${error.response?.data?.error || error.message}`);
+
+        setNist90bResult({
+          final_result: "Test Failed",
+          error: error.response?.data?.error || error.message
+        });
+      }
+    };
+
+    startProcess();
+
+    return () => {
+      if (progressIntervalId) {
+        clearInterval(progressIntervalId);
+      }
+    };
   };
 
-  const handleConnect5 = async () => {
-    if (!hostname5 || !port5 || !length5) {
-      alert("Please enter hostname, port, and length");
-      return;
-    }
 
-    try {
-      const response = await axios.post(`${REACT_APP_PROXY_URL}/proxy`, {
-        hostname:hostname5,     // string, e.g. "202.83.17.121"
-        port: Number(port5),  // make sure it’s a number
-        length: Number(length5) // make sure it’s a number
-      });
-
-       
-
-      if (response.data?.random) {
-        const randomValue = response.data.random;
-        setBinaryInput5(randomValue);
-        setIsSaveEnabled5(true);
-      
-        alert("Connected! Random value received.");
-      } else {
-       
-        alert("Incorrect credentials or invalid response.");
-        setBinaryInput5("");
-      }
-    } catch (error) {
-      
-      alert("Connection failed. See console for details.");
-      setBinaryInput5("");
-    }
-  };
   return (
-    <Box m="20px">
-      <Header title="Server Connections" />
-      {/* Table Section */}
-      <Box
-        mt="40px"
-        p="20px"
-        sx={{ backgroundColor: colors.primary[400], borderRadius: "8px" }}
+    <Box m="20px"
+    sx={{ 
+      overflowX: 'auto',
+      '&::-webkit-scrollbar': {
+        height: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: colors.primary[700],
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: colors.blueAccent[500],
+        borderRadius: '4px',
+        '&:hover': {
+          background: colors.blueAccent[400],
+        }
+      }
+    }}>
+      <Header title="Quantum Random Number Generator" subtitle="Server Connections & Testing" />
+      
+      {/* Server Configuration Card */}
+      <Card 
+        sx={{ 
+          mb: 3, 
+          background: `linear-gradient(135deg, ${colors.primary[400]} 10%, ${colors.blueAccent[900]} 100%)`,
+          borderRadius: "16px",
+          border: `1px solid ${colors.grey[400]}`
+        }}
       >
-        <Box
-          component="table"
-          sx={{
-            width: "100%",
-            borderCollapse: "collapse",
-            textAlign: "center",
-            "& th": {
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              padding: "12px",
-            },
-            "& td": {
-              padding: "12px",
-              border: `1px solid ${colors.blueAccent[500]}`,
-            },
-          }}
-        >
-          <thead>
-            <tr>
-              <th style={{ width: "10%" }}>Serial No</th>
-              <th style={{ width: "30%" }}>Test</th>
-              <th style={{ width: "10%" }}>Enter Length</th>
-              <th style={{ width: "15%" }}>NIST SP 800-20B</th>
-              <th style={{ width: "5%" }}>Progress Bar</th>
-              <th style={{ width: "15%" }}>Dieharder Tests Result</th>
-              <th style={{ width: "5%" }}>Progress Bar</th>
-              <th style={{ width: "10%" }}>Server </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>
-                <Box
-                  mt="20px"
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  gap="10px"
-                >
-                  <>
-                    <style>
-                      {`
-      .start-fetching-btn {
-        background-color: ${colors.greenAccent[800]};
-        color: ${colors.primary[100]};
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        cursor: pointer;
-      }
-      .start-fetching-btn:hover {
-        background-color: ${colors.greenAccent[600]};
-      }
-    `}
-                    </style>
+        <CardContent sx={{ p: 3 }}>
+          <Box display="flex" alignItems="center" mb={2}>
+            <ServerIcon sx={{ mr: 2, color: colors.greenAccent[500] }} />
+            <Typography variant="h5" fontWeight="600" color="white">
+              Server Configuration
+            </Typography>
+          </Box>
+          
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Host IP Address"
+                variant="outlined"
+                value={hostIP}
+                onChange={(e) => setHostIP(e.target.value)}
+                InputLabelProps={{
+                  sx: { color: colors.grey[300] }
+                }}
+                sx={{
+                  '& .MuiInputLabel-root': {
+                    color: colors.grey[400],
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: colors.greenAccent[400],
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: colors.blueAccent[400],
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.greenAccent[500],
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.greenAccent[500],
+                    },
+                  },
+                  '& .MuiInputBase-input': {
+                    color: 'white',
+                  },
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                label="File Size (MB)"
+                type="number"
+                value={size}
+                onChange={(e) => setSize(Number(e.target.value))}
+                inputProps={{ min: 1, max: 10 }}
+                InputLabelProps={{
+                  sx: { color: colors.grey[300] }
+                }}
+                sx={{
+                  '& .MuiInputLabel-root': {
+                    color: colors.grey[400],
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: colors.greenAccent[400],
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: colors.blueAccent[400],
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.greenAccent[500],
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.greenAccent[500],
+                    },
+                  },
+                  '& .MuiInputBase-input': {
+                    color: 'white',
+                  },
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} md={3}>
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={<DownloadIcon />}
+                onClick={handleDownload}
+                disabled={loading}
+                sx={{
+                  height: "56px",
+                  background: `linear-gradient(135deg, ${colors.greenAccent[500]} 0%, ${colors.greenAccent[700]} 100%)`,
+                  color: "white",
+                  textTransform: "none",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  borderRadius: "12px",
+                  "&:hover": {
+                    background: `linear-gradient(135deg, ${colors.greenAccent[500]} 0%, ${colors.greenAccent[700]} 100%)`,
+                    transform: "translateY(-2px)",
+                  },
+                  "&:disabled": {
+                    background: colors.grey[700],
+                  }
+                }}
+              >
+                {loading ? "Downloading..." : "Download QRNG File"}
+              </Button>
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <Chip 
+                label={binaryDownloaded ? "File Ready" : "No File"} 
+                color={binaryDownloaded ? "success" : "default"}
+                sx={{
+                  backgroundColor: binaryDownloaded ? colors.greenAccent[600] : colors.grey[600],
+                  color: "white",
+                  fontWeight: "600",
+                  fontSize: "14px"
+                }}
+              />
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
-                    <button onClick={handleConnect} className="start-fetching-btn">
-                      Connect
-                    </button>
-                  </>
-
+      {/* Testing Section - Three Horizontal Cards */}
+      <Grid container spacing={3}>
+        {/* NIST SP 800-20B Test Card */}
+        <Grid item xs={12} md={4}>
+          <Card 
+            sx={{ 
+              height: "100%",
+              background: `linear-gradient(135deg, ${colors.primary[400]} 10%, ${colors.blueAccent[900]} 100%)`,
+              borderRadius: "16px",
+              border: `1px solid ${colors.grey[400]}`,
+              transition: "all 0.3s ease",
+              "&:hover": {
+                transform: "translateY(-4px)",
+              }
+            }}
+          >
+            <CardContent sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column" }}>
+              <Box display="flex" alignItems="center" mb={3}>
+                <SecurityIcon sx={{ mr: 2, color: colors.blueAccent[300] }} />
+                <Typography variant="h6" fontWeight="600" color="white">
+                  NIST SP 800-20B Test
+                </Typography>
+              </Box>
+              
+              <Box flex="1" display="flex" flexDirection="column" justifyContent="space-between">
+                <Box>
                   <Button
+                    fullWidth
                     variant="contained"
-                    onClick={() => handleButtonClick("report")}
-                    disabled={loadingProgress < 100 || loadingProgressn < 100}
+                    startIcon={<PlayArrowIcon />}
+                    onClick={runNISTTest}
+                    disabled={!binaryDownloaded || loadingProgress > 0}
                     sx={{
-                      backgroundColor: colors.redAccent[400],
-                      color: colors.grey[100],
+                      mb: 2,
+                      background: `linear-gradient(135deg, ${colors.greenAccent[500]} 0%, ${colors.greenAccent[700]} 100%)`,
+                      color: "white",
                       textTransform: "none",
-                      padding: "10px 20px",
-                      borderRadius: "8px",
-                      transition: 'all 0.3s ease',
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      borderRadius: "10px",
+                      padding: "12px",
                       "&:hover": {
-                        backgroundColor: colors.redAccent[500],
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                        background: `linear-gradient(135deg, ${colors.blueAccent[400]} 0%, ${colors.blueAccent[600]} 100%)`,
                       },
                       "&:disabled": {
-                        backgroundColor: colors.grey[700],
-                        color: colors.grey[500],
-                      },
-                      position: 'relative',
+                        background: colors.grey[700],
+                      }
                     }}
                   >
-                    Generate Report
-                    <Box
+                    Run NIST 22B Test
+                  </Button>
+                  
+                  <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Typography variant="body2" color={colors.grey[300]}>
+                      Progress:
+                    </Typography>
+                    <Typography variant="body2" fontWeight="600" color="white">
+                      {loadingProgress}%
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ position: 'relative', display: 'inline-flex', width: '100%', mb: 2 }}>
+                    <CircularProgress
+                      variant="determinate"
+                      value={loadingProgress}
+                      size={60}
+                      thickness={4}
                       sx={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: colors.greenAccent[500],
-                        opacity: isGeneratingReportT ? 1 : 0,
-                        transition: 'opacity 0.3s ease',
-                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
-                        pointerEvents: 'none',
+                        color: loadingProgress === 100 ? colors.greenAccent[500] :
+                          loadingProgress > 0 ? colors.blueAccent[400] : colors.grey[600],
+                        margin: '0 auto',
+                        display: 'block'
                       }}
                     />
-                  </Button>
-                  {/* New Button for Saving Binary Number */}
-                  <>
-  <style>
-    {`
-      .save-binary-btn {
-        background-color: ${colors.blueAccent[400]};
-        color: ${colors.primary[100]};
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        cursor: pointer;
-      }
-      .save-binary-btn:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-      }
-      .save-binary-btn:not(:disabled):hover {
-        background-color: ${colors.blueAccent[600]};
-      }
-    `}
-  </style>
-
-  <button
-  onClick={saveBinaryNumber}
-  disabled={!isSaveEnabled }
-  className="save-binary-btn"
->
-  Save Binary Number
-</button>
-
-</>
-
+                    <Box
+                      sx={{
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        position: 'absolute',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Typography variant="caption" component="div" color="white" fontWeight="600">
+                        {loadingProgress}%
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </td>
-
-              <td>
-                {/* TextField to accept user input for length */}
-                <TextField
-                  label="Enter Length"
-                  type="number"
-                  value={length}
-                  onChange={(e) => setLength(Number(e.target.value))}
-                  variant="outlined"
-                  size="small"
-                  sx={{ width: "100px" }}
-                />
-              </td>
-              <td>{resultNIST ? resultNIST.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgressn} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgressn}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{resultDieharder ? resultDieharder.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>
-                <FormControl
-                  variant="outlined"
-                  size="small"
-                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
-                >
-                  <TextField
-                    label="Hostname / IP"
-                    variant="outlined"
-                    size="small"
-                    value={hostname}
-                    onChange={(e) => setHostname(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
-                  <TextField
-                    label="Port"
-                    variant="outlined"
-                    size="small"
-                    type="number"
-                    value={port}
-                    onChange={(e) => setPort(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
                 
-                </FormControl>
-              </td>
-
-
-            </tr>
-
-            <tr>
-              <td>2</td>
-              <td>
-                <Box
-                  mt="20px"
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  gap="10px"
-                >
-                   <>
-                    <style>
-                      {`
-      .start-fetching-btn {
-        background-color: ${colors.greenAccent[800]};
-        color: ${colors.primary[100]};
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        cursor: pointer;
-      }
-      .start-fetching-btn:hover {
-        background-color: ${colors.greenAccent[600]};
-      }
-    `}
-                    </style>
-
-                    <button onClick={handleConnect2} className="start-fetching-btn">
-                      Connect
-                    </button>
-                  </>
-               
-                  <Button
-                    variant="contained"
-                    onClick={() => handleButtonClick2("report")}
-                    disabled={loadingProgress2 < 100 || loadingProgress2n < 100}
+                <Box textAlign="center">
+                  <Typography 
+                    variant="h6" 
+                    fontWeight="600"
                     sx={{
-                      backgroundColor: colors.redAccent[400],
-                      color: colors.grey[100],
+                      color: nistResult ? 
+                        (nistResult.final_result?.toLowerCase().includes("pass") ? colors.greenAccent[500] :
+                         nistResult.final_result?.toLowerCase().includes("fail") ? colors.redAccent[500] :
+                         colors.blueAccent[300]) : colors.grey[500]
+                    }}
+                  >
+                    {nistResult ? nistResult.final_result : "Pending"}
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Dieharder Test Card */}
+        <Grid item xs={12} md={4}>
+          <Card 
+            sx={{ 
+              height: "100%",
+              background: `linear-gradient(135deg, ${colors.primary[400]} 10%, ${colors.blueAccent[900]} 100%)`,
+              borderRadius: "16px",
+              border: `1px solid ${colors.grey[400]}`,
+              transition: "all 0.3s ease",
+              "&:hover": {
+                transform: "translateY(-4px)",
+              }
+            }}
+          >
+            <CardContent sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column" }}>
+              <Box display="flex" alignItems="center" mb={3}>
+                <AnalyticsIcon sx={{ mr: 2, color: colors.blueAccent[300] }} />
+                <Typography variant="h6" fontWeight="600" color="white">
+                  Dieharder Test Suite
+                </Typography>
+              </Box>
+              
+              <Box flex="1" display="flex" flexDirection="column" justifyContent="space-between">
+                <Box>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={<PlayArrowIcon />}
+                    onClick={runDieharderTest}
+                    disabled={!binaryDownloaded || loadingProgress2 > 0}
+                    sx={{
+                      mb: 2,
+                      background: `linear-gradient(135deg, ${colors.greenAccent[500]} 0%, ${colors.greenAccent[700]} 100%)`,
+                      color: "white",
                       textTransform: "none",
-                      padding: "10px 20px",
-                      borderRadius: "8px",
-                      transition: 'all 0.3s ease',
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      borderRadius: "10px",
+                      padding: "12px",
                       "&:hover": {
-                        backgroundColor: colors.redAccent[500],
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                        background: `linear-gradient(135deg, ${colors.blueAccent[400]} 0%, ${colors.blueAccent[600]} 100%)`,
                       },
                       "&:disabled": {
-                        backgroundColor: colors.grey[700],
-                        color: colors.grey[500],
-                      },
-                      position: 'relative',
+                        background: colors.grey[700],
+                      }
                     }}
                   >
-                    Generate Report
-                    <Box
+                    Run Dieharder Test
+                  </Button>
+                  
+                  <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Typography variant="body2" color={colors.grey[300]}>
+                      Progress:
+                    </Typography>
+                    <Typography variant="body2" fontWeight="600" color="white">
+                      {loadingProgress2}%
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ position: 'relative', display: 'inline-flex', width: '100%', mb: 2 }}>
+                    <CircularProgress
+                      variant="determinate"
+                      value={loadingProgress2}
+                      size={60}
+                      thickness={4}
                       sx={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: colors.greenAccent[500],
-                        opacity: isGeneratingReportT2 ? 1 : 0,
-                        transition: 'opacity 0.3s ease',
-                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
-                        pointerEvents: 'none',
+                        color: loadingProgress2 === 100 ? colors.greenAccent[500] :
+                          loadingProgress2 > 0 ? colors.blueAccent[400] : colors.grey[600],
+                        margin: '0 auto',
+                        display: 'block'
                       }}
                     />
-                  </Button>
-                  {/* New Button for Saving Binary Number */}
-                  <button
-  onClick={saveBinaryNumber2}
-  disabled={!isSaveEnabled2 }
-  className="save-binary-btn"
->
-  Save Binary Number
-</button>
+                    <Box
+                      sx={{
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        position: 'absolute',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Typography variant="caption" component="div" color="white" fontWeight="600">
+                        {loadingProgress2}%
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </td>
-
-
-              <td>
-                {/* TextField to accept user input for length */}
-                <TextField
-                  label="Enter Length"
-                  type="number"
-                  value={length2}
-                  onChange={(e) => setLength2(Number(e.target.value))}
-                  variant="outlined"
-                  size="small"
-                  sx={{ width: "100px" }}
-                />
-              </td>
-              <td>{resultNIST2 ? resultNIST2.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress2n} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress2n}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{resultDieharder2 ? resultDieharder2.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress2} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress2}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>
-                <FormControl
-                  variant="outlined"
-                  size="small"
-                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
-                >
-                  <TextField
-                    label="Hostname / IP"
-                    variant="outlined"
-                    size="small"
-                    value={hostname2}
-                    onChange={(e) => setHostname2(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
-                  <TextField
-                    label="Port"
-                    variant="outlined"
-                    size="small"
-                    type="number"
-                    value={port2}
-                    onChange={(e) => setPort2(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
-                 
-                </FormControl>
-              </td>
-
-            </tr>
-
-            <tr>
-              <td>3</td>
-              <td>
-                <Box
-                  mt="20px"
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  gap="10px"
-                >
-                   <>
-                    <style>
-                      {`
-      .start-fetching-btn {
-        background-color: ${colors.greenAccent[800]};
-        color: ${colors.primary[100]};
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        cursor: pointer;
-      }
-      .start-fetching-btn:hover {
-        background-color: ${colors.greenAccent[600]};
-      }
-    `}
-                    </style>
-
-                    <button onClick={handleConnect3} className="start-fetching-btn">
-                      Connect
-                    </button>
-                  </>
                 
-                  <Button
-                    variant="contained"
-                    onClick={() => handleButtonClick3("report")}
-                    disabled={loadingProgress3 < 100 || loadingProgress3n < 100}
+                <Box textAlign="center">
+                  <Typography 
+                    variant="h6" 
+                    fontWeight="600"
                     sx={{
-                      backgroundColor: colors.redAccent[400],
-                      color: colors.grey[100],
+                      color: dieharderResult ? 
+                        (dieharderResult.final_result?.toLowerCase().includes("pass") ? colors.greenAccent[500] :
+                         dieharderResult.final_result?.toLowerCase().includes("fail") ? colors.redAccent[500] :
+                         colors.blueAccent[300]) : colors.grey[500]
+                    }}
+                  >
+                    {dieharderResult ? dieharderResult.final_result : "Pending"}
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* NIST SP 800-90B Test Card */}
+        <Grid item xs={12} md={4}>
+          <Card 
+            sx={{ 
+              height: "100%",
+              background: `linear-gradient(135deg, ${colors.primary[400]} 10%, ${colors.blueAccent[900]} 100%)`,
+              borderRadius: "16px",
+              border: `1px solid ${colors.grey[400]}`,
+              transition: "all 0.3s ease",
+              "&:hover": {
+                transform: "translateY(-4px)",
+              }
+            }}
+          >
+            <CardContent sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column" }}>
+              <Box display="flex" alignItems="center" mb={3}>
+                <ScienceIcon sx={{ mr: 2, color: colors.blueAccent[300] }} />
+                <Typography variant="h6" fontWeight="600" color="white">
+                  NIST SP 800-90B Test
+                </Typography>
+              </Box>
+              
+              <Box flex="1" display="flex" flexDirection="column" justifyContent="space-between">
+                <Box>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={<PlayArrowIcon />}
+                    onClick={runNIST90BTest}
+                    disabled={!binaryDownloaded || loadingProgress3 > 0}
+                    sx={{
+                      mb: 2,
+                      background: `linear-gradient(135deg, ${colors.greenAccent[500]} 0%, ${colors.greenAccent[700]} 100%)`,
+                      color: "white",
                       textTransform: "none",
-                      padding: "10px 20px",
-                      borderRadius: "8px",
-                      transition: 'all 0.3s ease',
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      borderRadius: "10px",
+                      padding: "12px",
                       "&:hover": {
-                        backgroundColor: colors.redAccent[500],
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                        background: `linear-gradient(135deg, ${colors.blueAccent[400]} 0%, ${colors.blueAccent[600]} 100%)`,
                       },
                       "&:disabled": {
-                        backgroundColor: colors.grey[700],
-                        color: colors.grey[500],
-                      },
-                      position: 'relative',
+                        background: colors.grey[700],
+                      }
                     }}
                   >
-                    Generate Report
-                    <Box
+                    Run NIST 90B Test
+                  </Button>
+                  
+                  <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Typography variant="body2" color={colors.grey[300]}>
+                      Progress:
+                    </Typography>
+                    <Typography variant="body2" fontWeight="600" color="white">
+                      {loadingProgress3}%
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ position: 'relative', display: 'inline-flex', width: '100%', mb: 2 }}>
+                    <CircularProgress
+                      variant="determinate"
+                      value={loadingProgress3}
+                      size={60}
+                      thickness={4}
                       sx={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: colors.greenAccent[500],
-                        opacity: isGeneratingReportT3 ? 1 : 0,
-                        transition: 'opacity 0.3s ease',
-                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
-                        pointerEvents: 'none',
+                        color: loadingProgress3 === 100 ? colors.greenAccent[500] :
+                          loadingProgress3 > 0 ? colors.blueAccent[400] : colors.grey[600],
+                        margin: '0 auto',
+                        display: 'block'
                       }}
                     />
-                  </Button>
-                  {/* New Button for Saving Binary Number */}
-                  <button
-  onClick={saveBinaryNumber3}
-  disabled={!isSaveEnabled3 }
-  className="save-binary-btn"
->
-  Save Binary Number
-</button>
-                </Box>
-              </td>
-
-              <td>
-                {/* TextField to accept user input for length */}
-                <TextField
-                  label="Enter Length"
-                  type="number"
-                  value={length3}
-                  onChange={(e) => setLength3(Number(e.target.value))}
-                  variant="outlined"
-                  size="small"
-                  sx={{ width: "100px" }}
-                />
-              </td>
-              <td>{resultNIST3 ? resultNIST3.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress3n} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress3n}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{resultDieharder3 ? resultDieharder3.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress3} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress3}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>
-                <FormControl
-                  variant="outlined"
-                  size="small"
-                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
-                >
-                  <TextField
-                    label="Hostname / IP"
-                    variant="outlined"
-                    size="small"
-                    value={hostname3}
-                    onChange={(e) => setHostname3(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
-                  <TextField
-                    label="Port"
-                    variant="outlined"
-                    size="small"
-                    type="number"
-                    value={port3}
-                    onChange={(e) => setPort3(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
-                
-                </FormControl>
-              </td>
-
-
-            </tr>
-
-            <tr>
-              <td>4</td>
-              <td>
-                <Box
-                  mt="20px"
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  gap="10px"
-                >
-                    <>
-                    <style>
-                      {`
-      .start-fetching-btn {
-        background-color: ${colors.greenAccent[800]};
-        color: ${colors.primary[100]};
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        cursor: pointer;
-      }
-      .start-fetching-btn:hover {
-        background-color: ${colors.greenAccent[600]};
-      }
-    `}
-                    </style>
-
-                    <button onClick={handleConnect4} className="start-fetching-btn">
-                      Connect
-                    </button>
-                  </>
-               
-                  <Button
-                    variant="contained"
-                    onClick={() => handleButtonClick4("report")}
-                    disabled={loadingProgress4 < 100 || loadingProgress4n < 100}
-                    sx={{
-                      backgroundColor: colors.redAccent[400],
-                      color: colors.grey[100],
-                      textTransform: "none",
-                      padding: "10px 20px",
-                      borderRadius: "8px",
-                      transition: 'all 0.3s ease',
-                      "&:hover": {
-                        backgroundColor: colors.redAccent[500],
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                      },
-                      "&:disabled": {
-                        backgroundColor: colors.grey[700],
-                        color: colors.grey[500],
-                      },
-                      position: 'relative',
-                    }}
-                  >
-                    Generate Report
                     <Box
                       sx={{
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
                         position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: colors.greenAccent[500],
-                        opacity: isGeneratingReportT4 ? 1 : 0,
-                        transition: 'opacity 0.3s ease',
-                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
-                        pointerEvents: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
-                    />
-                  </Button>
-                  {/* New Button for Saving Binary Number */}
-                  <button
-  onClick={saveBinaryNumber4}
-  disabled={!isSaveEnabled4 }
-  className="save-binary-btn"
->
-  Save Binary Number
-</button>
+                    >
+                      <Typography variant="caption" component="div" color="white" fontWeight="600">
+                        {loadingProgress3}%
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </td>
-
-              <td>
-                {/* TextField to accept user input for length */}
-                <TextField
-                  label="Enter Length"
-                  type="number"
-                  value={length4}
-                  onChange={(e) => setLength4(Number(e.target.value))}
-                  variant="outlined"
-                  size="small"
-                  sx={{ width: "100px" }}
-                />
-              </td>
-              <td>{resultNIST4 ? resultNIST4.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress4n} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress4n}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{resultDieharder4 ? resultDieharder4.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress4} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress4}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>
-                <FormControl
-                  variant="outlined"
-                  size="small"
-                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
-                >
-                  <TextField
-                    label="Hostname / IP"
-                    variant="outlined"
-                    size="small"
-                    value={hostname4}
-                    onChange={(e) => setHostname4(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
-                  <TextField
-                    label="Port"
-                    variant="outlined"
-                    size="small"
-                    type="number"
-                    value={port4}
-                    onChange={(e) => setPort4(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
                 
-                </FormControl>
-              </td>
-
-            </tr>
-
-            <tr>
-              <td>5</td>
-              <td>
-                <Box
-                  mt="20px"
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  gap="10px"
-                >
-                   <>
-                    <style>
-                      {`
-      .start-fetching-btn {
-        background-color: ${colors.greenAccent[800]};
-        color: ${colors.primary[100]};
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        cursor: pointer;
-      }
-      .start-fetching-btn:hover {
-        background-color: ${colors.greenAccent[600]};
-      }
-    `}
-                    </style>
-
-                    <button onClick={handleConnect5} className="start-fetching-btn">
-                      Connect
-                    </button>
-                  </>
-                 
-                  <Button
-                    variant="contained"
-                    onClick={() => handleButtonClick5("report")}
-                    disabled={loadingProgress5 < 100 || loadingProgress5n < 100}
+                <Box textAlign="center">
+                  <Typography 
+                    variant="h6" 
+                    fontWeight="600"
                     sx={{
-                      backgroundColor: colors.redAccent[400],
-                      color: colors.grey[100],
-                      textTransform: "none",
-                      padding: "10px 20px",
-                      borderRadius: "8px",
-                      transition: 'all 0.3s ease',
-                      "&:hover": {
-                        backgroundColor: colors.redAccent[500],
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                      },
-                      "&:disabled": {
-                        backgroundColor: colors.grey[700],
-                        color: colors.grey[500],
-                      },
-                      position: 'relative',
+                      color: nist90bResult ? 
+                        (nist90bResult.final_result?.toLowerCase().includes("pass") ? colors.greenAccent[500] :
+                         nist90bResult.final_result?.toLowerCase().includes("fail") ? colors.redAccent[500] :
+                         colors.blueAccent[300]) : colors.grey[500]
                     }}
                   >
-                    Generate Report
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: colors.greenAccent[500],
-                        opacity: isGeneratingReportT5 ? 1 : 0,
-                        transition: 'opacity 0.3s ease',
-                        boxShadow: `0 0 6px ${colors.greenAccent[500]}`,
-                        pointerEvents: 'none',
-                      }}
-                    />
-                  </Button>
-                  {/* New Button for Saving Binary Number */}
-                  <button
-  onClick={saveBinaryNumber5}
-  disabled={!isSaveEnabled5 }
-  className="save-binary-btn"
->
-  Save Binary Number
-</button>
-                </Box>
-              </td>
-
-              <td>
-                {/* TextField to accept user input for length */}
-                <TextField
-                  label="Enter Length"
-                  type="number"
-                  value={length5}
-                  onChange={(e) => setLength5(Number(e.target.value))}
-                  variant="outlined"
-                  size="small"
-                  sx={{ width: "100px" }}
-                />
-              </td>
-              <td>{resultNIST5 ? resultNIST5.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress5n} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress5n}%
+                    {nist90bResult ? nist90bResult.final_result : "Pending"}
                   </Typography>
                 </Box>
-              </td>
-              <td>{resultDieharder5 ? resultDieharder5.final_result : ""}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress5} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress5}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>
-                <FormControl
-                  variant="outlined"
-                  size="small"
-                  sx={{ display: "flex", flexDirection: "column", gap: 2, width: 200 }}
-                >
-                  <TextField
-                    label="Hostname / IP"
-                    variant="outlined"
-                    size="small"
-                    value={hostname5}
-                    onChange={(e) => setHostname5(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
-                  <TextField
-                    label="Port"
-                    variant="outlined"
-                    size="small"
-                    type="number"
-                    value={port5}
-                    onChange={(e) => setPort5(e.target.value)}
-                    InputLabelProps={{
-                      sx: { color: "white" }
-                    }}
-                  />
-                
-                </FormControl>
-              </td>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
-            </tr>
-          </tbody>
-        </Box>
-      </Box>
-      <Box
-  sx={{
-    background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1F2A40 50%, #0d1b2a 100%)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "280px",
-    textAlign: "center",
-    mt: 2,
-    boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.4)",
-    position: "relative",
-    overflow: "hidden",
-    borderRadius: "20px",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    '&:hover': {
-      boxShadow: "0px 12px 40px rgba(0, 0, 0, 0.6)",
-      transform: "translateY(-2px)",
-    },
-    transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-    '&::before': {
-      content: '""',
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
-      opacity: 0,
-      transition: "opacity 0.4s ease",
-    },
-    '&:hover::before': {
-      opacity: 1,
-    }
-  }}
->
-  {/* Animated background grid */}
-  <Box
-    sx={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundImage: `
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
-      `,
-      backgroundSize: "50px 50px",
-      animation: "gridMove 20s linear infinite",
-      opacity: 0.4,
-    }}
-  />
+      {/* Report Generation Card */}
+      <Card 
+        sx={{ 
+          mt: 3,
+          background: `linear-gradient(135deg, ${colors.primary[400]} 10%, ${colors.blueAccent[900]} 100%)`,
+          borderRadius: "16px",
+          border: `1px solid ${colors.grey[400]}`
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Box display="flex" alignItems="center" mb={3}>
+            <ArticleIcon sx={{ mr: 2, color: colors.greenAccent[500] }} />
+            <Typography variant="h5" fontWeight="600" color="white">
+              Report Generation
+            </Typography>
+          </Box>
+          
+          <Grid container spacing={2} justifyContent="center">
+            <Grid item xs={12} md={4}>
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={<ArticleIcon />}
+                onClick={() => handleButtonClick("report")}
+                disabled={loadingProgress < 100 || loadingProgressn < 100}
+                sx={{
+                  background: `linear-gradient(135deg, ${colors.redAccent[400]} 0%, ${colors.redAccent[600]} 100%)`,
+                  color: "white",
+                  textTransform: "none",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  borderRadius: "12px",
+                  padding: "15px",
+                  "&:hover": {
+                    background: `linear-gradient(135deg, ${colors.redAccent[400]} 0%, ${colors.redAccent[600]} 100%)`,
+                    transform: "translateY(-2px)",
+                  },
+                  "&:disabled": {
+                    background: colors.grey[700],
+                  }
+                }}
+              >
+                Generate Test Report
+              </Button>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
-  {/* Floating particles */}
-  {[...Array(6)].map((_, i) => (
-    <Box
-      key={i}
-      sx={{
-        position: "absolute",
-        width: 4,
-        height: 4,
-        borderRadius: "50%",
-        background: "rgba(255, 255, 255, 0.6)",
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-        animation: `floatParticle ${15 + i * 2}s infinite ease-in-out ${i * 0.5}s`,
-        boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
-      }}
-    />
-  ))}
+      {/* AI Analysis Section - Keep your existing beautiful AI section */}
+          <Box
+            sx={{
+              background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1F2A40 50%, #0d1b2a 100%)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "280px",
+              textAlign: "center",
+              mt: 3,
+              boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.4)",
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: "20px",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              '&:hover': {
+                boxShadow: "0px 12px 40px rgba(0, 0, 0, 0.6)",
+                transform: "translateY(-2px)",
+              },
+              transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              '&::before': {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: "linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
+                opacity: 0,
+                transition: "opacity 0.4s ease",
+              },
+              '&:hover::before': {
+                opacity: 1,
+              }
+            }}
+          >
+            {/* Animated background grid */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: `
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+          `,
+                backgroundSize: "50px 50px",
+                animation: "gridMove 20s linear infinite",
+                opacity: 0.4,
+              }}
+            />
 
-  {/* Main content container */}
-  <Box sx={{ position: "relative", zIndex: 2 }}>
-    {/* Animated Gemini Logo */}
-    <Box
-      component="img"
-      src="/image.png"
-      alt="Gemini Logo"
-      sx={{
-        width: 70,
-        height: "auto",
-        mb: 1.5,
-        borderRadius: "16px",
-        transition: "all 0.5s ease",
-        filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))",
-        animation: "logoGlow 4s infinite ease-in-out",
-        '&:hover': {
-          transform: "scale(1.15) rotate(5deg)",
-          filter: "drop-shadow(0 6px 20px rgba(230, 57, 70, 0.4))",
+            {/* Floating particles */}
+            {[...Array(6)].map((_, i) => (
+              <Box
+                key={i}
+                sx={{
+                  position: "absolute",
+                  width: 4,
+                  height: 4,
+                  borderRadius: "50%",
+                  background: "rgba(255, 255, 255, 0.6)",
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  animation: `floatParticle ${15 + i * 2}s infinite ease-in-out ${i * 0.5}s`,
+                  boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
+                }}
+              />
+            ))}
+
+            {/* Main content container */}
+            <Box sx={{ position: "relative", zIndex: 2 }}>
+              {/* Animated Gemini Logo */}
+              <Box
+                component="img"
+                src="/image.png"
+                alt="Gemini Logo"
+                sx={{
+                  width: 70,
+                  height: "auto",
+                  mb: 1.5,
+                  borderRadius: "16px",
+                  transition: "all 0.5s ease",
+                  filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))",
+                  animation: "logoGlow 4s infinite ease-in-out",
+                  '&:hover': {
+                    transform: "scale(1.15) rotate(5deg)",
+                    filter: "drop-shadow(0 6px 20px rgba(230, 57, 70, 0.4))",
+                  }
+                }}
+              />
+
+              {/* Title text */}
+              <Typography
+                variant="h6"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontWeight: 600,
+                  mb: 1,
+                  fontSize: "1.1rem",
+                  textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+                }}
+              >
+                Advanced AI Analysis
+              </Typography>
+
+              {/* Description */}
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.7)",
+                  mb: 2.5,
+                  maxWidth: "300px",
+                  fontSize: "0.85rem",
+                  lineHeight: 1.4,
+                }}
+              >
+                Upload your test reports for comprehensive AI-powered analysis and insights
+              </Typography>
+
+              {/* Enhanced Button */}
+              <Button
+                variant="contained"
+                onClick={() => {
+                  window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
+                }}
+                startIcon={<AutoAwesomeIcon sx={{ fontSize: "1.2rem" }} />}
+                sx={{
+                  background: "linear-gradient(135deg, #E63946 0%, #F77F00 100%)",
+                  color: "white",
+                  textTransform: "none",
+                  padding: "12px 36px",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  width: "auto",
+                  minWidth: "220px",
+                  borderRadius: "12px",
+                  transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+                  position: "relative",
+                  overflow: "hidden",
+                  zIndex: 1,
+                  boxShadow: "0 4px 15px rgba(230, 57, 70, 0.4)",
+                  '&:hover': {
+                    background: "linear-gradient(135deg, #F77F00 0%, #E63946 100%)",
+                    transform: "scale(1.05) translateY(-2px)",
+                    boxShadow: "0 8px 25px rgba(230, 57, 70, 0.6)",
+                  },
+                  '&::before': {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: "-100%",
+                    width: "100%",
+                    height: "100%",
+                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                    transition: "all 0.8s ease",
+                    zIndex: -1,
+                  },
+                  '&:hover::before': {
+                    left: "100%",
+                  },
+                  '&::after': {
+                    content: '""',
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    width: "0",
+                    height: "0",
+                    borderRadius: "50%",
+                    background: "rgba(255, 255, 255, 0.2)",
+                    transform: "translate(-50%, -50%)",
+                    transition: "all 0.6s ease",
+                    zIndex: -1,
+                  },
+                  '&:active::after': {
+                    width: "300px",
+                    height: "300px",
+                  }
+                }}
+              >
+                Analyze with AI
+              </Button>
+            </Box>
+
+            {/* Corner accents */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "60px",
+                height: "60px",
+                borderTop: "2px solid rgba(230, 57, 70, 0.5)",
+                borderLeft: "2px solid rgba(230, 57, 70, 0.5)",
+                borderTopLeftRadius: "20px",
+              }}
+            />
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                width: "60px",
+                height: "60px",
+                borderBottom: "2px solid rgba(230, 57, 70, 0.5)",
+                borderRight: "2px solid rgba(230, 57, 70, 0.5)",
+                borderBottomRightRadius: "20px",
+              }}
+            />
+
+            {/* Add these keyframes to your global CSS */}
+            <style jsx>{`
+        @keyframes gridMove {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(50px, 50px); }
         }
-      }}
-    />
-
-    {/* Title text */}
-    <Typography
-      variant="h6"
-      sx={{
-        color: "rgba(255, 255, 255, 0.9)",
-        fontWeight: 600,
-        mb: 1,
-        fontSize: "1.1rem",
-        textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
-      }}
-    >
-      Advanced AI Analysis
-    </Typography>
-
-    {/* Description */}
-    <Typography
-      variant="body2"
-      sx={{
-        color: "rgba(255, 255, 255, 0.7)",
-        mb: 2.5,
-        maxWidth: "300px",
-        fontSize: "0.85rem",
-        lineHeight: 1.4,
-      }}
-    >
-      Upload your test reports for comprehensive AI-powered analysis and insights
-    </Typography>
-
-    {/* Enhanced Button */}
-    <Button
-      variant="contained"
-      onClick={() => {
-        window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
-      }}
-      startIcon={<AutoAwesomeIcon sx={{ fontSize: "1.2rem" }} />}
-      sx={{
-        background: "linear-gradient(135deg, #E63946 0%, #F77F00 100%)",
-        color: "white",
-        textTransform: "none",
-        padding: "12px 36px",
-        fontSize: "1.1rem",
-        fontWeight: 600,
-        width: "auto",
-        minWidth: "220px",
-        borderRadius: "12px",
-        transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
-        position: "relative",
-        overflow: "hidden",
-        zIndex: 1,
-        boxShadow: "0 4px 15px rgba(230, 57, 70, 0.4)",
-        '&:hover': {
-          background: "linear-gradient(135deg, #F77F00 0%, #E63946 100%)",
-          transform: "scale(1.05) translateY(-2px)",
-          boxShadow: "0 8px 25px rgba(230, 57, 70, 0.6)",
-        },
-        '&::before': {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: "-100%",
-          width: "100%",
-          height: "100%",
-          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
-          transition: "all 0.8s ease",
-          zIndex: -1,
-        },
-        '&:hover::before': {
-          left: "100%",
-        },
-        '&::after': {
-          content: '""',
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          width: "0",
-          height: "0",
-          borderRadius: "50%",
-          background: "rgba(255, 255, 255, 0.2)",
-          transform: "translate(-50%, -50%)",
-          transition: "all 0.6s ease",
-          zIndex: -1,
-        },
-        '&:active::after': {
-          width: "300px",
-          height: "300px",
+        
+        @keyframes floatParticle {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          25% { transform: translateY(-20px) translateX(10px); }
+          50% { transform: translateY(-10px) translateX(20px); }
+          75% { transform: translateY(-15px) translateX(-10px); }
         }
-      }}
-    >
-      Analyze with AI
-    </Button>
-  </Box>
-
-  {/* Corner accents */}
-  <Box
-    sx={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "60px",
-      height: "60px",
-      borderTop: "2px solid rgba(230, 57, 70, 0.5)",
-      borderLeft: "2px solid rgba(230, 57, 70, 0.5)",
-      borderTopLeftRadius: "20px",
-    }}
-  />
-  <Box
-    sx={{
-      position: "absolute",
-      bottom: 0,
-      right: 0,
-      width: "60px",
-      height: "60px",
-      borderBottom: "2px solid rgba(230, 57, 70, 0.5)",
-      borderRight: "2px solid rgba(230, 57, 70, 0.5)",
-      borderBottomRightRadius: "20px",
-    }}
-  />
-
-  {/* Add these keyframes to your global CSS */}
-  <style jsx>{`
-    @keyframes gridMove {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(50px, 50px); }
-    }
-    
-    @keyframes floatParticle {
-      0%, 100% { transform: translateY(0px) translateX(0px); }
-      25% { transform: translateY(-20px) translateX(10px); }
-      50% { transform: translateY(-10px) translateX(20px); }
-      75% { transform: translateY(-15px) translateX(-10px); }
-    }
-    
-    @keyframes logoGlow {
-      0%, 100% { filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3)); }
-      50% { filter: drop-shadow(0 4px 20px rgba(230, 57, 70, 0.3)); }
-    }
-  `}</style>
-</Box>
+        
+        @keyframes logoGlow {
+          0%, 100% { filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3)); }
+          50% { filter: drop-shadow(0 4px 20px rgba(230, 57, 70, 0.3)); }
+        }
+      `}</style>
+    </Box>
     </Box>
   );
+
 };
 
 export default Qrng_Server;
+

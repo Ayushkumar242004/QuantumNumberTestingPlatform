@@ -3122,7 +3122,23 @@ if (error) {
   };
 
   return (
-    <Box m="20px">
+    <Box m="20px" sx={{
+    overflowX: 'auto',
+    '&::-webkit-scrollbar': {
+      height: '8px',
+    },
+    '&::-webkit-scrollbar-track': {
+      background: colors.primary[700],
+      borderRadius: '4px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: colors.blueAccent[500],
+      borderRadius: '4px',
+      '&:hover': {
+        background: colors.blueAccent[400],
+      }
+    }
+  }}>
       {/* Header Section */}
       <Header title="NIST Statistical Tests" />
       <Box
