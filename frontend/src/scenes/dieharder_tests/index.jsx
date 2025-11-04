@@ -41,11 +41,6 @@ const Dieharder_tests = () => {
   const [binaryInput3, setBinaryInput3] = useState("");
   const [binaryInput4, setBinaryInput4] = useState("");
   const [binaryInput5, setBinaryInput5] = useState("");
-  const [binaryInput6, setBinaryInput6] = useState("");
-  const [binaryInput7, setBinaryInput7] = useState("");
-  const [binaryInput8, setBinaryInput8] = useState("");
-  const [binaryInput9, setBinaryInput9] = useState("");
-  const [binaryInput10, setBinaryInput10] = useState("");
 
   const [isEnabled, setIsEnabled] = useState(true);
   const [isEnabled2, setIsEnabled2] = useState(true);
@@ -187,264 +182,294 @@ const Dieharder_tests = () => {
   const handleTimeChange = (event) => {
     const inputTime = event.target.value;
     setTime(inputTime); // Update the time state immediately
+
+    // Clear existing timeout
+    if (timeDebounceRef.current) {
+      clearTimeout(timeDebounceRef.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload_dt');
+      const storedProgress = sessionStorage.getItem('uploadProgress_dt');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled(false);
+      }
+    }, 500);
   };
+
+
   const handleUseCurrentTime = () => {
+    if (!isTimeEnabled) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime(formattedTime);
+
   };
+
 
   const handleTimeChange2 = (event) => {
     const inputTime = event.target.value;
     setTime2(inputTime); // Update the time state immediately
+
+    if (timeDebounceRef2.current) {
+      clearTimeout(timeDebounceRef2.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef2.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload2_dt');
+      const storedProgress = sessionStorage.getItem('uploadProgress2_dt');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled2(false);
+      }
+    }, 500);
   };
+
   const handleUseCurrentTime2 = () => {
+    if (!isTimeEnabled2) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime2(formattedTime);
+
   };
+
 
   const handleTimeChange3 = (event) => {
     const inputTime = event.target.value;
     setTime3(inputTime); // Update the time state immediately
+
+    // Clear existing timeout
+    if (timeDebounceRef3.current) {
+      clearTimeout(timeDebounceRef3.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef3.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload3_dt');
+      const storedProgress = sessionStorage.getItem('uploadProgress3_dt');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled3(false);
+      }
+    }, 500);
   };
+
   const handleUseCurrentTime3 = () => {
+    if (!isTimeEnabled3) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime3(formattedTime);
+
   };
+
 
   const handleTimeChange4 = (event) => {
     const inputTime = event.target.value;
     setTime4(inputTime); // Update the time state immediately
+
+    // Clear existing timeout
+    if (timeDebounceRef4.current) {
+      clearTimeout(timeDebounceRef4.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef4.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload4_dt');
+      const storedProgress = sessionStorage.getItem('uploadProgress4_dt');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled4(false);
+      }
+    }, 500);
   };
   const handleUseCurrentTime4 = () => {
+    if (!isTimeEnabled4) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime4(formattedTime);
+
   };
 
   const handleTimeChange5 = (event) => {
     const inputTime = event.target.value;
     setTime5(inputTime); // Update the time state immediately
+
+    // Clear existing timeout
+    if (timeDebounceRef5.current) {
+      clearTimeout(timeDebounceRef5.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef5.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload5_dt');
+      const storedProgress = sessionStorage.getItem('uploadProgress5_dt');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled5(false);
+      }
+    }, 500);
   };
+
   const handleUseCurrentTime5 = () => {
+    if (!isTimeEnabled5) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime5(formattedTime);
+
   };
 
 
   useEffect(() => {
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
 
-    const handler = setTimeout(() => {
-      if (time && !timeRegex.test(time)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
+    const timeouts = {};
+
+    // Create timeout for each time value
+    const times = [
+      { value: time, key: 'time' },
+      { value: time2, key: 'time2' },
+      { value: time3, key: 'time3' },
+      { value: time4, key: 'time4' },
+      { value: time5, key: 'time5' }
+    ];
+
+    times.forEach(({ value, key }) => {
+      // Clear existing timeout for this key if any
+      if (timeouts[key]) {
+        clearTimeout(timeouts[key]);
       }
-    }, 5000); // Wait 500ms after the user stops typing
 
+      // Set new timeout
+      timeouts[key] = setTimeout(() => {
+        if (value && !timeRegex.test(value)) {
+          alert("Invalid time format. Use HH:mm:ss (24-hour format).");
+        }
+      }, 500); // Wait 500ms after the user stops typing
+    });
+
+    // Cleanup function - clear all timeouts
     return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
+      Object.values(timeouts).forEach(timeoutId => {
+        clearTimeout(timeoutId);
+      });
     };
-  }, [time]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time2 && !timeRegex.test(time2)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time2]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time3 && !timeRegex.test(time3)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time3]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time4 && !timeRegex.test(time4)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time4]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time5 && !timeRegex.test(time5)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time5]);
+  }, [time, time2, time3, time4, time5]);
 
 
   useEffect(() => {
+    // Combine date and time for each instance when both are available
     if (date && time) {
       setScheduledTime(`${date} ${time}`);
     }
-  }, [date, time]);
-
-  useEffect(() => {
     if (date2 && time2) {
       setScheduledTime2(`${date2} ${time2}`);
     }
-  }, [date2, time2]);
-
-  useEffect(() => {
     if (date3 && time3) {
       setScheduledTime3(`${date3} ${time3}`);
     }
-  }, [date3, time3]);
-
-  useEffect(() => {
     if (date4 && time4) {
       setScheduledTime4(`${date4} ${time4}`);
     }
-  }, [date4, time4]);
-
-  useEffect(() => {
     if (date5 && time5) {
       setScheduledTime5(`${date5} ${time5}`);
     }
-  }, [date5, time5]);
+  }, [date, time, date2, time2, date3, time3, date4, time4, date5, time5]);
+
+
 
 
   const finalResult = result ? result.final_result : " ";
-
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-
-      if (scheduledTime) {
-        const date = new Date(scheduledTime);
-        const pad = (n) => String(n).padStart(2, '0');
-
-        const formattedScheduledTime = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-
-        setDebouncedScheduledTime(formattedScheduledTime);
-      }
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime]);
-
-
-
   const finalResult2 = result2 ? result2.final_result : " ";
-
- 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime2(scheduledTime2);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime2]);
-
   const finalResult3 = result3 ? result3.final_result : " ";
-
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime3(scheduledTime3);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime3]);
-
   const finalResult4 = result4 ? result4.final_result : " ";
-
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime4(scheduledTime4);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime4]);
-
   const finalResult5 = result5 ? result5.final_result : " ";
 
-
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime5(scheduledTime5);
-    }, 3000);
+    const handlers = [];
 
-    return () => {
-      clearTimeout(handler);
+    // Helper function to create debounced handler
+    const createDebouncedHandler = (scheduledTime, setDebouncedScheduledTime) => {
+      const handler = setTimeout(() => {
+        setDebouncedScheduledTime(scheduledTime);
+      }, 3000);
+      handlers.push(handler);
     };
-  }, [scheduledTime5]);
 
-  
+    // Create debounced handlers for all scheduled times
+    createDebouncedHandler(scheduledTime, setDebouncedScheduledTime);
+    createDebouncedHandler(scheduledTime2, setDebouncedScheduledTime2);
+    createDebouncedHandler(scheduledTime3, setDebouncedScheduledTime3);
+    createDebouncedHandler(scheduledTime4, setDebouncedScheduledTime4);
+    createDebouncedHandler(scheduledTime5, setDebouncedScheduledTime5);
+
+    // Cleanup function to clear all timeouts
+    return () => {
+      handlers.forEach(handler => {
+        clearTimeout(handler);
+      });
+    };
+  }, [scheduledTime, scheduledTime2, scheduledTime3, scheduledTime4, scheduledTime5]);
+
+
 
   const [showRedButton, setShowRedButton] = useState(false);
   const [showRedButton2, setShowRedButton2] = useState(false);
   const [showRedButton3, setShowRedButton3] = useState(false);
   const [showRedButton4, setShowRedButton4] = useState(false);
+
+  const [isDateEnabled, setIsDateEnabled] = useState(true);
+  const [isTimeEnabled, setIsTimeEnabled] = useState(true);
+
+  const [isDateEnabled2, setIsDateEnabled2] = useState(true);
+  const [isTimeEnabled2, setIsTimeEnabled2] = useState(true);
+
+  const [isDateEnabled3, setIsDateEnabled3] = useState(true);
+  const [isTimeEnabled3, setIsTimeEnabled3] = useState(true);
+
+  const [isDateEnabled4, setIsDateEnabled4] = useState(true);
+  const [isTimeEnabled4, setIsTimeEnabled4] = useState(true);
+
+  const [isDateEnabled5, setIsDateEnabled5] = useState(true);
+  const [isTimeEnabled5, setIsTimeEnabled5] = useState(true);
+
+  const timeDebounceRef = useRef(null);
+  const timeDebounceRef2 = useRef(null);
+  const timeDebounceRef3 = useRef(null);
+  const timeDebounceRef4 = useRef(null);
+  const timeDebounceRef5 = useRef(null);
   const [showRedButton5, setShowRedButton5] = useState(false);
 
-
   const handleFileUpload = () => {
-    //  setShowRedButton(true)
-    setIsEnabled(true);
     fileInputRef.current.click();
+    if (isUploadButtonEnabled) {
+    }
   };
   const handleFileUpload2 = () => {
-    // setShowRedButton2(true)
-    setIsEnabled2(true);
     fileInputRef2.current.click();
+    if (isUploadButtonEnabled2) {
+    }
+
   };
   const handleFileUpload3 = () => {
-    // setShowRedButton3(true)
-    setIsEnabled3(true);
-    fileInputRef3.current.click();
+    if (isUploadButtonEnabled3) {
+      fileInputRef3.current.click();
+    }
+
   };
   const handleFileUpload4 = () => {
-    // setShowRedButton4(true)
-    setIsEnabled4(true);
-    fileInputRef4.current.click();
+    if (isUploadButtonEnabled4) {
+      fileInputRef4.current.click();
+    }
+
   };
   const handleFileUpload5 = () => {
-    //  setShowRedButton5(true)
-    setIsEnabled5(true);
-    fileInputRef5.current.click();
+    if (isUploadButtonEnabled5) {
+      fileInputRef5.current.click();
+    }
+
   };
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -453,12 +478,26 @@ const Dieharder_tests = () => {
   const [selectedFile4, setSelectedFile4] = useState(null);
   const [selectedFile5, setSelectedFile5] = useState(null);
 
+
   const isProcessingFileRef = useRef(false);
+  const isProcessingFileRef2 = useRef(false);
+  const isProcessingFileRef3 = useRef(false);
+  const isProcessingFileRef4 = useRef(false);
+  const isProcessingFileRef5 = useRef(false);
+  const [isUploadButtonEnabled, setIsUploadButtonEnabled] = useState(true);
+  const [isUploadButtonEnabled2, setIsUploadButtonEnabled2] = useState(true);
+  const [isUploadButtonEnabled3, setIsUploadButtonEnabled3] = useState(true);
+  const [isUploadButtonEnabled4, setIsUploadButtonEnabled4] = useState(true);
+  const [isUploadButtonEnabled5, setIsUploadButtonEnabled5] = useState(true);
+
+
   const handleFileChange = async (event) => {
     isProcessingFileRef.current = true;
-    
+
     setLoadingProgressGr(0);
     setLoadingProgressRep(0);
+    sessionStorage.setItem(`ongoingFileUpload_dt`, 'true');
+
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -479,7 +518,7 @@ const Dieharder_tests = () => {
       return;
     }
 
-   
+
 
     const userId = await fetchUserId();
     if (!userId) return;
@@ -500,11 +539,11 @@ const Dieharder_tests = () => {
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime(currentTime);
 
-  
+
 
     // Supabase cleanup
     try {
-    
+
       const { error: deleteError } = await supabase
         .from('results3')
         .delete()
@@ -516,19 +555,18 @@ const Dieharder_tests = () => {
     } catch (err) {
 
     } finally {
-        isProcessingFileRef.current = false; // Reset flag when done
-      }
+      isProcessingFileRef.current = false; // Reset flag when done
+    }
     setIsEnabled(false);
     event.target.value = "";
   };
 
-const isProcessingFileRef2 = useRef(false);
-
   const handleFileChange2 = async (event) => {
     isProcessingFileRef2.current = true; // Set flag when processing starts
-    
+
     setLoadingProgress2Gr(0);
     setLoadingProgress2Rep(0);
+    sessionStorage.setItem(`ongoingFileUpload_dt2`, 'true');
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -547,7 +585,7 @@ const isProcessingFileRef2 = useRef(false);
       return;
     }
 
- 
+
     const userId = await fetchUserId();
     if (!userId) {
 
@@ -585,19 +623,20 @@ const isProcessingFileRef2 = useRef(false);
       }
     } catch (err) {
 
-    }finally {
-        isProcessingFileRef2.current = false; // Reset flag when done
-      }
+    } finally {
+      isProcessingFileRef2.current = false; // Reset flag when done
+    }
     setIsEnabled2(false);
 
     event.target.value = "";
   };
-const isProcessingFileRef3 = useRef(false);
+
   const handleFileChange3 = async (event) => {
-     isProcessingFileRef3.current = true; // Set flag when processing starts
-    
+    isProcessingFileRef3.current = true; // Set flag when processing starts
+
     setLoadingProgress3Gr(0);
     setLoadingProgress3Rep(0);
+    sessionStorage.setItem(`ongoingFileUpload_dt3`, 'true');
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -617,7 +656,7 @@ const isProcessingFileRef3 = useRef(false);
       return;
     }
 
-    
+
 
     const userId = await fetchUserId();
     if (!userId) {
@@ -645,7 +684,7 @@ const isProcessingFileRef3 = useRef(false);
 
     // Remove previous Supabase row for line 3
     try {
-     
+
       const { error: deleteError } = await supabase
         .from('results3')
         .delete()
@@ -658,20 +697,21 @@ const isProcessingFileRef3 = useRef(false);
       }
     } catch (err) {
 
-    }finally {
-        isProcessingFileRef3.current = false; // Reset flag when done
-      }
+    } finally {
+      isProcessingFileRef3.current = false; // Reset flag when done
+    }
     setIsEnabled3(false);
 
     // Reset the file input
     event.target.value = "";
   };
 
- const isProcessingFileRef4 = useRef(false);
+
   const handleFileChange4 = async (event) => {
-     isProcessingFileRef4.current = true; 
+    isProcessingFileRef4.current = true;
     setLoadingProgress4Gr(0);
     setLoadingProgress4Rep(0);
+    sessionStorage.setItem(`ongoingFileUpload_dt4`, 'true');
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -691,7 +731,7 @@ const isProcessingFileRef3 = useRef(false);
       return;
     }
 
-   
+
 
     const userId = await fetchUserId();
     if (!userId) {
@@ -717,10 +757,10 @@ const isProcessingFileRef3 = useRef(false);
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime4(currentTime);
 
-    
+
     // Remove previous Supabase row for line 4
     try {
-   
+
       const { error: deleteError } = await supabase
         .from('results3')
         .delete()
@@ -733,20 +773,21 @@ const isProcessingFileRef3 = useRef(false);
       }
     } catch (err) {
 
-    }finally {
-        isProcessingFileRef4.current = false; // Reset flag when done
-      }
+    } finally {
+      isProcessingFileRef4.current = false; // Reset flag when done
+    }
     setIsEnabled4(false);
 
     // Reset the file input
     event.target.value = "";
   };
 
- const isProcessingFileRef5 = useRef(false);
+
   const handleFileChange5 = async (event) => {
-    isProcessingFileRef5.current = true; 
+    isProcessingFileRef5.current = true;
     setLoadingProgress5Gr(0);
     setLoadingProgress5Rep(0);
+    sessionStorage.setItem(`ongoingFileUpload_dt5`, 'true');
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       // User closed the file picker without choosing a file
@@ -766,7 +807,7 @@ const isProcessingFileRef3 = useRef(false);
       return;
     }
 
-   
+
     const userId = await fetchUserId();
     if (!userId) {
 
@@ -791,7 +832,7 @@ const isProcessingFileRef3 = useRef(false);
     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setUploadTime5(currentTime);
 
-   
+
     // Remove previous Supabase row for line 5
     try {
       localStorage.setItem('resultFetchedFromSupabased5', 'false');
@@ -807,9 +848,9 @@ const isProcessingFileRef3 = useRef(false);
       }
     } catch (err) {
 
-    }finally {
-        isProcessingFileRef5.current = false; // Reset flag when done
-      }
+    } finally {
+      isProcessingFileRef5.current = false; // Reset flag when done
+    }
     setIsEnabled5(false);
 
     // Reset the file input
@@ -817,138 +858,12 @@ const isProcessingFileRef3 = useRef(false);
   };
 
 
-  // useEffect(() => {
-  //   const fetchStoredResults = async () => {
-  //     const userId = await fetchUserId();
-  //     if (!userId) {
-
-  //       return;
-  //     }
-  //     try {
-  //       const { data, error } = await supabase
-  //         .from('results3') // Replace 'results' with your Supabase table name
-  //         .select('*') // Fetch all rows
-  //         .eq("user_id", userId);
-  //       if (error) {
-
-  //         return;
-  //       }
-  //       // Update state with fetched data
-  //       if (data) {
-  //         data.forEach((row) => {
-  //           switch (row.line) {
-  //             case 1:
-  //               setBinaryInput(row.binary_data);
-  //               setScheduledTime(row.scheduled_time);
-  //               setResult({ final_result: row.result });
-  //               setFileName(row.file_name);
-  //               setUploadTime(row.upload_time);
-  //               setLoadingProgress(row.progress);
-  //               break;
-  //             case 2:
-  //               setBinaryInput2(row.binary_data);
-  //               setScheduledTime2(row.scheduled_time);
-  //               setResult2({ final_result: row.result });
-  //               setFileName2(row.file_name);
-  //               setUploadTime2(row.upload_time);
-  //               setLoadingProgress2(row.progress);
-  //               break;
-  //             case 3:
-  //               setBinaryInput3(row.binary_data);
-  //               setScheduledTime3(row.scheduled_time);
-  //               setResult3({ final_result: row.result });
-  //               setFileName3(row.file_name);
-  //               setUploadTime3(row.upload_time);
-  //               break;
-  //             case 4:
-  //               setBinaryInput4(row.binary_data);
-  //               setScheduledTime4(row.scheduled_time);
-  //               setResult4({ final_result: row.result });
-  //               setFileName4(row.file_name);
-  //               setUploadTime4(row.upload_time);
-  //               setLoadingProgress3(row.progress);
-  //               break;
-  //             case 5:
-  //               setBinaryInput5(row.binary_data);
-  //               setScheduledTime5(row.scheduled_time);
-  //               setResult5({ final_result: row.result });
-  //               setFileName5(row.file_name);
-  //               setUploadTime5(row.upload_time);
-  //               setLoadingProgress4(row.progress);
-  //               break;
-  //             case 6:
-  //               setBinaryInput6(row.binary_data);
-  //               setScheduledTime6(row.scheduled_time);
-  //               setResult6({ final_result: row.result });
-  //               setFileName6(row.file_name);
-  //               setUploadTime6(row.upload_time);
-  //               setLoadingProgress6(row.progress);
-  //               break;
-  //             case 7:
-  //               setBinaryInput7(row.binary_data);
-  //               setScheduledTime7(row.scheduled_time);
-  //               setResult7({ final_result: row.result });
-  //               setFileName7(row.file_name);
-  //               setUploadTime7(row.upload_time);
-  //               setLoadingProgress7(row.progress);
-  //               break;
-  //             case 8:
-  //               setBinaryInput8(row.binary_data);
-  //               setScheduledTime8(row.scheduled_time);
-  //               setResult8({ final_result: row.result });
-  //               setFileName8(row.file_name);
-  //               setUploadTime8(row.upload_time);
-  //               setLoadingProgress8(row.progress);
-  //               break;
-  //             case 9:
-  //               setBinaryInput9(row.binary_data);
-  //               setScheduledTime9(row.scheduled_time);
-  //               setResult9({ final_result: row.result });
-  //               setFileName9(row.file_name);
-  //               setUploadTime9(row.upload_time);
-  //               setLoadingProgress9(row.progress);
-  //               break;
-  //             case 10:
-  //               setBinaryInput10(row.binary_data);
-  //               setScheduledTime10(row.scheduled_time);
-  //               setResult10({ final_result: row.result });
-  //               setFileName10(row.file_name);
-  //               setUploadTime10(row.upload_time);
-  //               setLoadingProgress10(row.progress);
-  //               break;
-  //             default:
-  //               break;
-  //           }
-  //         });
-  //       }
-  //     } catch (err) {
-
-  //     }
-  //   };
-
-  //   fetchStoredResults();
-  // }, []);
-
-
-  const [isResults3Subscribed, setIsResults3Subscribed] = useState(false);
-  const subscriptionRefResults3 = useRef(null);
 
   useEffect(() => {
+     let subscription;
     const setupSubscription = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-
-      // ✅ Double check to prevent multiple subscriptions
-      if (isResults3Subscribed || subscriptionRefResults3.current) {
-      
-        return;
-      }
-
-      // ✅ Clean up any existing subscription first
-      if (subscriptionRefResults3.current) {
-        subscriptionRefResults3.current.unsubscribe();
-        subscriptionRefResults3.current = null;
-      }
 
       // Fetch initial data
       const fetchInitialData = async () => {
@@ -959,16 +874,16 @@ const isProcessingFileRef3 = useRef(false);
             .eq('user_id', userId);
 
           if (error) {
-           return;
+            return;
           }
 
           if (data) {
-            
+
             data.forEach(async (row) => {
               switch (row.line) {
                 case 1:
                   // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                   if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                     // Progress is 100% but no result means page was refreshed during idle state
                     await supabase
                       .from('results3')
@@ -980,7 +895,7 @@ const isProcessingFileRef3 = useRef(false);
                       .eq('line', 1);
 
                     setLoadingProgress(0);
-                   } else if (row.progress === 100 && row.result) {
+                  } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput(row.binary_data);
                     setScheduledTime(row.scheduled_time);
@@ -1000,7 +915,7 @@ const isProcessingFileRef3 = useRef(false);
                   break;
                 case 2:
                   // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                 if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                     // Progress is 100% but no result means page was refreshed during idle state
                     await supabase
                       .from('results3')
@@ -1012,7 +927,7 @@ const isProcessingFileRef3 = useRef(false);
                       .eq('line', 2);
 
                     setLoadingProgress2(0);
-                    } else if (row.progress === 100 && row.result) {
+                  } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput2(row.binary_data);
                     setScheduledTime2(row.scheduled_time);
@@ -1032,7 +947,7 @@ const isProcessingFileRef3 = useRef(false);
                   break;
                 case 3:
                   // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                   if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
                     // Progress is 100% but no result means page was refreshed during idle state
                     await supabase
                       .from('results3')
@@ -1044,7 +959,7 @@ const isProcessingFileRef3 = useRef(false);
                       .eq('line', 3);
 
                     setLoadingProgress3(0);
-                     } else if (row.progress === 100 && row.result) {
+                  } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput3(row.binary_data);
                     setScheduledTime3(row.scheduled_time);
@@ -1076,7 +991,7 @@ const isProcessingFileRef3 = useRef(false);
                       .eq('line', 4);
 
                     setLoadingProgress4(0);
-                    } else if (row.progress === 100 && row.result) {
+                  } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput4(row.binary_data);
                     setScheduledTime4(row.scheduled_time);
@@ -1108,7 +1023,7 @@ const isProcessingFileRef3 = useRef(false);
                       .eq('line', 5);
 
                     setLoadingProgress5(0);
-                   } else if (row.progress === 100 && row.result) {
+                  } else if (row.progress === 100 && row.result) {
                     // If progress is 100% AND there's a result, keep it (test completed)
                     setBinaryInput5(row.binary_data);
                     setScheduledTime5(row.scheduled_time);
@@ -1138,9 +1053,9 @@ const isProcessingFileRef3 = useRef(false);
 
       await fetchInitialData();
 
-     
-      subscriptionRefResults3.current = supabase
-        .channel('results3-changes-' + Date.now()) // ✅ Unique channel name with timestamp
+
+      subscription = supabase
+        .channel('results3-changes') // ✅ Unique channel name with timestamp
         .on(
           'postgres_changes',
           {
@@ -1150,72 +1065,82 @@ const isProcessingFileRef3 = useRef(false);
             filter: `user_id=eq.${userId}`
           },
           (payload) => {
-          
+
             const row = payload.new;
-              if (isProcessingFileRef?.current && payload.new?.line === 1) {
+            if (isProcessingFileRef?.current && payload.new?.line === 1) {
 
-            return;
-          }
-          if (isProcessingFileRef2?.current && payload.new?.line === 2) {
+              return;
+            }
+            if (isProcessingFileRef2?.current && payload.new?.line === 2) {
 
-            return;
-          }
-          if (isProcessingFileRef3?.current && payload.new?.line === 3) {
+              return;
+            }
+            if (isProcessingFileRef3?.current && payload.new?.line === 3) {
 
-            return;
-          }
-        if (isProcessingFileRef4?.current && payload.new?.line === 4) {
+              return;
+            }
+            if (isProcessingFileRef4?.current && payload.new?.line === 4) {
 
-            return;
-          }
-          if (isProcessingFileRef5?.current && payload.new?.line === 5) {
+              return;
+            }
+            if (isProcessingFileRef5?.current && payload.new?.line === 5) {
 
-            return;
-          }
-      if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
-      
-        return; // Don't update state for misleading 100% progress
-      }
+              return;
+            }
+            if (row.progress == 100 && (!row.result || row.result.trim() === "")) {
+
+              return; // Don't update state for misleading 100% progress
+            }
             switch (row.line) {
               case 1:
+                if (row.line === 1) {
                 setBinaryInput(row.binary_data);
                 setScheduledTime(row.scheduled_time);
                 setResult({ final_result: row.result });
                 setFileName(row.file_name);
                 setUploadTime(row.upload_time);
                 setLoadingProgress(row.progress);
+                }
                 break;
               case 2:
+                if (row.line === 1) {
                 setBinaryInput2(row.binary_data);
                 setScheduledTime2(row.scheduled_time);
                 setResult2({ final_result: row.result });
                 setFileName2(row.file_name);
                 setUploadTime2(row.upload_time);
                 setLoadingProgress2(row.progress);
+                }
                 break;
               case 3:
+                if (row.line === 1) {
                 setBinaryInput3(row.binary_data);
                 setScheduledTime3(row.scheduled_time);
                 setResult3({ final_result: row.result });
                 setFileName3(row.file_name);
                 setUploadTime3(row.upload_time);
                 setLoadingProgress3(row.progress);
+                }
                 break;
               case 4:
+                if (row.line === 1) {
                 setBinaryInput4(row.binary_data);
                 setScheduledTime4(row.scheduled_time);
                 setResult4({ final_result: row.result });
                 setFileName4(row.file_name);
                 setUploadTime4(row.upload_time);
                 setLoadingProgress4(row.progress);
+                }
                 break;
               case 5:
+                if (row.line === 1) {
                 setBinaryInput5(row.binary_data);
                 setScheduledTime5(row.scheduled_time);
                 setResult5({ final_result: row.result });
                 setFileName5(row.file_name);
                 setUploadTime5(row.upload_time);
                 setLoadingProgress5(row.progress);
+                }
                 break;
               default:
                 break;
@@ -1223,66 +1148,41 @@ const isProcessingFileRef3 = useRef(false);
           }
         )
         .subscribe((status) => {
-          console.log('📡 results3 Subscription status:', status);
-          if (status === 'SUBSCRIBED') {
-            setIsResults3Subscribed(true);
-          } else {
-            setIsResults3Subscribed(false);
-          }
+          
         });
     };
 
     setupSubscription();
 
     return () => {
-      if (subscriptionRefResults3.current) {
-       
-        subscriptionRefResults3.current.unsubscribe();
-        subscriptionRefResults3.current = null;
-        setIsResults3Subscribed(false);
+       if (subscription) {
+        subscription.unsubscribe();
+        // console.log('Subscription cleaned up');
       }
     };
-  }, [isResults3Subscribed]); // Add isResults3Subscribed as dependency
-  const [loadingProgress, setLoadingProgress] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabase3') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
+  }, []); // Add isResults3Subscribed as dependency
+
+
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingProgressRep, setLoadingProgressRep] = useState(0);
   const [loadingProgressGr, setLoadingProgressGr] = useState(0);
 
-  const [loadingProgress2, setLoadingProgress2] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased2') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
+
+  const [loadingProgress2, setLoadingProgress2] = useState(0);
   const [loadingProgress2Rep, setLoadingProgress2Rep] = useState(0);
   const [loadingProgress2Gr, setLoadingProgress2Gr] = useState(0);
 
-  const [loadingProgress3, setLoadingProgress3] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased3') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
+  const [loadingProgress3, setLoadingProgress3] = useState(0);
   const [loadingProgress3Rep, setLoadingProgress3Rep] = useState(0);
   const [loadingProgress3Gr, setLoadingProgress3Gr] = useState(0);
 
-  const [loadingProgress4, setLoadingProgress4] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased4') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
+  const [loadingProgress4, setLoadingProgress4] = useState(0);
   const [loadingProgress4Rep, setLoadingProgress4Rep] = useState(0);
   const [loadingProgress4Gr, setLoadingProgress4Gr] = useState(0);
 
-  const [loadingProgress5, setLoadingProgress5] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased5') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
+  const [loadingProgress5, setLoadingProgress5] = useState(0);
   const [loadingProgress5Rep, setLoadingProgress5Rep] = useState(0);
   const [loadingProgress5Gr, setLoadingProgress5Gr] = useState(0);
-
-  const [loadingProgress6, setLoadingProgress6] = useState(() => {
-    const isFetchedFromSupabase = localStorage.getItem('resultFetchedFromSupabased6') === 'true';
-    return isFetchedFromSupabase ? 100 : 0;
-  });
-
 
 
   const binaryInsertedRef = useRef(false); // 🔁 Track binary insert
@@ -1303,6 +1203,74 @@ const isProcessingFileRef3 = useRef(false);
   const alertShownRef3 = useRef(false);
   const alertShownRef4 = useRef(false);
   const alertShownRef5 = useRef(false);
+
+  useEffect(() => {
+    const handleProgressUpdate = (progress, storageKey, setIsDateEnabled, setIsTimeEnabled) => {
+      if (progress === 100) {
+        // Upload completed - enable both inputs
+        setIsDateEnabled(true);
+        setIsTimeEnabled(true);
+        sessionStorage.removeItem(`ongoingFileUpload_dt${storageKey}`);
+        sessionStorage.removeItem(`uploadProgress_dt${storageKey}`);
+      } else if (progress > 0 && progress < 100) {
+        // Upload in progress - disable both inputs
+        setIsDateEnabled(false);
+        setIsTimeEnabled(false);
+        sessionStorage.setItem(`ongoingFileUpload_dt${storageKey}`, 'true');
+        sessionStorage.setItem(`uploadProgress_dt${storageKey}`, progress.toString());
+      }
+    };
+
+    handleProgressUpdate(loadingProgress, '', setIsDateEnabled, setIsTimeEnabled);
+    handleProgressUpdate(loadingProgress2, '2', setIsDateEnabled2, setIsTimeEnabled2);
+    handleProgressUpdate(loadingProgress3, '3', setIsDateEnabled3, setIsTimeEnabled3);
+    handleProgressUpdate(loadingProgress4, '4', setIsDateEnabled4, setIsTimeEnabled4);
+    handleProgressUpdate(loadingProgress5, '5', setIsDateEnabled5, setIsTimeEnabled5);
+  }, [loadingProgress, loadingProgress2, loadingProgress3, loadingProgress4, loadingProgress5]);
+
+   useEffect(() => {
+    const checkPersistentState = (storageKey, setIsDateEnabled, setIsTimeEnabled) => {
+      const ongoingUpload = sessionStorage.getItem(`ongoingFileUpload_dt${storageKey}`);
+      const storedProgress = sessionStorage.getItem(`uploadProgress_dt${storageKey}`);
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        // There's an ongoing upload - disable inputs
+        setIsDateEnabled(false);
+        setIsTimeEnabled(false);
+      } else {
+        // No ongoing upload - enable inputs
+        setIsDateEnabled(true);
+        setIsTimeEnabled(true);
+      }
+    };
+
+    checkPersistentState('', setIsDateEnabled, setIsTimeEnabled);
+    checkPersistentState('2', setIsDateEnabled2, setIsTimeEnabled2);
+    checkPersistentState('3', setIsDateEnabled3, setIsTimeEnabled3);
+    checkPersistentState('4', setIsDateEnabled4, setIsTimeEnabled4);
+    checkPersistentState('5', setIsDateEnabled5, setIsTimeEnabled5);
+  }, []);
+
+ const handleUploadComplete = () => {
+    isProcessingFileRef.current = false;
+    setIsUploadButtonEnabled(true);
+  };
+  const handleUploadComplete2 = () => {
+    isProcessingFileRef2.current = false;
+    setIsUploadButtonEnabled2(true);
+  };
+  const handleUploadComplete3 = () => {
+    isProcessingFileRef3.current = false;
+    setIsUploadButtonEnabled3(true);
+  };
+  const handleUploadComplete4 = () => {
+    isProcessingFileRef4.current = false;
+    setIsUploadButtonEnabled4(true);
+  };
+  const handleUploadComplete5 = () => {
+    isProcessingFileRef5.current = false;
+    setIsUploadButtonEnabled5(true);
+  };
 
   const [currentJobIdT, setCurrentJobIdT] = useState(() => {
     const saved = localStorage.getItem("currentJobId_D");
@@ -1364,6 +1332,59 @@ const isProcessingFileRef3 = useRef(false);
     jobIdRef5.current = currentJobIdT5;
   }, [currentJobIdT5]);
 
+   useEffect(() => {
+    const checkPersistentState = (storageKey, isProcessingFileRef, setIsUploadButtonEnabled) => {
+      const ongoingUpload = sessionStorage.getItem(`ongoingFileUpload_dt${storageKey}`);
+      const storedProgress = sessionStorage.getItem(`uploadProgress_dt${storageKey}`);
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        // There's an ongoing upload that hasn't completed
+        isProcessingFileRef.current = true;
+        setIsUploadButtonEnabled(false);
+      } else {
+        // No ongoing upload or upload was completed
+        isProcessingFileRef.current = false;
+        setIsUploadButtonEnabled(true);
+        // Clean up sessionStorage
+        sessionStorage.removeItem(`ongoingFileUpload_dt${storageKey}`);
+        sessionStorage.removeItem(`uploadProgress_dt${storageKey}`);
+      }
+    };
+
+    // Check persistent state for all upload instances
+    checkPersistentState('', isProcessingFileRef, setIsUploadButtonEnabled);
+    checkPersistentState('2', isProcessingFileRef2, setIsUploadButtonEnabled2);
+    checkPersistentState('3', isProcessingFileRef3, setIsUploadButtonEnabled3);
+    checkPersistentState('4', isProcessingFileRef4, setIsUploadButtonEnabled4);
+    checkPersistentState('5', isProcessingFileRef5, setIsUploadButtonEnabled5);
+  }, []);
+
+  // Effect to handle loading progress changes for all uploads
+  useEffect(() => {
+    const handleProgressUpdate = (progress, storageKey, isProcessingFileRef, setIsUploadButtonEnabled) => {
+      if (progress === 100) {
+        // Upload completed
+        isProcessingFileRef.current = false;
+        setIsUploadButtonEnabled(true);
+        sessionStorage.removeItem(`ongoingFileUpload_dt${storageKey}`);
+        sessionStorage.removeItem(`uploadProgress_dt${storageKey}`);
+      } else if (progress > 0 && progress < 100) {
+        // Upload in progress
+        isProcessingFileRef.current = true;
+        setIsUploadButtonEnabled(false);
+        sessionStorage.setItem(`ongoingFileUpload_dt${storageKey}`, 'true');
+        sessionStorage.setItem(`uploadProgress_dt${storageKey}`, progress.toString());
+      }
+    };
+
+    // Handle progress updates for all upload instances
+    handleProgressUpdate(loadingProgress, '', isProcessingFileRef, setIsUploadButtonEnabled);
+    handleProgressUpdate(loadingProgress2, '2', isProcessingFileRef2, setIsUploadButtonEnabled2);
+    handleProgressUpdate(loadingProgress3, '3', isProcessingFileRef3, setIsUploadButtonEnabled3);
+    handleProgressUpdate(loadingProgress4, '4', isProcessingFileRef4, setIsUploadButtonEnabled4);
+    handleProgressUpdate(loadingProgress5, '5', isProcessingFileRef5, setIsUploadButtonEnabled5);
+  }, [loadingProgress, loadingProgress2, loadingProgress3, loadingProgress4, loadingProgress5]);
+
 
   useEffect(() => {
 
@@ -1372,6 +1393,10 @@ const isProcessingFileRef3 = useRef(false);
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
+      if (result=="non-random number" || result=="random number"){
+        
+        return;
+      }
 
       const fetchProgressFromSupabase = async () => {
         try {
@@ -1394,21 +1419,21 @@ const isProcessingFileRef3 = useRef(false);
 
           if (data) {
             const progress = data.progress || 0;
-             if (data.line === 1) {
-            setLoadingProgress(progress);
+            if (data.line === 1) {
+              setLoadingProgress(progress);
 
-            if (data.result) {
-              setResult({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase", "true");
-            }
+              if (data.result) {
+                setResult({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase", "true");
+              }
 
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
+              // ✅ Stop polling if already complete
+              if (progress >= 100 && progressIntervalId) {
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
             }
           }
-        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -1446,7 +1471,7 @@ const isProcessingFileRef3 = useRef(false);
 
     const lineNo = 1;
     if (result) {
-     return;
+      return;
     }
     setLoadingProgress(0);
     let progressIntervalId;
@@ -1464,7 +1489,7 @@ const isProcessingFileRef3 = useRef(false);
             fileReader.readAsBinaryString(selectedFile);
           });
 
-          
+
           binaryInsertedRef.current = true; // ✅ Prevent future inserts
 
         } catch (err) {
@@ -1569,8 +1594,10 @@ const isProcessingFileRef3 = useRef(false);
 
 
         setResult(response.data);
-        localStorage.setItem("resultFetchedFromSupabase3", "true");
+       if(result.final_result==="non-random number" || result.final_result==="random number"){
         await upsertProgress(100, userId, response.data.final_result);
+       }
+        handleUploadComplete();
 
       } catch (error) {
         if (progressIntervalId) {
@@ -1608,7 +1635,10 @@ const isProcessingFileRef3 = useRef(false);
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-
+       if (result=="non-random number" || result=="random number"){
+       
+        return;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1630,21 +1660,21 @@ const isProcessingFileRef3 = useRef(false);
 
           if (data) {
             const progress = data.progress || 0;
-             if (data.line === 2) {
-            setLoadingProgress2(progress);
+            if (data.line === 2) {
+              setLoadingProgress2(progress);
 
-            if (data.result) {
-              setResult2({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase", "true");
-            }
+              if (data.result) {
+                setResult2({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase", "true");
+              }
 
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
+              // ✅ Stop polling if already complete
+              if (progress >= 100 && progressIntervalId) {
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
             }
           }
-        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -1677,7 +1707,7 @@ const isProcessingFileRef3 = useRef(false);
 
 
   useEffect(() => {
-    if ( !debouncedScheduledTime2) return;
+    if (!debouncedScheduledTime2) return;
 
 
     const lineNo = 2;
@@ -1744,7 +1774,7 @@ const isProcessingFileRef3 = useRef(false);
         return;
       }
 
-      await upsertProgress2(1, userId);
+      await upsertProgress2(10, userId);
 
       setShowRedButton2(false);
       if (!alertShownRef2.current) {
@@ -1811,9 +1841,11 @@ const isProcessingFileRef3 = useRef(false);
         }
 
         setResult2(response.data);
-        localStorage.setItem("resultFetchedFromSupabase3", "true");
+       
+        if(result2.final_result==="non-random number" || result2.final_result==="random number"){
         await upsertProgress2(100, userId, response.data.final_result);
-
+       }
+       handleUploadComplete2();
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
@@ -1845,7 +1877,10 @@ const isProcessingFileRef3 = useRef(false);
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-
+       if (result3=="non-random number" || result3=="random number"){
+       
+        return;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -1867,21 +1902,21 @@ const isProcessingFileRef3 = useRef(false);
 
           if (data) {
             const progress = data.progress || 0;
- if (data.line === 3) {
-            setLoadingProgress3(progress);
+            if (data.line === 3) {
+              setLoadingProgress3(progress);
 
-            if (data.result) {
-              setResult3({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase", "true");
-            }
+              if (data.result) {
+                setResult3({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase", "true");
+              }
 
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
+              // ✅ Stop polling if already complete
+              if (progress >= 100 && progressIntervalId) {
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
             }
           }
-        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2046,9 +2081,11 @@ const isProcessingFileRef3 = useRef(false);
 
 
         setResult3(response.data);
-        localStorage.setItem("resultFetchedFromSupabase3", "true");
+       
+        if(result3.final_result==="non-random number" || result3.final_result==="random number"){
         await upsertProgress(100, userId, response.data.final_result);
-
+       }
+         handleUploadComplete3();
       } catch (error) {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
@@ -2081,7 +2118,10 @@ const isProcessingFileRef3 = useRef(false);
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-
+ if (result4=="non-random number" || result4=="random number"){
+      
+        return;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2103,21 +2143,21 @@ const isProcessingFileRef3 = useRef(false);
 
           if (data) {
             const progress = data.progress || 0;
-             if (data.line === 4) {
-            setLoadingProgress4(progress);
+            if (data.line === 4) {
+              setLoadingProgress4(progress);
 
-            if (data.result) {
-              setResult4({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase", "true");
-            }
+              if (data.result) {
+                setResult4({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase", "true");
+              }
 
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
+              // ✅ Stop polling if already complete
+              if (progress >= 100 && progressIntervalId) {
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
             }
           }
-        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2212,7 +2252,7 @@ const isProcessingFileRef3 = useRef(false);
         return;
       }
 
-      await upsertProgress(0, userId);
+      await upsertProgress(10, userId);
 
       setShowRedButton4(false);
       if (!alertShownRef4.current) {
@@ -2236,7 +2276,7 @@ const isProcessingFileRef3 = useRef(false);
           if (data) {
 
             const progress = data.progress || 0;
-            
+
             setLoadingProgress4(progress);
 
             if (data.result) {
@@ -2252,7 +2292,7 @@ const isProcessingFileRef3 = useRef(false);
               progressIntervalId = null;
             }
           }
-        
+
         } catch (err) {
 
         }
@@ -2287,8 +2327,12 @@ const isProcessingFileRef3 = useRef(false);
 
 
         setResult4(response.data);
-        localStorage.setItem("resultFetchedFromSupabase3", "true");
+        
+           
+        if(result4.final_result==="non-random number" || result4.final_result==="random number"){
         await upsertProgress(100, userId, response.data.final_result);
+       }
+         handleUploadComplete4();
 
       } catch (error) {
         if (progressIntervalId) {
@@ -2321,7 +2365,10 @@ const isProcessingFileRef3 = useRef(false);
     const resumeProgressCheck = async () => {
       const userId = await fetchUserId();
       if (!userId) return;
-
+       if (result5=="non-random number" || result5=="random number"){
+     
+        return;
+      }
       const fetchProgressFromSupabase = async () => {
         try {
           const { data, error } = await supabase
@@ -2343,21 +2390,21 @@ const isProcessingFileRef3 = useRef(false);
 
           if (data) {
             const progress = data.progress || 0;
-             if (data.line === 5) {
-            setLoadingProgress5(progress);
+            if (data.line === 5) {
+              setLoadingProgress5(progress);
 
-            if (data.result) {
-              setResult5({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase", "true");
-            }
+              if (data.result) {
+                setResult5({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase", "true");
+              }
 
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
+              // ✅ Stop polling if already complete
+              if (progress >= 100 && progressIntervalId) {
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
             }
           }
-        }
         } catch (err) {
 
           // ❌ stop polling on unexpected error
@@ -2390,7 +2437,7 @@ const isProcessingFileRef3 = useRef(false);
 
 
   useEffect(() => {
-    if (!binaryInput5 || !debouncedScheduledTime5) return;
+    if (!debouncedScheduledTime5) return;
 
 
     const lineNo = 5;
@@ -2525,8 +2572,12 @@ const isProcessingFileRef3 = useRef(false);
 
 
         setResult5(response.data);
-        localStorage.setItem("resultFetchedFromSupabase3", "true");
+       
+          if(result5.final_result==="non-random number" || result5.final_result==="random number"){
         await upsertProgress(100, userId, response.data.final_result);
+       }
+         handleUploadComplete5();
+
 
       } catch (error) {
         if (progressIntervalId) {
@@ -2558,7 +2609,7 @@ const isProcessingFileRef3 = useRef(false);
   const [binFile4, setBinFile4] = useState(null);
   const [binFile5, setBinFile5] = useState(null);
 
- 
+
   const handleButtonClick = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
@@ -2686,7 +2737,7 @@ const isProcessingFileRef3 = useRef(false);
 
           setLoadingProgress2Rep(prev => (percent > prev ? percent : prev)); // Prevent regress
         } catch (err) {
-         
+
         }
       }, 1000);
 
@@ -3103,7 +3154,7 @@ const isProcessingFileRef3 = useRef(false);
 
     } catch (error) {
       console.error(`Error downloading output for line ${line_number}:`, error);
-     
+
     }
   };
 
@@ -3115,23 +3166,7 @@ const isProcessingFileRef3 = useRef(false);
   const handleDownloadOutput5 = () => downloadDieharderOutput(5);
 
   return (
-    <Box m="20px" sx={{
-    overflowX: 'auto',
-    '&::-webkit-scrollbar': {
-      height: '8px',
-    },
-    '&::-webkit-scrollbar-track': {
-      background: colors.primary[700],
-      borderRadius: '4px',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      background: colors.blueAccent[500],
-      borderRadius: '4px',
-      '&:hover': {
-        background: colors.blueAccent[400],
-      }
-    }
-  }}>
+    <Box m="20px">
       {/* Header Section */}
       <Header title="Dieharder Tests" />
       <Box
@@ -3139,23 +3174,55 @@ const isProcessingFileRef3 = useRef(false);
         p="20px"
         sx={{
           backgroundColor: colors.primary[400],
-          borderRadius: "8px",
+          borderRadius: "12px", // Increased border radius
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)", // Softer, larger shadow
+          border: `1px solid ${colors.grey[700]}`, // Subtle border
+          overflowX: "auto", // Ensure horizontal scrolling for small screens
         }}
       >
         <Box
           component="table"
           sx={{
             width: "100%",
-            borderCollapse: "collapse",
+            borderCollapse: "separate", // Use separate for border-spacing
+            borderSpacing: "0 8px", // Space between rows
             textAlign: "center",
             "& th": {
-              backgroundColor: colors.blueAccent[700],
+              backgroundColor: colors.blueAccent[800], // Darker header background
               color: colors.grey[100],
-              padding: "12px",
+              padding: "14px 10px", // More vertical padding
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              fontSize: "0.85rem",
+              letterSpacing: "0.5px",
+              "&:first-of-type": {
+                borderTopLeftRadius: "8px", // Rounded corners for first header
+                borderBottomLeftRadius: "8px",
+              },
+              "&:last-of-type": {
+                borderTopRightRadius: "8px", // Rounded corners for last header
+                borderBottomRightRadius: "8px",
+              },
             },
             "& td": {
-              padding: "12px",
-              border: `1px solid ${colors.blueAccent[500]}`,
+              padding: "15px 10px", // More padding for cells
+              border: "none", // Remove individual cell borders
+              backgroundColor: colors.primary[500], // Slightly different background for cells
+              "&:first-of-type": {
+                borderTopLeftRadius: "8px", // Rounded corners for first cell
+                borderBottomLeftRadius: "8px",
+              },
+              "&:last-of-type": {
+                borderTopRightRadius: "8px", // Rounded corners for last cell
+                borderBottomRightRadius: "8px",
+              },
+            },
+            "& tr": {
+              transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out", // Smooth transition
+              "&:hover": {
+                transform: "translateY(-3px)", // Lift effect on hover
+                boxShadow: `0 6px 20px ${colors.primary[600]}80`, // Shadow on hover
+              },
             },
           }}
         >
@@ -3185,34 +3252,24 @@ const isProcessingFileRef3 = useRef(false);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled}
                       onClick={handleFileUpload}
+                      disabled={!isUploadButtonEnabled}   // 🔹 Disable button when state is false
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
+                        position: "relative",
                         "&:hover": {
                           backgroundColor: colors.greenAccent[600],
                         },
                       }}
                     >
-                      Upload binary file
-                      {showRedButton && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
+                      Upload Binary File
+
                     </Button>
+
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -3453,6 +3510,7 @@ const isProcessingFileRef3 = useRef(false);
                   type="date"
                   value={date}
                   onChange={handleDateChange}
+                    disabled={!isDateEnabled}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3470,6 +3528,7 @@ const isProcessingFileRef3 = useRef(false);
                   placeholder="e.g., 14:30:00"
                   value={time}
                   onChange={handleTimeChange}
+                   disabled={!isTimeEnabled}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3490,6 +3549,7 @@ const isProcessingFileRef3 = useRef(false);
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime}
+                             disabled={!isTimeEnabled}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding
@@ -3529,7 +3589,7 @@ const isProcessingFileRef3 = useRef(false);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled2}
+                      disabled={!isUploadButtonEnabled2}
                       onClick={handleFileUpload2}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -3537,6 +3597,7 @@ const isProcessingFileRef3 = useRef(false);
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
+                        position: "relative",
                         "&:hover": {
                           backgroundColor: colors.greenAccent[600],
                         },
@@ -3798,6 +3859,7 @@ const isProcessingFileRef3 = useRef(false);
                   type="date"
                   value={date2}
                   onChange={handleDateChange2}
+                   disabled={!isDateEnabled2}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3815,6 +3877,7 @@ const isProcessingFileRef3 = useRef(false);
                   placeholder="e.g., 14:30:00"
                   value={time2}
                   onChange={handleTimeChange2}
+                  disabled={!isTimeEnabled2}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3835,6 +3898,7 @@ const isProcessingFileRef3 = useRef(false);
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime2}
+                            disabled={!isTimeEnabled2}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding
@@ -3874,14 +3938,15 @@ const isProcessingFileRef3 = useRef(false);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled3}
                       onClick={handleFileUpload3}
+                       disabled={!isUploadButtonEnabled3}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
                         color: colors.grey[100],
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
+                        position: "relative",
                         "&:hover": {
                           backgroundColor: colors.greenAccent[600],
                         },
@@ -4142,6 +4207,7 @@ const isProcessingFileRef3 = useRef(false);
                   type="date"
                   value={date3}
                   onChange={handleDateChange3}
+                  disabled={!isDateEnabled3}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4159,6 +4225,7 @@ const isProcessingFileRef3 = useRef(false);
                   placeholder="e.g., 14:30:00"
                   value={time3}
                   onChange={handleTimeChange3}
+                  disabled={!isTimeEnabled3}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4179,6 +4246,7 @@ const isProcessingFileRef3 = useRef(false);
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime3}
+                            disabled={!isTimeEnabled3}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding
@@ -4218,7 +4286,7 @@ const isProcessingFileRef3 = useRef(false);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled4}
+                      disabled={!isUploadButtonEnabled4}
                       onClick={handleFileUpload4}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4226,6 +4294,7 @@ const isProcessingFileRef3 = useRef(false);
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
+                        position: "relative",
                         "&:hover": {
                           backgroundColor: colors.greenAccent[600],
                         },
@@ -4486,6 +4555,7 @@ const isProcessingFileRef3 = useRef(false);
                   type="date"
                   value={date4}
                   onChange={handleDateChange4}
+                  disabled={!isDateEnabled4}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4503,6 +4573,7 @@ const isProcessingFileRef3 = useRef(false);
                   placeholder="e.g., 14:30:00"
                   value={time4}
                   onChange={handleTimeChange4}
+                  disabled={!isTimeEnabled4}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4523,6 +4594,7 @@ const isProcessingFileRef3 = useRef(false);
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime4}
+                            disabled={!isTimeEnabled4}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding
@@ -4562,7 +4634,7 @@ const isProcessingFileRef3 = useRef(false);
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled5}
+                      disabled={!isUploadButtonEnabled5}
                       onClick={handleFileUpload5}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4570,6 +4642,7 @@ const isProcessingFileRef3 = useRef(false);
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
+                        position: "relative",
                         "&:hover": {
                           backgroundColor: colors.greenAccent[600],
                         },
@@ -4830,6 +4903,7 @@ const isProcessingFileRef3 = useRef(false);
                   type="date"
                   value={date5}
                   onChange={handleDateChange5}
+                   disabled={!isDateEnabled5}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4847,6 +4921,7 @@ const isProcessingFileRef3 = useRef(false);
                   placeholder="e.g., 14:30:00"
                   value={time5}
                   onChange={handleTimeChange5}
+                  disabled={!isTimeEnabled5}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4867,6 +4942,7 @@ const isProcessingFileRef3 = useRef(false);
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime5}
+                            disabled={!isTimeEnabled5}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding

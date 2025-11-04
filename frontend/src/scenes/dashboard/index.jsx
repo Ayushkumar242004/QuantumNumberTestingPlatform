@@ -989,23 +989,7 @@ useEffect(() => {
 
 
   return (
-    <Box m="20px" sx={{
-    overflowX: 'auto',
-    '&::-webkit-scrollbar': {
-      height: '8px',
-    },
-    '&::-webkit-scrollbar-track': {
-      background: colors.primary[700],
-      borderRadius: '4px',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      background: colors.blueAccent[500],
-      borderRadius: '4px',
-      '&:hover': {
-        background: colors.blueAccent[400],
-      }
-    }
-  }}>
+    <Box m="20px">
       {/* HEADER */}
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Header title="DASHBOARD" subtitle="Welcome to our dashboard" />
@@ -1017,10 +1001,11 @@ useEffect(() => {
           alignItems="center"
           gap="10px"
           sx={{
-            padding: "10px",
-            borderRadius: "8px",
-            backgroundColor: colors.primary[700],
-            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            padding: { xs: "10px", md: "15px 20px" }, // Responsive padding
+            borderRadius: "12px", // Consistent border radius
+            backgroundColor: colors.primary[800], // Slightly darker for controls section
+            boxShadow: "0 6px 18px rgba(0, 0, 0, 0.3)", // Add shadow
+            border: `1px solid ${colors.grey[700]}`, // Subtle border
             maxWidth: "fit-content",
             margin: "0 auto",
             "& > *": {
@@ -1190,7 +1175,7 @@ useEffect(() => {
               },
               "&:disabled": {
                 backgroundColor: colors.grey[700],
-                color: colors.grey[500],
+                color: colors.grey[300],
               },
               position: 'relative', // Added for the green dot positioning
             }}
@@ -1277,6 +1262,7 @@ useEffect(() => {
 
       {/* GRID & CHARTS */}
       <Box
+        mt="30px"
         display="grid"
         gridTemplateColumns="repeat(12, 1fr)"
         gridAutoRows="140px"
@@ -1285,137 +1271,174 @@ useEffect(() => {
         {/* ROW 1 */}
         <Box
           gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
+          sx={{
+            background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[700]} 100%)`,
+            borderRadius: "12px", 
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)", 
+            border: `1px solid ${colors.grey[700]}`, 
+            transition: "all 0.3s ease", 
+            "&:hover": {
+              transform: "translateY(-3px)", 
+              boxShadow: `0 6px 20px rgba(0, 0, 0, 0.35)`, 
+            },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between", 
+            width: "100%", 
+            p: "15px", 
+          }}
         >
+          {/* StatBox Content */}
+          <StatBox
+            title={resultNIST ? resultNIST.final_result : ""}
+            subtitle="Result SP 800-22B  Tests"
+          />
 
-
-          <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
-            {/* StatBox Content */}
-            <StatBox
-              title={resultNIST ? resultNIST.final_result : ""}
-              subtitle="Result SP 800-22B  Tests"
+          {/* Loading Progress on Right */}
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            p="5px"
+          >
+            <CircularProgress
+              variant="determinate"
+              value={loadingProgressn}
+              size={50}
+              thickness={5}
+              sx={{ color: "green" }}
             />
-
-            {/* Loading Progress on Right */}
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              p="5px"
+            <Typography
+              variant="body2"
+              fontWeight="bold"
+              color="white"
+              mt="5px"
             >
-              <CircularProgress
-                variant="determinate"
-                value={loadingProgressn}
-                size={50}
-                thickness={5}
-                sx={{ color: "green" }}
-              />
-              <Typography
-                variant="body2"
-                fontWeight="bold"
-                color="white"
-                mt="5px"
-              >
-                {loadingProgressn}%
-              </Typography>
-            </Box>
-          </Box>
-
-
-        </Box>
-
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
-            {/* StatBox Content */}
-            <StatBox
-              title={resultNIST90B ? resultNIST90B.final_result : ""}
-              subtitle="Result SP 800-90B  Tests"
-            />
-
-            {/* Loading Progress on Right */}
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              p="5px"
-            >
-              <CircularProgress
-                variant="determinate"
-                value={loadingProgressn2}
-                size={50}
-                thickness={5}
-                sx={{ color: "green" }}
-              />
-              <Typography
-                variant="body2"
-                fontWeight="bold"
-                color="white"
-                mt="5px"
-              >
-                {loadingProgressn2}%
-              </Typography>
-            </Box>
+              {loadingProgressn}%
+            </Typography>
           </Box>
         </Box>
 
         <Box
           gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
+          sx={{
+            background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[700]} 100%)`,
+            borderRadius: "12px", 
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)", 
+            border: `1px solid ${colors.grey[700]}`, 
+            transition: "all 0.3s ease", 
+            "&:hover": {
+              transform: "translateY(-3px)", 
+              boxShadow: `0 6px 20px rgba(0, 0, 0, 0.35)`, 
+            },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between", 
+            width: "100%", 
+            p: "15px", 
+          }}
         >
-          <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
-            {/* StatBox Content */}
-            <StatBox
-              title={resultDieharder ? resultDieharder.final_result : ""}
-              subtitle="Result Dieharder"
+          {/* StatBox Content */}
+          <StatBox
+            title={resultNIST90B ? resultNIST90B.final_result : ""}
+            subtitle="Result SP 800-90B  Tests"
+          />
+
+          {/* Loading Progress on Right */}
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            p="5px"
+          >
+            <CircularProgress
+              variant="determinate"
+              value={loadingProgressn2}
+              size={50}
+              thickness={5}
+              sx={{ color: "green" }}
             />
-
-            {/* Loading Progress on Right */}
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              p="5px"
+            <Typography
+              variant="body2"
+              fontWeight="bold"
+              color="white"
+              mt="5px"
             >
-              <CircularProgress
-                variant="determinate"
-                value={loadingProgressd}
-                size={50}
-                thickness={5}
-                sx={{ color: "green" }}
-              />
-              <Typography
-                variant="body2"
-                fontWeight="bold"
-                color="white"
-                mt="5px"
-              >
-                {loadingProgressd}%
-              </Typography>
-            </Box>
+              {loadingProgressn2}%
+            </Typography>
           </Box>
+        </Box>
 
+        <Box
+          gridColumn="span 3"
+          sx={{
+            background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[700]} 100%)`,
+            borderRadius: "12px", 
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)", 
+            border: `1px solid ${colors.grey[700]}`, 
+            transition: "all 0.3s ease", 
+            "&:hover": {
+              transform: "translateY(-3px)", 
+              boxShadow: `0 6px 20px rgba(0, 0, 0, 0.35)`, 
+            },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between", 
+            width: "100%", 
+            p: "15px", 
+          }}
+        >
+          {/* StatBox Content */}
+          <StatBox
+            title={resultDieharder ? resultDieharder.final_result : ""}
+            subtitle="Result Dieharder"
+          />
+
+          {/* Loading Progress on Right */}
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            p="5px"
+          >
+            <CircularProgress
+              variant="determinate"
+              value={loadingProgressd}
+              size={50}
+              thickness={5}
+              sx={{ color: "green" }}
+            />
+            <Typography
+              variant="body2"
+              fontWeight="bold"
+              color="white"
+              mt="5px"
+            >
+              {loadingProgressd}%
+            </Typography>
+          </Box>
         </Box>
         <Box
           gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
+          sx={{
+            background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[700]} 100%)`,
+            borderRadius: "12px", // Consistent border radius
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)", // Add shadow
+            border: `1px solid ${colors.grey[700]}`, // Subtle border
+            transition: "all 0.3s ease", // Smooth transition for hover
+            "&:hover": {
+              transform: "translateY(-3px)", // Lift effect on hover
+              boxShadow: `0 6px 20px rgba(0, 0, 0, 0.35)`, // Enhanced shadow on hover
+            },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center", // Keep center for single StatBox content
+            width: "100%", // Ensure it fills the grid column
+            p: "15px", // Add padding
+          }}
         >
           <StatBox
             title={currentTime || "Loading..."}
@@ -1432,7 +1455,17 @@ useEffect(() => {
         <Box
           gridColumn="span 8"
           gridRow="span 4"
-          backgroundColor={colors.primary[400]}
+          sx={{
+            background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
+            borderRadius: "12px", // Consistent border radius
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)", // Add shadow
+            border: `1px solid ${colors.grey[700]}`, // Subtle border
+            transition: "all 0.3s ease", // Smooth transition for hover
+            "&:hover": {
+              transform: "translateY(-3px)", // Lift effect on hover
+              boxShadow: `0 6px 20px rgba(0, 0, 0, 0.35)`, // Enhanced shadow on hover
+            },
+          }}
         >
           <Box
             mt="25px"
@@ -1479,8 +1512,18 @@ useEffect(() => {
         <Box
           gridColumn="span 4"
           gridRow="span 4"
-          backgroundColor={colors.primary[400]}
-          overflow="auto"
+          sx={{
+            background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
+            borderRadius: "12px", // Consistent border radius
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)", // Add shadow
+            border: `1px solid ${colors.grey[700]}`, // Subtle border
+            transition: "all 0.3s ease", // Smooth transition for hover
+            "&:hover": {
+              transform: "translateY(-3px)", // Lift effect on hover
+              boxShadow: `0 6px 20px rgba(0, 0, 0, 0.35)`, // Enhanced shadow on hover
+            },
+            overflow: "auto",
+          }}
         >
           <Box
             display="flex"

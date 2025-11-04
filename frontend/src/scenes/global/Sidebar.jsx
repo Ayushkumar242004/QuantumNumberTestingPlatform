@@ -22,11 +22,11 @@ import {
 import { supabase } from "../../utils/supabaseClient";
 import "./Sidebar.css";
 const navItems = [
-  {
-    title: "Dashboard",
-    href: "/",
-    icon: HomeOutlined,
-  },
+  // {
+  //   title: "Dashboard",
+  //   href: "/",
+  //   icon: HomeOutlined,
+  // },
   {
     title: "NIST SP 800-22B",
     href: "/nist_test",
@@ -121,11 +121,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
         zIndex: 1000,
         width: isCollapsed ? 80 : 256,
         transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        background: "linear-gradient(180deg, #1E1B3A 0%, #2B215D 40%, #3B1F76 100%)",
+        background: `linear-gradient(180deg, #1A1A2E 0%, #16213E 40%, #0F3460 100%)`, // Enhanced gradient
+        borderRight: "1px solid rgba(255, 255, 255, 0.1)", // Subtle border
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)", // Deeper shadow
         display: "flex",
         flexDirection: "column",
         color: "rgba(255, 255, 255, 0.8)",
-      }}   
+      }}
     >
       {/* Header */}
       <Box
@@ -144,21 +146,21 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
             </Box>
           </Box>
         )}
-        {/* <IconButton
+        <IconButton
           onClick={() => setIsCollapsed(!isCollapsed)}
           sx={{
             color: "rgba(255, 255, 255, 0.7)",
             "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
+              backgroundColor: "rgba(255, 255, 255, 0.2)", // Adjusted hover background
             },
           }}
         >
           {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
-        </IconButton> */}
+        </IconButton>
       </Box>
 
       {/* Navigation */}
-      <Box sx={{ flex: 1, overflowY: "auto", py: 4, px: 2 }}>
+      <Box sx={{ flex: 1, overflowY: "auto", overflowX: "hidden", py: 4, px: 2 }}>
         {navItems.map((item) => {
           const isActive = location.pathname === item.href;
           const Icon = item.icon;
@@ -176,11 +178,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
                     mx: "auto",
                     my: 1,
                     color: "rgba(255, 255, 255, 0.7)",
-                    backgroundColor: isActive ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                    backgroundColor: isActive ? "rgba(255, 255, 255, 0.15)" : "transparent", // Slightly more pronounced active state
                     borderRadius: "8px",
                     "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      backgroundColor: "rgba(255, 255, 255, 0.25)", // Stronger hover effect
+                      transform: "scale(1.05)", // Slight scale on hover
                     },
+                    transition: "all 0.2s ease", // Smooth transition
                   }}
                 >
                   <Icon />
@@ -207,10 +211,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
                 width: 'calc(100% - 32px)',
                 mb: 0.5,
                 color: "rgba(255, 255, 255, 0.7)",
-                backgroundColor: isActive ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                backgroundColor: isActive ? "rgba(255, 255, 255, 0.15)" : "transparent", // Slightly more pronounced active state
                 "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  backgroundColor: "rgba(255, 255, 255, 0.25)", // Stronger hover effect
+                  transform: "translateX(5px)", // Slide effect on hover
                 },
+                transition: "all 0.2s ease", // Smooth transition
               }}
             >
               {item.title}
@@ -235,12 +241,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
               sx={{
                 width: 40,
                 height: 40,
-                bgcolor: "rgba(255, 255, 255, 0.1)",
+                bgcolor: "rgba(255, 255, 255, 0.2)", // Darker background for collapsed avatar
                 color: "white",
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 "&:hover": {
-                    bgcolor: "error.main",
+                    bgcolor: "#EF476F", // More vibrant hover color for logout
                     transform: "scale(1.1)",
                 }
               }}
@@ -276,7 +282,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
                 {isLoggingOut ? (
                   <div className="loader-logout" />
                 ) : (
-                  <LogoutOutlined sx={{ color: "rgba(255, 255, 255, 0.7)" }} />
+                  <LogoutOutlined sx={{ color: "rgba(255, 255, 255, 0.8)", "&:hover": { color: "#EF476F" } }} /> // Enhanced hover for logout icon
                 )}
               </IconButton>
             </Tooltip>

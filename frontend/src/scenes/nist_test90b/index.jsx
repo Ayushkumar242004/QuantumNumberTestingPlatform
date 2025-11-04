@@ -32,11 +32,6 @@ const Nist_tests90b = () => {
   const [binaryInput3, setBinaryInput3] = useState("");
   const [binaryInput4, setBinaryInput4] = useState("");
   const [binaryInput5, setBinaryInput5] = useState("");
-  const [binaryInput6, setBinaryInput6] = useState("");
-  const [binaryInput7, setBinaryInput7] = useState("");
-  const [binaryInput8, setBinaryInput8] = useState("");
-  const [binaryInput9, setBinaryInput9] = useState("");
-  const [binaryInput10, setBinaryInput10] = useState("");
 
   useEffect(() => {
     // Reset body styles
@@ -58,44 +53,27 @@ const Nist_tests90b = () => {
   const fileInputRef3 = useRef(null);
   const fileInputRef4 = useRef(null);
   const fileInputRef5 = useRef(null);
-  const fileInputRef6 = useRef(null);
-  const fileInputRef7 = useRef(null);
-  const fileInputRef8 = useRef(null);
-  const fileInputRef_nine = useRef(null);
-  const fileInputRef10 = useRef(null);
+
 
   const [result, setResult] = useState("");
   const [result2, setResult2] = useState("");
   const [result3, setResult3] = useState("");
   const [result4, setResult4] = useState("");
   const [result5, setResult5] = useState("");
-  const [result6, setResult6] = useState(null);
-  const [result7, setResult7] = useState(null);
-  const [result8, setResult8] = useState(null);
-  const [result9, setResult9] = useState(null);
-  const [result10, setResult10] = useState(null);
+
 
   const [uploadTime, setUploadTime] = useState("");
   const [uploadTime2, setUploadTime2] = useState("");
   const [uploadTime3, setUploadTime3] = useState("");
   const [uploadTime4, setUploadTime4] = useState("");
   const [uploadTime5, setUploadTime5] = useState("");
-  const [uploadTime6, setUploadTime6] = useState("");
-  const [uploadTime7, setUploadTime7] = useState("");
-  const [uploadTime8, setUploadTime8] = useState("");
-  const [uploadTime9, setUploadTime9] = useState("");
-  const [uploadTime10, setUploadTime10] = useState("");
 
   const [fileName, setFileName] = useState(""); // New state to store filename
   const [fileName2, setFileName2] = useState(""); // New state to store filename
   const [fileName3, setFileName3] = useState(""); // New state to store filename
   const [fileName4, setFileName4] = useState(""); // New state to store filename
   const [fileName5, setFileName5] = useState(""); // New state to store filename
-  const [fileName6, setFileName6] = useState(""); // New state to store filename
-  const [fileName7, setFileName7] = useState(""); // New state to store filename
-  const [fileName8, setFileName8] = useState(""); // New state to store filename
-  const [fileName9, setFileName9] = useState(""); // New state to store filename
-  const [fileName10, setFileName10] = useState(""); // New state to store filename
+
 
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -112,27 +90,35 @@ const Nist_tests90b = () => {
   const [date5, setDate5] = useState("");
   const [time5, setTime5] = useState("");
 
-  const [date6, setDate6] = useState("");
-  const [time6, setTime6] = useState("");
-
-  const [date7, setDate7] = useState("");
-  const [time7, setTime7] = useState("");
-
-  const [date8, setDate8] = useState("");
-  const [time8, setTime8] = useState("");
-
-  const [date9, setDate9] = useState("");
-  const [time9, setTime9] = useState("");
-
-  const [date10, setDate10] = useState("");
-  const [time10, setTime10] = useState("");
-
 
   const [isEnabled, setIsEnabled] = useState(true);
   const [isEnabled2, setIsEnabled2] = useState(true);
   const [isEnabled3, setIsEnabled3] = useState(true);
   const [isEnabled4, setIsEnabled4] = useState(true);
   const [isEnabled5, setIsEnabled5] = useState(true);
+
+  const [isDateEnabled, setIsDateEnabled] = useState(true);
+  const [isTimeEnabled, setIsTimeEnabled] = useState(true);
+
+  const [isDateEnabled2, setIsDateEnabled2] = useState(true);
+  const [isTimeEnabled2, setIsTimeEnabled2] = useState(true);
+
+  const [isDateEnabled3, setIsDateEnabled3] = useState(true);
+  const [isTimeEnabled3, setIsTimeEnabled3] = useState(true);
+
+  const [isDateEnabled4, setIsDateEnabled4] = useState(true);
+  const [isTimeEnabled4, setIsTimeEnabled4] = useState(true);
+
+  const [isDateEnabled5, setIsDateEnabled5] = useState(true);
+  const [isTimeEnabled5, setIsTimeEnabled5] = useState(true);
+
+
+  const timeDebounceRef = useRef(null);
+  const timeDebounceRef2 = useRef(null);
+  const timeDebounceRef3 = useRef(null);
+  const timeDebounceRef4 = useRef(null);
+  const timeDebounceRef5 = useRef(null);
+
 
 
   const fetchUserId = async () => {
@@ -205,201 +191,213 @@ const Nist_tests90b = () => {
     }
   };
 
-  const handleDateChange6 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate6(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
-
-  const handleDateChange7 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate7(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
-
-  const handleDateChange8 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate8(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
-
-  const handleDateChange9 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate9(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
-
-  const handleDateChange10 = (event) => {
-    const inputDate = event.target.value;
-    if (dayjs(inputDate, "YYYY-MM-DD", true).isValid()) {
-      setDate10(inputDate);
-    } else {
-      alert("Invalid date format. Use YYYY-MM-DD.");
-    }
-  };
-
   const handleTimeChange = (event) => {
     const inputTime = event.target.value;
     setTime(inputTime); // Update the time state immediately
-  };
-  const handleUseCurrentTime = () => {
-    const now = new Date();
-    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
-    setTime(formattedTime);
+
+    // Clear existing timeout
+    if (timeDebounceRef.current) {
+      clearTimeout(timeDebounceRef.current);
+    }
+
+    // Disable time input after 500ms if upload is in progress
+    timeDebounceRef.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload_90b');
+      const storedProgress = sessionStorage.getItem('uploadProgress_90b');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled(false);
+      }
+    }, 500);
   };
 
   const handleTimeChange2 = (event) => {
     const inputTime = event.target.value;
-    setTime2(inputTime); // Update the time state immediately
-  };
-  const handleUseCurrentTime2 = () => {
-    const now = new Date();
-    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
-    setTime2(formattedTime);
+    setTime2(inputTime);
+
+    if (timeDebounceRef2.current) {
+      clearTimeout(timeDebounceRef2.current);
+    }
+
+    timeDebounceRef2.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload_90b2');
+      const storedProgress = sessionStorage.getItem('uploadProgress_90b2');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled2(false);
+      }
+    }, 500);
   };
 
   const handleTimeChange3 = (event) => {
     const inputTime = event.target.value;
-    setTime3(inputTime); // Update the time state immediately
-  };
-  const handleUseCurrentTime3 = () => {
-    const now = new Date();
-    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
-    setTime3(formattedTime);
+    setTime3(inputTime);
+
+    if (timeDebounceRef3.current) {
+      clearTimeout(timeDebounceRef3.current);
+    }
+
+    timeDebounceRef3.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload_90b3');
+      const storedProgress = sessionStorage.getItem('uploadProgress_90b3');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled3(false);
+      }
+    }, 500);
   };
 
   const handleTimeChange4 = (event) => {
     const inputTime = event.target.value;
-    setTime4(inputTime); // Update the time state immediately
-  };
-  const handleUseCurrentTime4 = () => {
-    const now = new Date();
-    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
-    setTime4(formattedTime);
+    setTime4(inputTime);
+
+    if (timeDebounceRef4.current) {
+      clearTimeout(timeDebounceRef4.current);
+    }
+
+    timeDebounceRef4.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload_90b4');
+      const storedProgress = sessionStorage.getItem('uploadProgress_90b4');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled4(false);
+      }
+    }, 500);
   };
 
   const handleTimeChange5 = (event) => {
     const inputTime = event.target.value;
-    setTime5(inputTime); // Update the time state immediately
+    setTime5(inputTime);
+
+    if (timeDebounceRef5.current) {
+      clearTimeout(timeDebounceRef5.current);
+    }
+
+    timeDebounceRef5.current = setTimeout(() => {
+      const ongoingUpload = sessionStorage.getItem('ongoingFileUpload_90b5');
+      const storedProgress = sessionStorage.getItem('uploadProgress_90b5');
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        setIsTimeEnabled5(false);
+      }
+    }, 500);
   };
+
+  const handleUseCurrentTime = () => {
+    if (!isTimeEnabled) return;
+    const now = new Date();
+    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
+    setTime(formattedTime);
+
+  };
+
+  const handleUseCurrentTime2 = () => {
+    if (!isTimeEnabled2) return;
+    const now = new Date();
+    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
+    setTime2(formattedTime);
+
+  };
+
+  const handleUseCurrentTime3 = () => {
+    if (!isTimeEnabled3) return;
+    const now = new Date();
+    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
+    setTime3(formattedTime);
+
+  };
+
+  const handleUseCurrentTime4 = () => {
+    if (!isTimeEnabled4) return;
+    const now = new Date();
+    const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
+    setTime4(formattedTime);
+
+  };
+
   const handleUseCurrentTime5 = () => {
+    if (!isTimeEnabled5) return;
     const now = new Date();
     const formattedTime = now.toTimeString().split(" ")[0]; // "HH:mm:ss"
     setTime5(formattedTime);
+
   };
 
   useEffect(() => {
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
+    const timeouts = [];
 
-    const handler = setTimeout(() => {
-      if (time && !timeRegex.test(time)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time2 && !timeRegex.test(time2)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time2]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time3 && !timeRegex.test(time3)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time3]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time4 && !timeRegex.test(time4)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time4]);
-
-  useEffect(() => {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/; // 24-hour format validation
-
-    const handler = setTimeout(() => {
-      if (time5 && !timeRegex.test(time5)) {
-        alert("Invalid time format. Use HH:mm:ss (24-hour format).");
-      }
-    }, 5000); // Wait 500ms after the user stops typing
-
-    return () => {
-      clearTimeout(handler); // Clear the timeout if the user types again
-    };
-  }, [time5]);
-
-
-  useEffect(() => {
-    if (date && time) {
-      setScheduledTime(`${date} ${time}`);
+    // Validate each time input
+    if (time) {
+      const timeout = setTimeout(() => {
+        if (!timeRegex.test(time)) {
+          alert("Invalid time format. Use HH:mm:ss (24-hour format).");
+        }
+      }, 5000);
+      timeouts.push(timeout);
     }
-  }, [date, time]);
+
+    if (time2) {
+      const timeout = setTimeout(() => {
+        if (!timeRegex.test(time2)) {
+          alert("Invalid time format. Use HH:mm:ss (24-hour format).");
+        }
+      }, 5000);
+      timeouts.push(timeout);
+    }
+
+    if (time3) {
+      const timeout = setTimeout(() => {
+        if (!timeRegex.test(time3)) {
+          alert("Invalid time format. Use HH:mm:ss (24-hour format).");
+        }
+      }, 5000);
+      timeouts.push(timeout);
+    }
+
+    if (time4) {
+      const timeout = setTimeout(() => {
+        if (!timeRegex.test(time4)) {
+          alert("Invalid time format. Use HH:mm:ss (24-hour format).");
+        }
+      }, 5000);
+      timeouts.push(timeout);
+    }
+
+    if (time5) {
+      const timeout = setTimeout(() => {
+        if (!timeRegex.test(time5)) {
+          alert("Invalid time format. Use HH:mm:ss (24-hour format).");
+        }
+      }, 5000);
+      timeouts.push(timeout);
+    }
+
+    // Cleanup all timeouts
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  }, [time, time2, time3, time4, time5]);
+
 
   useEffect(() => {
-    if (date2 && time2) {
-      setScheduledTime2(`${date2} ${time2}`);
-    }
-  }, [date2, time2]);
+    // Array of date, time, and setter pairs
+    const dateTimePairs = [
+      [date, time, setScheduledTime],
+      [date2, time2, setScheduledTime2],
+      [date3, time3, setScheduledTime3],
+      [date4, time4, setScheduledTime4],
+      [date5, time5, setScheduledTime5]
+    ];
 
-  useEffect(() => {
-    if (date3 && time3) {
-      setScheduledTime3(`${date3} ${time3}`);
-    }
-  }, [date3, time3]);
-
-  useEffect(() => {
-    if (date4 && time4) {
-      setScheduledTime4(`${date4} ${time4}`);
-    }
-  }, [date4, time4]);
-
-  useEffect(() => {
-    if (date5 && time5) {
-      setScheduledTime5(`${date5} ${time5}`);
-    }
-  }, [date5, time5]);
+    // Process each date-time pair
+    dateTimePairs.forEach(([currentDate, currentTime, setScheduledTimeFunc]) => {
+      if (currentDate && currentTime) {
+        const formattedDateTime = `${currentDate} ${currentTime}`;
+        setScheduledTimeFunc(formattedDateTime);
+      }
+    });
+  }, [date, time, date2, time2, date3, time3, date4, time4, date5, time5]);
 
   const [showRedButton, setShowRedButton] = useState(false);
   const [showRedButton2, setShowRedButton2] = useState(false);
@@ -408,32 +406,36 @@ const Nist_tests90b = () => {
   const [showRedButton5, setShowRedButton5] = useState(false);
 
 
+  // Handle file upload
   const handleFileUpload = () => {
-    // setShowRedButton(true);
-    setIsEnabled(true);
-    fileInputRef.current.click();
+    if (isUploadButtonEnabled) {
+      fileInputRef.current.click();
+    }
   };
   const handleFileUpload2 = () => {
-    // setShowRedButton2(true);
-    setIsEnabled2(true);
-    fileInputRef2.current.click();
+    if (isUploadButtonEnabled2) {
+      fileInputRef2.current.click();
+    }
+
   };
   const handleFileUpload3 = () => {
-    // setShowRedButton3(true);
-    setIsEnabled3(true);
-    fileInputRef3.current.click();
+    if (isUploadButtonEnabled3) {
+      fileInputRef3.current.click();
+    }
+
   };
   const handleFileUpload4 = () => {
-    // setShowRedButton4(true);
-    setIsEnabled4(true);
-    fileInputRef4.current.click();
+    if (isUploadButtonEnabled4) {
+      fileInputRef4.current.click();
+    }
+
   };
   const handleFileUpload5 = () => {
-    // setShowRedButton5(true);
-    setIsEnabled5(true);
-    fileInputRef5.current.click();
-  };
+    if (isUploadButtonEnabled5) {
+      fileInputRef5.current.click();
+    }
 
+  };
 
   const [currentJobIdT, setCurrentJobIdT] = useState(() => {
     const saved = localStorage.getItem("currentJobId_90b");
@@ -443,10 +445,6 @@ const Nist_tests90b = () => {
     return newId;
   });
 
-  useEffect(() => {
-    jobIdRef.current = currentJobIdT;
-  }, [currentJobIdT]);
-
   const [currentJobIdT2, setCurrentJobIdT2] = useState(() => {
     const saved = localStorage.getItem("currentJobId_90b2");
     if (saved) return saved;
@@ -454,10 +452,6 @@ const Nist_tests90b = () => {
     localStorage.setItem("currentJobId_90b2", newId);
     return newId;
   });
-
-  useEffect(() => {
-    jobIdRef2.current = currentJobIdT2;
-  }, [currentJobIdT2]);
 
   const [currentJobIdT3, setCurrentJobIdT3] = useState(() => {
     const saved = localStorage.getItem("currentJobId_90b3");
@@ -467,10 +461,6 @@ const Nist_tests90b = () => {
     return newId;
   });
 
-  useEffect(() => {
-    jobIdRef3.current = currentJobIdT3;
-  }, [currentJobIdT3]);
-
   const [currentJobIdT4, setCurrentJobIdT4] = useState(() => {
     const saved = localStorage.getItem("currentJobId_90b4");
     if (saved) return saved;
@@ -478,10 +468,6 @@ const Nist_tests90b = () => {
     localStorage.setItem("currentJobId_90b4", newId);
     return newId;
   });
-
-  useEffect(() => {
-    jobIdRef4.current = currentJobIdT4;
-  }, [currentJobIdT4]);
 
   const [currentJobIdT5, setCurrentJobIdT5] = useState(() => {
     const saved = localStorage.getItem("currentJobId_90b5");
@@ -491,88 +477,15 @@ const Nist_tests90b = () => {
     return newId;
   });
 
+  // Single useEffect for all job ID ref assignments
   useEffect(() => {
+    jobIdRef.current = currentJobIdT;
+    jobIdRef2.current = currentJobIdT2;
+    jobIdRef3.current = currentJobIdT3;
+    jobIdRef4.current = currentJobIdT4;
     jobIdRef5.current = currentJobIdT5;
-  }, [currentJobIdT5]);
+  }, [currentJobIdT, currentJobIdT2, currentJobIdT3, currentJobIdT4, currentJobIdT5]);
 
-
-
-  // const handleFileChange = async (event) => {
-  //    setLoadingProgressGr(0);
-  //   setLoadingProgressRep(0);
-  //   const selectedFile = event.target.files[0];
-  //   if (!selectedFile) {
-  //     // User closed the file picker without choosing a file
-  //     setShowRedButton(false);
-  //     return;
-  //   }
-
-  //   if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-  //     alert("Warning: The selected file is too large. Please choose a smaller file.");
-  //     return;
-  //   }
-
-  //   const userId = await fetchUserId();
-  //   if (!userId) return;
-
-  //   // Reset all state variables
-  //   setBinaryInput("");
-  //   setScheduledTime("");
-  //   setDebouncedScheduledTime("");
-  //   setResult(null);
-  //   setFileName("");
-  //   setUploadTime("");
-  //   setLoadingProgress(0);
-  //   setTime("");
-
-  //   setFileName(selectedFile.name);
-
-  //   const reader = new FileReader();
-  //   reader.onload = async (e) => {
-  //     const binaryData = e.target.result;
-  //     const byteArray = new Uint8Array(binaryData);
-
-  //     let binaryString = "";
-
-  //     if (selectedFile.name.toLowerCase().endsWith(".bin")) {
-  //       // Convert each byte to its binary representation (8 bits)
-  //       for (let i = 0; i < byteArray.length; i++) {
-  //         binaryString += byteArray[i].toString(2).padStart(8, '0');
-  //       }
-  //     } else {
-  //       // Assume it's a .txt file containing binary text
-  //       const decoder = new TextDecoder();
-  //       binaryString = decoder.decode(byteArray).trim();
-  //     }
-
-  //     setBinaryInput(binaryString);
-
-  //     const now = new Date();
-  //     const pad = (n) => String(n).padStart(2, '0');
-  //     const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  //     setUploadTime(currentTime);
-
-  //     try {
-  //       localStorage.setItem('resultFetchedFromSupabase_two', 'false');
-  //       const { error: deleteError } = await supabase
-  //         .from('results2')
-  //         .delete()
-  //         .match({ line: 1, user_id: userId });
-
-  //       setLoadingProgress(0);
-  //       if (deleteError) {
-
-  //         return;
-  //       }
-  //     } catch (err) {
-
-  //     }
-
-  //     event.target.value = "";
-  //   };
-  //   setIsEnabled(false);
-  //   reader.readAsArrayBuffer(selectedFile);
-  // };
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedFile2, setSelectedFile2] = useState(null);
@@ -586,407 +499,19 @@ const Nist_tests90b = () => {
   const binaryInsertedRef4 = useRef(false);
   const binaryInsertedRef5 = useRef(false);
 
-
-const isProcessingFileRef = useRef(false);
-  const handleFileChange = async (event) => {
-    isProcessingFileRef.current = true; // Set flag when processing starts
-    
-    setLoadingProgressGr(0);
-    setLoadingProgressRep(0);
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) {
-      // User closed the file picker without choosing a file
-      setShowRedButton(false);
-      return;
-    }
-
-    setSelectedFile(selectedFile);
-
-    const fileName = selectedFile.name.toLowerCase(); // normalize case
-    const isBin = fileName.endsWith(".bin");
-    const isTxt = fileName.endsWith(".txt");
+  const [isUploadButtonEnabled, setIsUploadButtonEnabled] = useState(true);
+  const [isUploadButtonEnabled2, setIsUploadButtonEnabled2] = useState(true);
+  const [isUploadButtonEnabled3, setIsUploadButtonEnabled3] = useState(true);
+  const [isUploadButtonEnabled4, setIsUploadButtonEnabled4] = useState(true);
+  const [isUploadButtonEnabled5, setIsUploadButtonEnabled5] = useState(true);
 
 
-
-    if (!isBin) {
-      alert("Please upload a .bin file.");
-      return;
-    }
-
-    if (selectedFile.size > MAX_STACK_SIZE_ESTIMATE) {
-      alert("Warning: The selected file is too large. Please choose a smaller file.");
-      return;
-    }
-
-    const userId = await fetchUserId();
-    if (!userId) return;
-
-    // Reset state
-    setBinaryInput("");
-    setResult("");
-    setFileName("");
-    setUploadTime("");
-    setLoadingProgress(0);
-    setTime("");
-    setScheduledTime("");
-    setDebouncedScheduledTime("");
-
-    setFileName(selectedFile.name);
-    const now = new Date();
-    const pad = (n) => String(n).padStart(2, '0');
-    const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    setUploadTime(currentTime);
-
-   
-    // Supabase cleanup
-    try {
-      localStorage.setItem('resultFetchedFromSupabase3', 'false');
-      const { error: deleteError } = await supabase
-        .from('results2')
-        .delete()
-        .match({ line: 1, user_id: userId });
-      setLoadingProgress(0);
-      if (deleteError) {
-        return;
-      }
-    } catch (err) {
-
-    }
- finally {
-        isProcessingFileRef.current = false; // Reset flag when done
-      }
-    setIsEnabled(false);
-    event.target.value = "";
-  };
-
+  const isProcessingFileRef = useRef(false);
   const isProcessingFileRef2 = useRef(false);
+  const isProcessingFileRef3 = useRef(false);
+  const isProcessingFileRef4 = useRef(false);
+  const isProcessingFileRef5 = useRef(false);
 
-  const handleFileChange2 = async (event) => {
-    isProcessingFileRef2.current = true; // Set flag when processing starts
-    
-    setLoadingProgress2Gr(0);
-    setLoadingProgress2Rep(0);
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) {
-      // User closed the file picker without choosing a file
-      setShowRedButton2(false);
-      return;
-    }
-    setSelectedFile2(selectedFile);
-    const fileName = selectedFile.name.toLowerCase(); // normalize case
-    const isBin = fileName.endsWith(".bin");
-    const isTxt = fileName.endsWith(".txt");
-
-
-
-    if (!isBin) {
-      alert("Please upload a .bin file.");
-      return;
-    }
-
-    // Fetch user ID
-    const userId = await fetchUserId();
-    if (!userId) {
-
-      return;
-    }
-
-    // Reset all state variables for line 2
-    setBinaryInput2(""); // Clear binary input
-    setScheduledTime2(""); // Clear scheduled time
-    setDebouncedScheduledTime2(""); // Clear debounced scheduled time
-    setResult2(""); // Clear result
-    setFileName2(""); // Clear filename
-    setUploadTime2(""); // Clear upload time
-    setLoadingProgress2(0); // Reset progress bar
-
-    // Set the new filename
-    setFileName2(selectedFile.name);
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      let binaryString = "";
-
-     
-
-      setBinaryInput2(binaryString);
-
-      // Store the current time when the file is uploaded
-      const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
-      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      setUploadTime2(currentTime);
-
-
-      // Remove the existing row for line 2 from Supabase
-      try {
-        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
-        const { error: deleteError } = await supabase
-          .from('results2')
-          .delete()
-          .match({ line: 2, user_id: userId }); // Replace '2' with the line number for this handler
-
-        setLoadingProgress2(0);
-        if (deleteError) {
-
-          return;
-        }
-
-      } catch (err) {
-
-      }finally {
-        isProcessingFileRef2.current = false; // Reset flag when done
-      }
-
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    setIsEnabled2(false);
-    reader.readAsArrayBuffer(selectedFile);
-  };
-
-const isProcessingFileRef3 = useRef(false);
-  const handleFileChange3 = async (event) => {
-     isProcessingFileRef3.current = true; // Set flag when processing starts
-    
-    const selectedFile = event.target.files[0];
-    setLoadingProgress3Gr(0);
-    setLoadingProgress3Rep(0);
-    if (!selectedFile) {
-      // User closed the file picker without choosing a file
-      setShowRedButton3(false);
-      return;
-    }
-    setSelectedFile3(selectedFile);
-    const fileName = selectedFile.name.toLowerCase(); // normalize case
-    const isBin = fileName.endsWith(".bin");
-    const isTxt = fileName.endsWith(".txt");
-
-
-
-    if (!isBin) {
-      alert("Please upload a .bin file.");
-      return;
-    }
-    // Fetch user ID
-    const userId = await fetchUserId();
-    if (!userId) {
-
-      return;
-    }
-
-    // Reset all state variables for line 3
-    setBinaryInput3(""); // Clear binary input
-    setScheduledTime3(""); // Clear scheduled time
-    setDebouncedScheduledTime3(""); // Clear debounced scheduled time
-    setResult3(""); // Clear result
-    setFileName3(""); // Clear filename
-    setUploadTime3(""); // Clear upload time
-    setLoadingProgress3(0); // Reset progress bar
-
-    // Set the new filename
-    setFileName3(selectedFile.name);
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      let binaryString = "";
-
-   
-      setBinaryInput3(binaryString);
-      // Update binaryInput state with new binary data
-
-      // Store the current time when the file is uploaded
-      const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
-      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      setUploadTime3(currentTime);
-
-      // Remove the existing row for line 3 from Supabase
-      try {
-        localStorage.setItem('resultFetchedFromSupabase90b3', 'false');
-        const { error: deleteError } = await supabase
-          .from('results2')
-          .delete()
-          .match({ line: 3, user_id: userId }); // Replace '3' with the line number for this handler
-
-        setLoadingProgress3(0);
-        if (deleteError) {
-
-          return;
-        }
-
-      } catch (err) {
-
-      }finally {
-        isProcessingFileRef3.current = false; // Reset flag when done
-      }
-
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    setIsEnabled3(false);
-    reader.readAsArrayBuffer(selectedFile);
-  };
- const isProcessingFileRef4 = useRef(false);
-  const handleFileChange4 = async (event) => {
-       isProcessingFileRef4.current = true; 
-    const selectedFile = event.target.files[0];
-    setLoadingProgress4Gr(0);
-    setLoadingProgress4Rep(0);
-    if (!selectedFile) {
-      // User closed the file picker without choosing a file
-      setShowRedButton4(false);
-      return;
-    }
-
-    setSelectedFile4(selectedFile);
-    const fileName = selectedFile.name.toLowerCase(); // normalize case
-    const isBin = fileName.endsWith(".bin");
-    const isTxt = fileName.endsWith(".txt");
-
-
-
-    if (!isBin) {
-      alert("Please upload a .bin file.");
-      return;
-    }
-    const userId = await fetchUserId();
-    if (!userId) {
-
-      return;
-    }
-
-    // Reset all state variables for line 2
-    setBinaryInput4(""); // Clear binary input
-    setScheduledTime4(""); // Clear scheduled time
-    setDebouncedScheduledTime4(""); // Clear debounced scheduled time
-    setResult4(""); // Clear result
-    setFileName4(""); // Clear filename
-    setUploadTime4(""); // Clear upload time
-    setLoadingProgress4(0); // Reset progress bar
-
-    // Set the new filename
-    setFileName4(selectedFile.name);
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      let binaryString = "";
-
-
-      setBinaryInput4(binaryString);
-
-      const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
-      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      setUploadTime4(currentTime);
-
-      try {
-        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
-        const { error: deleteError } = await supabase
-          .from('results2')
-          .delete()
-          .match({ line: 4, user_id: userId }); // Replace '2' with the line number for this handler
-
-        setLoadingProgress4(0);
-        if (deleteError) {
-
-          return;
-        }
-
-      } catch (err) {
-
-      }finally {
-        isProcessingFileRef4.current = false; // Reset flag when done
-      }
-
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    setIsEnabled4(false);
-    reader.readAsArrayBuffer(selectedFile);
-  };
- const isProcessingFileRef5 = useRef(false);
-  const handleFileChange5 = async (event) => {
-    isProcessingFileRef5.current = true; 
-    const selectedFile = event.target.files[0];
-    setLoadingProgress5Gr(0);
-    setLoadingProgress5Rep(0);
-    if (!selectedFile) {
-      // User closed the file picker without choosing a file
-      setShowRedButton5(false);
-      return;
-    }
-
-    setSelectedFile5(selectedFile);
-    const fileName = selectedFile.name.toLowerCase(); // normalize case
-    const isBin = fileName.endsWith(".bin");
-    const isTxt = fileName.endsWith(".txt");
-
-
-
-    if (!isBin) {
-      alert("Please upload a .bin file.");
-      return;
-    }
-    const userId = await fetchUserId();
-    if (!userId) {
-
-      return;
-    }
-
-    // Reset all state variables for line 2
-    setBinaryInput5(""); // Clear binary input
-    setScheduledTime5(""); // Clear scheduled time
-    setDebouncedScheduledTime5(""); // Clear debounced scheduled time
-    setResult5(""); // Clear result
-    setFileName5(""); // Clear filename
-    setUploadTime5(""); // Clear upload time
-    setLoadingProgress5(0); // Reset progress bar
-
-    // Set the new filename
-    setFileName5(selectedFile.name);
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const binaryData = e.target.result;
-      const byteArray = new Uint8Array(binaryData);
-      let binaryString = "";
-
-      setBinaryInput5(binaryString);
-
-      const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
-      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      setUploadTime5(currentTime);
-
-      try {
-        localStorage.setItem('resultFetchedFromSupabase90b2', 'false');
-        const { error: deleteError } = await supabase
-          .from('results2')
-          .delete()
-          .match({ line: 5, user_id: userId }); // Replace '2' with the line number for this handler
-
-        setLoadingProgress5(0);
-        if (deleteError) {
-
-          return;
-        }
-
-      } catch (err) {
-
-      }finally {
-        isProcessingFileRef5.current = false; // Reset flag when done
-      }
-      // Reset the file input value to allow the same file to be uploaded again
-      event.target.value = "";
-    };
-    setIsEnabled5(false);
-    reader.readAsArrayBuffer(selectedFile);
-  };
 
 
   const jobIdRef2 = useRef(null);
@@ -995,387 +520,576 @@ const isProcessingFileRef3 = useRef(false);
   const jobIdRef5 = useRef(null);
 
 
-  // useEffect(() => {
-  //   const fetchStoredResults = async () => {
-  //     const userId = await fetchUserId();
-  //     if (!userId) {
+  const handleUploadComplete = () => {
+    isProcessingFileRef.current = false;
+    setIsUploadButtonEnabled(true);
+  };
+  const handleUploadComplete2 = () => {
+    isProcessingFileRef2.current = false;
+    setIsUploadButtonEnabled2(true);
+  };
+  const handleUploadComplete3 = () => {
+    isProcessingFileRef3.current = false;
+    setIsUploadButtonEnabled3(true);
+  };
+  const handleUploadComplete4 = () => {
+    isProcessingFileRef4.current = false;
+    setIsUploadButtonEnabled4(true);
+  };
+  const handleUploadComplete5 = () => {
+    isProcessingFileRef5.current = false;
+    setIsUploadButtonEnabled5(true);
+  };
 
-  //       return;
-  //     }
-  //     try {
-  //       const { data, error } = await supabase
-  //         .from('results2') // Replace 'results' with your Supabase table name
-  //         .select('*') // Fetch all rows
-  //         .eq("user_id", userId);
-  //       if (error) {
+  const handleFileChange = async (event, instanceNumber = '') => {
+    // Get instance-specific values
+    const getInstanceValues = (instanceNum) => {
+      switch (instanceNum) {
+        case '':
+          return {
+            isProcessingFileRef: isProcessingFileRef,
+            setIsUploadButtonEnabled: setIsUploadButtonEnabled,
+            setLoadingProgressGr: setLoadingProgressGr,
+            setLoadingProgressRep: setLoadingProgressRep,
+            setSelectedFile: setSelectedFile,
+            setBinaryInput: setBinaryInput,
+            setScheduledTime: setScheduledTime,
+            setDebouncedScheduledTime: setDebouncedScheduledTime,
+            setResult: setResult,
+            setFileName: setFileName,
+            setUploadTime: setUploadTime,
+            setLoadingProgress: setLoadingProgress,
+            setTime: setTime,
+            setShowRedButton: setShowRedButton,
+            alertShownRef: alertShownRef,
+            setIsEnabled: null,
+            lineNumber: 1,
+            localStorageKey: 'resultFetchedFromSupabase3'
+          };
+        case '2':
+          return {
+            isProcessingFileRef: isProcessingFileRef2,
+            setIsUploadButtonEnabled: setIsUploadButtonEnabled2,
+            setLoadingProgressGr: setLoadingProgress2Gr,
+            setLoadingProgressRep: setLoadingProgress2Rep,
+            setSelectedFile: setSelectedFile2,
+            setBinaryInput: setBinaryInput2,
+            setScheduledTime: setScheduledTime2,
+            setDebouncedScheduledTime: setDebouncedScheduledTime2,
+            setResult: setResult2,
+            setFileName: setFileName2,
+            setUploadTime: setUploadTime2,
+            setLoadingProgress: setLoadingProgress2,
+            setTime: setTime2,
+            setShowRedButton: setShowRedButton2,
+            alertShownRef: alertShownRef2,
+            setIsEnabled: null,
+            lineNumber: 2,
+            localStorageKey: null
+          };
+        case '3':
+          return {
+            isProcessingFileRef: isProcessingFileRef3,
+            setIsUploadButtonEnabled: setIsUploadButtonEnabled3,
+            setLoadingProgressGr: setLoadingProgress3Gr,
+            setLoadingProgressRep: setLoadingProgress3Rep,
+            setSelectedFile: setSelectedFile3,
+            setBinaryInput: setBinaryInput3,
+            setScheduledTime: setScheduledTime3,
+            setDebouncedScheduledTime: setDebouncedScheduledTime3,
+            setResult: setResult3,
+            setFileName: setFileName3,
+            setUploadTime: setUploadTime3,
+            setLoadingProgress: setLoadingProgress3,
+            setTime: setTime3,
+            setShowRedButton: setShowRedButton3,
+            alertShownRef: alertShownRef3,
+            setIsEnabled: setIsEnabled3,
+            lineNumber: 3,
+            localStorageKey: 'resultFetchedFromSupabase90b3'
+          };
+        case '4':
+          return {
+            isProcessingFileRef: isProcessingFileRef4,
+            setIsUploadButtonEnabled: setIsUploadButtonEnabled4,
+            setLoadingProgressGr: setLoadingProgress4Gr,
+            setLoadingProgressRep: setLoadingProgress4Rep,
+            setSelectedFile: setSelectedFile4,
+            setBinaryInput: setBinaryInput4,
+            setScheduledTime: setScheduledTime4,
+            setDebouncedScheduledTime: setDebouncedScheduledTime4,
+            setResult: setResult4,
+            setFileName: setFileName4,
+            setUploadTime: setUploadTime4,
+            setLoadingProgress: setLoadingProgress4,
+            setTime: setTime4,
+            setShowRedButton: setShowRedButton4,
+            alertShownRef: alertShownRef4,
+            setIsEnabled: setIsEnabled4,
+            lineNumber: 4,
+            localStorageKey: 'resultFetchedFromSupabase90b2'
+          };
+        case '5':
+          return {
+            isProcessingFileRef: isProcessingFileRef5,
+            setIsUploadButtonEnabled: setIsUploadButtonEnabled5,
+            setLoadingProgressGr: setLoadingProgress5Gr,
+            setLoadingProgressRep: setLoadingProgress5Rep,
+            setSelectedFile: setSelectedFile5,
+            setBinaryInput: setBinaryInput5,
+            setScheduledTime: setScheduledTime5,
+            setDebouncedScheduledTime: setDebouncedScheduledTime5,
+            setResult: setResult5,
+            setFileName: setFileName5,
+            setUploadTime: setUploadTime5,
+            setLoadingProgress: setLoadingProgress5,
+            setTime: setTime5,
+            setShowRedButton: setShowRedButton5,
+            alertShownRef: alertShownRef5,
+            setIsEnabled: setIsEnabled5,
+            lineNumber: 5,
+            localStorageKey: 'resultFetchedFromSupabase90b2'
+          };
+        default:
+          return null;
+      }
+    };
 
-  //         return;
-  //       }
+    const instanceValues = getInstanceValues(instanceNumber);
+    if (!instanceValues) return;
 
-  //       // Update state with fetched data
-  //       if (data) {
-  //         data.forEach((row) => {
-  //           switch (row.line) {
-  //             case 1:
-  //               setBinaryInput(row.binary_data);
-  //               setScheduledTime(row.scheduled_time);
-  //               setResult({ final_result: row.result });
-  //               setFileName(row.file_name);
-  //               setUploadTime(row.upload_time);
-  //               setLoadingProgress(row.progress);
-  //               break;
-  //             case 2:
-  //               setBinaryInput2(row.binary_data);
-  //               setScheduledTime2(row.scheduled_time);
-  //               setResult2({ final_result: row.result });
-  //               setFileName2(row.file_name);
-  //               setUploadTime2(row.upload_time);
-  //               setLoadingProgress2(row.progress);
-  //               break;
-  //             case 3:
-  //               setBinaryInput3(row.binary_data);
-  //               setScheduledTime3(row.scheduled_time);
-  //               setResult3({ final_result: row.result });
-  //               setFileName3(row.file_name);
-  //               setUploadTime3(row.upload_time);
-  //               setLoadingProgress3(row.progress);
-  //               break;
-  //             case 4:
-  //               setBinaryInput4(row.binary_data);
-  //               setScheduledTime4(row.scheduled_time);
-  //               setResult4({ final_result: row.result });
-  //               setFileName4(row.file_name);
-  //               setUploadTime4(row.upload_time);
-  //               setLoadingProgress4(row.progress);
-  //               break;
+    // Set processing flag
+    instanceValues.isProcessingFileRef.current = true;
 
-  //             default:
-  //               break;
-  //           }
-  //         });
-  //       }
-  //     } catch (err) {
+    // Reset progress bars
+    instanceValues.setLoadingProgressGr(0);
+    instanceValues.setLoadingProgressRep(0);
 
-  //     }
-  //   };
+    // Set session storage
+    sessionStorage.setItem(`ongoingFileUpload${instanceNumber}`, 'true');
 
-  //   fetchStoredResults();
-  // }, []);
-
-const subscriptionRef = useRef(null);
-
-useEffect(() => {
-  const setupSubscription = async () => {
-    const userId = await fetchUserId();
-    if (!userId) return;
-
-    // ✅ Prevent multiple subscriptions
-    if (subscriptionRef.current) {
-      console.log('📡 Subscription already exists, skipping...');
+    const selectedFile = event.target.files[0];
+    if (!selectedFile) {
+      if (instanceValues.setShowRedButton) {
+        instanceValues.setShowRedButton(false);
+      }
       return;
     }
 
-    // ✅ FIRST: Fetch initial data for all lines
-    const fetchInitialData = async () => {
+    // File validation - check for .bin extension
+    const fileName = selectedFile.name.toLowerCase();
+    const isBin = fileName.endsWith(".bin");
+
+    if (!isBin) {
+      alert("Please upload a .bin file.");
+      return;
+    }
+
+    instanceValues.setSelectedFile(selectedFile);
+
+    const userId = await fetchUserId();
+    if (!userId) {
+      return;
+    }
+
+    // Reset all state variables
+    instanceValues.setBinaryInput("");
+    instanceValues.setScheduledTime("");
+    instanceValues.setDebouncedScheduledTime("");
+    instanceValues.setResult("");
+    instanceValues.setFileName("");
+    instanceValues.setUploadTime("");
+    instanceValues.setLoadingProgress(0);
+    instanceValues.setTime("");
+
+    instanceValues.setFileName(selectedFile.name);
+
+    // Set upload time immediately (for instance 1) or in FileReader (for other instances)
+    if (instanceNumber === '') {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      instanceValues.setUploadTime(currentTime);
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      const binaryData = e.target.result;
+      const byteArray = new Uint8Array(binaryData);
+      let binaryString = "";
+
+      // Update binaryInput state
+      instanceValues.setBinaryInput(binaryString);
+
+      // Set upload time for instances 2-5
+      if (instanceNumber !== '') {
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        const currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        instanceValues.setUploadTime(currentTime);
+      }
+
       try {
-        const { data, error } = await supabase
-          .from('results2')
-          .select('*')
-          .eq('user_id', userId);
-        
-        if (error) {
-         return;
+        // Set localStorage for specific instances
+        if (instanceValues.localStorageKey) {
+          localStorage.setItem(instanceValues.localStorageKey, 'false');
         }
 
-        if (data) {
-         data.forEach(async (row) => {
+        // Delete existing row from Supabase
+        const { error: deleteError } = await supabase
+          .from('results2')
+          .delete()
+          .match({ line: instanceValues.lineNumber, user_id: userId });
+
+        instanceValues.setLoadingProgress(0);
+
+        if (deleteError) {
+          return;
+        }
+      } catch (err) {
+        instanceValues.isProcessingFileRef.current = false;
+        instanceValues.setIsUploadButtonEnabled(true);
+      } finally {
+        instanceValues.isProcessingFileRef.current = false;
+
+        // Enable upload button for instance 1
+        if (instanceNumber === '') {
+          instanceValues.setIsUploadButtonEnabled(true);
+        }
+      }
+
+      instanceValues.alertShownRef.current = false;
+
+      // Set enabled for instances 3, 4, 5
+      if (instanceValues.setIsEnabled) {
+        instanceValues.setIsEnabled(false);
+      }
+
+      // Allow reupload of same file
+      event.target.value = "";
+    };
+    reader.onerror = () => {
+      instanceValues.isProcessingFileRef.current = false;
+      instanceValues.setIsUploadButtonEnabled(true);
+    };
+    reader.readAsArrayBuffer(selectedFile);
+  };
+
+  const subscriptionRef = useRef(null);
+
+  useEffect(() => {
+    const setupSubscription = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+
+      // ✅ Prevent multiple subscriptions
+      if (subscriptionRef.current) {
+        console.log('📡 Subscription already exists, skipping...');
+        return;
+      }
+
+      // ✅ FIRST: Fetch initial data for all lines
+      const fetchInitialData = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('results2')
+            .select('*')
+            .eq('user_id', userId);
+
+          if (error) {
+            return;
+          }
+
+          if (data) {
+            data.forEach(async (row) => {
+              const progress = row.progress || 0;
+              switch (row.line) {
+                case 1:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results2')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 1);
+
+                    setLoadingProgress(0);
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput(row.binary_data);
+                    setScheduledTime(row.scheduled_time);
+                    setResult({ final_result: row.result });
+                    setFileName(row.file_name);
+                    setUploadTime(row.upload_time);
+                    setLoadingProgress(progress);
+                    console.log(`📊 Line 1 initial progress: ${progress}%`);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput(row.binary_data);
+                    setScheduledTime(row.scheduled_time);
+                    setResult({ final_result: row.result });
+                    setFileName(row.file_name);
+                    setUploadTime(row.upload_time);
+                    setLoadingProgress(progress);
+                    console.log(`📊 Line 1 initial progress: ${progress}%`);
+                  }
+                  break;
+                case 2:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results2')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 2);
+
+                    setLoadingProgress2(0);
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput2(row.binary_data);
+                    setScheduledTime2(row.scheduled_time);
+                    setResult2({ final_result: row.result });
+                    setFileName2(row.file_name);
+                    setUploadTime2(row.upload_time);
+                    setLoadingProgress2(progress);
+                    console.log(`📊 Line 2 initial progress: ${progress}%`);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput2(row.binary_data);
+                    setScheduledTime2(row.scheduled_time);
+                    setResult2({ final_result: row.result });
+                    setFileName2(row.file_name);
+                    setUploadTime2(row.upload_time);
+                    setLoadingProgress2(progress);
+                    console.log(`📊 Line 2 initial progress: ${progress}%`);
+                  }
+                  break;
+                case 3:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results2')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 3);
+
+                    setLoadingProgress3(0);
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput3(row.binary_data);
+                    setScheduledTime3(row.scheduled_time);
+                    setResult3({ final_result: row.result });
+                    setFileName3(row.file_name);
+                    setUploadTime3(row.upload_time);
+                    setLoadingProgress3(progress);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput3(row.binary_data);
+                    setScheduledTime3(row.scheduled_time);
+                    setResult3({ final_result: row.result });
+                    setFileName3(row.file_name);
+                    setUploadTime3(row.upload_time);
+                    setLoadingProgress3(progress);
+                  }
+                  break;
+                case 4:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results2')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 4);
+
+                    setLoadingProgress4(0);
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput4(row.binary_data);
+                    setScheduledTime4(row.scheduled_time);
+                    setResult4({ final_result: row.result });
+                    setFileName4(row.file_name);
+                    setUploadTime4(row.upload_time);
+                    setLoadingProgress4(progress);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput4(row.binary_data);
+                    setScheduledTime4(row.scheduled_time);
+                    setResult4({ final_result: row.result });
+                    setFileName4(row.file_name);
+                    setUploadTime4(row.upload_time);
+                    setLoadingProgress4(progress);
+                  }
+                  break;
+                case 5:
+                  // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
+                  if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
+                    // Progress is 100% but no result means page was refreshed during idle state
+                    await supabase
+                      .from('results2')
+                      .update({
+                        progress: 10,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('user_id', userId)
+                      .eq('line', 5);
+
+                    setLoadingProgress5(0);
+                  } else if (row.progress === 100 && row.result) {
+                    // If progress is 100% AND there's a result, keep it (test completed)
+                    setBinaryInput5(row.binary_data);
+                    setScheduledTime5(row.scheduled_time);
+                    setResult5({ final_result: row.result });
+                    setFileName5(row.file_name);
+                    setUploadTime5(row.upload_time);
+                    setLoadingProgress5(progress);
+                  } else {
+                    // Normal case - progress is between 0-99
+                    setBinaryInput5(row.binary_data);
+                    setScheduledTime5(row.scheduled_time);
+                    setResult5({ final_result: row.result });
+                    setFileName5(row.file_name);
+                    setUploadTime5(row.upload_time);
+                    setLoadingProgress5(progress);
+                  }
+                  break;
+                default:
+                  break;
+              }
+            });
+          }
+        } catch (err) {
+          console.error('❌ Error in initial data fetch from results2:', err);
+        }
+      };
+
+      await fetchInitialData();
+
+
+      subscriptionRef.current = supabase
+        .channel('results2-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // INSERT, UPDATE, DELETE
+            schema: 'public',
+            table: 'results2',
+            filter: `user_id=eq.${userId}`
+          },
+          (payload) => {
+            const row = payload.new;
+
+            if (isProcessingFileRef?.current && payload.new?.line === 1) {
+
+              return;
+            }
+            if (isProcessingFileRef2?.current && payload.new?.line === 2) {
+
+              return;
+            }
+            if (isProcessingFileRef3?.current && payload.new?.line === 3) {
+
+              return;
+            }
+            if (isProcessingFileRef4?.current && payload.new?.line === 4) {
+
+              return;
+            }
+            if (isProcessingFileRef5?.current && payload.new?.line === 5) {
+
+              return;
+            }
+            if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
+
+              return; // Don't update state for misleading 100% progress
+            }
+
             const progress = row.progress || 0;
+
             switch (row.line) {
               case 1:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results2')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 1);
-                  
-                  setLoadingProgress(0);
-                 } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput(row.binary_data);
-                  setScheduledTime(row.scheduled_time);
-                  setResult({ final_result: row.result });
-                  setFileName(row.file_name);
-                  setUploadTime(row.upload_time);
-                  setLoadingProgress(progress);
-                  console.log(`📊 Line 1 initial progress: ${progress}%`);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput(row.binary_data);
-                  setScheduledTime(row.scheduled_time);
-                  setResult({ final_result: row.result });
-                  setFileName(row.file_name);
-                  setUploadTime(row.upload_time);
-                  setLoadingProgress(progress);
-                  console.log(`📊 Line 1 initial progress: ${progress}%`);
-                }
+                setBinaryInput(row.binary_data);
+                setScheduledTime(row.scheduled_time);
+                setResult({ final_result: row.result });
+                setFileName(row.file_name);
+                setUploadTime(row.upload_time);
+                setLoadingProgress(progress);
                 break;
               case 2:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-               if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results2')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 2);
-                  
-                  setLoadingProgress2(0);
-                  } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput2(row.binary_data);
-                  setScheduledTime2(row.scheduled_time);
-                  setResult2({ final_result: row.result });
-                  setFileName2(row.file_name);
-                  setUploadTime2(row.upload_time);
-                  setLoadingProgress2(progress);
-                  console.log(`📊 Line 2 initial progress: ${progress}%`);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput2(row.binary_data);
-                  setScheduledTime2(row.scheduled_time);
-                  setResult2({ final_result: row.result });
-                  setFileName2(row.file_name);
-                  setUploadTime2(row.upload_time);
-                  setLoadingProgress2(progress);
-                  console.log(`📊 Line 2 initial progress: ${progress}%`);
-                }
+                setBinaryInput2(row.binary_data);
+                setScheduledTime2(row.scheduled_time);
+                setResult2({ final_result: row.result });
+                setFileName2(row.file_name);
+                setUploadTime2(row.upload_time);
+                setLoadingProgress2(progress);
                 break;
               case 3:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-               if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results2')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 3);
-                  
-                  setLoadingProgress3(0);
-                  } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput3(row.binary_data);
-                  setScheduledTime3(row.scheduled_time);
-                  setResult3({ final_result: row.result });
-                  setFileName3(row.file_name);
-                  setUploadTime3(row.upload_time);
-                  setLoadingProgress3(progress);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput3(row.binary_data);
-                  setScheduledTime3(row.scheduled_time);
-                  setResult3({ final_result: row.result });
-                  setFileName3(row.file_name);
-                  setUploadTime3(row.upload_time);
-                  setLoadingProgress3(progress);
-                }
+                setBinaryInput3(row.binary_data);
+                setScheduledTime3(row.scheduled_time);
+                setResult3({ final_result: row.result });
+                setFileName3(row.file_name);
+                setUploadTime3(row.upload_time);
+                setLoadingProgress3(progress);
                 break;
               case 4:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results2')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 4);
-                  
-                  setLoadingProgress4(0);
-                  } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput4(row.binary_data);
-                  setScheduledTime4(row.scheduled_time);
-                  setResult4({ final_result: row.result });
-                  setFileName4(row.file_name);
-                  setUploadTime4(row.upload_time);
-                  setLoadingProgress4(progress);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput4(row.binary_data);
-                  setScheduledTime4(row.scheduled_time);
-                  setResult4({ final_result: row.result });
-                  setFileName4(row.file_name);
-                  setUploadTime4(row.upload_time);
-                  setLoadingProgress4(progress);
-                }
+                setBinaryInput4(row.binary_data);
+                setScheduledTime4(row.scheduled_time);
+                setResult4({ final_result: row.result });
+                setFileName4(row.file_name);
+                setUploadTime4(row.upload_time);
+                setLoadingProgress4(progress);
                 break;
               case 5:
-                // ⛔ CRITICAL FIX: Reset progress to 0 if no active test
-                if (row.progress === 100 && (!row.result || row.result === "" || row.result === " ")) {
-                  // Progress is 100% but no result means page was refreshed during idle state
-                  await supabase
-                    .from('results2')
-                    .update({
-                      progress: 10,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', userId)
-                    .eq('line', 5);
-                  
-                  setLoadingProgress5(0);
-                  } else if (row.progress === 100 && row.result) {
-                  // If progress is 100% AND there's a result, keep it (test completed)
-                  setBinaryInput5(row.binary_data);
-                  setScheduledTime5(row.scheduled_time);
-                  setResult5({ final_result: row.result });
-                  setFileName5(row.file_name);
-                  setUploadTime5(row.upload_time);
-                  setLoadingProgress5(progress);
-                } else {
-                  // Normal case - progress is between 0-99
-                  setBinaryInput5(row.binary_data);
-                  setScheduledTime5(row.scheduled_time);
-                  setResult5({ final_result: row.result });
-                  setFileName5(row.file_name);
-                  setUploadTime5(row.upload_time);
-                  setLoadingProgress5(progress);
-                }
+                setBinaryInput5(row.binary_data);
+                setScheduledTime5(row.scheduled_time);
+                setResult5({ final_result: row.result });
+                setFileName5(row.file_name);
+                setUploadTime5(row.upload_time);
+                setLoadingProgress5(progress);
                 break;
               default:
                 break;
             }
-          });
-        }
-      } catch (err) {
-        console.error('❌ Error in initial data fetch from results2:', err);
-      }
+          }
+        )
+        .subscribe((status) => {
+
+          if (status === 'SUBSCRIBED') {
+            console.log('✅ Successfully subscribed to results2 real-time updates');
+          }
+        });
     };
 
-    await fetchInitialData();
+    setupSubscription();
 
-   
-    subscriptionRef.current = supabase
-      .channel('results2-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // INSERT, UPDATE, DELETE
-          schema: 'public',
-          table: 'results2',
-          filter: `user_id=eq.${userId}`
-        },
-        (payload) => {
-         const row = payload.new;
+    // ✅ Cleanup subscription on component unmount
+    return () => {
+      if (subscriptionRef.current) {
 
-          if (isProcessingFileRef?.current && payload.new?.line === 1) {
-
-            return;
-          }
-          if (isProcessingFileRef2?.current && payload.new?.line === 2) {
-
-            return;
-          }
-          if (isProcessingFileRef3?.current && payload.new?.line === 3) {
-
-            return;
-          }
-        if (isProcessingFileRef4?.current && payload.new?.line === 4) {
-
-            return;
-          }
-          if (isProcessingFileRef5?.current && payload.new?.line === 5) {
-
-            return;
-          }
-      if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
-      
-        return; // Don't update state for misleading 100% progress
+        subscriptionRef.current.unsubscribe();
+        subscriptionRef.current = null;
       }
-
-          const progress = row.progress || 0;
-          
-          switch (row.line) {
-            case 1:
-             setBinaryInput(row.binary_data);
-              setScheduledTime(row.scheduled_time);
-              setResult({ final_result: row.result });
-              setFileName(row.file_name);
-              setUploadTime(row.upload_time);
-              setLoadingProgress(progress);
-              break;
-            case 2:
-             setBinaryInput2(row.binary_data);
-              setScheduledTime2(row.scheduled_time);
-              setResult2({ final_result: row.result });
-              setFileName2(row.file_name);
-              setUploadTime2(row.upload_time);
-              setLoadingProgress2(progress);
-              break;
-            case 3:
-              setBinaryInput3(row.binary_data);
-              setScheduledTime3(row.scheduled_time);
-              setResult3({ final_result: row.result });
-              setFileName3(row.file_name);
-              setUploadTime3(row.upload_time);
-              setLoadingProgress3(progress);
-              break;
-            case 4:
-              setBinaryInput4(row.binary_data);
-              setScheduledTime4(row.scheduled_time);
-              setResult4({ final_result: row.result });
-              setFileName4(row.file_name);
-              setUploadTime4(row.upload_time);
-              setLoadingProgress4(progress);
-              break;
-            case 5:
-              setBinaryInput5(row.binary_data);
-              setScheduledTime5(row.scheduled_time);
-              setResult5({ final_result: row.result });
-              setFileName5(row.file_name);
-              setUploadTime5(row.upload_time);
-              setLoadingProgress5(progress);
-              break;
-            default:
-              break;
-          }
-        }
-      )
-      .subscribe((status) => {
-       
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Successfully subscribed to results2 real-time updates');
-        }
-      });
-  };
-
-  setupSubscription();
-
-  // ✅ Cleanup subscription on component unmount
-  return () => {
-    if (subscriptionRef.current) {
-   
-      subscriptionRef.current.unsubscribe();
-      subscriptionRef.current = null;
-    }
-  };
-}, []);
+    };
+  }, []);
 
 
-    const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingProgressRep, setLoadingProgressRep] = useState(0);
   const [loadingProgressGr, setLoadingProgressGr] = useState(0);
 
@@ -1412,69 +1126,139 @@ useEffect(() => {
   const [debouncedScheduledTime5, setDebouncedScheduledTime5] = useState("");
 
   const finalResult = result ? result.final_result : " ";
-
-
- 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime(scheduledTime);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime]);
-
   const finalResult2 = result2 ? result2.final_result : " ";
-
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime2(scheduledTime2);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime2]);
-
   const finalResult3 = result3 ? result3.final_result : " ";
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime3(scheduledTime3);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime3]);
-
   const finalResult4 = result4 ? result4.final_result : " ";
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime4(scheduledTime4);
-    }, 3000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime4]);
-
   const finalResult5 = result5 ? result5.final_result : " ";
 
+  // Effect to check persistent state when component mounts for all uploads
+  useEffect(() => {
+    const checkPersistentState = (storageKey, setIsDateEnabled, setIsTimeEnabled) => {
+      const ongoingUpload = sessionStorage.getItem(`ongoingFileUpload_90b${storageKey}`);
+      const storedProgress = sessionStorage.getItem(`uploadProgress_90b${storageKey}`);
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        // There's an ongoing upload that hasn't completed
+        setIsDateEnabled(false);
+        setIsTimeEnabled(false);
+      } else {
+        setIsDateEnabled(true);
+        setIsTimeEnabled(true);
+      }
+    };
+
+    checkPersistentState('', setIsDateEnabled, setIsTimeEnabled);
+    checkPersistentState('2', setIsDateEnabled2, setIsTimeEnabled2);
+    checkPersistentState('3', setIsDateEnabled3, setIsTimeEnabled3);
+    checkPersistentState('4', setIsDateEnabled4, setIsTimeEnabled4);
+    checkPersistentState('5', setIsDateEnabled5, setIsTimeEnabled5);
+  }, []);
+
+  // Effect to handle loading progress changes for all uploads
+  useEffect(() => {
+    const handleProgressUpdate = (progress, storageKey, setIsDateEnabled, setIsTimeEnabled) => {
+      if (progress === 100) {
+        // Upload completed
+        setIsDateEnabled(true);
+        setIsTimeEnabled(true);
+        sessionStorage.removeItem(`ongoingFileUpload_90b${storageKey}`);
+        sessionStorage.removeItem(`uploadProgress_90b${storageKey}`);
+      } else if (progress > 0 && progress < 100) {
+        // Upload in progress
+        setIsDateEnabled(false);
+        setIsTimeEnabled(false);
+        sessionStorage.setItem(`ongoingFileUpload_90b${storageKey}`, 'true');
+        sessionStorage.setItem(`uploadProgress_90b${storageKey}`, progress.toString());
+      }
+    };
+
+    // Handle progress updates for all upload instances
+    handleProgressUpdate(loadingProgress, '', setIsDateEnabled, setIsTimeEnabled);
+    handleProgressUpdate(loadingProgress2, '2', setIsDateEnabled2, setIsTimeEnabled2);
+    handleProgressUpdate(loadingProgress3, '3', setIsDateEnabled3, setIsTimeEnabled3);
+    handleProgressUpdate(loadingProgress4, '4', setIsDateEnabled4, setIsTimeEnabled4);
+    handleProgressUpdate(loadingProgress5, '5', setIsDateEnabled5, setIsTimeEnabled5);
+  }, [loadingProgress, loadingProgress2, loadingProgress3, loadingProgress4, loadingProgress5]);
+
+
+  // Effect to check persistent state when component mounts for all uploads
+  useEffect(() => {
+    const checkPersistentState = (storageKey, isProcessingFileRef, setIsUploadButtonEnabled) => {
+      const ongoingUpload = sessionStorage.getItem(`ongoingFileUpload_90b${storageKey}`);
+      const storedProgress = sessionStorage.getItem(`uploadProgress_90b${storageKey}`);
+
+      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
+        // There's an ongoing upload that hasn't completed
+        isProcessingFileRef.current = true;
+        setIsUploadButtonEnabled(false);
+      } else {
+        // No ongoing upload or upload was completed
+        isProcessingFileRef.current = false;
+        setIsUploadButtonEnabled(true);
+        // Clean up sessionStorage
+        sessionStorage.removeItem(`ongoingFileUpload_90b${storageKey}`);
+        sessionStorage.removeItem(`uploadProgress_90b${storageKey}`);
+      }
+    };
+
+    // Check persistent state for all upload instances
+    checkPersistentState('', isProcessingFileRef, setIsUploadButtonEnabled);
+    checkPersistentState('2', isProcessingFileRef2, setIsUploadButtonEnabled2);
+    checkPersistentState('3', isProcessingFileRef3, setIsUploadButtonEnabled3);
+    checkPersistentState('4', isProcessingFileRef4, setIsUploadButtonEnabled4);
+    checkPersistentState('5', isProcessingFileRef5, setIsUploadButtonEnabled5);
+  }, []);
+
+  // Effect to handle loading progress changes for all uploads
+  useEffect(() => {
+    const handleProgressUpdate = (progress, storageKey, isProcessingFileRef, setIsUploadButtonEnabled) => {
+      if (progress === 100) {
+        // Upload completed
+        isProcessingFileRef.current = false;
+        setIsUploadButtonEnabled(true);
+        sessionStorage.removeItem(`ongoingFileUpload_90b${storageKey}`);
+        sessionStorage.removeItem(`uploadProgress_90b${storageKey}`);
+      } else if (progress > 0 && progress < 100) {
+        // Upload in progress
+        isProcessingFileRef.current = true;
+        setIsUploadButtonEnabled(false);
+        sessionStorage.setItem(`ongoingFileUpload_90b${storageKey}`, 'true');
+        sessionStorage.setItem(`uploadProgress_90b${storageKey}`, progress.toString());
+      }
+    };
+
+    // Handle progress updates for all upload instances
+    handleProgressUpdate(loadingProgress, '', isProcessingFileRef, setIsUploadButtonEnabled);
+    handleProgressUpdate(loadingProgress2, '2', isProcessingFileRef2, setIsUploadButtonEnabled2);
+    handleProgressUpdate(loadingProgress3, '3', isProcessingFileRef3, setIsUploadButtonEnabled3);
+    handleProgressUpdate(loadingProgress4, '4', isProcessingFileRef4, setIsUploadButtonEnabled4);
+    handleProgressUpdate(loadingProgress5, '5', isProcessingFileRef5, setIsUploadButtonEnabled5);
+  }, [loadingProgress, loadingProgress2, loadingProgress3, loadingProgress4, loadingProgress5]);
+
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedScheduledTime5(scheduledTime5);
-    }, 3000);
+    const timeouts = [];
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [scheduledTime5]);
+    // Array of scheduled time and setter pairs
+    const scheduledTimePairs = [
+      [scheduledTime, setDebouncedScheduledTime],
+      [scheduledTime2, setDebouncedScheduledTime2],
+      [scheduledTime3, setDebouncedScheduledTime3],
+      [scheduledTime4, setDebouncedScheduledTime4],
+      [scheduledTime5, setDebouncedScheduledTime5]
+    ];
 
+    // Set up debouncing for each pair
+    scheduledTimePairs.forEach(([time, setter]) => {
+      const timeout = setTimeout(() => {
+        setter(time);
+      }, 3000);
+      timeouts.push(timeout);
+    });
+
+    // Cleanup all timeouts
+    return () => timeouts.forEach(timeout => clearTimeout(timeout));
+  }, [scheduledTime, scheduledTime2, scheduledTime3, scheduledTime4, scheduledTime5]);
 
   const jobIdRef = useRef(null);
 
@@ -1485,1184 +1269,445 @@ useEffect(() => {
   const alertShownRef4 = useRef(false);
   const alertShownRef5 = useRef(false);
 
-  useEffect(() => {
+useEffect(() => {
+  const progressIntervalIds = {};
 
-    let progressIntervalId;
+  const resumeProgressCheck = async (lineNumber) => {
+    const userId = await fetchUserId();
+    if (!userId) return;
+    
+    // Check if result already exists and is valid for this line
+    switch (lineNumber) {
+      case 1:
+        if (result && (result.final_result === "non-random number" || result.final_result === "random number")) {
+          return;
+        }
+        break;
+      case 2:
+        if (result2 && (result2.final_result === "non-random number" || result2.final_result === "random number")) {
+          return;
+        }
+        break;
+      case 3:
+        if (result3 && (result3.final_result === "non-random number" || result3.final_result === "random number")) {
+          return;
+        }
+        break;
+      case 4:
+        if (result4 && (result4.final_result === "non-random number" || result4.final_result === "random number")) {
+          return;
+        }
+        break;
+      case 5:
+        if (result5 && (result5.final_result === "non-random number" || result5.final_result === "random number")) {
+          return;
+        }
+        break;
+    }
+    
+    const fetchProgressFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("results2")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("line", lineNumber)
+          .maybeSingle();
 
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
+        if (error) {
+          // ❌ stop polling on error
+          if (progressIntervalIds[lineNumber]) {
+            clearInterval(progressIntervalIds[lineNumber]);
+            delete progressIntervalIds[lineNumber];
+          }
+          return;
+        }
 
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 1)
-            .maybeSingle();
+        if (data && data.line === lineNumber) {
+          const progress = data.progress || 0;
 
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
+          // Update progress and result based on line number
+          switch (lineNumber) {
+            case 1:
+              setLoadingProgress(progress);
+              if (data.result) {
+                setResult({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase90b", "true");
+              }
+              break;
+            case 2:
+              setLoadingProgress2(progress);
+              if (data.result) {
+                setResult2({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase90b2", "true");
+              }
+              break;
+            case 3:
+              setLoadingProgress3(progress);
+              if (data.result) {
+                setResult3({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase90b2", "true");
+              }
+              break;
+            case 4:
+              setLoadingProgress4(progress);
+              if (data.result) {
+                setResult4({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase90b4", "true");
+              }
+              break;
+            case 5:
+              setLoadingProgress5(progress);
+              if (data.result) {
+                setResult5({ final_result: data.result });
+                localStorage.setItem("resultFetchedFromSupabase90b5", "true");
+              }
+              break;
           }
 
-          if (data) {
-            const progress = data.progress || 0;
-             if (data.line === 1) {
-            setLoadingProgress(progress);
-
-            if (data.result) {
-              setResult({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase90b", "true");
-            }
-
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
+          // ✅ Stop polling if already complete
+          if (progress >= 100 && progressIntervalIds[lineNumber]) {
+            clearInterval(progressIntervalIds[lineNumber]);
+            delete progressIntervalIds[lineNumber];
           }
         }
-        } catch (err) {
+      } catch (err) {
+        // ❌ stop polling on unexpected error
+        if (progressIntervalIds[lineNumber]) {
+          clearInterval(progressIntervalIds[lineNumber]);
+          delete progressIntervalIds[lineNumber];
+        }
+      }
+    };
 
-          // ❌ stop polling on unexpected error
+    // Start polling for this line
+    progressIntervalIds[lineNumber] = setInterval(fetchProgressFromSupabase, 2000);
+
+    // Do one immediate fetch
+    await fetchProgressFromSupabase();
+  };
+
+  // Start progress checks for all lines
+  const lines = [1, 2, 3, 4, 5];
+  lines.forEach(line => {
+    resumeProgressCheck(line);
+  });
+
+  // On unmount → clear all polling intervals
+  return () => {
+    Object.values(progressIntervalIds).forEach(intervalId => {
+      clearInterval(intervalId);
+    });
+  };
+}, [result, result2, result3, result4, result5]);
+  useEffect(() => {
+    const processLine = async (lineNumber) => {
+      // Get line-specific values
+      const getLineValues = (lineNo) => {
+        switch (lineNo) {
+          case 1:
+            return {
+              debouncedTime: debouncedScheduledTime,
+              result: result,
+              selectedFile: selectedFile,
+              fileName: fileName,
+              uploadTime: uploadTime,
+              currentJobId: currentJobIdT,
+              setLoadingProgress: setLoadingProgress,
+              setResult: setResult,
+              setShowRedButton: setShowRedButton,
+              alertShownRef: alertShownRef,
+              binaryInsertedRef: binaryInsertedRef,
+              setIsEnabled: setIsEnabled,
+              handleUploadComplete: handleUploadComplete,
+              binaryInput: null
+            };
+          case 2:
+            return {
+              debouncedTime: debouncedScheduledTime2,
+              result: result2,
+              selectedFile: selectedFile2,
+              fileName: fileName2,
+              uploadTime: uploadTime2,
+              currentJobId: currentJobIdT2,
+              setLoadingProgress: setLoadingProgress2,
+              setResult: setResult2,
+              setShowRedButton: setShowRedButton2,
+              alertShownRef: alertShownRef2,
+              binaryInsertedRef: binaryInsertedRef2,
+              handleUploadComplete: handleUploadComplete2,
+              binaryInput: null
+            };
+          case 3:
+            return {
+              debouncedTime: debouncedScheduledTime3,
+              result: result3,
+              selectedFile: selectedFile3,
+              fileName: fileName3,
+              uploadTime: uploadTime3,
+              currentJobId: currentJobIdT3,
+              setLoadingProgress: setLoadingProgress3,
+              setResult: setResult3,
+              setShowRedButton: setShowRedButton3,
+              alertShownRef: alertShownRef3,
+              binaryInsertedRef: binaryInsertedRef3,
+              handleUploadComplete: handleUploadComplete3,
+              binaryInput: binaryInput3
+            };
+          case 4:
+            return {
+              debouncedTime: debouncedScheduledTime4,
+              result: result4,
+              selectedFile: selectedFile4,
+              fileName: fileName4,
+              uploadTime: uploadTime4,
+              currentJobId: currentJobIdT4,
+              setLoadingProgress: setLoadingProgress4,
+              setResult: setResult4,
+              setShowRedButton: setShowRedButton4,
+              alertShownRef: alertShownRef4,
+              binaryInsertedRef: binaryInsertedRef4,
+              handleUploadComplete: handleUploadComplete4,
+              binaryInput: binaryInput4
+            };
+          case 5:
+            return {
+              debouncedTime: debouncedScheduledTime5,
+              result: result5,
+              selectedFile: selectedFile5,
+              fileName: fileName5,
+              uploadTime: uploadTime5,
+              currentJobId: currentJobIdT5,
+              setLoadingProgress: setLoadingProgress5,
+              setResult: setResult5,
+              setShowRedButton: setShowRedButton5,
+              alertShownRef: alertShownRef5,
+              binaryInsertedRef: binaryInsertedRef5,
+              handleUploadComplete: handleUploadComplete5,
+              binaryInput: binaryInput5
+            };
+          default:
+            return null;
+        }
+      };
+
+      const lineValues = getLineValues(lineNumber);
+      if (!lineValues || !lineValues.debouncedTime || lineValues.result) {
+        return null;
+      }
+
+
+      lineValues.setLoadingProgress(0);
+      let progressIntervalId;
+
+      const upsertProgress = async (progress, userId, result = "") => {
+        let binaryString = null;
+
+        if (progress === 0 && lineValues.selectedFile && !lineValues.binaryInsertedRef.current) {
+          try {
+            const fileReader = new FileReader();
+            const fileBuffer = await new Promise((resolve, reject) => {
+              fileReader.onload = () => resolve(fileReader.result);
+              fileReader.onerror = () => reject(fileReader.error);
+              fileReader.readAsBinaryString(lineValues.selectedFile);
+            });
+
+            // Optional binary conversion
+            // binaryString = Array.from(fileBuffer)
+            //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+            //   .join('');
+
+            lineValues.binaryInsertedRef.current = true;
+          } catch (err) {
+            return;
+          }
+        }
+
+        const payload = {
+          user_id: userId,
+          line: lineNumber,
+          binary_data: " ",
+          scheduled_time: lineValues.debouncedTime,
+          result: result,
+          file_name: lineValues.fileName,
+          upload_time: lineValues.uploadTime,
+          progress: progress,
+          updated_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase.from('results2').upsert(payload);
+        if (error) {
+          console.error("Supabase upsert error:", error.message);
+        }
+      };
+
+      const startProcess = async () => {
+        const userId = await fetchUserId();
+        if (!userId) return;
+
+        await upsertProgress(10, userId);
+        lineValues.setShowRedButton(false);
+
+        if (!lineValues.alertShownRef.current) {
+          alert("File uploaded successfully!");
+          lineValues.alertShownRef.current = true;
+        }
+
+        const fetchProgressFromSupabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("results2")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("line", lineNumber)
+              .maybeSingle();
+
+            if (error) {
+              return;
+            }
+
+            if (data) {
+              const progress = data.progress || 0;
+              lineValues.setLoadingProgress(progress);
+
+              if (progress >= 100 && progressIntervalId) {
+                clearInterval(progressIntervalId);
+                progressIntervalId = null;
+              }
+            }
+          } catch (err) {
+            // Error handling
+          }
+        };
+
+        progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
+        await fetchProgressFromSupabase();
+
+        try {
+          const formData = new FormData();
+          formData.append("file", lineValues.selectedFile);
+          const formattedScheduledTime = new Date(lineValues.debouncedTime)
+            .toISOString()
+            .replace("T", " ")
+            .split(".")[0];
+
+          formData.append("scheduled_time", lineNumber === 1 ? lineValues.debouncedTime : formattedScheduledTime);
+          formData.append("job_id", lineValues.currentJobId);
+          formData.append("line", lineNumber);
+          formData.append("user_id", userId);
+          formData.append("file_name", lineValues.fileName);
+
+          const response = await axios.post(
+            `${REACT_APP_BASE_URL}/nist90b_run/`,
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
+          );
+
+          if (lineValues.setIsEnabled) {
+            lineValues.setIsEnabled(true);
+          }
+
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
             progressIntervalId = null;
           }
-        }
-      };
 
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
-    };
-
-    // On mount → resume progress check
-    resumeProgressCheck();
-
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, []);
-
-
-  useEffect(() => {
-    if (!debouncedScheduledTime) {
-      return;
-    }
-   
-    const lineNo = 1;
-    if (result) {
-      return;
-    }
-    setLoadingProgress(0);
-    let progressIntervalId;
- 
-    const upsertProgress = async (progress, userId, result = "") => {
-      let binaryString = null;
-
-      if (progress === 0 && selectedFile && !binaryInsertedRef.current) {
-        try {
-          const fileReader = new FileReader();
-
-          const fileBuffer = await new Promise((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(selectedFile);
-          });
-
-          // binaryString = Array.from(fileBuffer)
-          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-          //   .join('');
-
-          binaryInsertedRef.current = true; // ✅ Prevent future inserts
-
-        } catch (err) {
-
-          return;
-        }
-      }
-
-      const payload = {
-        user_id: userId,
-        line: 1,
-        binary_data: " ",
-        scheduled_time: debouncedScheduledTime,
-        result: result,
-        file_name: fileName,
-        upload_time: uploadTime,
-        progress: progress,
-        updated_at: new Date().toISOString()
-      };
-
-
-      const { error } = await supabase
-        .from('results2')
-        .upsert(payload);
-
-if (error) {
-        console.error("Supabase upsert error:", error.message);
-      }
-    };
-   
-    const startProcess = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      await upsertProgress(10, userId);
-
-      setShowRedButton(false);
-      if (!alertShownRef.current) {
-        alert("File uploaded successfully!");
-        alertShownRef.current = true;
-      }
-     
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 1)
-            .maybeSingle();
-
-          if (error) {
-
-            return;
+          lineValues.setResult(response.data);
+          lineValues.handleUploadComplete();
+          if (response.data.final_result === "non-random number" || response.data.final_result === "random number") {
+            await upsertProgress(100, userId, response.data.final_result);
           }
-
-          if (data) {
-
-            const progress = data.progress || 0;
-
-            setLoadingProgress(progress);
-
-            //  Stop polling once progress is 100%
-            if (progress >= 100 && progressIntervalId) {
-
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-
-        }
-      };
-
-
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-      await fetchProgressFromSupabase();
-      try {
-
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        const formattedScheduledTime = new Date(debouncedScheduledTime)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-
-      
-        formData.append("scheduled_time", debouncedScheduledTime);
-        formData.append("job_id", currentJobIdT);
-        formData.append("line", lineNo);
-        formData.append("user_id", userId);
-        formData.append("file_name", fileName);
-        
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/nist90b_run/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-     
-        console.log("response", response);
-        setIsEnabled(true);
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-       
-        setResult(response.data);
-        localStorage.setItem("resultFetchedFromSupabase90b", "true");
-        await upsertProgress(100, userId, response.data.final_result);
-       
-      } catch (error) {
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-        setLoadingProgress(0);
-        await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
-
-      }
-    };
-
-    startProcess();
-
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, [selectedFile, debouncedScheduledTime]);
-
-
-  useEffect(() => {
-
-    let progressIntervalId;
-
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 2)
-            .maybeSingle();
-
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-             if (data.line === 2) {
-            setLoadingProgress2(progress);
-
-            if (data.result) {
-              setResult2({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase90b2", "true");
-            }
-
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        }
-        } catch (err) {
-
-          // ❌ stop polling on unexpected error
+        } catch (error) {
           if (progressIntervalId) {
             clearInterval(progressIntervalId);
             progressIntervalId = null;
           }
+
+          lineValues.setLoadingProgress(0);
+          await upsertProgress(0, userId);
+          alert(`Error: ${error}`);
         }
       };
 
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
-    };
-
-    // On mount → resume progress check
-    resumeProgressCheck();
-
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, []); // <-- runs only on mount/unmount
-
-  useEffect(() => {
-    if (!debouncedScheduledTime2) return;
-  
-    const lineNo = 2;
-  
-    if (result2) {
-     return;
-    }
-  
-    setLoadingProgress2(0);
-    let progressIntervalId;
-  
-    const upsertProgress = async (progress, userId, result = "") => {
-      let binaryString = null;
-  
-      if (progress === 0 && selectedFile2 && !binaryInsertedRef2.current) {
-        try {
-          const fileReader = new FileReader();
-  
-          const fileBuffer = await new Promise((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(selectedFile2);
-          });
-  
-          // binaryString = Array.from(fileBuffer)
-          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-          //   .join('');
-  
-          binaryInsertedRef2.current = true; // ✅ Prevent duplicate binary inserts
-        } catch (err) {
-          return;
-        }
-      }
-  
-      const payload = {
-        user_id: userId,
-        line: 2,
-        binary_data: " ", // You can replace with binaryString if needed
-        scheduled_time: debouncedScheduledTime2,
-        result: result,
-        file_name: fileName2,
-        upload_time: uploadTime2,
-        progress: progress,
-        updated_at: new Date().toISOString()
-      };
-  
-      const { error } = await supabase.from("results2").upsert(payload);
-  
-     
-    };
-  
-    const startProcess = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-  
-      await upsertProgress(10, userId);
-  
-      setShowRedButton2(false);
-      if (!alertShownRef2.current) {
-        alert("File uploaded successfully!");
-        alertShownRef2.current = true;
-      }
-  
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 2)
-            .maybeSingle();
-  
-          if (error) {
-          return;
-          }
-  
-          if (data) {
-            const progress = data.progress || 0;
-            setLoadingProgress2(progress);
-  
-            if (progress >= 100 && progressIntervalId) {
-           
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-         
-        }
-      };
-  
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-      await fetchProgressFromSupabase();
-  
-      try {
-        const formData = new FormData();
-        formData.append("file", selectedFile2);
-  
-        const formattedScheduledTime = new Date(debouncedScheduledTime2)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-  
-        formData.append("scheduled_time", formattedScheduledTime);
-        formData.append("job_id", currentJobIdT2);
-        formData.append("line", lineNo);
-        formData.append("user_id", userId);
-        formData.append("file_name", fileName2);
-        
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/nist90b_run/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-  
-        setIsEnabled2(true);
-  
+      await startProcess();
+      return () => {
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
           progressIntervalId = null;
         }
-  
-        setResult2(response.data);
-        localStorage.setItem("resultFetchedFromSupabase90b2", "true");
-  
-        await upsertProgress(100, userId, response.data.final_result);
-      } catch (error) {
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-  
-        setLoadingProgress2(0);
-        await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
-      }
-    };
-  
-    startProcess();
-  
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, [selectedFile2, debouncedScheduledTime2]);
-  
-
-  useEffect(() => {
-
-    let progressIntervalId;
-
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 3)
-            .maybeSingle();
-
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-             if (data.line === 3) {
-            setLoadingProgress3(progress);
-
-            if (data.result) {
-              setResult3({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase90b2", "true");
-            }
-
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        }
-        } catch (err) {
-
-          // ❌ stop polling on unexpected error
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          }
-        }
       };
-
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
     };
 
-    // On mount → resume progress check
-    resumeProgressCheck();
+    // Process all lines that have debounced scheduled time and no result yet
+    const lines = [1, 2, 3, 4, 5];
+    const cleanupFunctions = [];
 
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
+    lines.forEach(line => {
+      const cleanup = processLine(line);
+      if (cleanup) {
+        cleanupFunctions.push(cleanup);
       }
-    };
-  }, []); // <-- runs only on mount/unmount
-
-  useEffect(() => {
-    if (!debouncedScheduledTime3) return;
-  
-    const lineNo = 3;
-  
-    if (result3) {
-      // localStorage.setItem('resultFetchedFromSupabase90b3', 'true');
-      // setLoadingProgress3(100);
-      return;
-    }
-  
-    setLoadingProgress3(0);
-    let progressIntervalId;
-  
-    const upsertProgress = async (progress, userId, result = "") => {
-      let binaryString = null;
-  
-      if (progress === 0 && selectedFile3 && !binaryInsertedRef3.current) {
-        try {
-          const fileReader = new FileReader();
-  
-          const fileBuffer = await new Promise((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(selectedFile3);
-          });
-  
-          // binaryString = Array.from(fileBuffer)
-          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-          //   .join('');
-  
-          binaryInsertedRef3.current = true; // ✅ Prevent future inserts
-        } catch (err) {
-          return;
-        }
-      }
-  
-      const payload = {
-        user_id: userId,
-        line: 3,
-        binary_data: " ", // Replace with binaryString if needed
-        scheduled_time: debouncedScheduledTime3,
-        result: result,
-        file_name: fileName3,
-        upload_time: uploadTime3,
-        progress: progress,
-        updated_at: new Date().toISOString()
-      };
-  
-      const { error } = await supabase.from("results2").upsert(payload);
-  
-      if (error) {
-        console.error("Supabase upsert error:", error.message);
-      }
-    };
-  
-    const startProcess = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-  
-      await upsertProgress(10, userId);
-  
-      setShowRedButton3(false);
-      if (!alertShownRef3.current) {
-        alert("File uploaded successfully!");
-        alertShownRef3.current = true;
-      }
-  
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 3)
-            .maybeSingle();
-  
-          if (error) {
-            console.error("Supabase fetch error:", error.message);
-            return;
-          }
-  
-          if (data) {
-            const progress = data.progress || 0;
-            setLoadingProgress3(progress);
-  
-            if (progress >= 100 && progressIntervalId) {
-             clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-          console.error("Progress fetch error:", err);
-        }
-      };
-  
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-      await fetchProgressFromSupabase();
-  
-      try {
-        const formData = new FormData();
-        formData.append("file", selectedFile3);
-  
-        const formattedScheduledTime = new Date(debouncedScheduledTime3)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-  
-        formData.append("scheduled_time", formattedScheduledTime);
-        formData.append("job_id", currentJobIdT3);
-        formData.append("line", lineNo);
-        formData.append("user_id", userId);
-        formData.append("file_name", fileName3);
-  
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/nist90b_run/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-  
-        setIsEnabled3(true);
-  
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-  
-        setResult3(response.data);
-        localStorage.setItem("resultFetchedFromSupabase90b3", "true");
-  
-        await upsertProgress(100, userId, response.data.final_result);
-      } catch (error) {
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-  
-        setLoadingProgress3(0);
-        await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
-      }
-    };
-  
-    startProcess();
-  
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, [selectedFile3, debouncedScheduledTime3]);
-  
-
-  useEffect(() => {
-
-    let progressIntervalId;
-
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 4)
-            .maybeSingle();
-
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-             if (data.line === 4) {
-            setLoadingProgress4(progress);
-
-            if (data.result) {
-              setResult4({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase90b4", "true");
-            }
-
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        }
-        } catch (err) {
-
-          // ❌ stop polling on unexpected error
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          }
-        }
-      };
-
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
-    };
-
-    // On mount → resume progress check
-    resumeProgressCheck();
-
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, []); // <-- runs only on mount/unmount
-
-  useEffect(() => {
-    if ( !debouncedScheduledTime4) return;
-  
-    const lineNo = 4;
-  
-    if (result4) {
-     return;
-    }
-  
-    setLoadingProgress4(0);
-    let progressIntervalId;
-  
-    const upsertProgress = async (progress, userId, result = "") => {
-      let binaryString = null;
-  
-      if (progress === 0 && selectedFile4 && !binaryInsertedRef4.current) {
-        try {
-          const fileReader = new FileReader();
-  
-          const fileBuffer = await new Promise((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(selectedFile4);
-          });
-  
-          // binaryString = Array.from(fileBuffer)
-          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-          //   .join('');
-  
-          binaryInsertedRef4.current = true; // \u2705 Prevent future inserts
-        } catch (err) {
-          return;
-        }
-      }
-  
-      const payload = {
-        user_id: userId,
-        line: 4,
-        binary_data: " ", // Replace with binaryString if needed
-        scheduled_time: debouncedScheduledTime4,
-        result: result,
-        file_name: fileName4,
-        upload_time: uploadTime4,
-        progress: progress,
-        updated_at: new Date().toISOString()
-      };
-  
-      const { error } = await supabase.from("results2").upsert(payload);
-  
-      if (error) {
-        console.error("Supabase upsert error:", error.message);
-      }
-    };
-  
-    const startProcess = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-  
-      await upsertProgress(10, userId);
-  
-      setShowRedButton4(false);
-      if (!alertShownRef4.current) {
-        alert("File uploaded successfully!");
-        alertShownRef4.current = true;
-      }
-  
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 4)
-            .maybeSingle();
-  
-          if (error) {
-            console.error("Supabase fetch error:", error.message);
-            return;
-          }
-  
-          if (data) {
-            const progress = data.progress || 0;
-            setLoadingProgress4(progress);
-  
-            if (progress >= 100 && progressIntervalId) {
-             clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-          console.error("Progress fetch error:", err);
-        }
-      };
-  
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-      await fetchProgressFromSupabase();
-  
-      try {
-        const formData = new FormData();
-        formData.append("file", selectedFile4);
-  
-        const formattedScheduledTime = new Date(debouncedScheduledTime4)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-  
-        formData.append("scheduled_time", formattedScheduledTime);
-        formData.append("job_id", currentJobIdT4);
-        formData.append("line", lineNo);
-        formData.append("user_id", userId);
-        formData.append("file_name", fileName4);
-  
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/nist90b_run/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-  
-        setIsEnabled4(true);
-  
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-  
-        setResult4(response.data);
-        localStorage.setItem("resultFetchedFromSupabase90b4", "true");
-  
-        await upsertProgress(100, userId, response.data.final_result);
-      } catch (error) {
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-  
-        setLoadingProgress4(0);
-        await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
-      }
-    };
-  
-    startProcess();
-  
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, [selectedFile4, debouncedScheduledTime4]);
-  
-
-  useEffect(() => {
-
-    let progressIntervalId;
-
-    const resumeProgressCheck = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 5)
-            .maybeSingle();
-
-          if (error) {
-
-            // ❌ stop polling on error
-            if (progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-            return;
-          }
-
-          if (data) {
-            const progress = data.progress || 0;
-             if (data.line === 5) {
-            setLoadingProgress5(progress);
-
-            if (data.result) {
-              setResult5({ final_result: data.result });
-              localStorage.setItem("resultFetchedFromSupabase90b5", "true");
-            }
-
-            // ✅ Stop polling if already complete
-            if (progress >= 100 && progressIntervalId) {
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        }
-        } catch (err) {
-
-          // ❌ stop polling on unexpected error
-          if (progressIntervalId) {
-            clearInterval(progressIntervalId);
-            progressIntervalId = null;
-          }
-        }
-      };
-
-      // Start polling again
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 2000);
-
-      // Do one immediate fetch
-      await fetchProgressFromSupabase();
-    };
-
-    // On mount → resume progress check
-    resumeProgressCheck();
-
-    // On unmount → clear polling
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, []); // <-- runs only on mount/unmount
-
-  useEffect(() => {
-    if (!debouncedScheduledTime5) return;
-  
-    const lineNo = 5;
-  
-    if (result5) {
-     return;
-    }
-  
-    setLoadingProgress5(0);
-    let progressIntervalId;
-  
-    const upsertProgress = async (progress, userId, result = "") => {
-      let binaryString = null;
-  
-      if (progress === 0 && selectedFile5 && !binaryInsertedRef5.current) {
-        try {
-          const fileReader = new FileReader();
-  
-          const fileBuffer = await new Promise((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result);
-            fileReader.onerror = () => reject(fileReader.error);
-            fileReader.readAsBinaryString(selectedFile5);
-          });
-  
-          // binaryString = Array.from(fileBuffer)
-          //   .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-          //   .join('');
-  
-          binaryInsertedRef5.current = true; // ✅ Prevent future inserts
-        } catch (err) {
-          return;
-        }
-      }
-  
-      const payload = {
-        user_id: userId,
-        line: 5,
-        binary_data: " ", // Replace with binaryString if needed
-        scheduled_time: debouncedScheduledTime5,
-        result: result,
-        file_name: fileName5,
-        upload_time: uploadTime5,
-        progress: progress,
-        updated_at: new Date().toISOString()
-      };
-  
-      const { error } = await supabase.from("results2").upsert(payload);
-  
-      if (error) {
-        console.error("Supabase upsert error:", error.message);
-      }
-    };
-  
-    const startProcess = async () => {
-      const userId = await fetchUserId();
-      if (!userId) return;
-  
-      await upsertProgress(10, userId);
-  
-      setShowRedButton5(false);
-      if (!alertShownRef5.current) {
-        alert("File uploaded successfully!");
-        alertShownRef5.current = true;
-      }
-  
-      const fetchProgressFromSupabase = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("results2")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("line", 5)
-            .maybeSingle();
-  
-          if (error) {
-            console.error("Supabase fetch error:", error.message);
-            return;
-          }
-  
-          if (data) {
-            const progress = data.progress || 0;
-            setLoadingProgress5(progress);
-  
-            if (progress >= 100 && progressIntervalId) {
-            
-              clearInterval(progressIntervalId);
-              progressIntervalId = null;
-            }
-          }
-        } catch (err) {
-          console.error("Progress fetch error:", err);
-        }
-      };
-  
-      progressIntervalId = setInterval(fetchProgressFromSupabase, 1000);
-      await fetchProgressFromSupabase();
-  
-      try {
-        const formData = new FormData();
-        formData.append("file", selectedFile5);
-  
-        const formattedScheduledTime = new Date(debouncedScheduledTime5)
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-  
-        formData.append("scheduled_time", formattedScheduledTime);
-        formData.append("job_id", currentJobIdT5);
-        formData.append("line", lineNo);
-        formData.append("user_id", userId);
-        formData.append("file_name", fileName5);
-  
-        const response = await axios.post(
-          `${REACT_APP_BASE_URL}/nist90b_run/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-  
-        setIsEnabled5(true);
-  
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-  
-        setResult5(response.data);
-        localStorage.setItem("resultFetchedFromSupabase90b5", "true");
-  
-        await upsertProgress(100, userId, response.data.final_result);
-      } catch (error) {
-        if (progressIntervalId) {
-          clearInterval(progressIntervalId);
-          progressIntervalId = null;
-        }
-  
-        setLoadingProgress5(0);
-        await upsertProgress(0, userId);
-        alert(`Error: ${error}`);
-      }
-    };
-  
-    startProcess();
-  
-    return () => {
-      if (progressIntervalId) {
-        clearInterval(progressIntervalId);
-        progressIntervalId = null;
-      }
-    };
-  }, [selectedFile5, debouncedScheduledTime5]);
-
-
-  const downloadNist90bOutput = async (lineNumber = 1) => {
-  try {
-    const url = `${REACT_APP_BASE_URL}/download_nist90b/?line=${lineNumber}`;
-
-    const response = await fetch(url, {
-      method: 'GET',
     });
 
-    if (!response.ok) {
-      alert('No cached output found or an error occurred.');
-      return;
+    // Cleanup function
+    return () => {
+      cleanupFunctions.forEach(cleanup => {
+        if (typeof cleanup === 'function') {
+          cleanup();
+        }
+      });
+    };
+  }, [
+    // All dependencies
+    debouncedScheduledTime, debouncedScheduledTime2, debouncedScheduledTime3, debouncedScheduledTime4, debouncedScheduledTime5,
+    result, result2, result3, result4, result5,
+    selectedFile, selectedFile2, selectedFile3, selectedFile4, selectedFile5,
+    fileName, fileName2, fileName3, fileName4, fileName5,
+    uploadTime, uploadTime2, uploadTime3, uploadTime4, uploadTime5,
+    currentJobIdT, currentJobIdT2, currentJobIdT3, currentJobIdT4, currentJobIdT5
+  ]);
+
+  const downloadNist90bOutput = async (lineNumber = 1) => {
+    try {
+      const url = `${REACT_APP_BASE_URL}/download_nist90b/?line=${lineNumber}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        alert('No cached output found or an error occurred.');
+        return;
+      }
+
+      const text = await response.text();
+
+      // Create a blob from the text
+      const blob = new Blob([text], { type: 'text/plain' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${lineNumber}_nist90b_output.txt`;
+
+      // Append to body and trigger click
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading NIST90B output:', error);
     }
-
-    const text = await response.text();
-
-    // Create a blob from the text
-    const blob = new Blob([text], { type: 'text/plain' });
-    const downloadUrl = window.URL.createObjectURL(blob);
-
-    // Create a temporary link element
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = `${lineNumber}_nist90b_output.txt`;
-
-    // Append to body and trigger click
-    document.body.appendChild(link);
-    link.click();
-
-    // Clean up
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(downloadUrl);
-  } catch (error) {
-    console.error('Error downloading NIST90B output:', error);
-  }
-};
+  };
 
 
   const handleButtonClick = async (type) => {
     const userId = await fetchUserId();
     if (type === "report") {
-    
+
 
       let progressInterval;
       setLoadingProgressRep(5);
@@ -2683,7 +1728,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName, line_number:1 }),
+        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName, line_number: 1 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2720,7 +1765,7 @@ if (error) {
 
     } else if (type === "graph") {
 
-     
+
 
       let progressInterval;
       setLoadingProgressGr(5);
@@ -2742,7 +1787,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName,line_number:1  }),
+        body: JSON.stringify({ binary_data: binaryInput, job_id: currentJobIdT, file_name: fileName, line_number: 1 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2754,7 +1799,7 @@ if (error) {
           const fileName = `graph-${currentJobIdT}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-         
+
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2770,7 +1815,7 @@ if (error) {
     const userId = await fetchUserId();
     if (type === "report") {
 
-      
+
 
       let progressInterval;
       setLoadingProgress2Rep(5);
@@ -2791,7 +1836,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2,line_number:2 }),
+        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2, line_number: 2 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2813,7 +1858,7 @@ if (error) {
 
     } else if (type === "graph") {
 
-     
+
       let progressInterval;
       setLoadingProgress2Gr(5);
 
@@ -2834,7 +1879,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2,line_number:2 }),
+        body: JSON.stringify({ binary_data: binaryInput2, job_id: currentJobIdT2, file_name: fileName2, line_number: 2 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2846,7 +1891,7 @@ if (error) {
           const fileName = `graph-${currentJobIdT2}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-        
+
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2861,7 +1906,7 @@ if (error) {
     const userId = await fetchUserId();
     if (type === "report") {
 
-      
+
       let progressInterval;
       setLoadingProgress3Rep(5);
 
@@ -2881,7 +1926,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3,line_number:3 }),
+        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3, line_number: 3 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2901,7 +1946,7 @@ if (error) {
         });
     } else if (type === "graph") {
 
-    
+
 
 
       let progressInterval;
@@ -2923,7 +1968,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3,line_number:3 }),
+        body: JSON.stringify({ binary_data: binaryInput3, job_id: currentJobIdT3, file_name: fileName3, line_number: 3 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2935,7 +1980,7 @@ if (error) {
           const fileName = `graph-${currentJobIdT3}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-        
+
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2970,7 +2015,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4,line_number:4 }),
+        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4, line_number: 4 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -2982,7 +2027,7 @@ if (error) {
           const fileName = `report-${currentJobIdT4}.pdf`;
           const file = new File([blob], fileName, { type: blob.type });
 
-       
+
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -2991,7 +2036,7 @@ if (error) {
         });
     } else if (type === "graph") {
 
-  
+
       let progressInterval;
       setLoadingProgress4Gr(0);
 
@@ -3011,7 +2056,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4 ,line_number:4}),
+        body: JSON.stringify({ binary_data: binaryInput4, job_id: currentJobIdT4, file_name: fileName4, line_number: 4 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3023,7 +2068,7 @@ if (error) {
           const fileName = `graph-${currentJobIdT4}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-       
+
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3038,7 +2083,7 @@ if (error) {
     const userId = await fetchUserId();
     if (type === "report") {
 
-      
+
       let progressInterval;
       setLoadingProgress5Rep(5);
 
@@ -3058,7 +2103,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/pdf-report-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5,line_number:5 }),
+        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5, line_number: 5 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3078,7 +2123,7 @@ if (error) {
         });
     } else if (type === "graph") {
 
-     
+
       let progressInterval;
       setLoadingProgress5Gr(0);
 
@@ -3098,7 +2143,7 @@ if (error) {
       fetch(`${REACT_APP_BASE_URL}/graph-generation-nist90b/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5,line_number:5 }),
+        body: JSON.stringify({ binary_data: binaryInput5, job_id: currentJobIdT5, file_name: fileName5, line_number: 5 }),
       })
         .then((response) => response.blob())
         .then(async (blob) => {
@@ -3110,7 +2155,7 @@ if (error) {
           const fileName = `graph-${currentJobIdT5}.png`;
           const file = new File([blob], fileName, { type: blob.type });
 
-        
+
         })
         .catch((error) => {
           alert(`Error: ${error}`);
@@ -3122,23 +2167,7 @@ if (error) {
   };
 
   return (
-    <Box m="20px" sx={{
-    overflowX: 'auto',
-    '&::-webkit-scrollbar': {
-      height: '8px',
-    },
-    '&::-webkit-scrollbar-track': {
-      background: colors.primary[700],
-      borderRadius: '4px',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      background: colors.blueAccent[500],
-      borderRadius: '4px',
-      '&:hover': {
-        background: colors.blueAccent[400],
-      }
-    }
-  }}>
+    <Box m="20px">
       {/* Header Section */}
       <Header title="NIST Statistical Tests" />
       <Box
@@ -3146,23 +2175,55 @@ if (error) {
         p="20px"
         sx={{
           backgroundColor: colors.primary[400],
-          borderRadius: "8px",
+          borderRadius: "12px", // Increased border radius
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)", // Softer, larger shadow
+          border: `1px solid ${colors.grey[700]}`, // Subtle border
+          overflowX: "auto", // Ensure horizontal scrolling for small screens
         }}
       >
         <Box
           component="table"
           sx={{
             width: "100%",
-            borderCollapse: "collapse",
+            borderCollapse: "separate", // Use separate for border-spacing
+            borderSpacing: "0 8px", // Space between rows
             textAlign: "center",
             "& th": {
-              backgroundColor: colors.blueAccent[700],
+              backgroundColor: colors.blueAccent[800], // Darker header background
               color: colors.grey[100],
-              padding: "12px",
+              padding: "14px 10px", // More vertical padding
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              fontSize: "0.85rem",
+              letterSpacing: "0.5px",
+              "&:first-of-type": {
+                borderTopLeftRadius: "8px", // Rounded corners for first header
+                borderBottomLeftRadius: "8px",
+              },
+              "&:last-of-type": {
+                borderTopRightRadius: "8px", // Rounded corners for last header
+                borderBottomRightRadius: "8px",
+              },
             },
             "& td": {
-              padding: "12px",
-              border: `1px solid ${colors.blueAccent[500]}`,
+              padding: "15px 10px", // More padding for cells
+              border: "none", // Remove individual cell borders
+              backgroundColor: colors.primary[500], // Slightly different background for cells
+              "&:first-of-type": {
+                borderTopLeftRadius: "8px", // Rounded corners for first cell
+                borderBottomLeftRadius: "8px",
+              },
+              "&:last-of-type": {
+                borderTopRightRadius: "8px", // Rounded corners for last cell
+                borderBottomRightRadius: "8px",
+              },
+            },
+            "& tr": {
+              transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out", // Smooth transition
+              "&:hover": {
+                transform: "translateY(-3px)", // Lift effect on hover
+                boxShadow: `0 6px 20px ${colors.primary[600]}80`, // Shadow on hover
+              },
             },
           }}
         >
@@ -3192,7 +2253,7 @@ if (error) {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled}
+                      disabled={!isUploadButtonEnabled}
                       onClick={handleFileUpload}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -3200,6 +2261,7 @@ if (error) {
                         textTransform: "none",
                         padding: "10px 20px",
                         borderRadius: "8px",
+                        position: "relative",
                         "&:hover": {
                           backgroundColor: colors.greenAccent[600],
                         },
@@ -3224,7 +2286,7 @@ if (error) {
                       type="file"
                       ref={fileInputRef}
                       style={{ display: "none" }}
-                      onChange={handleFileChange}
+                      onChange={(event) => handleFileChange(event, '')}
                     />
                     <Box position="relative" display="inline-flex">
                       <Button
@@ -3469,6 +2531,7 @@ if (error) {
                   type="date"
                   value={date}
                   onChange={handleDateChange}
+                  disabled={!isDateEnabled}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3486,6 +2549,7 @@ if (error) {
                   placeholder="e.g., 14:30:00"
                   value={time}
                   onChange={handleTimeChange}
+                  disabled={!isTimeEnabled}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3506,6 +2570,7 @@ if (error) {
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime}
+                            disabled={!isTimeEnabled}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding
@@ -3544,7 +2609,7 @@ if (error) {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled2}
+                      disabled={!isUploadButtonEnabled2}
                       onClick={handleFileUpload2}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -3576,7 +2641,7 @@ if (error) {
                       type="file"
                       ref={fileInputRef2}
                       style={{ display: "none" }}
-                      onChange={handleFileChange2}
+                      onChange={(event) => handleFileChange(event, '2')}
                     />
                     <Box position="relative" display="inline-flex">
                       <Button
@@ -3752,29 +2817,29 @@ if (error) {
                       )}
                     </Box>
                     <Button
-                        variant="contained"
-                        onClick={() => downloadNist90bOutput(2)}
-                        disabled={loadingProgress2 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[800],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Download Output
-                      </Button>
+                      variant="contained"
+                      onClick={() => downloadNist90bOutput(2)}
+                      disabled={loadingProgress2 < 100}
+                      sx={{
+                        backgroundColor: colors.redAccent[800],
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        transition: 'all 0.3s ease',
+                        "&:hover": {
+                          backgroundColor: colors.redAccent[500],
+                          transform: 'translateY(-2px)',
+                          boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                        },
+                        "&:disabled": {
+                          backgroundColor: colors.grey[700],
+                          color: colors.grey[500],
+                        }
+                      }}
+                    >
+                      Download Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -3816,6 +2881,7 @@ if (error) {
                   type="date"
                   value={date2}
                   onChange={handleDateChange2}
+                  disabled={!isDateEnabled2}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3833,6 +2899,7 @@ if (error) {
                   placeholder="e.g., 14:30:00"
                   value={time2}
                   onChange={handleTimeChange2}
+                  disabled={!isTimeEnabled2}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -3853,6 +2920,7 @@ if (error) {
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime2}
+                            disabled={!isTimeEnabled2}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding
@@ -3892,7 +2960,7 @@ if (error) {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled3}
+                      disabled={!isUploadButtonEnabled3}
                       onClick={handleFileUpload3}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -3924,7 +2992,7 @@ if (error) {
                       type="file"
                       ref={fileInputRef3}
                       style={{ display: "none" }}
-                      onChange={handleFileChange3}
+                      onChange={(event) => handleFileChange(event, '3')}
                     />
                     <Box position="relative" display="inline-flex">
                       <Button
@@ -4100,29 +3168,29 @@ if (error) {
                       )}
                     </Box>
                     <Button
-                        variant="contained"
-                        onClick={() => downloadNist90bOutput(3)}
-                        disabled={loadingProgress3 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[800],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Download Output
-                      </Button>
+                      variant="contained"
+                      onClick={() => downloadNist90bOutput(3)}
+                      disabled={loadingProgress3 < 100}
+                      sx={{
+                        backgroundColor: colors.redAccent[800],
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        transition: 'all 0.3s ease',
+                        "&:hover": {
+                          backgroundColor: colors.redAccent[500],
+                          transform: 'translateY(-2px)',
+                          boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                        },
+                        "&:disabled": {
+                          backgroundColor: colors.grey[700],
+                          color: colors.grey[500],
+                        }
+                      }}
+                    >
+                      Download Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -4164,6 +3232,7 @@ if (error) {
                   type="date"
                   value={date3}
                   onChange={handleDateChange3}
+                  disabled={!isDateEnabled3}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4181,6 +3250,7 @@ if (error) {
                   placeholder="e.g., 14:30:00"
                   value={time3}
                   onChange={handleTimeChange3}
+                  disabled={!isTimeEnabled3}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4201,6 +3271,7 @@ if (error) {
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime3}
+                            disabled={!isTimeEnabled3}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding
@@ -4239,7 +3310,7 @@ if (error) {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled4}
+                      disabled={!isUploadButtonEnabled4}
                       onClick={handleFileUpload4}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4271,7 +3342,7 @@ if (error) {
                       type="file"
                       ref={fileInputRef4}
                       style={{ display: "none" }}
-                      onChange={handleFileChange4}
+                      onChange={(event) => handleFileChange(event, '4')}
                     />
                     <Box position="relative" display="inline-flex">
                       <Button
@@ -4447,29 +3518,29 @@ if (error) {
                       )}
                     </Box>
                     <Button
-                        variant="contained"
-                        onClick={() => downloadNist90bOutput(4)}
-                        disabled={loadingProgress4 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[800],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Download Output
-                      </Button>
+                      variant="contained"
+                      onClick={() => downloadNist90bOutput(4)}
+                      disabled={loadingProgress4 < 100}
+                      sx={{
+                        backgroundColor: colors.redAccent[800],
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        transition: 'all 0.3s ease',
+                        "&:hover": {
+                          backgroundColor: colors.redAccent[500],
+                          transform: 'translateY(-2px)',
+                          boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                        },
+                        "&:disabled": {
+                          backgroundColor: colors.grey[700],
+                          color: colors.grey[500],
+                        }
+                      }}
+                    >
+                      Download Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -4511,6 +3582,7 @@ if (error) {
                   type="date"
                   value={date4}
                   onChange={handleDateChange4}
+                  disabled={!isDateEnabled4}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4528,6 +3600,7 @@ if (error) {
                   placeholder="e.g., 14:30:00"
                   value={time4}
                   onChange={handleTimeChange4}
+                  disabled={!isTimeEnabled4}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4548,6 +3621,7 @@ if (error) {
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime4}
+                            disabled={!isTimeEnabled4}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding
@@ -4587,7 +3661,7 @@ if (error) {
                   <Box display="flex" justifyContent="center" gap="20px">
                     <Button
                       variant="contained"
-                      disabled={!isEnabled5}
+                      disabled={!isUploadButtonEnabled5}
                       onClick={handleFileUpload5}
                       sx={{
                         backgroundColor: colors.greenAccent[800],
@@ -4619,7 +3693,7 @@ if (error) {
                       type="file"
                       ref={fileInputRef5}
                       style={{ display: "none" }}
-                      onChange={handleFileChange5}
+                      onChange={(event) => handleFileChange(event, '5')}
                     />
                     <Box position="relative" display="inline-flex">
                       <Button
@@ -4795,29 +3869,29 @@ if (error) {
                       )}
                     </Box>
                     <Button
-                        variant="contained"
-                        onClick={() => downloadNist90bOutput(5)}
-                        disabled={loadingProgress5 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[800],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: 'all 0.3s ease',
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          }
-                        }}
-                      >
-                        Download Output
-                      </Button>
+                      variant="contained"
+                      onClick={() => downloadNist90bOutput(5)}
+                      disabled={loadingProgress5 < 100}
+                      sx={{
+                        backgroundColor: colors.redAccent[800],
+                        color: colors.grey[100],
+                        textTransform: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        transition: 'all 0.3s ease',
+                        "&:hover": {
+                          backgroundColor: colors.redAccent[500],
+                          transform: 'translateY(-2px)',
+                          boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
+                        },
+                        "&:disabled": {
+                          backgroundColor: colors.grey[700],
+                          color: colors.grey[500],
+                        }
+                      }}
+                    >
+                      Download Output
+                    </Button>
                   </Box>
                 </Box>
               </td>
@@ -4859,6 +3933,7 @@ if (error) {
                   type="date"
                   value={date5}
                   onChange={handleDateChange5}
+                  disabled={!isDateEnabled5}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4876,6 +3951,7 @@ if (error) {
                   placeholder="e.g., 14:30:00"
                   value={time5}
                   onChange={handleTimeChange5}
+                  disabled={!isTimeEnabled5}
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   size="small"
@@ -4896,6 +3972,7 @@ if (error) {
                         <Tooltip title="Current Time" arrow>
                           <IconButton
                             onClick={handleUseCurrentTime5}
+                            disabled={!isTimeEnabled5}
                             edge="end"
                             sx={{
                               padding: "4px", // Smaller padding
@@ -4920,1840 +3997,224 @@ if (error) {
               </td>
 
             </tr>
-            {/*
-<>
-            <tr>
-              <td>6</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload6}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                      {showRedButton6 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef6}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange6}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick6("graph")}
-                        disabled={loadingProgress6 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress6Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress6Gr}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
 
-                      {loadingProgress6Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress6Gr > 0 ? "scale(1)" : "scale(0)",
-                            opacity: loadingProgress6Gr > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress6Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress6Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick6("report")}
-                        disabled={loadingProgress6 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress6Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress6Rep}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress6Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress6Rep > 0 ? "scale(1)" : "scale(0)",
-                            opacity: loadingProgress6Rep > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress6Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-                              color: colors.greenAccent[500],
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress6Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult6}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress6} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress6}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime6 || ""}</td>
-              <td>{fileName6 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date6}
-                  onChange={handleDateChange6}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time6}
-                  onChange={handleTimeChange6}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime6}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime6 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-
-            <tr>
-              <td>7</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload7}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                      {showRedButton7 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef7}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange7}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick7("graph")}
-                        disabled={loadingProgress7 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress7Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress7Gr}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress7Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress7Gr > 0 ? "scale(1)" : "scale(0)",
-                            opacity: loadingProgress7Gr > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress7Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress7Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick7("report")}
-                        disabled={loadingProgress7 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress7Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress7Rep}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress7Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress7Rep > 0 ? "scale(1)" : "scale(0)",
-                            opacity: loadingProgress7Rep > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress7Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-                              color: colors.greenAccent[500],
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress7Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult7}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress7} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress7}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime7 || ""}</td>
-              <td>{fileName7 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date7}
-                  onChange={handleDateChange7}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-              
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time7}
-                  onChange={handleTimeChange7}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime7}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-               
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime7 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-
-            <tr>
-              <td>8</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload8}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                      {showRedButton8 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef8}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange8}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick8("graph")}
-                        disabled={loadingProgress8 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress8Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress8Gr}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress8Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress8Gr > 0 ? "scale(1)" : "scale(0)",
-                            opacity: loadingProgress8Gr > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress8Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress8Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick8("report")}
-                        disabled={loadingProgress8 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress8Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress8Rep}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress8Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress8Rep > 0 ? "scale(1)" : "scale(0)",
-                            opacity: loadingProgress8Rep > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress8Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-                              color: colors.greenAccent[500],
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress8Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult8}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress8} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress8}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime8 || ""}</td>
-              <td>{fileName8 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date8}
-                  onChange={handleDateChange8}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-             
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time8}
-                  onChange={handleTimeChange8}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime8}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-               
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime8 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-
-            <tr>
-              <td>9</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload9}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                      {showRedButton9 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef_nine}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange9}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick9("graph")}
-                        disabled={loadingProgress9 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress9Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress9Gr}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress9Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress9Gr > 0 ? "scale(1)" : "scale(0)",
-                            opacity: loadingProgress9Gr > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress9Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress9Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick9("report")}
-                        disabled={loadingProgress9 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress9Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress9Rep}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress9Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress9Rep > 0 ? "scale(1)" : "scale(0)",
-                            opacity: loadingProgress9Rep > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress9Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-                              color: colors.greenAccent[500],
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress9Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult9}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress9} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress9}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime9 || ""}</td>
-              <td>{fileName9 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date9}
-                  onChange={handleDateChange9}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time9}
-                  onChange={handleTimeChange9}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime9}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime9 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-
-            <tr>
-              <td>10</td>
-              <td>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                  mt="10px"
-                  gap="10px"
-                >
-                  <Box display="flex" justifyContent="center" gap="20px">
-                    <Button
-                      variant="contained"
-                      onClick={handleFileUpload10}
-                      sx={{
-                        backgroundColor: colors.greenAccent[800],
-                        color: colors.grey[100],
-                        textTransform: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: colors.greenAccent[600],
-                        },
-                      }}
-                    >
-                      Upload Binary File
-                      {showRedButton10 && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            width: 12,
-                            height: 12,
-                            backgroundColor: "red",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef10}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange10}
-                    />
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick10("graph")}
-                        disabled={loadingProgress10 < 100}
-                        sx={{
-                          backgroundColor: colors.blueAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.blueAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.blueAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Graph
-                        {loadingProgress10Gr <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.blueAccent[800],
-                              width: `${loadingProgress10Gr}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress10Gr <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress10Gr > 0 ? "scale(1)" : "scale(0)",
-                            opacity: loadingProgress10Gr > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress10Gr}
-                            size={36}
-                            thickness={4}
-                            sx={{
-                              color: colors.blueAccent[300], // Professional, soft blue
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.blueAccent[300]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress10Gr}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleButtonClick10("report")}
-                        disabled={loadingProgress10 < 100}
-                        sx={{
-                          backgroundColor: colors.redAccent[400],
-                          color: colors.grey[100],
-                          textTransform: "none",
-                          padding: "10px 20px",
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 8px ${colors.redAccent[400]}40`,
-                          },
-                          "&:disabled": {
-                            backgroundColor: colors.grey[700],
-                            color: colors.grey[500],
-                          },
-                        }}
-                      >
-                        Generate Report
-                        {loadingProgress10Rep <= 100 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              height: "3px",
-                              backgroundColor: colors.greenAccent[500],
-                              width: `${loadingProgress10Rep}%`,
-                              transition:
-                                "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                              borderRadius: "0 0 8px 8px",
-                            }}
-                          />
-                        )}
-                      </Button>
-
-                      {loadingProgress10Rep <= 100 && (
-                        <Box
-                          position="absolute"
-                          bottom={-12}
-                          right={-12}
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="44px"
-                          height="44px"
-                          p="2px"
-                          borderRadius="50%"
-                          sx={{
-                            backgroundColor: colors.grey[800],
-                            border: `2px solid ${colors.grey[600]}`,
-                            transform:
-                              loadingProgress10Rep > 0
-                                ? "scale(1)"
-                                : "scale(0)",
-                            opacity: loadingProgress10Rep > 0 ? 1 : 0,
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <CircularProgress
-                            variant="determinate"
-                            value={loadingProgress10Rep}
-                            size={40}
-                            thickness={4}
-                            sx={{
-                              color: colors.greenAccent[500],
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            fontWeight="bold"
-                            color={colors.greenAccent[500]}
-                            sx={{
-                              position: "absolute",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            {loadingProgress10Rep}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
-                </Box>
-              </td>
-              <td>{finalResult10}</td>
-              <td>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  height="100%"
-                  p="5px"
-                >
-                  <CircularProgress
-                    variant="determinate"
-                    value={loadingProgress10} // Updated progress state
-                    size={50}
-                    thickness={5}
-                    sx={{
-                      color: "green",
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="white"
-                    mt="5px"
-                  >
-                    {loadingProgress10}%
-                  </Typography>
-                </Box>
-              </td>
-              <td>{uploadTime10 || ""}</td>
-              <td>{fileName10 || "No file selected"}</td>
-              <td>
-                <TextField
-                  label="Select Date"
-                  type="date"
-                  value={date10}
-                  onChange={handleDateChange10}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                    },
-                    marginBottom: "10px",
-                  }}
-                />
-
-                
-                <TextField
-                  label="Enter Time (HH:mm:ss)"
-                  placeholder="e.g., 14:30:00"
-                  value={time10}
-                  onChange={handleTimeChange10}
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    width: "150px", // Reduced width
-                    "& .MuiInputBase-input": {
-                      textAlign: "center",
-                      color: "white", // Input text color (optional)
-                      "&::placeholder": {
-                        color: "white", // Placeholder color
-                        opacity: 1, // Required to override default opacity
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title="Current Time" arrow>
-                          <IconButton
-                            onClick={handleUseCurrentTime10}
-                            edge="end"
-                            sx={{
-                              padding: "4px", // Smaller padding
-                            }}
-                          >
-                            <AccessTimeIcon
-                              sx={{
-                                fontSize: "18px", // Smaller icon
-                                color: "black", // Black color
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-               
-                <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
-                  Scheduled Time: {scheduledTime10 || "Not set"}
-                </Typography>
-              </td>
-            </tr>
-</>
-*/}
           </tbody>
         </Box>
       </Box>
       <Box
-  sx={{
-    background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1F2A40 50%, #0d1b2a 100%)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "280px",
-    textAlign: "center",
-    mt: 2,
-    boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.4)",
-    position: "relative",
-    overflow: "hidden",
-    borderRadius: "20px",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    '&:hover': {
-      boxShadow: "0px 12px 40px rgba(0, 0, 0, 0.6)",
-      transform: "translateY(-2px)",
-    },
-    transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-    '&::before': {
-      content: '""',
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
-      opacity: 0,
-      transition: "opacity 0.4s ease",
-    },
-    '&:hover::before': {
-      opacity: 1,
-    }
-  }}
->
-  {/* Animated background grid */}
-  <Box
-    sx={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundImage: `
+        sx={{
+          background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1F2A40 50%, #0d1b2a 100%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "280px",
+          textAlign: "center",
+          mt: 2,
+          boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.4)",
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: "20px",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          '&:hover': {
+            boxShadow: "0px 12px 40px rgba(0, 0, 0, 0.6)",
+            transform: "translateY(-2px)",
+          },
+          transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+          '&::before': {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
+            opacity: 0,
+            transition: "opacity 0.4s ease",
+          },
+          '&:hover::before': {
+            opacity: 1,
+          }
+        }}
+      >
+        {/* Animated background grid */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
         linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
       `,
-      backgroundSize: "50px 50px",
-      animation: "gridMove 20s linear infinite",
-      opacity: 0.4,
-    }}
-  />
+            backgroundSize: "50px 50px",
+            animation: "gridMove 20s linear infinite",
+            opacity: 0.4,
+          }}
+        />
 
-  {/* Floating particles */}
-  {[...Array(6)].map((_, i) => (
-    <Box
-      key={i}
-      sx={{
-        position: "absolute",
-        width: 4,
-        height: 4,
-        borderRadius: "50%",
-        background: "rgba(255, 255, 255, 0.6)",
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-        animation: `floatParticle ${15 + i * 2}s infinite ease-in-out ${i * 0.5}s`,
-        boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
-      }}
-    />
-  ))}
+        {/* Floating particles */}
+        {[...Array(6)].map((_, i) => (
+          <Box
+            key={i}
+            sx={{
+              position: "absolute",
+              width: 4,
+              height: 4,
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.6)",
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `floatParticle ${15 + i * 2}s infinite ease-in-out ${i * 0.5}s`,
+              boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
+            }}
+          />
+        ))}
 
-  {/* Main content container */}
-  <Box sx={{ position: "relative", zIndex: 2 }}>
-    {/* Animated Gemini Logo */}
-    <Box
-      component="img"
-      src="/image.png"
-      alt="Gemini Logo"
-      sx={{
-        width: 70,
-        height: "auto",
-        mb: 1.5,
-        borderRadius: "16px",
-        transition: "all 0.5s ease",
-        filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))",
-        animation: "logoGlow 4s infinite ease-in-out",
-        '&:hover': {
-          transform: "scale(1.15) rotate(5deg)",
-          filter: "drop-shadow(0 6px 20px rgba(230, 57, 70, 0.4))",
-        }
-      }}
-    />
+        {/* Main content container */}
+        <Box sx={{ position: "relative", zIndex: 2 }}>
+          {/* Animated Gemini Logo */}
+          <Box
+            component="img"
+            src="/image.png"
+            alt="Gemini Logo"
+            sx={{
+              width: 70,
+              height: "auto",
+              mb: 1.5,
+              borderRadius: "16px",
+              transition: "all 0.5s ease",
+              filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))",
+              animation: "logoGlow 4s infinite ease-in-out",
+              '&:hover': {
+                transform: "scale(1.15) rotate(5deg)",
+                filter: "drop-shadow(0 6px 20px rgba(230, 57, 70, 0.4))",
+              }
+            }}
+          />
 
-    {/* Title text */}
-    <Typography
-      variant="h6"
-      sx={{
-        color: "rgba(255, 255, 255, 0.9)",
-        fontWeight: 600,
-        mb: 1,
-        fontSize: "1.1rem",
-        textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
-      }}
-    >
-      Advanced AI Analysis
-    </Typography>
+          {/* Title text */}
+          <Typography
+            variant="h6"
+            sx={{
+              color: "rgba(255, 255, 255, 0.9)",
+              fontWeight: 600,
+              mb: 1,
+              fontSize: "1.1rem",
+              textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            Advanced AI Analysis
+          </Typography>
 
-    {/* Description */}
-    <Typography
-      variant="body2"
-      sx={{
-        color: "rgba(255, 255, 255, 0.7)",
-        mb: 2.5,
-        maxWidth: "300px",
-        fontSize: "0.85rem",
-        lineHeight: 1.4,
-      }}
-    >
-      Upload your test reports for comprehensive AI-powered analysis and insights
-    </Typography>
+          {/* Description */}
+          <Typography
+            variant="body2"
+            sx={{
+              color: "rgba(255, 255, 255, 0.7)",
+              mb: 2.5,
+              maxWidth: "300px",
+              fontSize: "0.85rem",
+              lineHeight: 1.4,
+            }}
+          >
+            Upload your test reports for comprehensive AI-powered analysis and insights
+          </Typography>
 
-    {/* Enhanced Button */}
-    <Button
-      variant="contained"
-      onClick={() => {
-        window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
-      }}
-      startIcon={<AutoAwesomeIcon sx={{ fontSize: "1.2rem" }} />}
-      sx={{
-        background: "linear-gradient(135deg, #E63946 0%, #F77F00 100%)",
-        color: "white",
-        textTransform: "none",
-        padding: "12px 36px",
-        fontSize: "1.1rem",
-        fontWeight: 600,
-        width: "auto",
-        minWidth: "220px",
-        borderRadius: "12px",
-        transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
-        position: "relative",
-        overflow: "hidden",
-        zIndex: 1,
-        boxShadow: "0 4px 15px rgba(230, 57, 70, 0.4)",
-        '&:hover': {
-          background: "linear-gradient(135deg, #F77F00 0%, #E63946 100%)",
-          transform: "scale(1.05) translateY(-2px)",
-          boxShadow: "0 8px 25px rgba(230, 57, 70, 0.6)",
-        },
-        '&::before': {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: "-100%",
-          width: "100%",
-          height: "100%",
-          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
-          transition: "all 0.8s ease",
-          zIndex: -1,
-        },
-        '&:hover::before': {
-          left: "100%",
-        },
-        '&::after': {
-          content: '""',
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          width: "0",
-          height: "0",
-          borderRadius: "50%",
-          background: "rgba(255, 255, 255, 0.2)",
-          transform: "translate(-50%, -50%)",
-          transition: "all 0.6s ease",
-          zIndex: -1,
-        },
-        '&:active::after': {
-          width: "300px",
-          height: "300px",
-        }
-      }}
-    >
-      Analyze with AI
-    </Button>
-  </Box>
+          {/* Enhanced Button */}
+          <Button
+            variant="contained"
+            onClick={() => {
+              window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
+            }}
+            startIcon={<AutoAwesomeIcon sx={{ fontSize: "1.2rem" }} />}
+            sx={{
+              background: "linear-gradient(135deg, #E63946 0%, #F77F00 100%)",
+              color: "white",
+              textTransform: "none",
+              padding: "12px 36px",
+              fontSize: "1.1rem",
+              fontWeight: 600,
+              width: "auto",
+              minWidth: "220px",
+              borderRadius: "12px",
+              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+              position: "relative",
+              overflow: "hidden",
+              zIndex: 1,
+              boxShadow: "0 4px 15px rgba(230, 57, 70, 0.4)",
+              '&:hover': {
+                background: "linear-gradient(135deg, #F77F00 0%, #E63946 100%)",
+                transform: "scale(1.05) translateY(-2px)",
+                boxShadow: "0 8px 25px rgba(230, 57, 70, 0.6)",
+              },
+              '&::before': {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                transition: "all 0.8s ease",
+                zIndex: -1,
+              },
+              '&:hover::before': {
+                left: "100%",
+              },
+              '&::after': {
+                content: '""',
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: "0",
+                height: "0",
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.2)",
+                transform: "translate(-50%, -50%)",
+                transition: "all 0.6s ease",
+                zIndex: -1,
+              },
+              '&:active::after': {
+                width: "300px",
+                height: "300px",
+              }
+            }}
+          >
+            Analyze with AI
+          </Button>
+        </Box>
 
-  {/* Corner accents */}
-  <Box
-    sx={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "60px",
-      height: "60px",
-      borderTop: "2px solid rgba(230, 57, 70, 0.5)",
-      borderLeft: "2px solid rgba(230, 57, 70, 0.5)",
-      borderTopLeftRadius: "20px",
-    }}
-  />
-  <Box
-    sx={{
-      position: "absolute",
-      bottom: 0,
-      right: 0,
-      width: "60px",
-      height: "60px",
-      borderBottom: "2px solid rgba(230, 57, 70, 0.5)",
-      borderRight: "2px solid rgba(230, 57, 70, 0.5)",
-      borderBottomRightRadius: "20px",
-    }}
-  />
+        {/* Corner accents */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "60px",
+            height: "60px",
+            borderTop: "2px solid rgba(230, 57, 70, 0.5)",
+            borderLeft: "2px solid rgba(230, 57, 70, 0.5)",
+            borderTopLeftRadius: "20px",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            right: 0,
+            width: "60px",
+            height: "60px",
+            borderBottom: "2px solid rgba(230, 57, 70, 0.5)",
+            borderRight: "2px solid rgba(230, 57, 70, 0.5)",
+            borderBottomRightRadius: "20px",
+          }}
+        />
 
-  {/* Add these keyframes to your global CSS */}
-  <style jsx>{`
+        {/* Add these keyframes to your global CSS */}
+        <style jsx>{`
     @keyframes gridMove {
       0% { transform: translate(0, 0); }
       100% { transform: translate(50px, 50px); }
@@ -6771,7 +4232,7 @@ if (error) {
       50% { filter: drop-shadow(0 4px 20px rgba(230, 57, 70, 0.3)); }
     }
   `}</style>
-</Box>
+      </Box>
     </Box>
   );
 };

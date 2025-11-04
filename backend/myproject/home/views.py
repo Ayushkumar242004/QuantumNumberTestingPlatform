@@ -1295,8 +1295,6 @@ from django.test import RequestFactory
 
 @csrf_exempt
 def generate_pdf_report_server(request):
-    global global_graph_image
-    
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
@@ -1320,232 +1318,42 @@ def generate_pdf_report_server(request):
                 tmp_file.write(chunk)
             uploaded_file_path = tmp_file.name
 
-        print("1")
         cache.set(f"{job_id}_progressReportServer", 2)
-        print("2")
         
-       
-        print("Generating graphs...")
+        print("Fetching results from cache...")
 
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'inline; filename="report.pdf"'
+        # ✅ Fetch results from all three test categories from cache
+        nist22_results = cache.get(f"{line_number}_results")
+        nist90b_results = cache.get(f"{line_number}_results90b") 
+        dieharder_results = cache.get(f"{line_number}_results_dieharder")
 
-        print("6")
-        buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4,
-                                rightMargin=10, leftMargin=10,
-                                topMargin=10, bottomMargin=30, title="QNU Labs")
+        cache.set(f"{job_id}_progressReportServer", 10)
 
-        styles = getSampleStyleSheet()
-        title = Paragraph("Report-QNu Labs", styles['Title'])
-        title_space = Spacer(1, 0.0 * inch)
-        subtitle_style = styles['Heading2']
-        subtitle_style.fontName = 'Helvetica-Bold'
-        subtitle_style.fontSize = 12
-        subtitle_style.underline = True
-        nist_subtitle = Paragraph("Statistical Tests:", subtitle_style)
-        subtitle_space = Spacer(1, 0.5 * inch)
-        graph_subtitle = Paragraph("Graphical Analysis:", subtitle_style)
-        bold_red_style = ParagraphStyle(
-            'BoldRed', parent=styles['Normal'], fontSize=12, fontName='Helvetica-Bold', textColor='red'
-        )
-        print("7")
-        cache.set(f"{job_id}_progressReportServer", 6)
-
-        # --- NIST SP 800-22B Tests (Modern Implementation) ---
-        def run_nist_22b_tests(file_path):
-            file_size_bytes = os.path.getsize(file_path)
-            num_bits = file_size_bytes * 8
-
-            # Prepare input for NIST assess
-            automated_input = f"0\n{file_path}\n1\n0\n1\n1\n".encode()
-
-            # Run NIST test suite
-            process = subprocess.Popen(
-                ["./assess", str(num_bits)],
-                cwd=STS_PATH,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            stdout, stderr = process.communicate(input=automated_input)
-            print(f"[{job_id}] assess output:", stdout.decode(), stderr.decode())
-
-            # Path to experiment results
-            experiment_path = os.path.join(STS_PATH, "experiments", "AlgorithmTesting")
-            if not os.path.exists(experiment_path):
-                print(f"Experiment path not found: {experiment_path}")
-                return {}
-
-            # Process results with correct file names and mapping
-            test_results = {}
-
-            # ADD THIS MISSING DICTIONARY:
-            TEST_FOLDERS = {
-                "ApproximateEntropy": "results.txt",
-                "BlockFrequency": "results.txt",
-                "CumulativeSums": "results.txt",
-                "FFT": "results.txt",
-                "Frequency": "results.txt",  # this one is different in your screenshot
-                "LinearComplexity": "results.txt",
-                "LongestRun": "results.txt",
-                "NonOverlappingTemplate": "results.txt",
-                "OverlappingTemplate": "results.txt",
-                "RandomExcursions": "results.txt",
-                "RandomExcursionsVariant": "results.txt",
-                "Rank": "results.txt",
-                "Runs": "results.txt",
-                "Serial": "results.txt",
-                "Universal": "results.txt"
-            }
-
-
-            # Test name mapping for display
-            test_name_mapping = {
-                "Frequency": "Frequency Test",
-                "BlockFrequency": "Frequency Block Test",
-                "CumulativeSums": "Cusum Test", 
-                "Runs": "Runs Test",
-                "LongestRun": "Longest One Block Test",
-                "Rank": "Binary Matrix Rank Test",
-                "FFT": "Discrete Fourier Transform Test",
-                "NonOverlappingTemplate": "Non Overlapping Test",
-                "OverlappingTemplate": "Overlapping Test",
-                "Universal": "Universal Test",
-                "ApproximateEntropy": "Approximate Entropy Test",
-                "RandomExcursions": "Random Excursion Test",
-                "RandomExcursionsVariant": "Random Excursion Variant Test",
-                "Serial": "Serial Test",
-                "LinearComplexity": "Linear Complexity Test",
-            }
-
-            for test_name, result_file in TEST_FOLDERS.items():
-                test_folder = os.path.join(experiment_path, test_name)
-                results_file = os.path.join(test_folder, result_file) 
-
-                if not os.path.isfile(results_file):
-                    # Use the display name for the result
-                    display_name = test_name_mapping.get(test_name, test_name)
-                    test_results[display_name] = {"p_value": 0, "result": "no data"}
-                    print(f"Results file not found: {results_file}")
-                    continue
-
-                p_values = []
-                try:
-                    with open(results_file, "r") as f:
-                        for line in f:
-                            try:
-                                p = float(line.strip())
-                                p_values.append(p)
-                            except:
-                                continue
-                except Exception as e:
-                    print(f"Error reading {results_file}: {e}")
-
-                if not p_values:
-                    test_result = "no data"
-                    rep_p_value = None
-                else:
-                    # Use the first p-value or minimum p-value
-                    rep_p_value = min(p_values)
-                    test_result = "random number" if rep_p_value > 0.05 else "non-random number"
-
-                # Use the display name for the result
-                display_name = test_name_mapping.get(test_name, test_name)
-                test_results[display_name] = {"p_value": rep_p_value, "result": test_result}
-
-                print(f"NIST 22B - {display_name}: p_value={rep_p_value}, result={test_result}")
-
-            return test_results
-
-        # Run NIST 22B tests
-        nist22_results = run_nist_22b_tests(uploaded_file_path)
-        nist22_passed = sum(1 for test in nist22_results.values() if test.get("result") == "random number")
-        print(f"NIST 22B Passed: {nist22_passed}/{len(nist22_results)}")
+        # Initialize results dictionaries
+        nist22_tests = {}
+        nist90b_tests = {}
+        dieharder_tests = {}
         
-        cache.set(f"{job_id}_progressReportServer", 22)
-        print("8")
+        # Process NIST 22B results
+        if nist22_results:
+            nist22_tests = nist22_results.get("tests", {})
+            nist22_final = nist22_results.get("final_result", "N/A")
+        else:
+            nist22_final = "No data"
 
-        def result_text(p):
-            if isinstance(p, dict):
-                return p.get("result", "non-random number")
-            return 'random number' if p > 0.01 else 'non-random number'
+        # Process NIST 90B results
+        if nist90b_results:
+            nist90b_tests = nist90b_results.get("tests", {})
+            nist90b_final = nist90b_results.get("final_result", "N/A")
+        else:
+            nist90b_final = "No data"
 
-        # --- NIST SP 800-90B Tests (Modern Implementation) ---
-        def run_nist_90b_tests(file_path):
-            # Define tests - using actual 90B test names
-            tests_executables = {
-                "IID Test": {
-                    "exe": os.path.join(CPP_FOLDER, "ea_iid"),
-                    "args": ["-v", file_path]
-                },
-                "Non-IID Test": {
-                    "exe": os.path.join(CPP_FOLDER, "ea_non_iid"),
-                    "args": ["-v", file_path]
-                },
-            }
-
-            results = {}
-            MIN_ENTROPY_THRESHOLDS = {
-                "IID Test": 7.5,
-                "Non-IID Test": 7.5,
-            }
-
-            for test_name, test_info in tests_executables.items():
-                exe_path = test_info["exe"]
-                args = test_info["args"]
-
-                if not os.path.isfile(exe_path) or not os.access(exe_path, os.X_OK):
-                    results[test_name] = {"min_entropy": 0.0, "result": "executable missing"}
-                    print(f"Executable not found: {exe_path}")
-                    continue
-
-                try:
-                    result = subprocess.run([exe_path] + args, capture_output=True, text=True, shell=False)
-                    output = result.stdout.strip()
-                    print(f"NIST 90B - {test_name} output: {output}")
-
-                    # Extract min_entropy from stdout
-                    min_entropy = 0.0
-                    for line in output.splitlines():
-                        line_lower = line.lower()
-                        if any(keyword in line_lower for keyword in ["h_original", "min-entropy", "h_bitstring", "min("]):
-                            numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
-                            if numbers:
-                                candidate = float(numbers[0])
-                                # Take the first reasonable entropy value
-                                if 0 <= candidate <= 8.0:  # Reasonable range for min-entropy per bit
-                                    min_entropy = candidate
-                                    break
-
-                    # Determine verdict based on min-entropy threshold
-                    threshold = MIN_ENTROPY_THRESHOLDS.get(test_name, 7.5)
-                    verdict = "random number" if min_entropy >= threshold else "non-random number"
-                    print(f"NIST 90B - {test_name}: min_entropy={min_entropy}, threshold={threshold}, result={verdict}")
-
-                except Exception as e:
-                    print(f"Error running {test_name}: {e}")
-                    min_entropy = 0.0
-                    verdict = "non-random number"
-
-                results[test_name] = {"min_entropy": min_entropy, "result": verdict}
-
-            return results
-
-        print("9")
-        cache.set(f"{job_id}_progressReportServer", 31)
-        
-        # Run NIST 90B tests
-        nist90b_results = run_nist_90b_tests(uploaded_file_path)
-        nist90b_passed = sum(1 for test in nist90b_results.values() if test.get("result") == "random number")
-        print(f"NIST 90B Passed: {nist90b_passed}/{len(nist90b_results)}")
-
-        cache.set(f"{job_id}_progressReportServer", 32)
-
-        # --- Dieharder Tests (Modern Implementation) ---
-        def run_dieharder_tests(file_path):
-            dieharder_test_ids = ["0","1","2","4","5","6","7","8","9","10","11","12","13","14","15","16","17"]
-
+        # Process Dieharder results
+        if dieharder_results:
+            dieharder_tests_list = dieharder_results.get("tests", [])
+            dieharder_final = dieharder_results.get("final_result", "N/A")
+            
+            # Convert dieharder list to dict for easier processing
             test_id_name_map = {
                 "0": "Diehard Birthdays Test",
                 "1": "Diehard Overlapping 5-Permutations Test", 
@@ -1565,118 +1373,203 @@ def generate_pdf_report_server(request):
                 "16": "Diehard Runs Test",
                 "17": "Diehard Craps Test",
             }
-
-            results = {}
-            passed_count = 0
-
-            for test_id in dieharder_test_ids:
-                command = [
-                    str(settings.TESTS_DIR / "dieharder-2.6.24/dieharder/dieharder"),
-                    "-d", test_id,
-                    "-g", "66",
-                    "-f", file_path
-                ]
-
-                p_value = None
-                assessment = None
-                try:
-                    process = subprocess.run(
-                        command,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        universal_newlines=True,
-                        timeout=300
-                    )
-                    output = process.stdout
+            
+            for test in dieharder_tests_list:
+                if isinstance(test, dict):
+                    test_id = test.get("test_id", "")
+                    test_name = test_id_name_map.get(test_id, f"Test {test_id}")
+                    assessment = test.get("assessment", "")
                     
-                    for line in output.splitlines():
-                        line = line.strip()
-                        if line.startswith("Kuiper KS: p"):
-                            match = re.search(r"p\s*=\s*([^\s]+)", line)
-                            if match:
-                                val = match.group(1)
-                                try:
-                                    p_value = float(val) if val.lower() != "nan" else 0.0
-                                except ValueError:
-                                    p_value = 0.0
-                        if line.startswith("Assessment:"):
-                            assessment = line.replace("Assessment:", "").strip()
-
-                    if assessment and "PASSED" in assessment.upper():
-                        result = 'random number'
-                        passed_count += 1
+                    # ✅ Check if "POOR" is in the assessment - if yes, then non-random
+                    if "POOR" in assessment.upper():
+                        result = "non-random number"
+                    elif "PASSED" in assessment.upper() or "WEAK" in assessment.upper():
+                        result = "random number"
                     else:
-                        result = 'non-random number'
+                        # Default to non-random if unclear
+                        result = "non-random number"
+                    
+                    dieharder_tests[test_name] = {
+                        "p_value": test.get("p_value", 0),
+                        "result": result,
+                        "raw_assessment": assessment  # Keep original for reference
+                    }
+        else:
+            dieharder_final = "No data"
 
-                    print(f"Dieharder - {test_id_name_map[test_id]}: p_value={p_value}, assessment={assessment}, result={result}")
+        cache.set(f"{job_id}_progressReportServer", 20)
 
-                except subprocess.TimeoutExpired:
-                    result = 'non-random number'
-                    p_value = 0
-                    print(f"Dieharder - {test_id_name_map[test_id]}: TIMEOUT")
-                except Exception as e:
-                    result = 'non-random number'
-                    p_value = 0
-                    print(f"Dieharder - {test_id_name_map[test_id]}: ERROR - {e}")
-
-                results[test_id_name_map[test_id]] = result
-
-            return results, passed_count
-
-        # Run Dieharder tests
-        dieharder_results, dieharder_passed = run_dieharder_tests(uploaded_file_path)
-        x = dieharder_passed
-        print(f"Dieharder Passed: {x}/{len(dieharder_results)}")
-
-        cache.set(f"{job_id}_progressReportServer", 55)
+        # ✅ Calculate final result based on majority
+        total_tests = len(nist22_tests) + len(nist90b_tests) + len(dieharder_tests)
         
-        # Calculate final result
-        total_tests = len(nist22_results) + len(nist90b_results) + len(dieharder_results)
-        total_passed = nist22_passed + nist90b_passed + x
-        final_text = 'random number' if total_passed > (total_tests // 2) else 'non-random number'
-        print(f"Final Result: {final_text} (Total: {total_passed}/{total_tests})")
+        # Count passed tests for each category
+        nist22_passed = sum(1 for test in nist22_tests.values() 
+                           if test.get("result", "").lower() == "random number")
+        nist90b_passed = sum(1 for test in nist90b_tests.values() 
+                            if test.get("result", "").lower() == "random number")
+        dieharder_passed = sum(1 for test in dieharder_tests.values() 
+                              if test.get("result", "").lower() == "random number")
 
-        # Prepare table data with correct test name mapping
+        total_passed = nist22_passed + nist90b_passed + dieharder_passed
+        final_text = 'random number' if total_passed > (total_tests // 2) else 'non-random number'
+        
+        print(f"Final Result: {final_text} (Total: {total_passed}/{total_tests})")
+        print(f"NIST 22B: {nist22_passed}/{len(nist22_tests)}")
+        print(f"NIST 90B: {nist90b_passed}/{len(nist90b_tests)}")
+        print(f"Dieharder: {dieharder_passed}/{len(dieharder_tests)}")
+
+        cache.set(f"{job_id}_progressReportServer", 30)
+
+        # ✅ Generate graphs for all three categories
+        print("Generating graphs...")
+        
+        # Generate NIST 22B graph
+        nist22_graph_response = create_graph_for_report(line_number, "nist22")
+        nist22_graph_buffer = nist22_graph_response.content
+        nist22_graph_io = BytesIO(nist22_graph_buffer)
+        
+        # Generate NIST 90B graph
+        nist90b_graph_response = create_graph_for_report(line_number, "nist90b")
+        nist90b_graph_buffer = nist90b_graph_response.content
+        nist90b_graph_io = BytesIO(nist90b_graph_buffer)
+        
+        # Generate Dieharder graph
+        dieharder_graph_response = create_graph_for_report(line_number, "dieharder")
+        dieharder_graph_buffer = dieharder_graph_response.content
+        dieharder_graph_io = BytesIO(dieharder_graph_buffer)
+        
+        cache.set(f"{job_id}_progressReportServer", 40)
+
+        # ✅ Prepare PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="comprehensive_report.pdf"'
+
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer, pagesize=A4,
+            rightMargin=10, leftMargin=10,
+            topMargin=10, bottomMargin=30, 
+            title="QNU Labs Comprehensive Report"
+        )
+
+        styles = getSampleStyleSheet()
+        title = Paragraph("Comprehensive Test Report - QNu Labs", styles['Title'])
+        title_space = Spacer(1, 0.0 * inch)
+        
+        subtitle_style = styles['Heading2']
+        subtitle_style.fontName = 'Helvetica-Bold'
+        subtitle_style.fontSize = 12
+        subtitle_style.underline = True
+        
+        nist_subtitle = Paragraph("Statistical Tests Results:", subtitle_style)
+        graph_subtitle = Paragraph("Graphical Analysis:", subtitle_style)
+        subtitle_space = Spacer(1, 0.5 * inch)
+        
+        bold_red_style = ParagraphStyle(
+            'BoldRed', parent=styles['Normal'], fontSize=12, fontName='Helvetica-Bold', textColor='red'
+        )
+
+        cache.set(f"{job_id}_progressReportServer", 45)
+
+        # ✅ Build comprehensive table data
         data1 = [
             ['Test Type', 'Result', 'Test type', 'Result'],
-            # NIST 22B Tests
-            [Paragraph('1. Frequency Test', styles['Normal']), result_text(nist22_results.get('Frequency Test', {})),
-             Paragraph('2. Frequency Test within a Block', styles['Normal']), result_text(nist22_results.get('Frequency Block Test', {}))],
-            [Paragraph('3. Runs Test', styles['Normal']), result_text(nist22_results.get('Runs Test', {})),
-             Paragraph('4. Test for the longest Run of Ones', styles['Normal']), result_text(nist22_results.get('Longest One Block Test', {}))],
-            [Paragraph('5. Binary Matrix Rank Test', styles['Normal']), result_text(nist22_results.get('Binary Matrix Rank Test', {})),
-            Paragraph('6. Discrete Fourier Transform Test', styles['Normal']), result_text(nist22_results.get('Discrete Fourier Transform Test', {}))],
-            [Paragraph('7. Non-overlapping Template Match', styles['Normal']), result_text(nist22_results.get('Non Overlapping Test', {})),
-             Paragraph('8. Overlapping Template Matching Test', styles['Normal']), result_text(nist22_results.get('Overlapping Test', {}))],
-            [Paragraph('9. Maurers Universal test', styles['Normal']), result_text(nist22_results.get('Universal Test', {})),
-             Paragraph('10. Linear complexity Test', styles['Normal']), result_text(nist22_results.get('Linear Complexity Test', {}))],
-            [Paragraph('11. Serial Test', styles['Normal']), result_text(nist22_results.get('Serial Test', {})),
-             Paragraph('12. Approximate Entropy Test', styles['Normal']), result_text(nist22_results.get('Approximate Entropy Test', {}))],
-            [Paragraph('13. Cumulative Sum Test', styles['Normal']), result_text(nist22_results.get('Cusum Test', {})),
-             Paragraph('14. Random Excursions Test', styles['Normal']), result_text(nist22_results.get('Random Excursion Test', {}))],
-            [Paragraph('15. Random Excursions Variant Test', styles['Normal']), result_text(nist22_results.get('Random Excursion Variant Test', {})), '', ''],
-            # NIST 90B Tests - Updated to match actual test names
-            [Paragraph('16. IID Test', styles['Normal']), nist90b_results.get('IID Test', {}).get('result', 'non-random number'),
-             Paragraph('17. Non-IID Test', styles['Normal']), nist90b_results.get('Non-IID Test', {}).get('result', 'non-random number')],
-            # Dieharder Tests
-            [Paragraph('18. Birthday Spacing', styles['Normal']), dieharder_results.get("Diehard Birthdays Test", "non-random number"),
-            Paragraph('19. Parking Lot Test', styles['Normal']), dieharder_results.get("Diehard Parking Lot Test", "non-random number")],
-            [Paragraph('20. Overlapping Permutations', styles['Normal']), dieharder_results.get("Diehard Overlapping 5-Permutations Test", "non-random number"),
-            Paragraph('21. Minimum Distance Test', styles['Normal']), dieharder_results.get("Diehard Minimum Distance (2D Circle) Test", "non-random number")],
-            [Paragraph('22. Ranks of 31x31 Test', styles['Normal']), dieharder_results.get("Diehard Ranks of 31x31 Matrices Test", "non-random number"),
-            Paragraph('23. 3D Spheres Test', styles['Normal']), dieharder_results.get("Diehard 3D Spheres Test", "non-random number")],
-            [Paragraph('24. Ranks of 6x8 Test', styles['Normal']), dieharder_results.get("Diehard Ranks of 6x8 Matrices Test", "non-random number"),
-            Paragraph('25. Craps Test', styles['Normal']), dieharder_results.get("Diehard Craps Test", "non-random number")],
-            [Paragraph('26. OPSO Test', styles['Normal']), dieharder_results.get("Diehard OPSO Test", "non-random number"),
-            Paragraph('27. OQSO Test', styles['Normal']), dieharder_results.get("Diehard OQSO Test", "non-random number")],
-            [Paragraph('28. DNA Test', styles['Normal']), dieharder_results.get("Diehard DNA Test", "non-random number"),
-            Paragraph('29. Count the Ones (Stream) Test', styles['Normal']), dieharder_results.get("Diehard Count the 1s (Stream) Test", "non-random number")],
-            [Paragraph('30. Count the Ones (Bytes) Test', styles['Normal']), dieharder_results.get("Diehard Count the 1s (Byte) Test", "non-random number"),
-            Paragraph('31. Bitstream Test', styles['Normal']), dieharder_results.get("Diehard Bitstream Test", "non-random number")],
-            [Paragraph('32. Overlapping Sums Test', styles['Normal']), dieharder_results.get("Diehard Overlapping Sums Test", "non-random number"),
-            Paragraph('33. Runs Test', styles['Normal']), dieharder_results.get("Diehard Runs Test", "non-random number")],
-            [Paragraph('Final Result', styles['Normal']), Paragraph(final_text, bold_red_style), '', ''],
         ]
+
+        def result_text(test_data):
+            """Extract result from test data"""
+            if isinstance(test_data, dict):
+                result = test_data.get("result", "")
+                # For Dieharder tests, we've already processed "POOR" to "non-random number"
+                return result
+            return "non-random number"
+
+        # NIST 22B Tests
+        nist22_test_mapping = {
+            'Frequency Test': '1. Frequency Test',
+            'Frequency Block Test': '2. Frequency Test within a Block', 
+            'Runs Test': '3. Runs Test',
+            'Longest One Block Test': '4. Test for the longest Run of Ones',
+            'Binary Matrix Rank Test': '5. Binary Matrix Rank Test',
+            'Discrete Fourier Transform Test': '6. Discrete Fourier Transform Test',
+            'Non Overlapping Test': '7. Non-overlapping Template Match',
+            'Overlapping Test': '8. Overlapping Template Matching Test',
+            'Universal Test': '9. Maurers Universal test',
+            'Linear Complexity Test': '10. Linear complexity Test',
+            'Serial Test': '11. Serial Test',
+            'Approximate Entropy Test': '12. Approximate Entropy Test',
+            'Cusum Test': '13. Cumulative Sum Test',
+            'Random Excursion Test': '14. Random Excursions Test',
+            'Random Excursion Variant Test': '15. Random Excursions Variant Test'
+        }
+
+        # Add NIST 22B tests in pairs
+        nist22_items = list(nist22_tests.items())
+        for i in range(0, len(nist22_items), 2):
+            if i < len(nist22_items):
+                test1_name, test1_data = nist22_items[i]
+                display_name1 = nist22_test_mapping.get(test1_name, f"16. {test1_name}")
+                result1 = result_text(test1_data)
+                
+                if i + 1 < len(nist22_items):
+                    test2_name, test2_data = nist22_items[i + 1]
+                    display_name2 = nist22_test_mapping.get(test2_name, f"17. {test2_name}")
+                    result2 = result_text(test2_data)
+                    data1.append([
+                        Paragraph(display_name1, styles['Normal']), result1,
+                        Paragraph(display_name2, styles['Normal']), result2
+                    ])
+                else:
+                    data1.append([
+                        Paragraph(display_name1, styles['Normal']), result1, '', ''
+                    ])
+
+        # NIST 90B Tests
+        nist90b_start_idx = 16
+        nist90b_items = list(nist90b_tests.items())
+        for i, (test_name, test_data) in enumerate(nist90b_items):
+            display_name = f"{nist90b_start_idx + i}. {test_name}"
+            result = result_text(test_data)
+            if i % 2 == 0:
+                if i + 1 < len(nist90b_items):
+                    next_test_name, next_test_data = nist90b_items[i + 1]
+                    next_display_name = f"{nist90b_start_idx + i + 1}. {next_test_name}"
+                    next_result = result_text(next_test_data)
+                    data1.append([
+                        Paragraph(display_name, styles['Normal']), result,
+                        Paragraph(next_display_name, styles['Normal']), next_result
+                    ])
+                else:
+                    data1.append([
+                        Paragraph(display_name, styles['Normal']), result, '', ''
+                    ])
+
+        # Dieharder Tests
+        dieharder_start_idx = nist90b_start_idx + len(nist90b_items)
+        dieharder_items = list(dieharder_tests.items())
+        for i, (test_name, test_data) in enumerate(dieharder_items):
+            display_name = f"{dieharder_start_idx + i}. {test_name}"
+            result = result_text(test_data)
+            if i % 2 == 0:
+                if i + 1 < len(dieharder_items):
+                    next_test_name, next_test_data = dieharder_items[i + 1]
+                    next_display_name = f"{dieharder_start_idx + i + 1}. {next_test_name}"
+                    next_result = result_text(next_test_data)
+                    data1.append([
+                        Paragraph(display_name, styles['Normal']), result,
+                        Paragraph(next_display_name, styles['Normal']), next_result
+                    ])
+                else:
+                    data1.append([
+                        Paragraph(display_name, styles['Normal']), result, '', ''
+                    ])
+
+        # Add final result row
+        data1.append([
+            Paragraph('Final Result', styles['Normal']), 
+            Paragraph(final_text, bold_red_style), 
+            '', ''
+        ])
 
         colWidths = [2 * inch, 1.5 * inch, 2 * inch, 1.5 * inch]
         table1 = Table(data1, colWidths=colWidths)
@@ -1690,16 +1583,9 @@ def generate_pdf_report_server(request):
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
 
-        print("10")
-        # Images for graphs
-        # graph_image1 = Image(graph_image_io1, width=7 * inch, height=4.5 * inch)
-        print("11")
-        # graph_image = Image(graph_image_io, width=7 * inch, height=4.5 * inch)
-        print("12")
-        # graph_image2 = Image(graph_image_io2, width=7 * inch, height=4.5 * inch)
-        cache.set(f"{job_id}_progressReportServer", 56)
-        
-        # Logo
+        cache.set(f"{job_id}_progressReportServer", 50)
+
+        # ✅ Logo
         logo_path = os.path.join(os.path.dirname(__file__), 'qnulogo.png')
         logo_image = Image(logo_path, width=0.5 * inch, height=0.5 * inch)
         logo_table = Table([[logo_image]], colWidths=[6.5 * inch], rowHeights=[0.5 * inch])
@@ -1708,68 +1594,70 @@ def generate_pdf_report_server(request):
             ('VALIGN', (100, 100), (0, 0), 'TOP'),
         ]))
 
-        print("13")
-        # AI Analysis
-        all_results_text = {}
-        all_results_text.update({k: v.get("result", "non-random number") for k, v in nist22_results.items()})
-        all_results_text.update({k: v.get("result", "non-random number") for k, v in nist90b_results.items()})
-        all_results_text.update(dieharder_results)
-        
-        cache.set(f"{job_id}_progressReportServer", 57)
-        AIAnalysis_subtitle = Paragraph("AI Analysis:", subtitle_style)
-        prompt = "Perform a detailed analysis of the results from all the statistical tests. For each test, display the test name along with its result and indicate whether the result is Random or Non-Random. In the analysis, mention that the basis of selecting random or non random is the majority of tests' response. Finally, tell how many tests give random number or non random number as a result along with their names."
-
-        response1 = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[{"text": prompt}, {"text": json.dumps(all_results_text)}],
+        # ✅ Summary section
+        summary_style = ParagraphStyle(
+            'Summary',
+            parent=styles['Normal'],
+            fontSize=11,
+            fontName='Helvetica-Bold',
+            textColor=colors.darkblue,
+            spaceAfter=12
         )
-        if response1.candidates:
-            gemini_analysis = response1.candidates[0].content.parts[0].text
-        else:
-            gemini_analysis = ""
-
-        formatted_output = format_markdown(gemini_analysis)
-        bullet_points = formatted_output.replace("<ul>", "").replace("</ul>", "").split("<li>")
-        bullet_points = [point.replace("</li>", "").strip() for point in bullet_points if point.strip()]
-
-        gemini_analysis_paragraph = ListFlowable(
-            [ListItem(Paragraph(point, styles['Normal'])) for point in bullet_points],
-            bulletType='bullet',
-        )
-        cache.set(f"{job_id}_progressReportServer", 58)
         
-        # Build the PDF
+        summary_text = f"""
+        <b>Test Summary:</b><br/>
+        • NIST SP 800-22B Tests: {nist22_passed}/{len(nist22_tests)} passed<br/>
+        • NIST SP 800-90B Tests: {nist90b_passed}/{len(nist90b_tests)} passed<br/>
+        • Dieharder Tests: {dieharder_passed}/{len(dieharder_tests)} passed<br/>
+        • <b>Overall: {total_passed}/{total_tests} tests passed</b><br/>
+        • <b>Final Verdict: {final_text.upper()}</b>
+        """
+        
+        summary_paragraph = Paragraph(summary_text, summary_style)
+
+        cache.set(f"{job_id}_progressReportServer", 55)
+
+        # ✅ Create graph images for PDF
+        nist22_graph_image = Image(nist22_graph_io, width=7 * inch, height=4.5 * inch)
+        nist90b_graph_image = Image(nist90b_graph_io, width=7 * inch, height=4.5 * inch)
+        dieharder_graph_image = Image(dieharder_graph_io, width=7 * inch, height=4.5 * inch)
+
+        # ✅ Build the PDF with multiple pages
         elements = [
             logo_table,
             title,
             title_space,
+            summary_paragraph,
+            Spacer(1, 0.2 * inch),
             nist_subtitle,
             table1,
-            subtitle_space,
+            
+            # Page break for graphs
+            PageBreak(),
             graph_subtitle,
-            subtitle_space,
-            # graph_image1,
-            subtitle_space,
-            # graph_image,
-            subtitle_space,
-            # graph_image2,
-            subtitle_space,
-            AIAnalysis_subtitle,
-            gemini_analysis_paragraph,
+            Spacer(1, 0.2 * inch),
+            Paragraph("NIST SP 800-22B Tests:", styles['Heading3']),
+            nist22_graph_image,
+            Spacer(1, 0.2 * inch),
+            Paragraph("NIST SP 800-90B Tests:", styles['Heading3']),
+            nist90b_graph_image,
+            Spacer(1, 0.2 * inch),
+            Paragraph("Dieharder Tests:", styles['Heading3']),
+            dieharder_graph_image,
         ]
-        cache.set(f"{job_id}_progressReportServer", 59)
+
         doc.build(elements)
-        print("14")
+        
         response.write(buffer.getvalue())
         buffer.close()
-        
+
         # Cleanup temporary file
         try:
             os.remove(uploaded_file_path)
         except:
             pass
             
-        cache.set(f"{job_id}_progressReportServer", 60)
+        cache.set(f"{job_id}_progressReportServer", 100)
         return response
 
     except Exception as e:
@@ -1780,6 +1668,125 @@ def generate_pdf_report_server(request):
         except:
             pass
         return JsonResponse({"error": str(e)}, status=500)
+
+
+def create_graph_for_report(line_number, test_type):
+    """Helper function to generate graphs for the report"""
+    import io
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+    
+    # Fetch results from cache based on test type
+    if test_type == "nist22":
+        cache_key = f"{line_number}_results"
+        results = cache.get(cache_key)
+        if not results:
+            return HttpResponse("No NIST 22B results found", status=404)
+        
+        tests = results.get("tests", {})
+        valid_tests = {
+            test_name: float(test_info.get("p_value") or 0)
+            for test_name, test_info in tests.items()
+        }
+        
+        x = list(valid_tests.keys())
+        y = list(valid_tests.values())
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        colors = ['green' if p >= 0.01 else 'blue' for p in y]
+        ax.bar(x, y, color=colors)
+        ax.axhline(y=0.01, color='red', linestyle='--', linewidth=2, label='p-value = 0.01')
+        ax.set_xlabel('NIST SP 800-22B Tests', fontsize=14)
+        ax.set_ylabel('p-value', fontsize=14)
+        ax.set_yticks([i / 10.0 for i in range(0, 11)])
+        ax.set_ylim(0, 1)
+        plt.xticks(rotation=45, ha='right', fontsize=10)
+        plt.tight_layout()
+
+        legend_elements = [
+            Patch(facecolor='green', edgecolor='green', label='Random (p ≥ 0.01)'),
+            Patch(facecolor='blue', edgecolor='blue', label='Non-random (p < 0.01)')
+        ]
+        ax.legend(handles=legend_elements, loc='upper right', prop={'size': 8})
+
+    elif test_type == "nist90b":
+        cache_key = f"{line_number}_results90b"
+        results = cache.get(cache_key)
+        if not results:
+            return HttpResponse("No NIST 90B results found", status=404)
+        
+        tests = results.get("tests", {})
+        valid_tests = {test_name: float(test_info.get("min_entropy", 0.0)) for test_name, test_info in tests.items()}
+
+        x = list(valid_tests.keys())
+        y = list(valid_tests.values())
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+        colors = ['green' if p >= 7.5 else 'blue' for p in y]
+        ax.bar(x, y, color=colors)
+        ax.axhline(y=7.5, color='red', linestyle='--', linewidth=2, label='Min-Entropy = 7.5')
+        ax.set_xlabel('NIST SP 800-90B Tests', fontsize=14)
+        ax.set_ylabel('Min-Entropy', fontsize=14)
+        ax.set_ylim(0, 10)
+        plt.xticks(rotation=45, ha='right', fontsize=10)
+        plt.tight_layout()
+
+        legend_elements = [
+            Patch(facecolor='green', edgecolor='green', label='Random (Min-Entropy ≥ 7.5)'),
+            Patch(facecolor='blue', edgecolor='blue', label='Non-random (Min-Entropy < 7.5)')
+        ]
+        ax.legend(handles=legend_elements, loc='upper right', prop={'size': 8})
+
+    elif test_type == "dieharder":
+        cache_key = f"{line_number}_results_dieharder"
+        results = cache.get(cache_key)
+        if not results:
+            return HttpResponse("No Dieharder results found", status=404)
+        
+        tests = results.get("tests", [])
+        test_p_values = {}
+        test_id_name_map = {
+            "0": "Birthdays", "1": "Overlapping", "2": "Ranks 31x31", "4": "Ranks 6x8",
+            "5": "Bitstream", "6": "OPSO", "7": "OQSO", "8": "DNA", "9": "Count 1s Stream",
+            "10": "Count 1s Byte", "11": "Parking Lot", "12": "Min Distance", "13": "3D Spheres",
+            "14": "Squeeze", "15": "Overlapping Sums", "16": "Runs", "17": "Craps"
+        }
+        
+        for t in tests:
+            test_id = t.get('test_id', '')
+            short_name = test_id_name_map.get(test_id, f"Test {test_id}")
+            test_p_values[short_name] = t.get("p_value", 0.0)
+
+        x_labels = list(test_p_values.keys())
+        y_values = list(test_p_values.values())
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+        colors = ['green' if p > 0.01 else 'blue' for p in y_values]
+        ax.bar(x_labels, y_values, color=colors)
+        ax.axhline(y=0.01, color='red', linestyle='--', linewidth=2, label='p-value = 0.01')
+        ax.set_xlabel('Dieharder Tests', fontsize=14)
+        ax.set_ylabel('P-values', fontsize=14)
+        ax.set_yticks([i / 10.0 for i in range(0, 11)])
+        ax.set_ylim(0, 1)
+        plt.xticks(rotation=45, ha='right', fontsize=8)
+        plt.tight_layout()
+
+        legend_elements = [
+            Patch(facecolor='green', edgecolor='green', label='Random (p > 0.01)'),
+            Patch(facecolor='blue', edgecolor='blue', label='Non-random (p ≤ 0.01)'),
+        ]
+        ax.legend(handles=legend_elements, loc='upper right', prop={'size': 8})
+
+    else:
+        return HttpResponse("Invalid test type", status=400)
+
+    # Convert to image response
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+    buf.seek(0)
+    plt.close(fig)
+
+    return HttpResponse(buf, content_type='image/png')
 
 @csrf_exempt
 def get_progress_server(request, job_id):
@@ -4159,4 +4166,5 @@ def fetch_qrng(request):
         return response
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500),
+
