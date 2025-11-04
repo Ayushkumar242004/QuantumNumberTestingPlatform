@@ -11,6 +11,7 @@ import { MenuItem, FormControl, InputAdornment, Tooltip } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { supabase } from '../../utils/supabaseClient';
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from '@mui/icons-material/Delete';
 const MAX_STACK_SIZE_ESTIMATE = 200 * 1024 * 1024;
 
 const Nist_tests = () => {
@@ -1260,33 +1261,33 @@ const Nist_tests = () => {
             const progress = data.progress || 0;
 
             // Update progress based on line number
-           switch (lineNumber) {
-      case 1:
-        if (result && (result.final_result === "non-random number" || result.final_result === "random number")) {
-          return;
-        }
-        break;
-      case 2:
-        if (result2 && (result2.final_result === "non-random number" || result2.final_result === "random number")) {
-          return;
-        }
-        break;
-      case 3:
-        if (result3 && (result3.final_result === "non-random number" || result3.final_result === "random number")) {
-          return;
-        }
-        break;
-      case 4:
-        if (result4 && (result4.final_result === "non-random number" || result4.final_result === "random number")) {
-          return;
-        }
-        break;
-      case 5:
-        if (result5 && (result5.final_result === "non-random number" || result5.final_result === "random number")) {
-          return;
-        }
-        break;
-    }
+            switch (lineNumber) {
+              case 1:
+                if (result && (result.final_result === "non-random number" || result.final_result === "random number")) {
+                  return;
+                }
+                break;
+              case 2:
+                if (result2 && (result2.final_result === "non-random number" || result2.final_result === "random number")) {
+                  return;
+                }
+                break;
+              case 3:
+                if (result3 && (result3.final_result === "non-random number" || result3.final_result === "random number")) {
+                  return;
+                }
+                break;
+              case 4:
+                if (result4 && (result4.final_result === "non-random number" || result4.final_result === "random number")) {
+                  return;
+                }
+                break;
+              case 5:
+                if (result5 && (result5.final_result === "non-random number" || result5.final_result === "random number")) {
+                  return;
+                }
+                break;
+            }
 
             // ✅ Stop polling if already complete
             if (progress >= 100 && progressIntervalIds[lineNumber]) {
@@ -2063,6 +2064,97 @@ const Nist_tests = () => {
     }
   };
 
+const handleDeleteRow = async (lineNumber) => {
+  // Clear local state
+  switch (lineNumber) {
+    case 1:
+      setBinaryInput("");
+      setResult("");
+      setUploadTime("");
+      setFileName("");
+      setScheduledTime("");
+      setDebouncedScheduledTime("");
+      setLoadingProgress(0);
+      setIsUploadButtonEnabled(true);
+      setIsDateEnabled(true);
+      setIsTimeEnabled(true);
+      alertShownRef.current = false;
+      binaryInsertedRef.current = false;
+      break;
+    case 2:
+      setBinaryInput2("");
+      setResult2("");
+      setUploadTime2("");
+      setFileName2("");
+      setScheduledTime2("");
+      setDebouncedScheduledTime2("");
+      setLoadingProgress2(0);
+      setIsUploadButtonEnabled2(true);
+      setIsDateEnabled2(true);
+      setIsTimeEnabled2(true);
+      alertShownRef2.current = false;
+      binaryInsertedRef2.current = false;
+      break;
+    case 3:
+      setBinaryInput3("");
+      setResult3("");
+      setUploadTime3("");
+      setFileName3("");
+      setScheduledTime3("");
+      setDebouncedScheduledTime3("");
+      setLoadingProgress3(0);
+      setIsUploadButtonEnabled3(true);
+      setIsDateEnabled3(true);
+      setIsTimeEnabled3(true);
+      alertShownRef3.current = false;
+      binaryInsertedRef3.current = false;
+      break;
+    case 4:
+      setBinaryInput4("");
+      setResult4("");
+      setUploadTime4("");
+      setFileName4("");
+      setScheduledTime4("");
+      setDebouncedScheduledTime4("");
+      setLoadingProgress4(0);
+      setIsUploadButtonEnabled4(true);
+      setIsDateEnabled4(true);
+      setIsTimeEnabled4(true);
+      alertShownRef4.current = false;
+      binaryInsertedRef4.current = false;
+      break;
+    case 5:
+      setBinaryInput5("");
+      setResult5("");
+      setUploadTime5("");
+      setFileName5("");
+      setScheduledTime5("");
+      setDebouncedScheduledTime5("");
+      setLoadingProgress5(0);
+      setIsUploadButtonEnabled5(true);
+      setIsDateEnabled5(true);
+      setIsTimeEnabled5(true);
+      alertShownRef5.current = false;
+      binaryInsertedRef5.current = false;
+      break;
+    default:
+      break;
+  }
+
+  // Clear from Supabase
+  try {
+    const userId = await fetchUserId();
+    if (userId) {
+      await supabase
+        .from('results')
+        .delete()
+        .match({ line: lineNumber, user_id: userId });
+    }
+  } catch (error) {
+    console.error("Error deleting row from Supabase:", error);
+    alert("Failed to delete row from database.");
+  }
+};
 
   return (
     <Box m="20px">
@@ -2073,54 +2165,67 @@ const Nist_tests = () => {
         p="20px"
         sx={{
           backgroundColor: colors.primary[400],
-          borderRadius: "12px", // Increased border radius
-          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)", // Softer, larger shadow
-          border: `1px solid ${colors.grey[700]}`, // Subtle border
-          overflowX: "auto", // Ensure horizontal scrolling for small screens
+          borderRadius: "12px",
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+          border: `1px solid ${colors.grey[700]}`,
+          overflowX: "auto",
         }}
       >
         <Box
           component="table"
           sx={{
             width: "100%",
-            borderCollapse: "separate", // Use separate for border-spacing
-            borderSpacing: "0 8px", // Space between rows
+            borderCollapse: "separate",
+            borderSpacing: "0 8px",
             textAlign: "center",
             "& th": {
-              backgroundColor: colors.blueAccent[800], // Darker header background
+              backgroundColor: colors.blueAccent[800],
               color: colors.grey[100],
-              padding: "14px 10px", // More vertical padding
+              padding: "14px 10px",
               fontWeight: "bold",
               textTransform: "uppercase",
               fontSize: "0.85rem",
               letterSpacing: "0.5px",
               "&:first-of-type": {
-                borderTopLeftRadius: "8px", // Rounded corners for first header
+                borderTopLeftRadius: "8px",
                 borderBottomLeftRadius: "8px",
               },
               "&:last-of-type": {
-                borderTopRightRadius: "8px", // Rounded corners for last header
+                borderTopRightRadius: "8px",
                 borderBottomRightRadius: "8px",
+              },
+              // Fixed width for Actions header
+              "&:nth-child(8)": {
+                width: "100px",
+                minWidth: "100px",
+                maxWidth: "100px",
               },
             },
             "& td": {
-              padding: "15px 10px", // More padding for cells
-              border: "none", // Remove individual cell borders
-              backgroundColor: colors.primary[500], // Slightly different background for cells
+              padding: "15px 10px",
+              border: "none",
+              backgroundColor: colors.primary[500],
               "&:first-of-type": {
-                borderTopLeftRadius: "8px", // Rounded corners for first cell
+                borderTopLeftRadius: "8px",
                 borderBottomLeftRadius: "8px",
               },
               "&:last-of-type": {
-                borderTopRightRadius: "8px", // Rounded corners for last cell
+                borderTopRightRadius: "8px",
                 borderBottomRightRadius: "8px",
+              },
+              // Fixed width for Actions cells
+              "&:nth-child(8)": {
+                width: "100px",
+                minWidth: "100px",
+                maxWidth: "100px",
+                padding: "8px 4px",
               },
             },
             "& tr": {
-              transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out", // Smooth transition
+              transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
               "&:hover": {
-                transform: "translateY(-3px)", // Lift effect on hover
-                boxShadow: `0 6px 20px ${colors.primary[600]}80`, // Shadow on hover
+                transform: "translateY(-3px)",
+                boxShadow: `0 6px 20px ${colors.primary[600]}80`,
               },
             },
           }}
@@ -2133,7 +2238,8 @@ const Nist_tests = () => {
               <th style={{ width: "10%" }}>Progress Bar</th>
               <th style={{ width: "10%" }}>Uploading Time</th>
               <th style={{ width: "10%" }}>Filename</th>
-              <th style={{ width: "20%" }}>Scheduling Time</th>
+              <th style={{ width: "19%" }}>Scheduling Time</th>
+              <th style={{ width: "1%" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -2472,6 +2578,23 @@ const Nist_tests = () => {
                   Scheduled Time: {scheduledTime || "Not set"}
                 </Typography>
               </td>
+              <td>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <IconButton
+                    aria-label="delete"
+                    onClick={() => handleDeleteRow(1)}
+                    sx={{
+                      color: colors.redAccent[500],
+                      '&:hover': {
+                        color: colors.redAccent[400],
+                        backgroundColor: colors.redAccent[50],
+                      },
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </td>
 
 
             </tr>
@@ -2808,7 +2931,23 @@ const Nist_tests = () => {
                 </Typography>
               </td>
 
-
+                   <td>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <IconButton
+              aria-label="delete"
+              onClick={() => handleDeleteRow(2)}
+              sx={{
+                color: colors.redAccent[500],
+                '&:hover': {
+                  color: colors.redAccent[400],
+                  backgroundColor: colors.redAccent[50],
+                },
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+        </td>
             </tr>
 
             <tr>
@@ -3144,7 +3283,23 @@ const Nist_tests = () => {
                 </Typography>
               </td>
 
-
+ <td>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <IconButton
+              aria-label="delete"
+              onClick={() => handleDeleteRow(3)}
+              sx={{
+                color: colors.redAccent[500],
+                '&:hover': {
+                  color: colors.redAccent[400],
+                  backgroundColor: colors.redAccent[50],
+                },
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+        </td>
             </tr>
 
             <tr>
@@ -3477,7 +3632,23 @@ const Nist_tests = () => {
                   Scheduled Time: {scheduledTime4 || "Not set"}
                 </Typography>
               </td>
-
+ <td>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <IconButton
+              aria-label="delete"
+              onClick={() => handleDeleteRow(4)}
+              sx={{
+                color: colors.redAccent[500],
+                '&:hover': {
+                  color: colors.redAccent[400],
+                  backgroundColor: colors.redAccent[50],
+                },
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+        </td>
 
             </tr>
 
@@ -3811,7 +3982,23 @@ const Nist_tests = () => {
                   Scheduled Time: {scheduledTime5 || "Not set"}
                 </Typography>
               </td>
-
+ <td>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <IconButton
+              aria-label="delete"
+              onClick={() => handleDeleteRow(5)}
+              sx={{
+                color: colors.redAccent[500],
+                '&:hover': {
+                  color: colors.redAccent[400],
+                  backgroundColor: colors.redAccent[50],
+                },
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+        </td>
 
             </tr>
 

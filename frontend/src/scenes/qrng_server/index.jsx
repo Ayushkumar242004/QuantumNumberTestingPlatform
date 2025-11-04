@@ -16,6 +16,8 @@ import ArticleIcon from "@mui/icons-material/Article";
 import ServerIcon from "@mui/icons-material/Storage";
 import SecurityIcon from "@mui/icons-material/Security";
 import ScienceIcon from "@mui/icons-material/Science";
+import { IconButton } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Qrng_Server = () => {
   const theme = useTheme();
@@ -31,9 +33,9 @@ const Qrng_Server = () => {
 
   const [loadingProgress3, setLoadingProgress3] = useState(0);
 
-   const [testRunTrigger, setTestRunTrigger] = useState(0);
-    const [testRunTrigger2, setTestRunTrigger2] = useState(0);
-      const [testRunTrigger3, setTestRunTrigger3] = useState(0);
+  const [testRunTrigger, setTestRunTrigger] = useState(0);
+  const [testRunTrigger2, setTestRunTrigger2] = useState(0);
+  const [testRunTrigger3, setTestRunTrigger3] = useState(0);
 
   const [hostIP, setHostIP] = useState("");
 
@@ -52,383 +54,383 @@ const Qrng_Server = () => {
   const activeChannelsRef = useRef({});
 
 
-// Add this state at the top of your component
-const [activeTests, setActiveTests] = useState({
-  nist90b: false,
-  nist: false, 
-  dieharder: false
-});
+  // Add this state at the top of your component
+  const [activeTests, setActiveTests] = useState({
+    nist90b: false,
+    nist: false,
+    dieharder: false
+  });
 
-const handleButtonClick = async (type) => {
-  if (type === "report") {
-    // Check if we have a downloaded file (either in state or sessionStorage)
-    const fileInfoStr = sessionStorage.getItem('downloadedFileInfo');
-    if (!downloadedFile && !fileInfoStr) {
-      alert("Please download a file first using the Download File button");
-      return;
-    }
-
-    // Set session storage to indicate report generation is in progress
-    sessionStorage.setItem('reportGenerationInProgress', 'true');
-
-    try {
-      const userId = await fetchUserId();
-      if (!userId) {
-        alert("User not found");
-        sessionStorage.removeItem('reportGenerationInProgress');
+  const handleButtonClick = async (type) => {
+    if (type === "report") {
+      // Check if we have a downloaded file (either in state or sessionStorage)
+      const fileInfoStr = sessionStorage.getItem('downloadedFileInfo');
+      if (!downloadedFile && !fileInfoStr) {
+        alert("Please download a file first using the Download File button");
         return;
       }
 
-      // Create FormData to send file and metadata
-      const formData = new FormData();
-      
-      // If we have the actual file, use it. Otherwise, we'll need to handle this case
-      if (downloadedFile) {
-        formData.append("file", downloadedFile);
-      } else {
-        // If file is lost due to refresh, show error
-        alert("File data was lost due to page refresh. Please download the file again.");
-        sessionStorage.removeItem('reportGenerationInProgress');
-        sessionStorage.removeItem('downloadedFileInfo');
-        return;
-      }
+      // Set session storage to indicate report generation is in progress
+      sessionStorage.setItem('reportGenerationInProgress', 'true');
 
-      // Add required metadata
-      const hardcodedTime = "2025-04-10 11:31:08";
-      const jobId = `report_${Date.now()}`;
-
-      formData.append("scheduled_time", hardcodedTime);
-      formData.append("scheduled_time_str", hardcodedTime);
-      formData.append("job_id", jobId);
-      formData.append("line", "1");
-      formData.append("user_id", userId);
-      formData.append("file_name", downloadedFile.name);
-
-      // Show loading state
-      setLoading(true);
-
-      const response = await fetch(`${REACT_APP_BASE_URL}/pdf-report-server/`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to generate report");
-      }
-
-      // Get the PDF blob
-      const blob = await response.blob();
-
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `qrng_report_${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-
-      // Cleanup
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-      alert("Report generated and downloaded successfully!");
-
-      // Small delay before clearing
-      setTimeout(() => {
-        sessionStorage.removeItem('reportGenerationInProgress');
-      }, 1000);
-
-    } catch (error) {
-      console.error("Error generating report:", error);
-      alert(`Error generating report: ${error.message}`);
-      
-      // Clear session storage on error
-      sessionStorage.removeItem('reportGenerationInProgress');
-    } finally {
-      setLoading(false);
-    }
-  }
-};
-
-useEffect(() => {
-  let subscription1;
-  let subscription2;
-  let subscription3;
-  const fallbackIntervals = {};
-
-  const setupSubscriptions = async () => {
-    const userId = await fetchUserId();
-    if (!userId) return;
-
-    // Fetch initial data for all three tables
-    const fetchInitialData = async () => {
       try {
-        // results - NIST Test
-        console.log("Fetching initial data for 'results'...");
-        const { data: data1, error: error1 } = await supabase
-          .from('results')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('line', 1);
-
-        if (error1) {
-          console.error("Supabase fetch error (results):", error1);
-        } else if (data1 && data1.length > 0) {
-          const row = data1[0];
-          console.log("Initial 'results' data:", row);
-          setLoadingProgress(row.progress);
-          if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
-            await supabase
-              .from('results')
-              .update({ progress: 0, updated_at: new Date().toISOString() })
-              .eq('user_id', userId)
-              .eq('line', 1);
-            setLoadingProgress(0);
-            setNistResult(null);
-            localStorage.removeItem('nistResult');
-          } else if (row.result) {
-            setNistResult({ final_result: row.result });
-            localStorage.setItem('nistResult', JSON.stringify({ final_result: row.result }));
-          }
-        }
-
-        // results2 - NIST 90B Test
-        console.log("Fetching initial data for 'results2'...");
-        const { data: data2, error: error2 } = await supabase
-          .from('results2')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('line', 1);
-
-        if (error2) {
-          console.error("Supabase fetch error (results2):", error2);
-        } else if (data2 && data2.length > 0) {
-          const row = data2[0];
-          console.log("Initial 'results2' data:", row);
-          setLoadingProgress3(row.progress); // This should be setLoadingProgress3 for NIST 90B
-          if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
-            await supabase
-              .from('results2')
-              .update({ progress: 0, updated_at: new Date().toISOString() })
-              .eq('user_id', userId)
-              .eq('line', 1);
-            setLoadingProgress3(0);
-            setNist90bResult(null);
-            localStorage.removeItem('nist90bResult');
-          } else if (row.result) {
-            setNist90bResult({ final_result: row.result });
-            localStorage.setItem('nist90bResult', JSON.stringify({ final_result: row.result }));
-          }
-        }
-
-        // results3 - Dieharder Test
-        console.log("Fetching initial data for 'results3'...");
-        const { data: data3, error: error3 } = await supabase
-          .from('results3')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('line', 1);
-
-        if (error3) {
-          console.error("Supabase fetch error (results3):", error3);
-        } else if (data3 && data3.length > 0) {
-          const row = data3[0];
-          console.log("Initial 'results3' data:", row);
-          setLoadingProgress2(row.progress); // This should be setLoadingProgress2 for Dieharder
-          if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
-            await supabase
-              .from('results3')
-              .update({ progress: 0, updated_at: new Date().toISOString() })
-              .eq('user_id', userId)
-              .eq('line', 1);
-            setLoadingProgress2(0);
-            setDieharderResult(null);
-            localStorage.removeItem('dieharderResult');
-          } else if (row.result) {
-            setDieharderResult({ final_result: row.result });
-            localStorage.setItem('dieharderResult', JSON.stringify({ final_result: row.result }));
-          }
-        }
-      } catch (err) {
-        console.error('Error in initial data fetch:', err);
-      }
-    };
-
-    await fetchInitialData();
-
-    // Subscription for results (NIST Test)
-    subscription1 = supabase
-      .channel('results-changes')
-      .on(
-        'postgres_changes',
-        { 
-          event: '*',
-          schema: 'public', 
-          table: 'results', 
-          filter: `user_id=eq.${userId} AND line=eq.1` 
-        },
-        (payload) => {
-          console.debug('Realtime results payload:', payload);
-          const row = payload.new;
-          if (!row) return;
-          
-          const progress = Number(row.progress || 0);
-          console.log('Real-time NIST progress update:', progress);
-          
-          setLoadingProgress(progress);
-          
-          if (row.result && row.result.trim() !== "") {
-            setNistResult({ final_result: row.result });
-            localStorage.setItem('nistResult', JSON.stringify({ final_result: row.result }));
-          } else if (progress === 100) {
-            setNistResult(null);
-            localStorage.removeItem('nistResult');
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('Subscription 1 (results) status:', status);
-      });
-
-    // Subscription for results2 (NIST 90B Test)
-    subscription2 = supabase
-      .channel('results2-changes')
-      .on(
-        'postgres_changes',
-        { 
-          event: '*',
-          schema: 'public', 
-          table: 'results2', 
-          filter: `user_id=eq.${userId} AND line=eq.1` 
-        },
-        (payload) => {
-          console.debug('Realtime results2 payload:', payload);
-          const row = payload.new;
-          if (!row) return;
-          
-          const progress = Number(row.progress || 0);
-          console.log('Real-time NIST 90B progress update:', progress);
-          
-          setLoadingProgress3(progress); // This should update NIST 90B progress
-          
-          if (row.result && row.result.trim() !== "") {
-            setNist90bResult({ final_result: row.result });
-            localStorage.setItem('nist90bResult', JSON.stringify({ final_result: row.result }));
-          } else if (progress === 100) {
-            setNist90bResult(null);
-            localStorage.removeItem('nist90bResult');
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('Subscription 2 (results2) status:', status);
-      });
-
-    // Subscription for results3 (Dieharder Test)
-    subscription3 = supabase
-      .channel('results3-changes')
-      .on(
-        'postgres_changes',
-        { 
-          event: '*',
-          schema: 'public', 
-          table: 'results3', 
-          filter: `user_id=eq.${userId} AND line=eq.1` 
-        },
-        (payload) => {
-          console.debug('Realtime results3 payload:', payload);
-          const row = payload.new;
-          if (!row) return;
-          
-          const progress = Number(row.progress || 0);
-          console.log('Real-time Dieharder progress update:', progress);
-          
-          setLoadingProgress2(progress); // This should update Dieharder progress
-          
-          if (row.result && row.result.trim() !== "") {
-            setDieharderResult({ final_result: row.result });
-            localStorage.setItem('dieharderResult', JSON.stringify({ final_result: row.result }));
-          } else if (progress === 100) {
-            setDieharderResult(null);
-            localStorage.removeItem('dieharderResult');
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('Subscription 3 (results3) status:', status);
-      });
-
-    // Start fallback polling for all tables
-    startAggressiveFallbackPoll('results', setLoadingProgress, setNistResult, userId, 'nistResult');
-    startAggressiveFallbackPoll('results2', setLoadingProgress3, setNist90bResult, userId, 'nist90bResult');
-    startAggressiveFallbackPoll('results3', setLoadingProgress2, setDieharderResult, userId, 'dieharderResult');
-  };
-
-  // More aggressive fallback polling
-  const startAggressiveFallbackPoll = (tableName, setProgressFn, setResultFn, userId, storageKey) => {
-    if (fallbackIntervals[tableName]) return;
-    
-    console.log(`Starting aggressive polling for ${tableName}`);
-    fallbackIntervals[tableName] = setInterval(async () => {
-      try {
-        const { data, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .eq('user_id', userId)
-          .eq('line', 1)
-          .maybeSingle();
-
-        if (error) {
-          console.debug(`Fallback poll error (${tableName}):`, error);
+        const userId = await fetchUserId();
+        if (!userId) {
+          alert("User not found");
+          sessionStorage.removeItem('reportGenerationInProgress');
           return;
         }
-        
-        if (data) {
-          const progress = Number(data.progress || 0);
-          console.log(`Fallback poll (${tableName}) progress:`, progress);
-          
-          setProgressFn(progress);
-          
-          if (data.result && data.result.trim() !== "") {
-            setResultFn({ final_result: data.result });
-            localStorage.setItem(storageKey, JSON.stringify({ final_result: data.result }));
-          }
 
-          // Only stop if we have a final result
-          if (progress >= 100 && data.result && data.result.trim() !== "") {
-            console.log(`Stopping fallback poll for ${tableName} - completed`);
-            clearInterval(fallbackIntervals[tableName]);
-            delete fallbackIntervals[tableName];
-          }
+        // Create FormData to send file and metadata
+        const formData = new FormData();
+
+        // If we have the actual file, use it. Otherwise, we'll need to handle this case
+        if (downloadedFile) {
+          formData.append("file", downloadedFile);
+        } else {
+          // If file is lost due to refresh, show error
+          alert("File data was lost due to page refresh. Please download the file again.");
+          sessionStorage.removeItem('reportGenerationInProgress');
+          sessionStorage.removeItem('downloadedFileInfo');
+          return;
         }
-      } catch (e) {
-        console.debug(`Fallback poll exception (${tableName}):`, e);
+
+        // Add required metadata
+        const hardcodedTime = "2025-04-10 11:31:08";
+        const jobId = `report_${Date.now()}`;
+
+        formData.append("scheduled_time", hardcodedTime);
+        formData.append("scheduled_time_str", hardcodedTime);
+        formData.append("job_id", jobId);
+        formData.append("line", "1");
+        formData.append("user_id", userId);
+        formData.append("file_name", downloadedFile.name);
+
+        // Show loading state
+        setLoading(true);
+
+        const response = await fetch(`${REACT_APP_BASE_URL}/pdf-report-server/`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to generate report");
+        }
+
+        // Get the PDF blob
+        const blob = await response.blob();
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `qrng_report_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+
+        // Cleanup
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        alert("Report generated and downloaded successfully!");
+
+        // Small delay before clearing
+        setTimeout(() => {
+          sessionStorage.removeItem('reportGenerationInProgress');
+        }, 1000);
+
+      } catch (error) {
+        console.error("Error generating report:", error);
+        alert(`Error generating report: ${error.message}`);
+
+        // Clear session storage on error
+        sessionStorage.removeItem('reportGenerationInProgress');
+      } finally {
+        setLoading(false);
       }
-    }, 500); // More frequent polling - 500ms
-  };
-
-  setupSubscriptions();
-
-  return () => {
-    // Cleanup
-    try {
-      if (subscription1) subscription1.unsubscribe();
-      if (subscription2) subscription2.unsubscribe();
-      if (subscription3) subscription3.unsubscribe();
-    } catch (e) {
-      console.debug('Error unsubscribing channels:', e);
     }
-
-    Object.values(fallbackIntervals).forEach(id => {
-      try {
-        if (id) clearInterval(id);
-      } catch (e) {
-        console.debug('Error clearing interval:', e);
-      }
-    });
   };
-}, [testRunTrigger, testRunTrigger2, testRunTrigger3]);
+
+  useEffect(() => {
+    let subscription1;
+    let subscription2;
+    let subscription3;
+    const fallbackIntervals = {};
+
+    const setupSubscriptions = async () => {
+      const userId = await fetchUserId();
+      if (!userId) return;
+
+      // Fetch initial data for all three tables
+      const fetchInitialData = async () => {
+        try {
+          // results - NIST Test
+          console.log("Fetching initial data for 'results'...");
+          const { data: data1, error: error1 } = await supabase
+            .from('results')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('line', 1);
+
+          if (error1) {
+            console.error("Supabase fetch error (results):", error1);
+          } else if (data1 && data1.length > 0) {
+            const row = data1[0];
+            console.log("Initial 'results' data:", row);
+            setLoadingProgress(row.progress);
+            if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
+              await supabase
+                .from('results')
+                .update({ progress: 0, updated_at: new Date().toISOString() })
+                .eq('user_id', userId)
+                .eq('line', 1);
+              setLoadingProgress(0);
+              setNistResult(null);
+              localStorage.removeItem('nistResult');
+            } else if (row.result) {
+              setNistResult({ final_result: row.result });
+              localStorage.setItem('nistResult', JSON.stringify({ final_result: row.result }));
+            }
+          }
+
+          // results2 - NIST 90B Test
+          console.log("Fetching initial data for 'results2'...");
+          const { data: data2, error: error2 } = await supabase
+            .from('results2')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('line', 1);
+
+          if (error2) {
+            console.error("Supabase fetch error (results2):", error2);
+          } else if (data2 && data2.length > 0) {
+            const row = data2[0];
+            console.log("Initial 'results2' data:", row);
+            setLoadingProgress3(row.progress); // This should be setLoadingProgress3 for NIST 90B
+            if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
+              await supabase
+                .from('results2')
+                .update({ progress: 0, updated_at: new Date().toISOString() })
+                .eq('user_id', userId)
+                .eq('line', 1);
+              setLoadingProgress3(0);
+              setNist90bResult(null);
+              localStorage.removeItem('nist90bResult');
+            } else if (row.result) {
+              setNist90bResult({ final_result: row.result });
+              localStorage.setItem('nist90bResult', JSON.stringify({ final_result: row.result }));
+            }
+          }
+
+          // results3 - Dieharder Test
+          console.log("Fetching initial data for 'results3'...");
+          const { data: data3, error: error3 } = await supabase
+            .from('results3')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('line', 1);
+
+          if (error3) {
+            console.error("Supabase fetch error (results3):", error3);
+          } else if (data3 && data3.length > 0) {
+            const row = data3[0];
+            console.log("Initial 'results3' data:", row);
+            setLoadingProgress2(row.progress); // This should be setLoadingProgress2 for Dieharder
+            if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
+              await supabase
+                .from('results3')
+                .update({ progress: 0, updated_at: new Date().toISOString() })
+                .eq('user_id', userId)
+                .eq('line', 1);
+              setLoadingProgress2(0);
+              setDieharderResult(null);
+              localStorage.removeItem('dieharderResult');
+            } else if (row.result) {
+              setDieharderResult({ final_result: row.result });
+              localStorage.setItem('dieharderResult', JSON.stringify({ final_result: row.result }));
+            }
+          }
+        } catch (err) {
+          console.error('Error in initial data fetch:', err);
+        }
+      };
+
+      await fetchInitialData();
+
+      // Subscription for results (NIST Test)
+      subscription1 = supabase
+        .channel('results-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'results',
+            filter: `user_id=eq.${userId} AND line=eq.1`
+          },
+          (payload) => {
+            console.debug('Realtime results payload:', payload);
+            const row = payload.new;
+            if (!row) return;
+
+            const progress = Number(row.progress || 0);
+            console.log('Real-time NIST progress update:', progress);
+
+            setLoadingProgress(progress);
+
+            if (row.result && row.result.trim() !== "") {
+              setNistResult({ final_result: row.result });
+              localStorage.setItem('nistResult', JSON.stringify({ final_result: row.result }));
+            } else if (progress === 100) {
+              setNistResult(null);
+              localStorage.removeItem('nistResult');
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('Subscription 1 (results) status:', status);
+        });
+
+      // Subscription for results2 (NIST 90B Test)
+      subscription2 = supabase
+        .channel('results2-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'results2',
+            filter: `user_id=eq.${userId} AND line=eq.1`
+          },
+          (payload) => {
+            console.debug('Realtime results2 payload:', payload);
+            const row = payload.new;
+            if (!row) return;
+
+            const progress = Number(row.progress || 0);
+            console.log('Real-time NIST 90B progress update:', progress);
+
+            setLoadingProgress3(progress); // This should update NIST 90B progress
+
+            if (row.result && row.result.trim() !== "") {
+              setNist90bResult({ final_result: row.result });
+              localStorage.setItem('nist90bResult', JSON.stringify({ final_result: row.result }));
+            } else if (progress === 100) {
+              setNist90bResult(null);
+              localStorage.removeItem('nist90bResult');
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('Subscription 2 (results2) status:', status);
+        });
+
+      // Subscription for results3 (Dieharder Test)
+      subscription3 = supabase
+        .channel('results3-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'results3',
+            filter: `user_id=eq.${userId} AND line=eq.1`
+          },
+          (payload) => {
+            console.debug('Realtime results3 payload:', payload);
+            const row = payload.new;
+            if (!row) return;
+
+            const progress = Number(row.progress || 0);
+            console.log('Real-time Dieharder progress update:', progress);
+
+            setLoadingProgress2(progress); // This should update Dieharder progress
+
+            if (row.result && row.result.trim() !== "") {
+              setDieharderResult({ final_result: row.result });
+              localStorage.setItem('dieharderResult', JSON.stringify({ final_result: row.result }));
+            } else if (progress === 100) {
+              setDieharderResult(null);
+              localStorage.removeItem('dieharderResult');
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('Subscription 3 (results3) status:', status);
+        });
+
+      // Start fallback polling for all tables
+      startAggressiveFallbackPoll('results', setLoadingProgress, setNistResult, userId, 'nistResult');
+      startAggressiveFallbackPoll('results2', setLoadingProgress3, setNist90bResult, userId, 'nist90bResult');
+      startAggressiveFallbackPoll('results3', setLoadingProgress2, setDieharderResult, userId, 'dieharderResult');
+    };
+
+    // More aggressive fallback polling
+    const startAggressiveFallbackPoll = (tableName, setProgressFn, setResultFn, userId, storageKey) => {
+      if (fallbackIntervals[tableName]) return;
+
+      console.log(`Starting aggressive polling for ${tableName}`);
+      fallbackIntervals[tableName] = setInterval(async () => {
+        try {
+          const { data, error } = await supabase
+            .from(tableName)
+            .select('*')
+            .eq('user_id', userId)
+            .eq('line', 1)
+            .maybeSingle();
+
+          if (error) {
+            console.debug(`Fallback poll error (${tableName}):`, error);
+            return;
+          }
+
+          if (data) {
+            const progress = Number(data.progress || 0);
+            console.log(`Fallback poll (${tableName}) progress:`, progress);
+
+            setProgressFn(progress);
+
+            if (data.result && data.result.trim() !== "") {
+              setResultFn({ final_result: data.result });
+              localStorage.setItem(storageKey, JSON.stringify({ final_result: data.result }));
+            }
+
+            // Only stop if we have a final result
+            if (progress >= 100 && data.result && data.result.trim() !== "") {
+              console.log(`Stopping fallback poll for ${tableName} - completed`);
+              clearInterval(fallbackIntervals[tableName]);
+              delete fallbackIntervals[tableName];
+            }
+          }
+        } catch (e) {
+          console.debug(`Fallback poll exception (${tableName}):`, e);
+        }
+      }, 500); // More frequent polling - 500ms
+    };
+
+    setupSubscriptions();
+
+    return () => {
+      // Cleanup
+      try {
+        if (subscription1) subscription1.unsubscribe();
+        if (subscription2) subscription2.unsubscribe();
+        if (subscription3) subscription3.unsubscribe();
+      } catch (e) {
+        console.debug('Error unsubscribing channels:', e);
+      }
+
+      Object.values(fallbackIntervals).forEach(id => {
+        try {
+          if (id) clearInterval(id);
+        } catch (e) {
+          console.debug('Error clearing interval:', e);
+        }
+      });
+    };
+  }, [testRunTrigger, testRunTrigger2, testRunTrigger3]);
 
   const fetchUserId = async () => {
     const username = localStorage.getItem("username"); // Retrieve the username from localStorage
@@ -519,69 +521,109 @@ useEffect(() => {
     }
   };
 
-// Add this useEffect to restore downloaded file info on component mount
-useEffect(() => {
-  const restoreDownloadedFile = async () => {
-    const fileInfoStr = sessionStorage.getItem('downloadedFileInfo');
-    if (fileInfoStr) {
-      try {
-        const fileInfo = JSON.parse(fileInfoStr);
-        
-        // Create a mock file object with the stored info
-        // Note: We can't recreate the actual File object, but we can store enough info
-        // to show that a file was downloaded and enable the report button
-        const mockFile = new File([], fileInfo.name, {
-          type: fileInfo.type,
-          lastModified: fileInfo.lastModified
-        });
-        
-        setDownloadedFile(mockFile);
-        setBinaryDownloaded(true);
-        
-        console.log("Restored downloaded file info from sessionStorage");
-      } catch (error) {
-        console.error("Error restoring downloaded file:", error);
-        sessionStorage.removeItem('downloadedFileInfo');
+  // Add this useEffect to restore downloaded file info on component mount
+  useEffect(() => {
+    const restoreDownloadedFile = async () => {
+      const fileInfoStr = sessionStorage.getItem('downloadedFileInfo');
+      if (fileInfoStr) {
+        try {
+          const fileInfo = JSON.parse(fileInfoStr);
+
+          // Create a mock file object with the stored info
+          // Note: We can't recreate the actual File object, but we can store enough info
+          // to show that a file was downloaded and enable the report button
+          const mockFile = new File([], fileInfo.name, {
+            type: fileInfo.type,
+            lastModified: fileInfo.lastModified
+          });
+
+          setDownloadedFile(mockFile);
+          setBinaryDownloaded(true);
+
+          console.log("Restored downloaded file info from sessionStorage");
+        } catch (error) {
+          console.error("Error restoring downloaded file:", error);
+          sessionStorage.removeItem('downloadedFileInfo');
+        }
       }
+    };
+
+    restoreDownloadedFile();
+  }, []);
+
+  const handleDownload = async () => {
+    if (!hostIP) {
+      alert("Please enter Host IP Address");
+      return;
     }
-  };
 
-  restoreDownloadedFile();
-}, []);
+    if (size < 1 || size > 10) {
+      alert("Please enter size between 1 and 10 MB");
+      return;
+    }
 
-const handleDownload = async () => {
-  if (!hostIP) {
-    alert("Please enter Host IP Address");
-    return;
-  }
+    // Set session storage to indicate download is in progress
+    sessionStorage.setItem('qrngDownloadInProgress', 'true');
 
-  if (size < 1 || size > 10) {
-    alert("Please enter size between 1 and 10 MB");
-    return;
-  }
+    const userId = await fetchUserId();
+    setLoading(true);
 
-  // Set session storage to indicate download is in progress
-  sessionStorage.setItem('qrngDownloadInProgress', 'true');
-  
-  const userId = await fetchUserId();
-  setLoading(true);
+    try {
+      const response = await fetch(`${REACT_APP_BASE_URL}/fetch-qrng/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          size_mb: size,
+          host: hostIP
+        }),
+      });
 
-  try {
-    const response = await fetch(`${REACT_APP_BASE_URL}/fetch-qrng/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        size_mb: size,
-        host: hostIP
-      }),
-    });
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert("Error: " + (errorData.error || "Unknown error"));
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      alert("Error: " + (errorData.error || "Unknown error"));
-      
+        // Remove session storage on error
+        sessionStorage.removeItem('qrngDownloadInProgress');
+        sessionStorage.removeItem('downloadedFileInfo');
+        setLoading(false);
+        return;
+      }
+
+      // Convert response to blob and trigger download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Create and save the file for NIST testing
+      const file = new File([blob], "qrng.bin", { type: "application/octet-stream" });
+      setDownloadedFile(file);
+      setBinaryDownloaded(true);
+
+      // ✅ Store file info in sessionStorage for persistence
+      const fileInfo = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+      };
+      sessionStorage.setItem('downloadedFileInfo', JSON.stringify(fileInfo));
+
+      // Also trigger download to user
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "qrng.bin";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      await upsertProgress(0, userId, "");
+      await upsertProgress2(0, userId, "");
+      await upsertProgress3(0, userId, "");
+    } catch (err) {
+      console.error(err);
+
       // Remove session storage on error
       sessionStorage.removeItem('qrngDownloadInProgress');
       sessionStorage.removeItem('downloadedFileInfo');
@@ -589,50 +631,10 @@ const handleDownload = async () => {
       return;
     }
 
-    // Convert response to blob and trigger download
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    // Create and save the file for NIST testing
-    const file = new File([blob], "qrng.bin", { type: "application/octet-stream" });
-    setDownloadedFile(file);
-    setBinaryDownloaded(true);
-
-    // ✅ Store file info in sessionStorage for persistence
-    const fileInfo = {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: file.lastModified
-    };
-    sessionStorage.setItem('downloadedFileInfo', JSON.stringify(fileInfo));
-
-    // Also trigger download to user
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "qrng.bin";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-
-    await upsertProgress(0, userId, "");
-    await upsertProgress2(0, userId, "");
-    await upsertProgress3(0, userId, "");
-  } catch (err) {
-    console.error(err);
-    
-    // Remove session storage on error
+    // Remove session storage when download completes successfully
     sessionStorage.removeItem('qrngDownloadInProgress');
-    sessionStorage.removeItem('downloadedFileInfo');
     setLoading(false);
-    return;
-  }
-
-  // Remove session storage when download completes successfully
-  sessionStorage.removeItem('qrngDownloadInProgress');
-  setLoading(false);
-};
+  };
 
   useEffect(() => {
     const progressIntervalIds = {};
@@ -1014,7 +1016,7 @@ const handleDownload = async () => {
         return;
       }
 
-     await upsertProgress(0, userId);
+      await upsertProgress(0, userId);
       setTestRunTrigger2(prev => prev + 1);
 
 
@@ -1272,7 +1274,82 @@ const handleDownload = async () => {
   }, []);
 
 
+const handleClearConfiguration = async () => {
+  // Replaced 'confirm' with 'alert' to comply with no-restricted-globals rule
+  alert("All configurations have been cleared.");
+  
+  // Clear localStorage
+  localStorage.removeItem('hostIP');
+  localStorage.removeItem('fileSize');
+  localStorage.removeItem('downloadedFileInfo');
+  localStorage.removeItem('nistResult');
+  localStorage.removeItem('dieharderResult');
+  localStorage.removeItem('nist90bResult');
+  
+  // Clear state
+  setHostIP("");
+  setSize(1);
+  setBinaryDownloaded(false);
+  setDownloadedFile(null);
+  setNistResult(null);
+  setDieharderResult(null);
+  setNist90bResult(null);
+  setLoadingProgress(0);
+  setLoadingProgress2(0);
+  setLoadingProgress3(0);
 
+  // Delete data from Supabase tables for line 1
+  try {
+    const userId = await fetchUserId();
+    if (!userId) return;
+
+    // Delete from results table (NIST Test)
+    const { error: error1 } = await supabase
+      .from('results')
+      .delete()
+      .eq('user_id', userId)
+      .eq('line', 1);
+
+    if (error1) {
+      console.error("Error deleting from results table:", error1.message);
+    }
+
+    // Delete from results2 table (NIST 90B Test)
+    const { error: error2 } = await supabase
+      .from('results2')
+      .delete()
+      .eq('user_id', userId)
+      .eq('line', 1);
+
+    if (error2) {
+      console.error("Error deleting from results2 table:", error2.message);
+    }
+
+    // Delete from results3 table (Dieharder Test)
+    const { error: error3 } = await supabase
+      .from('results3')
+      .delete()
+      .eq('user_id', userId)
+      .eq('line', 1);
+
+    if (error3) {
+      console.error("Error deleting from results3 table:", error3.message);
+    }
+
+    console.log("Successfully cleared data from all Supabase tables");
+
+  } catch (err) {
+    console.error("Error clearing Supabase data:", err);
+  }
+};
+
+useEffect(() => {
+  // Load host IP from session storage on component mount
+  const savedHostIP = sessionStorage.getItem('hostIP');
+  if (savedHostIP) {
+    setHostIP(savedHostIP);
+  }
+}, []);
 
   return (
     <Box m="20px"
@@ -1315,37 +1392,40 @@ const handleDownload = async () => {
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={4}>
               <TextField
-                fullWidth
-                label="Host IP Address"
-                variant="outlined"
-                value={hostIP}
-                onChange={(e) => setHostIP(e.target.value)}
-                InputLabelProps={{
-                  sx: { color: colors.grey[300] }
-                }}
-                sx={{
-                  '& .MuiInputLabel-root': {
-                    color: colors.grey[400],
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: colors.greenAccent[400],
-                  },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: colors.blueAccent[400],
-                    },
-                    '&:hover fieldset': {
-                      borderColor: colors.greenAccent[500],
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: colors.greenAccent[500],
-                    },
-                  },
-                  '& .MuiInputBase-input': {
-                    color: 'white',
-                  },
-                }}
-              />
+  fullWidth
+  label="Host IP Address"
+  variant="outlined"
+  value={hostIP}
+  onChange={(e) => {
+    setHostIP(e.target.value);
+    sessionStorage.setItem('hostIP', e.target.value);
+  }}
+  InputLabelProps={{
+    sx: { color: colors.grey[300] }
+  }}
+  sx={{
+    '& .MuiInputLabel-root': {
+      color: colors.grey[400],
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: colors.greenAccent[400],
+    },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: colors.blueAccent[400],
+      },
+      '&:hover fieldset': {
+        borderColor: colors.greenAccent[500],
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: colors.greenAccent[500],
+      },
+    },
+    '& .MuiInputBase-input': {
+      color: 'white',
+    },
+  }}
+/>
             </Grid>
 
             <Grid item xs={12} md={3}>
@@ -1415,19 +1495,26 @@ const handleDownload = async () => {
               </Button>
             </Grid>
 
+            {/* File Ready and Delete Icon in the same Grid item */}
             <Grid item xs={12} md={2}>
-              <Chip
-                label={binaryDownloaded ? "File Ready" : "No File"}
-                color={binaryDownloaded ? "success" : "default"}
-                sx={{
-                  backgroundColor: binaryDownloaded ? colors.greenAccent[600] : colors.grey[600],
-                  color: "white",
-                  fontWeight: "600",
-                  fontSize: "14px"
-                }}
-              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+               
+                <IconButton
+                  onClick={handleClearConfiguration}
+                  sx={{
+                    color: colors.redAccent[500],
+                    "&:hover": {
+                      color: colors.redAccent[400],
+                      backgroundColor: 'rgba(244, 67, 54, 0.1)', // subtle red background on hover
+                    },
+                  }}
+                >
+                  <DeleteIcon sx={{ fontSize: 28 }} />
+                </IconButton>
+              </Box>
             </Grid>
           </Grid>
+
         </CardContent>
       </Card>
 

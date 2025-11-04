@@ -1,6 +1,6 @@
 ________________________________________________________________________________
 
-		FILE = /home/rao/Documents/test2/backend/myproject/home/sts-2.1.2/nist_1762254883935_qrng.bin		ALPHA = 0.0100
+		FILE = /home/rao/Documents/test2/backend/myproject/home/sts-2.1.2/nist_1762256121660_qrng.bin		ALPHA = 0.0100
 ________________________________________________________________________________
 
-		BITSREAD = 8388608 0s = 4194073 1s = 4194535
+		BITSREAD = 8388608 0s = 4193123 1s = 4195485
