@@ -11,7 +11,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '../../utils/supabaseClient';
 import { saveAs } from "file-saver"; // npm install file-saver
-
+import DeleteIcon from '@mui/icons-material/Delete';
 const MAX_STACK_SIZE_ESTIMATE = 150 * 1024 * 1024;
 
 const Dieharder_tests = () => {
@@ -3165,6 +3165,98 @@ const Dieharder_tests = () => {
   const handleDownloadOutput4 = () => downloadDieharderOutput(4);
   const handleDownloadOutput5 = () => downloadDieharderOutput(5);
 
+    const handleDeleteRow = async (lineNumber) => {
+    // Clear local state
+    switch (lineNumber) {
+      case 1:
+        setBinaryInput("");
+        setResult("");
+        setUploadTime("");
+        setFileName("");
+        setScheduledTime("");
+        setDebouncedScheduledTime("");
+        setLoadingProgress(0);
+        setIsUploadButtonEnabled(true);
+        setIsDateEnabled(true);
+        setIsTimeEnabled(true);
+        alertShownRef.current = false;
+        binaryInsertedRef.current = false;
+        break;
+      case 2:
+        setBinaryInput2("");
+        setResult2("");
+        setUploadTime2("");
+        setFileName2("");
+        setScheduledTime2("");
+        setDebouncedScheduledTime2("");
+        setLoadingProgress2(0);
+        setIsUploadButtonEnabled2(true);
+        setIsDateEnabled2(true);
+        setIsTimeEnabled2(true);
+        alertShownRef2.current = false;
+        binaryInsertedRef2.current = false;
+        break;
+      case 3:
+        setBinaryInput3("");
+        setResult3("");
+        setUploadTime3("");
+        setFileName3("");
+        setScheduledTime3("");
+        setDebouncedScheduledTime3("");
+        setLoadingProgress3(0);
+        setIsUploadButtonEnabled3(true);
+        setIsDateEnabled3(true);
+        setIsTimeEnabled3(true);
+        alertShownRef3.current = false;
+        binaryInsertedRef3.current = false;
+        break;
+      case 4:
+        setBinaryInput4("");
+        setResult4("");
+        setUploadTime4("");
+        setFileName4("");
+        setScheduledTime4("");
+        setDebouncedScheduledTime4("");
+        setLoadingProgress4(0);
+        setIsUploadButtonEnabled4(true);
+        setIsDateEnabled4(true);
+        setIsTimeEnabled4(true);
+        alertShownRef4.current = false;
+        binaryInsertedRef4.current = false;
+        break;
+      case 5:
+        setBinaryInput5("");
+        setResult5("");
+        setUploadTime5("");
+        setFileName5("");
+        setScheduledTime5("");
+        setDebouncedScheduledTime5("");
+        setLoadingProgress5(0);
+        setIsUploadButtonEnabled5(true);
+        setIsDateEnabled5(true);
+        setIsTimeEnabled5(true);
+        alertShownRef5.current = false;
+        binaryInsertedRef5.current = false;
+        break;
+      default:
+        break;
+    }
+
+    // Clear from Supabase
+    try {
+      const userId = await fetchUserId();
+      if (userId) {
+        await supabase
+          .from('results3')
+          .delete()
+          .match({ line: lineNumber, user_id: userId });
+      }
+    } catch (error) {
+      console.error("Error deleting row from Supabase:", error);
+      alert("Failed to delete row from database.");
+    }
+  };
+
   return (
     <Box m="20px">
       {/* Header Section */}
@@ -3227,14 +3319,15 @@ const Dieharder_tests = () => {
           }}
         >
           <thead>
-            <tr>
+           <tr>
               <th style={{ width: "10%" }}>Serial No</th>
               <th style={{ width: "30%" }}>Upload File</th>
               <th style={{ width: "10%" }}>Result</th>
               <th style={{ width: "10%" }}>Progress Bar</th>
               <th style={{ width: "10%" }}>Uploading Time</th>
               <th style={{ width: "10%" }}>Filename</th>
-              <th style={{ width: "20%" }}>Scheduling Time</th>
+              <th style={{ width: "19%" }}>Scheduling Time</th>
+              <th style={{ width: "1%" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -3573,6 +3666,24 @@ const Dieharder_tests = () => {
                   Scheduled Time: {scheduledTime || "Not set"}
                 </Typography>
               </td>
+               <td>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <IconButton
+                    aria-label="delete"
+                    onClick={() => handleDeleteRow(1)}
+                    sx={{
+                      color: colors.redAccent[500],
+                      '&:hover': {
+                        color: colors.redAccent[400],
+                        backgroundColor: colors.redAccent[50],
+                      },
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </td>
+
             </tr>
 
             <tr>
@@ -3922,6 +4033,23 @@ const Dieharder_tests = () => {
                   Scheduled Time: {scheduledTime2 || "Not set"}
                 </Typography>
               </td>
+               <td>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <IconButton
+                    aria-label="delete"
+                    onClick={() => handleDeleteRow(2)}
+                    sx={{
+                      color: colors.redAccent[500],
+                      '&:hover': {
+                        color: colors.redAccent[400],
+                        backgroundColor: colors.redAccent[50],
+                      },
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </td>
             </tr>
 
             <tr>
@@ -4269,6 +4397,23 @@ const Dieharder_tests = () => {
                 <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
                   Scheduled Time: {scheduledTime3 || "Not set"}
                 </Typography>
+              </td>
+               <td>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <IconButton
+                    aria-label="delete"
+                    onClick={() => handleDeleteRow(3)}
+                    sx={{
+                      color: colors.redAccent[500],
+                      '&:hover': {
+                        color: colors.redAccent[400],
+                        backgroundColor: colors.redAccent[50],
+                      },
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
               </td>
             </tr>
 
@@ -4618,6 +4763,23 @@ const Dieharder_tests = () => {
                   Scheduled Time: {scheduledTime4 || "Not set"}
                 </Typography>
               </td>
+               <td>
+                              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                <IconButton
+                                  aria-label="delete"
+                                  onClick={() => handleDeleteRow(4)}
+                                  sx={{
+                                    color: colors.redAccent[500],
+                                    '&:hover': {
+                                      color: colors.redAccent[400],
+                                      backgroundColor: colors.redAccent[50],
+                                    },
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Box>
+                            </td>
             </tr>
 
             <tr>
@@ -4965,6 +5127,23 @@ const Dieharder_tests = () => {
                 <Typography variant="body2" mt={0.5} sx={{ color: "#4CCEAC" }}>
                   Scheduled Time: {scheduledTime5 || "Not set"}
                 </Typography>
+              </td>
+               <td>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <IconButton
+                    aria-label="delete"
+                    onClick={() => handleDeleteRow(5)}
+                    sx={{
+                      color: colors.redAccent[500],
+                      '&:hover': {
+                        color: colors.redAccent[400],
+                        backgroundColor: colors.redAccent[50],
+                      },
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
               </td>
             </tr>
 

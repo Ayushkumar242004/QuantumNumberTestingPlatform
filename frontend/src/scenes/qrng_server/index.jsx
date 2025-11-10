@@ -172,7 +172,7 @@ const Qrng_Server = () => {
             .from('results')
             .select('*')
             .eq('user_id', userId)
-            .eq('line', 1);
+            .eq('line', 6);
 
           if (error1) {
             console.error("Supabase fetch error (results):", error1);
@@ -185,7 +185,7 @@ const Qrng_Server = () => {
                 .from('results')
                 .update({ progress: 0, updated_at: new Date().toISOString() })
                 .eq('user_id', userId)
-                .eq('line', 1);
+                .eq('line', 6);
               setLoadingProgress(0);
               setNistResult(null);
               localStorage.removeItem('nistResult');
@@ -201,7 +201,7 @@ const Qrng_Server = () => {
             .from('results2')
             .select('*')
             .eq('user_id', userId)
-            .eq('line', 1);
+            .eq('line', 6);
 
           if (error2) {
             console.error("Supabase fetch error (results2):", error2);
@@ -214,7 +214,7 @@ const Qrng_Server = () => {
                 .from('results2')
                 .update({ progress: 0, updated_at: new Date().toISOString() })
                 .eq('user_id', userId)
-                .eq('line', 1);
+                .eq('line', 6);
               setLoadingProgress3(0);
               setNist90bResult(null);
               localStorage.removeItem('nist90bResult');
@@ -230,7 +230,7 @@ const Qrng_Server = () => {
             .from('results3')
             .select('*')
             .eq('user_id', userId)
-            .eq('line', 1);
+            .eq('line', 6);
 
           if (error3) {
             console.error("Supabase fetch error (results3):", error3);
@@ -243,7 +243,7 @@ const Qrng_Server = () => {
                 .from('results3')
                 .update({ progress: 0, updated_at: new Date().toISOString() })
                 .eq('user_id', userId)
-                .eq('line', 1);
+                .eq('line', 6);
               setLoadingProgress2(0);
               setDieharderResult(null);
               localStorage.removeItem('dieharderResult');
@@ -378,7 +378,7 @@ const Qrng_Server = () => {
             .from(tableName)
             .select('*')
             .eq('user_id', userId)
-            .eq('line', 1)
+            .eq('line', 6)
             .maybeSingle();
 
           if (error) {
@@ -458,7 +458,7 @@ const Qrng_Server = () => {
 
     const payload = {
       user_id: userId,
-      line: 1,
+      line: 6,
       binary_data: " ",
       scheduled_time: "2025-04-10 11:31:08", // Hardcoded time
       result: result,
@@ -479,7 +479,7 @@ const Qrng_Server = () => {
 
     const payload = {
       user_id: userId,
-      line: 1,
+      line: 6,
       binary_data: " ",
       scheduled_time: "2025-04-10 11:31:08", // Hardcoded time
       result: result,
@@ -502,7 +502,7 @@ const Qrng_Server = () => {
 
     const payload = {
       user_id: userId,
-      line: 1,
+      line: 6,
       binary_data: " ",
       scheduled_time: "2025-04-10 11:31:08", // Hardcoded time
       result: result,
@@ -529,9 +529,6 @@ const Qrng_Server = () => {
         try {
           const fileInfo = JSON.parse(fileInfoStr);
 
-          // Create a mock file object with the stored info
-          // Note: We can't recreate the actual File object, but we can store enough info
-          // to show that a file was downloaded and enable the report button
           const mockFile = new File([], fileInfo.name, {
             type: fileInfo.type,
             lastModified: fileInfo.lastModified
@@ -734,7 +731,7 @@ const Qrng_Server = () => {
 
     // Start progress checks for all tables and lines
     const tables = ['results', 'results2', 'results3'];
-    const lines = [1]; // You can add more lines like [1, 2, 3, 4, 5] if needed
+    const lines = [6]; // You can add more lines like [1, 2, 3, 4, 5] if needed
 
     tables.forEach(table => {
       lines.forEach(line => {
@@ -756,7 +753,7 @@ const Qrng_Server = () => {
       return;
     }
 
-    const lineNo = 1;
+    const lineNo = 6;
 
     setNistResult(null);
     setLoadingProgress(0);
@@ -928,7 +925,7 @@ const Qrng_Server = () => {
     }
 
 
-    const lineNo = 1; // Using line 1 for Dieharder tests
+    const lineNo = 6; // Using line 1 for Dieharder tests
 
     setDieharderResult(null);
     setLoadingProgress2(0);
@@ -1099,7 +1096,7 @@ const Qrng_Server = () => {
       return;
     }
 
-    const lineNo = 1;
+    const lineNo = 6;
 
     setNist90bResult(null);
     setLoadingProgress3(0);
@@ -1274,85 +1271,96 @@ const Qrng_Server = () => {
   }, []);
 
 
-const handleClearConfiguration = async () => {
-  // Replaced 'confirm' with 'alert' to comply with no-restricted-globals rule
-  alert("All configurations have been cleared.");
-  
-  // Clear localStorage
-  localStorage.removeItem('hostIP');
-  localStorage.removeItem('fileSize');
-  localStorage.removeItem('downloadedFileInfo');
-  localStorage.removeItem('nistResult');
-  localStorage.removeItem('dieharderResult');
-  localStorage.removeItem('nist90bResult');
-  
-  // Clear state
-  setHostIP("");
-  setSize(1);
-  setBinaryDownloaded(false);
-  setDownloadedFile(null);
-  setNistResult(null);
-  setDieharderResult(null);
-  setNist90bResult(null);
-  setLoadingProgress(0);
-  setLoadingProgress2(0);
-  setLoadingProgress3(0);
+  const handleClearConfiguration = async () => {
+    // Replaced 'confirm' with 'alert' to comply with no-restricted-globals rule
+    alert("All configurations have been cleared.");
 
-  // Delete data from Supabase tables for line 1
-  try {
-    const userId = await fetchUserId();
-    if (!userId) return;
+    // Clear localStorage
+    localStorage.removeItem('hostIP');
+    localStorage.removeItem('fileSize');
+    localStorage.removeItem('downloadedFileInfo');
+    localStorage.removeItem('nistResult');
+    localStorage.removeItem('dieharderResult');
+    localStorage.removeItem('nist90bResult');
 
-    // Delete from results table (NIST Test)
-    const { error: error1 } = await supabase
-      .from('results')
-      .delete()
-      .eq('user_id', userId)
-      .eq('line', 1);
+    // Clear state
+    setHostIP("");
+    setSize(1);
+    setBinaryDownloaded(false);
+    setDownloadedFile(null);
+    setNistResult(null);
+    setDieharderResult(null);
+    setNist90bResult(null);
+    setLoadingProgress(0);
+    setLoadingProgress2(0);
+    setLoadingProgress3(0);
 
-    if (error1) {
-      console.error("Error deleting from results table:", error1.message);
+    // Delete data from Supabase tables for line 1
+    try {
+      const userId = await fetchUserId();
+      if (!userId) return;
+
+      // Delete from results table (NIST Test)
+      const { error: error1 } = await supabase
+        .from('results')
+        .delete()
+        .eq('user_id', userId)
+        .eq('line', 6);
+
+      if (error1) {
+        console.error("Error deleting from results table:", error1.message);
+      }
+
+      // Delete from results2 table (NIST 90B Test)
+      const { error: error2 } = await supabase
+        .from('results2')
+        .delete()
+        .eq('user_id', userId)
+        .eq('line', 6);
+
+      if (error2) {
+        console.error("Error deleting from results2 table:", error2.message);
+      }
+
+      // Delete from results3 table (Dieharder Test)
+      const { error: error3 } = await supabase
+        .from('results3')
+        .delete()
+        .eq('user_id', userId)
+        .eq('line', 6);
+
+      if (error3) {
+        console.error("Error deleting from results3 table:", error3.message);
+      }
+
+      console.log("Successfully cleared data from all Supabase tables");
+
+    } catch (err) {
+      console.error("Error clearing Supabase data:", err);
     }
+  };
 
-    // Delete from results2 table (NIST 90B Test)
-    const { error: error2 } = await supabase
-      .from('results2')
-      .delete()
-      .eq('user_id', userId)
-      .eq('line', 1);
-
-    if (error2) {
-      console.error("Error deleting from results2 table:", error2.message);
+  useEffect(() => {
+    // Load host IP from session storage on component mount
+    const savedHostIP = sessionStorage.getItem('hostIP');
+    if (savedHostIP) {
+      setHostIP(savedHostIP);
     }
+  }, []);
 
-    // Delete from results3 table (Dieharder Test)
-    const { error: error3 } = await supabase
-      .from('results3')
-      .delete()
-      .eq('user_id', userId)
-      .eq('line', 1);
+  useEffect(() => {
+    // Wait until the page fully mounts
+    const timer = setTimeout(() => {
+      alert("Please do not switch the page until the file is downloaded.");
+    }, 50); // small delay ensures page is loaded
 
-    if (error3) {
-      console.error("Error deleting from results3 table:", error3.message);
-    }
-
-    console.log("Successfully cleared data from all Supabase tables");
-
-  } catch (err) {
-    console.error("Error clearing Supabase data:", err);
-  }
-};
-
-useEffect(() => {
-  // Load host IP from session storage on component mount
-  const savedHostIP = sessionStorage.getItem('hostIP');
-  if (savedHostIP) {
-    setHostIP(savedHostIP);
-  }
-}, []);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
+    
     <Box m="20px"
+    
       sx={{
         overflowX: 'auto',
         '&::-webkit-scrollbar': {
@@ -1392,40 +1400,40 @@ useEffect(() => {
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={4}>
               <TextField
-  fullWidth
-  label="Host IP Address"
-  variant="outlined"
-  value={hostIP}
-  onChange={(e) => {
-    setHostIP(e.target.value);
-    sessionStorage.setItem('hostIP', e.target.value);
-  }}
-  InputLabelProps={{
-    sx: { color: colors.grey[300] }
-  }}
-  sx={{
-    '& .MuiInputLabel-root': {
-      color: colors.grey[400],
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-      color: colors.greenAccent[400],
-    },
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: colors.blueAccent[400],
-      },
-      '&:hover fieldset': {
-        borderColor: colors.greenAccent[500],
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: colors.greenAccent[500],
-      },
-    },
-    '& .MuiInputBase-input': {
-      color: 'white',
-    },
-  }}
-/>
+                fullWidth
+                label="Host IP Address"
+                variant="outlined"
+                value={hostIP}
+                onChange={(e) => {
+                  setHostIP(e.target.value);
+                  sessionStorage.setItem('hostIP', e.target.value);
+                }}
+                InputLabelProps={{
+                  sx: { color: colors.grey[300] }
+                }}
+                sx={{
+                  '& .MuiInputLabel-root': {
+                    color: colors.grey[400],
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: colors.greenAccent[400],
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: colors.blueAccent[400],
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.greenAccent[500],
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.greenAccent[500],
+                    },
+                  },
+                  '& .MuiInputBase-input': {
+                    color: 'white',
+                  },
+                }}
+              />
             </Grid>
 
             <Grid item xs={12} md={3}>
@@ -1498,7 +1506,7 @@ useEffect(() => {
             {/* File Ready and Delete Icon in the same Grid item */}
             <Grid item xs={12} md={2}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-               
+
                 <IconButton
                   onClick={handleClearConfiguration}
                   sx={{

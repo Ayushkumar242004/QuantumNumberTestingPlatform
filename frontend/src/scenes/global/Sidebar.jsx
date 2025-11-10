@@ -22,11 +22,7 @@ import {
 import { supabase } from "../../utils/supabaseClient";
 import "./Sidebar.css";
 const navItems = [
-  // {
-  //   title: "Dashboard",
-  //   href: "/",
-  //   icon: HomeOutlined,
-  // },
+
   {
     title: "NIST SP 800-22B",
     href: "/nist_test",
