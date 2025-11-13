@@ -21,8 +21,8 @@ import {
 } from "@mui/icons-material";
 import { supabase } from "../../utils/supabaseClient";
 import "./Sidebar.css";
-const navItems = [
 
+const navItems = [
   {
     title: "NIST SP 800-22B",
     href: "/nist_test",
@@ -42,6 +42,7 @@ const navItems = [
     title: "QRNG Server",
     href: "/qrng_server",
     icon: DnsOutlined,
+    external: true, // Add this flag to identify external links
   },
 ];
 
@@ -105,7 +106,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
       window.location.href = "/login";
     }, 500);
   };
-  
+
+  // Function to handle external link clicks
+  const handleExternalLinkClick = (href) => {
+    window.open(href, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <Box
@@ -161,6 +166,66 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
           const isActive = location.pathname === item.href;
           const Icon = item.icon;
 
+          // For external links (like QRNG Server)
+          if (item.external) {
+            if (isCollapsed) {
+              return (
+                <Tooltip key={item.title} title={item.title} placement="right">
+                  <IconButton
+                    onClick={() => handleExternalLinkClick(item.href)}
+                    sx={{
+                      display: "flex",
+                      width: 48,
+                      height: 48,
+                      mx: "auto",
+                      my: 1,
+                      color: "rgba(255, 255, 255, 0.7)",
+                      backgroundColor: isActive ? "rgba(255, 255, 255, 0.15)" : "transparent",
+                      borderRadius: "8px",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.25)",
+                        transform: "scale(1.05)",
+                      },
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <Icon />
+                  </IconButton>
+                </Tooltip>
+              );
+            }
+
+            return (
+              <Button
+                key={item.title}
+                onClick={() => handleExternalLinkClick(item.href)}
+                startIcon={<Icon />}
+                fullWidth
+                sx={{
+                  justifyContent: "flex-start",
+                  px: 3,
+                  py: 1.5,
+                  textTransform: "none",
+                  fontSize: "1rem",
+                  borderRadius: "8px",
+                  mx: 'auto',
+                  width: 'calc(100% - 32px)',
+                  mb: 0.5,
+                  color: "rgba(255, 255, 255, 0.7)",
+                  backgroundColor: isActive ? "rgba(255, 255, 255, 0.15)" : "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.25)",
+                    transform: "translateX(5px)",
+                  },
+                  transition: "all 0.2s ease",
+                }}
+              >
+                {item.title}
+              </Button>
+            );
+          }
+
+          // For internal links (all other items)
           if (isCollapsed) {
             return (
               <Tooltip key={item.title} title={item.title} placement="right">
@@ -174,13 +239,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
                     mx: "auto",
                     my: 1,
                     color: "rgba(255, 255, 255, 0.7)",
-                    backgroundColor: isActive ? "rgba(255, 255, 255, 0.15)" : "transparent", // Slightly more pronounced active state
+                    backgroundColor: isActive ? "rgba(255, 255, 255, 0.15)" : "transparent",
                     borderRadius: "8px",
                     "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.25)", // Stronger hover effect
-                      transform: "scale(1.05)", // Slight scale on hover
+                      backgroundColor: "rgba(255, 255, 255, 0.25)",
+                      transform: "scale(1.05)",
                     },
-                    transition: "all 0.2s ease", // Smooth transition
+                    transition: "all 0.2s ease",
                   }}
                 >
                   <Icon />
@@ -207,20 +272,18 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
                 width: 'calc(100% - 32px)',
                 mb: 0.5,
                 color: "rgba(255, 255, 255, 0.7)",
-                backgroundColor: isActive ? "rgba(255, 255, 255, 0.15)" : "transparent", // Slightly more pronounced active state
+                backgroundColor: isActive ? "rgba(255, 255, 255, 0.15)" : "transparent",
                 "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.25)", // Stronger hover effect
-                  transform: "translateX(5px)", // Slide effect on hover
+                  backgroundColor: "rgba(255, 255, 255, 0.25)",
+                  transform: "translateX(5px)",
                 },
-                transition: "all 0.2s ease", // Smooth transition
+                transition: "all 0.2s ease",
               }}
             >
               {item.title}
             </Button>
           );
         })}
-        
-       
       </Box>
 
       {/* User Profile */}
@@ -237,12 +300,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
               sx={{
                 width: 40,
                 height: 40,
-                bgcolor: "rgba(255, 255, 255, 0.2)", // Darker background for collapsed avatar
+                bgcolor: "rgba(255, 255, 255, 0.2)",
                 color: "white",
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 "&:hover": {
-                    bgcolor: "#EF476F", // More vibrant hover color for logout
+                    bgcolor: "#EF476F",
                     transform: "scale(1.1)",
                 }
               }}
@@ -278,14 +341,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
                 {isLoggingOut ? (
                   <div className="loader-logout" />
                 ) : (
-                  <LogoutOutlined sx={{ color: "rgba(255, 255, 255, 0.8)", "&:hover": { color: "#EF476F" } }} /> // Enhanced hover for logout icon
+                  <LogoutOutlined sx={{ color: "rgba(255, 255, 255, 0.8)", "&:hover": { color: "#EF476F" } }} />
                 )}
               </IconButton>
             </Tooltip>
           </Box>
         )}
       </Box>
-     
     </Box>
   );
 }

@@ -311,3 +311,13 @@ CACHES = {
         "KEY_PREFIX": "myapp",
     }
 }
+
+
+# Force Django to stream large uploads to disk
+FILE_UPLOAD_HANDLERS = [
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+]
+# When a single upload exceeds this many bytes it will be written to disk
+FILE_UPLOAD_MAX_MEMORY_SIZE = 256 * 1024  # 256 KiB
+# Prevent Django from buffering request body in memory (allow large uploads)
+DATA_UPLOAD_MAX_MEMORY_SIZE = None

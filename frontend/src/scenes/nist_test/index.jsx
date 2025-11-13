@@ -12,6 +12,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { supabase } from '../../utils/supabaseClient';
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from '@mui/icons-material/Delete';
+import { toast } from "react-toastify";
 const MAX_STACK_SIZE_ESTIMATE = 200 * 1024 * 1024;
 
 const Nist_tests = () => {
@@ -2064,97 +2065,106 @@ const Nist_tests = () => {
     }
   };
 
-const handleDeleteRow = async (lineNumber) => {
-  // Clear local state
-  switch (lineNumber) {
-    case 1:
-      setBinaryInput("");
-      setResult("");
-      setUploadTime("");
-      setFileName("");
-      setScheduledTime("");
-      setDebouncedScheduledTime("");
-      setLoadingProgress(0);
-      setIsUploadButtonEnabled(true);
-      setIsDateEnabled(true);
-      setIsTimeEnabled(true);
-      alertShownRef.current = false;
-      binaryInsertedRef.current = false;
-      break;
-    case 2:
-      setBinaryInput2("");
-      setResult2("");
-      setUploadTime2("");
-      setFileName2("");
-      setScheduledTime2("");
-      setDebouncedScheduledTime2("");
-      setLoadingProgress2(0);
-      setIsUploadButtonEnabled2(true);
-      setIsDateEnabled2(true);
-      setIsTimeEnabled2(true);
-      alertShownRef2.current = false;
-      binaryInsertedRef2.current = false;
-      break;
-    case 3:
-      setBinaryInput3("");
-      setResult3("");
-      setUploadTime3("");
-      setFileName3("");
-      setScheduledTime3("");
-      setDebouncedScheduledTime3("");
-      setLoadingProgress3(0);
-      setIsUploadButtonEnabled3(true);
-      setIsDateEnabled3(true);
-      setIsTimeEnabled3(true);
-      alertShownRef3.current = false;
-      binaryInsertedRef3.current = false;
-      break;
-    case 4:
-      setBinaryInput4("");
-      setResult4("");
-      setUploadTime4("");
-      setFileName4("");
-      setScheduledTime4("");
-      setDebouncedScheduledTime4("");
-      setLoadingProgress4(0);
-      setIsUploadButtonEnabled4(true);
-      setIsDateEnabled4(true);
-      setIsTimeEnabled4(true);
-      alertShownRef4.current = false;
-      binaryInsertedRef4.current = false;
-      break;
-    case 5:
-      setBinaryInput5("");
-      setResult5("");
-      setUploadTime5("");
-      setFileName5("");
-      setScheduledTime5("");
-      setDebouncedScheduledTime5("");
-      setLoadingProgress5(0);
-      setIsUploadButtonEnabled5(true);
-      setIsDateEnabled5(true);
-      setIsTimeEnabled5(true);
-      alertShownRef5.current = false;
-      binaryInsertedRef5.current = false;
-      break;
-    default:
-      break;
-  }
-
-  // Clear from Supabase
-  try {
-    const userId = await fetchUserId();
-    if (userId) {
-      await supabase
-        .from('results')
-        .delete()
-        .match({ line: lineNumber, user_id: userId });
+  const handleDeleteRow = async (lineNumber) => {
+    // Clear local state
+    switch (lineNumber) {
+      case 1:
+        setBinaryInput("");
+        setResult("");
+        setUploadTime("");
+        setFileName("");
+        setScheduledTime("");
+        setDebouncedScheduledTime("");
+        setLoadingProgress(0);
+        setIsUploadButtonEnabled(true);
+        setIsDateEnabled(true);
+        setIsTimeEnabled(true);
+        alertShownRef.current = false;
+        binaryInsertedRef.current = false;
+        break;
+      case 2:
+        setBinaryInput2("");
+        setResult2("");
+        setUploadTime2("");
+        setFileName2("");
+        setScheduledTime2("");
+        setDebouncedScheduledTime2("");
+        setLoadingProgress2(0);
+        setIsUploadButtonEnabled2(true);
+        setIsDateEnabled2(true);
+        setIsTimeEnabled2(true);
+        alertShownRef2.current = false;
+        binaryInsertedRef2.current = false;
+        break;
+      case 3:
+        setBinaryInput3("");
+        setResult3("");
+        setUploadTime3("");
+        setFileName3("");
+        setScheduledTime3("");
+        setDebouncedScheduledTime3("");
+        setLoadingProgress3(0);
+        setIsUploadButtonEnabled3(true);
+        setIsDateEnabled3(true);
+        setIsTimeEnabled3(true);
+        alertShownRef3.current = false;
+        binaryInsertedRef3.current = false;
+        break;
+      case 4:
+        setBinaryInput4("");
+        setResult4("");
+        setUploadTime4("");
+        setFileName4("");
+        setScheduledTime4("");
+        setDebouncedScheduledTime4("");
+        setLoadingProgress4(0);
+        setIsUploadButtonEnabled4(true);
+        setIsDateEnabled4(true);
+        setIsTimeEnabled4(true);
+        alertShownRef4.current = false;
+        binaryInsertedRef4.current = false;
+        break;
+      case 5:
+        setBinaryInput5("");
+        setResult5("");
+        setUploadTime5("");
+        setFileName5("");
+        setScheduledTime5("");
+        setDebouncedScheduledTime5("");
+        setLoadingProgress5(0);
+        setIsUploadButtonEnabled5(true);
+        setIsDateEnabled5(true);
+        setIsTimeEnabled5(true);
+        alertShownRef5.current = false;
+        binaryInsertedRef5.current = false;
+        break;
+      default:
+        break;
     }
-  } catch (error) {
-    console.error("Error deleting row from Supabase:", error);
-    alert("Failed to delete row from database.");
-  }
-};
+
+    // Clear from Supabase
+    try {
+      const userId = await fetchUserId();
+      if (userId) {
+        await supabase
+          .from('results')
+          .delete()
+          .match({ line: lineNumber, user_id: userId });
+      }
+    } catch (error) {
+      console.error("Error deleting row from Supabase:", error);
+      alert("Failed to delete row from database.");
+    }
+  };
+  useEffect(() => {
+    const hasShown = localStorage.getItem("nist_progress_notice_shown");
+
+    if (!hasShown) {
+      alert("If the progress is not updating, kindly refresh the page.");
+      localStorage.setItem("nist_progress_notice_shown", "true");
+    }
+  }, []);
+
 
   return (
     <Box m="20px">
@@ -2580,21 +2590,28 @@ const handleDeleteRow = async (lineNumber) => {
               </td>
               <td>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <IconButton
-                    aria-label="delete"
-                    onClick={() => handleDeleteRow(1)}
-                    sx={{
-                      color: colors.redAccent[500],
-                      '&:hover': {
-                        color: colors.redAccent[400],
-                        backgroundColor: colors.redAccent[50],
-                      },
-                    }}
+                  <Tooltip
+                    title="Use this button in case of server hang or if progress is not updating even after refreshes else your data will be lost"
+                    arrow
+                    placement="top"
                   >
-                    <DeleteIcon />
-                  </IconButton>
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => handleDeleteRow(1)}
+                      sx={{
+                        color: colors.redAccent[500],
+                        '&:hover': {
+                          color: colors.redAccent[400],
+                          backgroundColor: colors.redAccent[50],
+                        },
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
               </td>
+
 
 
             </tr>
@@ -2931,23 +2948,30 @@ const handleDeleteRow = async (lineNumber) => {
                 </Typography>
               </td>
 
-                   <td>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <IconButton
-              aria-label="delete"
-              onClick={() => handleDeleteRow(2)}
-              sx={{
-                color: colors.redAccent[500],
-                '&:hover': {
-                  color: colors.redAccent[400],
-                  backgroundColor: colors.redAccent[50],
-                },
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        </td>
+              <td>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <Tooltip
+                    title="Use this button in case of server hang or if progress is not updating even after refreshes else your data will be lost"
+                    arrow
+                    placement="top"
+                  >
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => handleDeleteRow(2)}
+                      sx={{
+                        color: colors.redAccent[500],
+                        '&:hover': {
+                          color: colors.redAccent[400],
+                          backgroundColor: colors.redAccent[50],
+                        },
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </td>
+
             </tr>
 
             <tr>
@@ -3283,23 +3307,30 @@ const handleDeleteRow = async (lineNumber) => {
                 </Typography>
               </td>
 
- <td>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <IconButton
-              aria-label="delete"
-              onClick={() => handleDeleteRow(3)}
-              sx={{
-                color: colors.redAccent[500],
-                '&:hover': {
-                  color: colors.redAccent[400],
-                  backgroundColor: colors.redAccent[50],
-                },
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        </td>
+             <td>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <Tooltip
+                    title="Use this button in case of server hang or if progress is not updating even after refreshes else your data will be lost"
+                    arrow
+                    placement="top"
+                  >
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => handleDeleteRow(3)}
+                      sx={{
+                        color: colors.redAccent[500],
+                        '&:hover': {
+                          color: colors.redAccent[400],
+                          backgroundColor: colors.redAccent[50],
+                        },
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </td>
+
             </tr>
 
             <tr>
@@ -3632,23 +3663,30 @@ const handleDeleteRow = async (lineNumber) => {
                   Scheduled Time: {scheduledTime4 || "Not set"}
                 </Typography>
               </td>
- <td>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <IconButton
-              aria-label="delete"
-              onClick={() => handleDeleteRow(4)}
-              sx={{
-                color: colors.redAccent[500],
-                '&:hover': {
-                  color: colors.redAccent[400],
-                  backgroundColor: colors.redAccent[50],
-                },
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        </td>
+               <td>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <Tooltip
+                    title="Use this button in case of server hang or if progress is not updating even after refreshes else your data will be lost"
+                    arrow
+                    placement="top"
+                  >
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => handleDeleteRow(4)}
+                      sx={{
+                        color: colors.redAccent[500],
+                        '&:hover': {
+                          color: colors.redAccent[400],
+                          backgroundColor: colors.redAccent[50],
+                        },
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </td>
+
 
             </tr>
 
@@ -3982,23 +4020,30 @@ const handleDeleteRow = async (lineNumber) => {
                   Scheduled Time: {scheduledTime5 || "Not set"}
                 </Typography>
               </td>
- <td>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <IconButton
-              aria-label="delete"
-              onClick={() => handleDeleteRow(5)}
-              sx={{
-                color: colors.redAccent[500],
-                '&:hover': {
-                  color: colors.redAccent[400],
-                  backgroundColor: colors.redAccent[50],
-                },
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        </td>
+              <td>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <Tooltip
+                    title="Use this button in case of server hang or if progress is not updating even after refreshes else your data will be lost"
+                    arrow
+                    placement="top"
+                  >
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => handleDeleteRow(5)}
+                      sx={{
+                        color: colors.redAccent[500],
+                        '&:hover': {
+                          color: colors.redAccent[400],
+                          backgroundColor: colors.redAccent[50],
+                        },
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </td>
+
 
             </tr>
 
@@ -4009,238 +4054,6 @@ const handleDeleteRow = async (lineNumber) => {
       </Box>
 
 
-      <Box
-        sx={{
-          background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1F2A40 50%, #0d1b2a 100%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "280px",
-          textAlign: "center",
-          mt: 2,
-          boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.4)",
-          position: "relative",
-          overflow: "hidden",
-          borderRadius: "20px",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          '&:hover': {
-            boxShadow: "0px 12px 40px rgba(0, 0, 0, 0.6)",
-            transform: "translateY(-2px)",
-          },
-          transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-          '&::before': {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
-            opacity: 0,
-            transition: "opacity 0.4s ease",
-          },
-          '&:hover::before': {
-            opacity: 1,
-          }
-        }}
-      >
-        {/* Animated background grid */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
-      `,
-            backgroundSize: "50px 50px",
-            animation: "gridMove 20s linear infinite",
-            opacity: 0.4,
-          }}
-        />
-
-        {/* Floating particles */}
-        {[...Array(6)].map((_, i) => (
-          <Box
-            key={i}
-            sx={{
-              position: "absolute",
-              width: 4,
-              height: 4,
-              borderRadius: "50%",
-              background: "rgba(255, 255, 255, 0.6)",
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animation: `floatParticle ${15 + i * 2}s infinite ease-in-out ${i * 0.5}s`,
-              boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
-            }}
-          />
-        ))}
-
-        {/* Main content container */}
-        <Box sx={{ position: "relative", zIndex: 2 }}>
-          {/* Animated Gemini Logo */}
-          <Box
-            component="img"
-            src="/image.png"
-            alt="Gemini Logo"
-            sx={{
-              width: 70,
-              height: "auto",
-              mb: 1.5,
-              borderRadius: "16px",
-              transition: "all 0.5s ease",
-              filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))",
-              animation: "logoGlow 4s infinite ease-in-out",
-              '&:hover': {
-                transform: "scale(1.15) rotate(5deg)",
-                filter: "drop-shadow(0 6px 20px rgba(230, 57, 70, 0.4))",
-              }
-            }}
-          />
-
-          {/* Title text */}
-          <Typography
-            variant="h6"
-            sx={{
-              color: "rgba(255, 255, 255, 0.9)",
-              fontWeight: 600,
-              mb: 1,
-              fontSize: "1.1rem",
-              textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            Advanced AI Analysis
-          </Typography>
-
-          {/* Description */}
-          <Typography
-            variant="body2"
-            sx={{
-              color: "rgba(255, 255, 255, 0.7)",
-              mb: 2.5,
-              maxWidth: "300px",
-              fontSize: "0.85rem",
-              lineHeight: 1.4,
-            }}
-          >
-            Upload your test reports for comprehensive AI-powered analysis and insights
-          </Typography>
-
-          {/* Enhanced Button */}
-          <Button
-            variant="contained"
-            onClick={() => {
-              window.open(`${REACT_APP_FRONTEND_URL}/report`, "_blank");
-            }}
-            startIcon={<AutoAwesomeIcon sx={{ fontSize: "1.2rem" }} />}
-            sx={{
-              background: "linear-gradient(135deg, #E63946 0%, #F77F00 100%)",
-              color: "white",
-              textTransform: "none",
-              padding: "12px 36px",
-              fontSize: "1.1rem",
-              fontWeight: 600,
-              width: "auto",
-              minWidth: "220px",
-              borderRadius: "12px",
-              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
-              position: "relative",
-              overflow: "hidden",
-              zIndex: 1,
-              boxShadow: "0 4px 15px rgba(230, 57, 70, 0.4)",
-              '&:hover': {
-                background: "linear-gradient(135deg, #F77F00 0%, #E63946 100%)",
-                transform: "scale(1.05) translateY(-2px)",
-                boxShadow: "0 8px 25px rgba(230, 57, 70, 0.6)",
-              },
-              '&::before': {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: "-100%",
-                width: "100%",
-                height: "100%",
-                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
-                transition: "all 0.8s ease",
-                zIndex: -1,
-              },
-              '&:hover::before': {
-                left: "100%",
-              },
-              '&::after': {
-                content: '""',
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                width: "0",
-                height: "0",
-                borderRadius: "50%",
-                background: "rgba(255, 255, 255, 0.2)",
-                transform: "translate(-50%, -50%)",
-                transition: "all 0.6s ease",
-                zIndex: -1,
-              },
-              '&:active::after': {
-                width: "300px",
-                height: "300px",
-              }
-            }}
-          >
-            Analyze with AI
-          </Button>
-        </Box>
-
-        {/* Corner accents */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "60px",
-            height: "60px",
-            borderTop: "2px solid rgba(230, 57, 70, 0.5)",
-            borderLeft: "2px solid rgba(230, 57, 70, 0.5)",
-            borderTopLeftRadius: "20px",
-          }}
-        />
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            right: 0,
-            width: "60px",
-            height: "60px",
-            borderBottom: "2px solid rgba(230, 57, 70, 0.5)",
-            borderRight: "2px solid rgba(230, 57, 70, 0.5)",
-            borderBottomRightRadius: "20px",
-          }}
-        />
-
-        {/* Add these keyframes to your global CSS */}
-        <style jsx>{`
-    @keyframes gridMove {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(50px, 50px); }
-    }
-    
-    @keyframes floatParticle {
-      0%, 100% { transform: translateY(0px) translateX(0px); }
-      25% { transform: translateY(-20px) translateX(10px); }
-      50% { transform: translateY(-10px) translateX(20px); }
-      75% { transform: translateY(-15px) translateX(-10px); }
-    }
-    
-    @keyframes logoGlow {
-      0%, 100% { filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3)); }
-      50% { filter: drop-shadow(0 4px 20px rgba(230, 57, 70, 0.3)); }
-    }
-  `}</style>
-      </Box>
     </Box>
   );
 };

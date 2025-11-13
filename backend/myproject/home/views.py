@@ -2434,6 +2434,71 @@ def execute_nist_tests(self, job_data):
             except Exception as e:
                 logger.warning(f"⚠️ [CLEANUP ERROR] {e}")
 
+# @csrf_exempt
+# def run_nist_tests(request):
+#     if request.method != "POST":
+#         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+
+#     try:
+#         uploaded_file = request.FILES.get("file")
+#         scheduled_time_str = request.POST.get("scheduled_time", "")
+#         scheduled_time_str1= request.POST.get("scheduled_time_str", "")
+#         job_id = request.POST.get("job_id", str(uuid.uuid4()))
+#         line_number = request.POST.get("line", "")
+#         user_id = request.POST.get("user_id", "")
+#         fileName = request.POST.get("file_name", uploaded_file.name if uploaded_file else "")
+
+#         if not uploaded_file:
+#             return JsonResponse({"error": "No file uploaded"}, status=400)
+#         if not scheduled_time_str:
+#             return JsonResponse({"error": "scheduled_time is required"}, status=400)
+#         if not user_id:
+#             return JsonResponse({"error": "user_id is required"}, status=400)
+
+#         # Save uploaded file to temporary location
+#         temp_file_path = os.path.join(STS_PATH, f"{job_id}_{uploaded_file.name}")
+#         with open(temp_file_path, "wb+") as f:
+#             for chunk in uploaded_file.chunks():
+#                 f.write(chunk)
+
+#         # Prepare job_data
+#         job_data = {
+#             'uploaded_file_path': temp_file_path,
+#             'scheduled_time_str': scheduled_time_str,
+#             'scheduled_time_str1': scheduled_time_str1,
+#             'job_id': job_id,
+#             'line_number': line_number,
+#             'userId': user_id,
+#             'fileName': fileName,
+#         }
+
+#         # Calculate countdown for scheduling (0 if due now)
+#         kolkata_tz = pytz.timezone("Asia/Kolkata")
+#         scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
+#         current_time = datetime.datetime.now(kolkata_tz)
+#         countdown = max(0, int((scheduled_time - current_time).total_seconds()))
+
+#         # Set initial progress
+#         cache.set(f"{job_id}_progress", 0, timeout=3600)
+
+#         # ALWAYS queue a Celery task (task will add to internal queue or run immediately)
+#         task = execute_nist_tests.apply_async(kwargs={'job_data': job_data}, countdown=countdown, queue='nist_tests')
+
+#         message = "NIST tests processing started" if countdown == 0 else "NIST tests scheduled"
+#         return JsonResponse({
+#             "status": "success",
+#             "job_id": job_id,
+#             "task_id": task.id,
+#             "message": message,
+#             "scheduled_time": scheduled_time_str,
+#         })
+
+#     except Exception as e:
+#         logger.error(f"[RUN_NIST ERROR] {e}")
+#         return JsonResponse({"error": str(e)}, status=500)
+
+# ...existing code...
+
 @csrf_exempt
 def run_nist_tests(request):
     if request.method != "POST":
@@ -2442,7 +2507,7 @@ def run_nist_tests(request):
     try:
         uploaded_file = request.FILES.get("file")
         scheduled_time_str = request.POST.get("scheduled_time", "")
-        scheduled_time_str1= request.POST.get("scheduled_time_str", "")
+        scheduled_time_str1 = request.POST.get("scheduled_time_str", "")
         job_id = request.POST.get("job_id", str(uuid.uuid4()))
         line_number = request.POST.get("line", "")
         user_id = request.POST.get("user_id", "")
@@ -2455,21 +2520,29 @@ def run_nist_tests(request):
         if not user_id:
             return JsonResponse({"error": "user_id is required"}, status=400)
 
-        # Save uploaded file to temporary location
-        temp_file_path = os.path.join(STS_PATH, f"{job_id}_{uploaded_file.name}")
-        with open(temp_file_path, "wb+") as f:
+        # Ensure STS_PATH exists and write upload to disk-backed temp file to avoid keeping large blobs in memory
+        os.makedirs(STS_PATH, exist_ok=True)
+        tmp = tempfile.NamedTemporaryFile(delete=False,
+                                         prefix=f"{job_id}_",
+                                         suffix=os.path.splitext(fileName)[1] or ".bin",
+                                         dir=STS_PATH)
+        try:
             for chunk in uploaded_file.chunks():
-                f.write(chunk)
+                tmp.write(chunk)
+            tmp.flush()
+            temp_file_path = tmp.name
+        finally:
+            tmp.close()
 
-        # Prepare job_data
+        # Prepare job_data (pass path only, not file bytes)
         job_data = {
-            'uploaded_file_path': temp_file_path,
-            'scheduled_time_str': scheduled_time_str,
-            'scheduled_time_str1': scheduled_time_str1,
-            'job_id': job_id,
-            'line_number': line_number,
-            'userId': user_id,
-            'fileName': fileName,
+            "uploaded_file_path": temp_file_path,
+            "scheduled_time_str": scheduled_time_str,
+            "scheduled_time_str1": scheduled_time_str1,
+            "job_id": job_id,
+            "line_number": line_number,
+            "userId": user_id,
+            "fileName": fileName,
         }
 
         # Calculate countdown for scheduling (0 if due now)
@@ -2482,7 +2555,7 @@ def run_nist_tests(request):
         cache.set(f"{job_id}_progress", 0, timeout=3600)
 
         # ALWAYS queue a Celery task (task will add to internal queue or run immediately)
-        task = execute_nist_tests.apply_async(kwargs={'job_data': job_data}, countdown=countdown, queue='nist_tests')
+        task = execute_nist_tests.apply_async(kwargs={"job_data": job_data}, countdown=countdown, queue="nist_tests")
 
         message = "NIST tests processing started" if countdown == 0 else "NIST tests scheduled"
         return JsonResponse({
@@ -2494,7 +2567,13 @@ def run_nist_tests(request):
         })
 
     except Exception as e:
-        logger.error(f"[RUN_NIST ERROR] {e}")
+        logger.error(f"[RUN_NIST ERROR] {e}", exc_info=True)
+        # Attempt to cleanup temp file if it was created and we failed before queuing
+        try:
+            if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+        except Exception:
+            pass
         return JsonResponse({"error": str(e)}, status=500)
 
 
@@ -4168,3 +4247,18 @@ def fetch_qrng(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500),
 
+import os
+import tempfile
+
+def save_uploaded_file_to_disk(uploaded_file, dest_dir, prefix=""):
+    os.makedirs(dest_dir, exist_ok=True)
+    suffix = os.path.splitext(getattr(uploaded_file, "name", ""))[1] or ".bin"
+    tmp = tempfile.NamedTemporaryFile(delete=False, prefix=prefix, suffix=suffix, dir=dest_dir)
+    try:
+        for chunk in uploaded_file.chunks():
+            tmp.write(chunk)
+        tmp.flush()
+        path = tmp.name
+    finally:
+        tmp.close()
+    return path

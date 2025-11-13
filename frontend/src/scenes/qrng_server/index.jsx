@@ -1348,15 +1348,15 @@ const Qrng_Server = () => {
     }
   }, []);
 
-  useEffect(() => {
-    // Wait until the page fully mounts
-    const timer = setTimeout(() => {
-      alert("Please do not switch the page until the file is downloaded.");
-    }, 50); // small delay ensures page is loaded
 
-    return () => clearTimeout(timer);
-  }, []);
+useEffect(() => {
+  const hasShown = localStorage.getItem("nist_progress_notice_shown");
 
+  if (!hasShown) {
+    alert("If the progress is not updating, kindly refresh the page.");
+    localStorage.setItem("nist_progress_notice_shown", "true");
+  }
+}, []);
   return (
     
     <Box m="20px"
