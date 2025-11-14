@@ -91,7 +91,7 @@ function App() {
             }}
           >
             <Routes>
-              <Route path="/" element={<PrivateRoute element={<Dashboard />} />} />
+              <Route path="/" element={<PrivateRoute element={<Navigate to="/nist_test" replace />} />} />
               <Route path="/nist_test" element={<PrivateRoute element={<Nist_test />} />} />
               <Route path="/nist_test90b" element={<PrivateRoute element={<Nist_tests90b />} />} />
               <Route path="/die_harder_tests" element={<PrivateRoute element={<Dieharder_tests />} />} />

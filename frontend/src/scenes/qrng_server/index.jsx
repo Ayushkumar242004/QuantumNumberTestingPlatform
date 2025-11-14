@@ -1359,25 +1359,34 @@ useEffect(() => {
 }, []);
   return (
     
-    <Box m="20px"
+   <Box 
+  m="20px"
+  sx={{
+    maxHeight: 'calc(100vh - 40px)',
+    overflow: 'auto',
     
-      sx={{
-        overflowX: 'auto',
-        '&::-webkit-scrollbar': {
-          height: '8px',
-        },
-        '&::-webkit-scrollbar-track': {
-          background: colors.primary[700],
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: colors.blueAccent[500],
-          borderRadius: '4px',
-          '&:hover': {
-            background: colors.blueAccent[400],
-          }
-        }
-      }}>
+    // Webkit scrollbar styles (Chrome, Safari, Edge)
+    '&::-webkit-scrollbar': {
+      width: '8px',
+      height: '8px'
+    },
+    '&::-webkit-scrollbar-track': {
+      background: colors.primary[700],
+      borderRadius: '4px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: colors.blueAccent[500],
+      borderRadius: '4px',
+      '&:hover': {
+        background: colors.blueAccent[400],
+      }
+    },
+    
+    // Firefox scrollbar styles
+    scrollbarWidth: 'thin',
+    scrollbarColor: `${colors.blueAccent[500]} ${colors.primary[700]}`,
+  }}
+>
       <Header title="Quantum Random Number Generator" subtitle="Server Connections & Testing" />
 
       {/* Server Configuration Card */}
