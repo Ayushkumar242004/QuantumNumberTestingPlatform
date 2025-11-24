@@ -1,0 +1,26 @@
+			RANDOM EXCURSIONS VARIANT TEST
+		--------------------------------------------
+		COMPUTATIONAL INFORMATION:
+		--------------------------------------------
+		(a) Number Of Cycles (J) = 1382
+		(b) Sequence Length (n)  = 419430400
+		--------------------------------------------
+SUCCESS		(x = -9) Total visits = 1832; p-value = 0.037898
+SUCCESS		(x = -8) Total visits = 1844; p-value = 0.023271
+SUCCESS		(x = -7) Total visits = 1780; p-value = 0.035762
+SUCCESS		(x = -6) Total visits = 1742; p-value = 0.038960
+SUCCESS		(x = -5) Total visits = 1738; p-value = 0.023999
+SUCCESS		(x = -4) Total visits = 1714; p-value = 0.016995
+SUCCESS		(x = -3) Total visits = 1625; p-value = 0.038729
+SUCCESS		(x = -2) Total visits = 1487; p-value = 0.248877
+SUCCESS		(x = -1) Total visits = 1404; p-value = 0.675611
+SUCCESS		(x =  1) Total visits = 1350; p-value = 0.542744
+SUCCESS		(x =  2) Total visits = 1347; p-value = 0.700712
+SUCCESS		(x =  3) Total visits = 1359; p-value = 0.844886
+SUCCESS		(x =  4) Total visits = 1325; p-value = 0.681963
+SUCCESS		(x =  5) Total visits = 1323; p-value = 0.708347
+SUCCESS		(x =  6) Total visits = 1370; p-value = 0.945133
+SUCCESS		(x =  7) Total visits = 1432; p-value = 0.791955
+SUCCESS		(x =  8) Total visits = 1421; p-value = 0.848106
+SUCCESS		(x =  9) Total visits = 1439; p-value = 0.792585
+

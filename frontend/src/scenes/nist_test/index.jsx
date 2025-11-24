@@ -13,7 +13,7 @@ import { supabase } from '../../utils/supabaseClient';
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { toast } from "react-toastify";
-const MAX_STACK_SIZE_ESTIMATE = 200 * 1024 * 1024;
+
 
 const Nist_tests = () => {
   const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
@@ -2164,7 +2164,6 @@ const Nist_tests = () => {
       localStorage.setItem("nist_progress_notice_shown", "true");
     }
   }, []);
-
 
   return (
     <Box m="20px">
