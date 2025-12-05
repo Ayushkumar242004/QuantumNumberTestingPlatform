@@ -167,7 +167,7 @@ const Qrng_Server = () => {
       const fetchInitialData = async () => {
         try {
           // results - NIST Test
-          console.log("Fetching initial data for 'results'...");
+          // console.log("Fetching initial data for 'results'...");
           const { data: data1, error: error1 } = await supabase
             .from('results')
             .select('*')
@@ -175,10 +175,10 @@ const Qrng_Server = () => {
             .eq('line', 6);
 
           if (error1) {
-            console.error("Supabase fetch error (results):", error1);
+            // console.error("Supabase fetch error (results):", error1);
           } else if (data1 && data1.length > 0) {
             const row = data1[0];
-            console.log("Initial 'results' data:", row);
+        
             setLoadingProgress(row.progress);
             if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
               await supabase
@@ -196,7 +196,7 @@ const Qrng_Server = () => {
           }
 
           // results2 - NIST 90B Test
-          console.log("Fetching initial data for 'results2'...");
+        
           const { data: data2, error: error2 } = await supabase
             .from('results2')
             .select('*')
@@ -207,7 +207,7 @@ const Qrng_Server = () => {
             console.error("Supabase fetch error (results2):", error2);
           } else if (data2 && data2.length > 0) {
             const row = data2[0];
-            console.log("Initial 'results2' data:", row);
+          
             setLoadingProgress3(row.progress); // This should be setLoadingProgress3 for NIST 90B
             if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
               await supabase
@@ -236,7 +236,7 @@ const Qrng_Server = () => {
             console.error("Supabase fetch error (results3):", error3);
           } else if (data3 && data3.length > 0) {
             const row = data3[0];
-            console.log("Initial 'results3' data:", row);
+           
             setLoadingProgress2(row.progress); // This should be setLoadingProgress2 for Dieharder
             if (row.progress === 100 && (!row.result || row.result.trim() === "")) {
               await supabase
@@ -276,7 +276,7 @@ const Qrng_Server = () => {
             if (!row) return;
 
             const progress = Number(row.progress || 0);
-            console.log('Real-time NIST progress update:', progress);
+         
 
             setLoadingProgress(progress);
 
@@ -290,7 +290,7 @@ const Qrng_Server = () => {
           }
         )
         .subscribe((status) => {
-          console.log('Subscription 1 (results) status:', status);
+        
         });
 
       // Subscription for results2 (NIST 90B Test)
@@ -310,7 +310,7 @@ const Qrng_Server = () => {
             if (!row) return;
 
             const progress = Number(row.progress || 0);
-            console.log('Real-time NIST 90B progress update:', progress);
+            // console.log('Real-time NIST 90B progress update:', progress);
 
             setLoadingProgress3(progress); // This should update NIST 90B progress
 
@@ -324,7 +324,7 @@ const Qrng_Server = () => {
           }
         )
         .subscribe((status) => {
-          console.log('Subscription 2 (results2) status:', status);
+          // console.log('Subscription 2 (results2) status:', status);
         });
 
       // Subscription for results3 (Dieharder Test)
@@ -344,7 +344,7 @@ const Qrng_Server = () => {
             if (!row) return;
 
             const progress = Number(row.progress || 0);
-            console.log('Real-time Dieharder progress update:', progress);
+            // console.log('Real-time Dieharder progress update:', progress);
 
             setLoadingProgress2(progress); // This should update Dieharder progress
 
@@ -371,7 +371,7 @@ const Qrng_Server = () => {
     const startAggressiveFallbackPoll = (tableName, setProgressFn, setResultFn, userId, storageKey) => {
       if (fallbackIntervals[tableName]) return;
 
-      console.log(`Starting aggressive polling for ${tableName}`);
+      // console.log(`Starting aggressive polling for ${tableName}`);
       fallbackIntervals[tableName] = setInterval(async () => {
         try {
           const { data, error } = await supabase
@@ -388,8 +388,7 @@ const Qrng_Server = () => {
 
           if (data) {
             const progress = Number(data.progress || 0);
-            console.log(`Fallback poll (${tableName}) progress:`, progress);
-
+          
             setProgressFn(progress);
 
             if (data.result && data.result.trim() !== "") {
@@ -399,7 +398,7 @@ const Qrng_Server = () => {
 
             // Only stop if we have a final result
             if (progress >= 100 && data.result && data.result.trim() !== "") {
-              console.log(`Stopping fallback poll for ${tableName} - completed`);
+           
               clearInterval(fallbackIntervals[tableName]);
               delete fallbackIntervals[tableName];
             }
@@ -537,7 +536,7 @@ const Qrng_Server = () => {
           setDownloadedFile(mockFile);
           setBinaryDownloaded(true);
 
-          console.log("Restored downloaded file info from sessionStorage");
+          // console.log("Restored downloaded file info from sessionStorage");
         } catch (error) {
           console.error("Error restoring downloaded file:", error);
           sessionStorage.removeItem('downloadedFileInfo');
@@ -1210,7 +1209,7 @@ const Qrng_Server = () => {
           }
         );
 
-        console.log("NIST 90B response:", response);
+        // console.log("NIST 90B response:", response);
 
         if (progressIntervalId) {
           clearInterval(progressIntervalId);
@@ -1333,7 +1332,7 @@ const Qrng_Server = () => {
         console.error("Error deleting from results3 table:", error3.message);
       }
 
-      console.log("Successfully cleared data from all Supabase tables");
+      // console.log("Successfully cleared data from all Supabase tables");
 
     } catch (err) {
       console.error("Error clearing Supabase data:", err);

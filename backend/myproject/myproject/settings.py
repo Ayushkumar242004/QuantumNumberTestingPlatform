@@ -187,8 +187,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # ================================
 # CELERY CONFIG
 # ================================
-CELERY_BROKER_URL = 'redis://100.97.115.11:6379/0'
-CELERY_RESULT_BACKEND = 'redis://100.97.115.11:6379/0'
+CELERY_BROKER_URL = "redis://100.86.167.54:6379/0"
+CELERY_RESULT_BACKEND = "redis://100.86.167.54:6379/0"
 
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
@@ -229,7 +229,7 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://100.97.115.11:6379/1",
+        "LOCATION": "redis://100.86.167.54:6379/1",
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         "TIMEOUT": 3600,
     }

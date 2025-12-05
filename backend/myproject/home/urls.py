@@ -25,7 +25,7 @@ urlpatterns = [
     path('graph-generation-nist90b/', views.create_graph_nist90b, name='create_graph_nist90b'),
     path('get_progress_graph90b/<uuid:job_id>', views.get_progress_graph90b, name='get_progress_graph90b'),
     
-    path('graph-generaion-dieharder/', views.create_graph_dieharder, name='create_graph_dieharder'),
+    path('graph-generation-dieharder/', views.create_graph_dieharder, name='create_graph_dieharder'),
     path('get_progress_graphDieharder/<uuid:job_id>/', views.get_progress_graphDieharder, name='get_progress_graphDieharder'),
     
     # final ans

@@ -1,6 +1,6 @@
 ________________________________________________________________________________
 
-		FILE = /home/rao/Documents/test2/backend/myproject/home/sts-2.1.2/50c3084e-ef1d-4237-9599-f473441607dc_50Mb.bin		ALPHA = 0.0100
+		FILE = /home/ayush/Documents/all_material_for_randomness/QNU_celery/backend/myproject/home/sts-2.1.2/ff9494f4-054b-4275-b56f-18b4d09af48b_testfile.bin		ALPHA = 0.0100
 ________________________________________________________________________________
 
-		BITSREAD = 419430400 0s = 209732906 1s = 209697494
+		BITSREAD = 8388608 0s = 4195422 1s = 4193186

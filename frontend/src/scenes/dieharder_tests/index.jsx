@@ -2689,7 +2689,7 @@ const Dieharder_tests = () => {
       formData.append("job_id", currentJobIdT);
       formData.append("line_number", 1);
 
-      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-dieharder/`, {
         method: "POST",
         body: formData,
       })
@@ -2748,6 +2748,7 @@ const Dieharder_tests = () => {
         formData.append("file", binFile2);
       }
       formData.append("job_id", currentJobIdT2);
+      formData.append("line_number", 2);
 
       fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
         method: "POST",
@@ -2794,9 +2795,10 @@ const Dieharder_tests = () => {
         formData.append("file", binFile2);
       }
       formData.append("job_id", currentJobIdT2);
+      formData.append("line_number", 2);
 
 
-      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-dieharder/`, {
         method: "POST",
         body: formData,
       })
@@ -2848,6 +2850,7 @@ const Dieharder_tests = () => {
         formData.append("file", binFile3);
       }
       formData.append("job_id", currentJobIdT3);
+      formData.append("line_number", 3);
 
 
       fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
@@ -2893,9 +2896,10 @@ const Dieharder_tests = () => {
         formData.append("file", binFile3);
       }
       formData.append("job_id", currentJobIdT3);
+      formData.append("line_number", 3);
 
 
-      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-dieharder/`, {
         method: "POST",
         body: formData,
       })
@@ -2946,6 +2950,7 @@ const Dieharder_tests = () => {
         formData.append("file", binFile4);
       }
       formData.append("job_id", currentJobIdT4);
+      formData.append("line_number", 4);
 
 
       fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
@@ -2992,8 +2997,9 @@ const Dieharder_tests = () => {
         formData.append("file", binFile4);
       }
       formData.append("job_id", currentJobIdT4);
+      formData.append("line_number", 4);
 
-      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-dieharder/`, {
         method: "POST",
         body: formData,
       })
@@ -3041,6 +3047,7 @@ const Dieharder_tests = () => {
         formData.append("file", binFile5);
       }
       formData.append("job_id", currentJobIdT5);
+      formData.append("line_number", 5);
 
 
       fetch(`${REACT_APP_BASE_URL}/pdf-report-dieharder/`, {
@@ -3089,10 +3096,11 @@ const Dieharder_tests = () => {
         formData.append("file", binFile5);
       }
       formData.append("job_id", currentJobIdT5);
+      formData.append("line_number", 5);
 
 
 
-      fetch(`${REACT_APP_BASE_URL}/graph-generaion-dieharder/`, {
+      fetch(`${REACT_APP_BASE_URL}/graph-generation-dieharder/`, {
         method: "POST",
         body: formData,
       })

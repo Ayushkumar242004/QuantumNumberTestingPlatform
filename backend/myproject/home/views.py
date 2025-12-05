@@ -270,14 +270,13 @@ def create_graph_dieharder(request):
 
     job_id = request.POST.get('job_id')
     line_number = request.POST.get('line_number')
-    if not job_id:
-        return JsonResponse({"error": "job_id is required"}, status=400)
 
     # file_name = request.POST.get('file_name', '')
     cache.set(f"{job_id}_progressGraphDieharder", 1)
 
     # ✅ Fetch results from cache instead of running tests
     cached_results = cache.get(f"{line_number}_results_dieharder")
+    print("hello",cached_results)
     if not cached_results:
         return JsonResponse({"error": "No cached results found for this job_id"}, status=404)
 
@@ -3833,6 +3832,8 @@ import os, datetime, pytz, uuid, subprocess, re, traceback, tempfile
 
 logger = logging.getLogger(__name__)
 TOTAL_STEPS_DIEHARDER = 20
+from pathlib import Path
+
 
 @shared_task(bind=True)
 def execute_dieharder_tests(self, job_data):
@@ -3840,6 +3841,8 @@ def execute_dieharder_tests(self, job_data):
     Execute Dieharder tests with queueing and consistent lock handling.
     """
     uploaded_file_path = None
+    temp_input_path = None  # temp file given to dieharder
+
     job_id = job_data.get('job_id', str(uuid.uuid4()))
     user_id = job_data.get('userId')
     line_number = job_data.get('line_number')
@@ -3852,7 +3855,10 @@ def execute_dieharder_tests(self, job_data):
         def update_progress(step):
             try:
                 progress = round((step / TOTAL_STEPS_DIEHARDER) * 100)
-                logger.info(f"📈 [DIEHARDER PROGRESS] job={job_id} step={step}/{TOTAL_STEPS_DIEHARDER} => {progress}%")
+                logger.info(
+                    f"📈 [DIEHARDER PROGRESS] job={job_id} "
+                    f"step={step}/{TOTAL_STEPS_DIEHARDER} => {progress}%"
+                )
                 cache.set(f"{job_id}_progress_dieharder", progress, timeout=3600)
                 # Update Supabase progress
                 supabase.table("results3").update({"progress": progress}) \
@@ -3864,29 +3870,44 @@ def execute_dieharder_tests(self, job_data):
 
         # 🗝️ Acquire lock FIRST
         if not DieharderTaskLock.acquire_dieharder_lock(user_id):
-            logger.warning(f"🔒 [DIEHARDER LOCK FAILED] Could not acquire lock for user={user_id}")
-            return {"status": "locked", "message": f"Another Dieharder task running for user {user_id}"}
+            logger.warning(
+                f"🔒 [DIEHARDER LOCK FAILED] Could not acquire lock for user={user_id}"
+            )
+            return {
+                "status": "locked",
+                "message": f"Another Dieharder task running for user {user_id}",
+            }
 
         logger.info(f"✅ [DIEHARDER LOCK ACQUIRED] user={user_id}")
 
         # Scheduled time check
         kolkata_tz = pytz.timezone("Asia/Kolkata")
-        scheduled_time_str = job_data.get('scheduled_time_str')
-        scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
+        scheduled_time_str = job_data.get("scheduled_time_str")
+        scheduled_time = kolkata_tz.localize(
+            datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S")
+        )
         current_time = datetime.datetime.now(kolkata_tz)
         time_diff = (scheduled_time - current_time).total_seconds()
-        logger.info(f"⏰ [DIEHARDER TIME CHECK] now={current_time.isoformat()} scheduled={scheduled_time.isoformat()} diff={time_diff}s")
+        logger.info(
+            f"⏰ [DIEHARDER TIME CHECK] "
+            f"now={current_time.isoformat()} "
+            f"scheduled={scheduled_time.isoformat()} "
+            f"diff={time_diff}s"
+        )
 
         if time_diff > 0:
-            logger.info(f"⏳ [DIEHARDER DEFER] Job {job_id} scheduled for future. Scheduling new Celery task after {time_diff}s")
+            logger.info(
+                f"⏳ [DIEHARDER DEFER] Job {job_id} scheduled for future. "
+                f"Scheduling new Celery task after {time_diff}s"
+            )
             update_progress(2)
             DieharderTaskLock.release_dieharder_lock(user_id)  # Release only when deferring
 
             # Schedule the same task to run after the required delay
             execute_dieharder_tests.apply_async(
-                kwargs={'job_data': job_data},
+                kwargs={"job_data": job_data},
                 countdown=int(time_diff),
-                queue='dieharder_tests'
+                queue="dieharder_tests",
             )
 
             # ✅ CRITICAL: Return immediately to stop current task execution
@@ -3895,19 +3916,51 @@ def execute_dieharder_tests(self, job_data):
         # ✅ Only proceed with test execution if time_diff <= 0
         update_progress(2)
 
-        # File checks
-        uploaded_file_path = job_data.get('uploaded_file_path')
-        if not uploaded_file_path or not os.path.exists(uploaded_file_path):
+        # ---------------------------
+        # 🔍 FILE CHECK + TEMP COPY
+        # ---------------------------
+        uploaded_file_path = job_data.get("uploaded_file_path")
+        if not uploaded_file_path:
+            logger.error("❌ [DIEHARDER FILE ERROR] No uploaded_file_path in job_data")
+            raise Exception("No uploaded_file_path provided for Dieharder job")
+
+        if not os.path.exists(uploaded_file_path):
             logger.error(f"❌ [DIEHARDER FILE NOT FOUND] {uploaded_file_path}")
             raise Exception(f"File not found: {uploaded_file_path}")
 
-        file_size_bytes = os.path.getsize(uploaded_file_path)
-        logger.info(f"📊 [DIEHARDER FILE INFO] {uploaded_file_path} size_bytes={file_size_bytes}")
+        if not os.path.isfile(uploaded_file_path):
+            logger.error(f"❌ [DIEHARDER NOT REGULAR FILE] {uploaded_file_path}")
+            raise Exception(f"Not a regular file: {uploaded_file_path}")
 
-        # Define Dieharder test IDs
+        file_size_bytes = os.path.getsize(uploaded_file_path)
+        logger.info(
+            f"📊 [DIEHARDER FILE INFO] {uploaded_file_path} size_bytes={file_size_bytes}"
+        )
+
+        # ✅ Create a short, simple temp file for dieharder
+        import tempfile
+        import shutil
+
+        temp_dir = tempfile.gettempdir()
+        temp_input_path = os.path.join(temp_dir, f"dh_{job_id[:8]}.bin")
+
+        # Copy the data file so dieharder always sees a regular file
+        shutil.copy2(uploaded_file_path, temp_input_path)
+        logger.info(
+            f"📁 [DIEHARDER TEMP FILE] Copied to {temp_input_path} "
+            f"(size={os.path.getsize(temp_input_path)} bytes)"
+        )
+
+        if not os.path.isfile(temp_input_path):
+            raise Exception(f"Temp input file not regular: {temp_input_path}")
+
+        # ---------------------------
+        # 🔧 DIEHARDER EXECUTION
+        # ---------------------------
+
         dieharder_test_ids = [
             "2", "1", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-            "13", "14", "15", "16", "17"
+            "13", "14", "15", "16", "17",
         ]
 
         update_progress(3)
@@ -3920,84 +3973,93 @@ def execute_dieharder_tests(self, job_data):
         # Dieharder executable path
         dieharder_executable = str(settings.TESTS_DIR / "dieharder-2.6.24/dieharder/dieharder")
 
-        if not os.path.isfile(dieharder_executable) or not os.access(dieharder_executable, os.X_OK):
+        if not os.path.isfile(dieharder_executable) or not os.access(
+            dieharder_executable, os.X_OK
+        ):
             logger.error(f"❌ [DIEHARDER EXECUTABLE MISSING] {dieharder_executable}")
-            raise Exception(f"Dieharder executable not found or not executable: {dieharder_executable}")
+            raise Exception(
+                f"Dieharder executable not found or not executable: {dieharder_executable}"
+            )
 
-        # ✅ Function to clean and sanitize output
         def clean_output(text):
             """Remove binary characters and ensure clean text output"""
             if not text:
                 return ""
-            
-            # If bytes, decode first
+
+            # Decode if bytes
             if isinstance(text, bytes):
                 try:
-                    text = text.decode('utf-8', errors='replace')
-                except:
-                    text = text.decode('latin-1', errors='replace')
-            
-            # Remove non-printable characters except newlines, tabs, and carriage returns
+                    text = text.decode("utf-8", errors="replace")
+                except Exception:
+                    text = text.decode("latin-1", errors="replace")
+
             cleaned = ""
             for char in text:
-                if (32 <= ord(char) <= 126) or char in '\n\r\t':
+                if (32 <= ord(char) <= 126) or char in "\n\r\t":
                     cleaned += char
                 else:
-                    # Replace with space or remove (for control characters)
-                    if ord(char) in [9, 10, 13]:  # tab, newline, carriage return
+                    if ord(char) in [9, 10, 13]:
                         cleaned += char
                     else:
-                        cleaned += ' '  # replace other non-printables with space
-            
-            # Remove excessive whitespace
-            cleaned = re.sub(r'[ \t]+', ' ', cleaned)
-            cleaned = re.sub(r'\n\s*\n', '\n\n', cleaned)
-            
+                        cleaned += " "
+
+            cleaned = re.sub(r"[ \t]+", " ", cleaned)
+            cleaned = re.sub(r"\n\s*\n", "\n\n", cleaned)
             return cleaned.strip()
 
         # Run each Dieharder test
         for test_id in dieharder_test_ids:
             command = [
                 dieharder_executable,
-                "-d", test_id,
-                "-g", "66",  # raw binary input
-                "-f", uploaded_file_path
+                "-d",
+                test_id,
+                "-g",
+                "66",  # raw binary input
+                "-f",
+                temp_input_path,  # ✅ ALWAYS use short temp file
             ]
+
+            logger.info(f"🔧 [DIEHARDER COMMAND] {' '.join(command)}")
 
             try:
                 logger.info(f"🔧 [DIEHARDER RUNNING TEST] Test ID: {test_id}")
-                
-                # ✅ Use text mode with explicit encoding
+
                 process = subprocess.run(
                     command,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True,  # ✅ Force text mode
-                    encoding='utf-8',  # ✅ Explicit encoding
-                    errors='replace',  # ✅ Replace encoding errors
-                    timeout=300  # 5 minutes timeout per test
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=300,
                 )
-                
-                # ✅ Clean both stdout and stderr
+
                 output = clean_output(process.stdout)
                 error_output = clean_output(process.stderr)
 
                 logger.info(f"=== Dieharder Test {test_id} Output ===")
-                logger.info(output[:500] + "..." if len(output) > 500 else output)  # Log first 500 chars
-                
+                logger.info(
+                    output[:500] + "..." if len(output) > 500 else output
+                )
+
                 if error_output:
                     logger.error(f"=== Dieharder Test {test_id} Error ===")
-                    logger.error(error_output[:500] + "..." if len(error_output) > 500 else error_output)
+                    logger.error(
+                        error_output[:500] + "..."
+                        if len(error_output) > 500
+                        else error_output
+                    )
 
-                # ✅ Add cleaned output to combined output
+                # Combine output
                 test_output = f"=== Output for test {test_id} ===\n{output}\n"
                 if error_output:
-                    test_output += f"=== Errors for test {test_id} ===\n{error_output}\n"
+                    test_output += (
+                        f"=== Errors for test {test_id} ===\n{error_output}\n"
+                    )
                 test_output += "\n"
-                
                 combined_output += test_output
 
-                # Parse results from cleaned output
+                # Parse p-value + assessment
                 p_value, assessment = None, None
                 for line in output.splitlines():
                     line = line.strip()
@@ -4006,7 +4068,9 @@ def execute_dieharder_tests(self, job_data):
                         if match:
                             val = match.group(1)
                             try:
-                                p_value = float(val) if val.lower() != "nan" else 0.0
+                                p_value = (
+                                    float(val) if val.lower() != "nan" else 0.0
+                                )
                             except ValueError:
                                 p_value = 0.0
                     if line.startswith("Assessment:"):
@@ -4015,7 +4079,7 @@ def execute_dieharder_tests(self, job_data):
                 test_result = {
                     "test_id": test_id,
                     "p_value": p_value if p_value is not None else 0.0,
-                    "assessment": assessment or "non-random number"
+                    "assessment": assessment or "non-random number",
                 }
 
                 if assessment and "PASSED" in assessment.upper():
@@ -4028,51 +4092,65 @@ def execute_dieharder_tests(self, job_data):
 
             except subprocess.TimeoutExpired:
                 logger.error(f"⏰ [DIEHARDER TIMEOUT] Test {test_id} timed out")
-                results.append({
-                    "test_id": test_id, 
-                    "error": "Timeout", 
-                    "result": "non-random number"
-                })
-                combined_output += f"=== Output for test {test_id} ===\nTimeout: Test took longer than 5 minutes\n\n"
-                
+                results.append(
+                    {
+                        "test_id": test_id,
+                        "error": "Timeout",
+                        "result": "non-random number",
+                    }
+                )
+                combined_output += (
+                    f"=== Output for test {test_id} ===\n"
+                    f"Timeout: Test took longer than 5 minutes\n\n"
+                )
+
             except Exception as e:
                 logger.error(f"❌ [DIEHARDER TEST ERROR] Test {test_id}: {e}")
-                results.append({
-                    "test_id": test_id, 
-                    "error": str(e), 
-                    "result": "non-random number"
-                })
-                combined_output += f"=== Output for test {test_id} ===\nError: {str(e)}\n\n"
+                results.append(
+                    {
+                        "test_id": test_id,
+                        "error": str(e),
+                        "result": "non-random number",
+                    }
+                )
+                combined_output += (
+                    f"=== Output for test {test_id} ===\n"
+                    f"Error: {str(e)}\n\n"
+                )
 
             step_counter += 1
             update_progress(step_counter)
 
-        # ✅ Final cleaning of combined output before storage
+        # Final cleaning + storage
         combined_output = clean_output(combined_output)
-        
-        # ✅ Store cleaned combined output in cache
         cache.set(f"{line_number}_download_dieharder", combined_output, timeout=3600)
-        logger.info(f"✅ [DIEHARDER OUTPUT STORED] line={line_number}, output_length={len(combined_output)}")
-        
-        # ✅ Also store in job cache for backward compatibility
+        logger.info(
+            f"✅ [DIEHARDER OUTPUT STORED] line={line_number}, "
+            f"output_length={len(combined_output)}"
+        )
         cache.set(f"{job_id}_raw_output_dieharder", combined_output, timeout=3600)
-        
+
         update_progress(19)
 
-        # Final verdict
-        final_text = "random number" if passed_count > len(dieharder_test_ids) / 2 else "non-random number"
+        final_text = (
+            "random number"
+            if passed_count > len(dieharder_test_ids) / 2
+            else "non-random number"
+        )
         executed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        logger.info(f"🏁 [DIEHARDER VERDICT] job={job_id} verdict={final_text} passed={passed_count}/{len(dieharder_test_ids)}")
 
-        # Store results in cache
+        logger.info(
+            f"🏁 [DIEHARDER VERDICT] job={job_id} verdict={final_text} "
+            f"passed={passed_count}/{len(dieharder_test_ids)}"
+        )
+
         job_results = {
             "job_id": job_id,
             "tests": results,
             "final_result": final_text,
             "executed_at": executed_at,
             "passed_count": passed_count,
-            "total_tests": len(dieharder_test_ids)
+            "total_tests": len(dieharder_test_ids),
         }
         cache.set(f"{line_number}_results_dieharder", job_results, timeout=3600)
 
@@ -4091,37 +4169,51 @@ def execute_dieharder_tests(self, job_data):
                     "result": final_text,
                     "progress": 100,
                     "file_name": fileName,
-                    "updated_at": current_time
+                    "updated_at": current_time,
                 },
-                ignore_duplicates=False
+                ignore_duplicates=False,
             ).execute()
             logger.info("[DIEHARDER SUPABASE] final result upserted")
         except Exception as e:
-            logger.warning(f"[DIEHARDER SUPABASE WARN] could not upsert final result: {e}")
+            logger.warning(
+                f"[DIEHARDER SUPABASE WARN] could not upsert final result: {e}"
+            )
 
         logger.info(f"✅ [DIEHARDER TASK SUCCESS] job={job_id}")
         return {
-            "status": "completed", 
-            "job_id": job_id, 
+            "status": "completed",
+            "job_id": job_id,
             "final_result": final_text,
             "tests": results,
             "passed_count": passed_count,
-            "total_tests": len(dieharder_test_ids)
+            "total_tests": len(dieharder_test_ids),
         }
 
     except Exception as e:
         logger.error(f"💥 [DIEHARDER TASK ERROR] job={job_id} error={e}")
         logger.error("".join(traceback.format_exc()))
+        # You can also cache error if you like
+        cache.set(f"{line_number}_dieharder_error", str(e), timeout=3600)
         raise
 
     finally:
-        # Always clean up - release lock and remove temp files
         try:
             DieharderTaskLock.release_dieharder_lock(user_id)
             logger.info(f"🔓 [DIEHARDER LOCK RELEASED] user={user_id}")
         except Exception as e:
             logger.warning(f"⚠️ [DIEHARDER LOCK RELEASE ERROR] {e}")
 
+        # Remove temp input file
+        if temp_input_path and os.path.exists(temp_input_path):
+            try:
+                os.remove(temp_input_path)
+                logger.info(f"🗑️ [DIEHARDER TEMP FILE REMOVED] {temp_input_path}")
+            except Exception as e:
+                logger.warning(
+                    f"⚠️ [DIEHARDER TEMP FILE CLEANUP ERROR] {temp_input_path}: {e}"
+                )
+
+        # Remove original uploaded file (your existing behavior)
         if uploaded_file_path and os.path.exists(uploaded_file_path):
             try:
                 os.remove(uploaded_file_path)
@@ -4129,6 +4221,7 @@ def execute_dieharder_tests(self, job_data):
             except Exception as e:
                 logger.warning(f"⚠️ [DIEHARDER CLEANUP ERROR] {e}")
 
+                
 # @csrf_exempt
 # def generate_final_ans_dieharder(request):
 #     """
@@ -4200,7 +4293,6 @@ def execute_dieharder_tests(self, job_data):
 #     except Exception as e:
 #         logger.error(f"[RUN_DIEHARDER ERROR] {e}")
 #         return JsonResponse({"error": str(e)}, status=500)
-
 @csrf_exempt
 def generate_final_ans_dieharder(request):
     """
@@ -4296,175 +4388,6 @@ def generate_final_ans_dieharder(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-def run_after_delay_dieharder(job_id, scheduled_time, file, line_number, user_id, fileName):
-    import datetime, tempfile, os, time, subprocess
-
-    kolkata_tz = pytz.timezone("Asia/Kolkata")
-    now = datetime.datetime.now(kolkata_tz)  # Make current time timezone-aware
-
-    wait_seconds = (scheduled_time - now).total_seconds()
-    def update_progress(step: int):
-                try:
-                    progress_percentage = round((step / 18) * 100)
-                    current_time = datetime.datetime.now().isoformat()
-                    supabase.table("results3").update({
-                        "progress": progress_percentage,
-                    }).eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
-                except Exception as e:
-                    print(f"Supabase progress update failed at step {step}: {e}")
-    
-    if wait_seconds > 0:
-        print(f"Sleeping for {wait_seconds:.2f} seconds until scheduled time...")
-        time.sleep(wait_seconds)
-
-    cache.set(f"{job_id}_progress_dieharder", 1)
-    update_progress(1)
-    # Save file to a temp location and read binary data
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmpfile:
-        for chunk in file.chunks():
-            tmpfile.write(chunk)
-        tmpfile_path = tmpfile.name
-    cache.get(f"{job_id}_progress_dieharder", 2)
-    update_progress(2)
-    # Extract binary data as string
-    with open(tmpfile_path, 'rb') as f:
-        byte_data = f.read()
-        binary_data_str = ''.join(format(byte, '08b') for byte in byte_data)
-
-    print(f"Running Dieharder tests at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} on file: {tmpfile_path}")
-
-    dieharder_test_ids = [
-        "2"
-        , "1", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14","15","16","17"
-    ]
-
-    results = []
-    passed_count = 0
-    progress_counter = 3
-    cache.get(f"{job_id}_progress_dieharder", 3)
-    update_progress(3)
-    for test_id in dieharder_test_ids:
-        command = [
-            str(settings.TESTS_DIR / "dieharder-2.6.24/dieharder/dieharder"),
-            "-d", test_id,
-            "-g", "66",
-            "-f", tmpfile_path
-        ]
-
-        try:
-            process = subprocess.run(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-                timeout=300
-            )
-            output = process.stdout
-            print(f"Output for test {test_id}:\n{output}")
-
-            p_value = None
-            assessment = None
-
-            for line in output.splitlines():
-                    line = line.strip()
-
-                    # Match p-value even with extra spaces or nan
-                    if line.startswith("Kuiper KS: p"):
-                        match = re.search(r"p\s*=\s*([^\s]+)", line)
-                        if match:
-                            val = match.group(1)
-                            try:
-                                p_value = float(val) if val.lower() != "nan" else 0.0
-                            except ValueError:
-                                p_value = 0.0
-
-                # Match assessment text
-            if line.startswith("Assessment:"):
-                assessment = line.replace("Assessment:", "").strip()
-            results.append({
-                "test_id": test_id,
-                "p_value": p_value,
-                "assessment": assessment or "unknown"
-            })
-
-            if assessment and "PASSED" in assessment.upper():
-                passed_count += 1
-
-        except subprocess.TimeoutExpired:
-            results.append({
-                "test_id": test_id,
-                "error": "Timeout"
-            })
-        except Exception as e:
-            results.append({
-                "test_id": test_id,
-                "error": str(e)
-            })
-
-        # ✅ Update Supabase after each test run
-        try:
-            current_time = datetime.datetime.now().isoformat()
-            supabase.table("results").upsert({
-                "user_id": int(user_id),
-                "line": int(line_number),
-                "binary_data": " ",
-                "scheduled_time": scheduled_time.isoformat(),
-                "upload_time": current_time,
-                "result": "null",
-                "progress": progress_counter,
-                "file_name": fileName,
-                "updated_at": current_time
-            }, ignore_duplicates=False).execute()
-        except Exception as e:
-            print(f"Supabase update failed: {e}")
-
-        cache.set(f"{job_id}_progress_dieharder", progress_counter)
-        update_progress(progress_counter)
-        progress_counter += 1
-
-    final_result = 'random number' if passed_count > len(dieharder_test_ids) / 2 else 'non-random number'
-    print("Final result based on Dieharder tests:", final_result)
-
-
-    job_results = {
-        "job_id": job_id,
-        "tests": results,
-        "final_result": final_result,
-        
-    }
-    cache.set(f"{line_number}_results_dieharder", job_results, timeout=3600)
-
-    # ✅ Final Supabase upsert
-    try:
-        current_time = datetime.datetime.now().isoformat()
-        supabase.table("results").upsert(
-            {
-                "user_id": int(user_id),
-                "line": int(line_number),
-                "binary_data": " ",
-                "scheduled_time": scheduled_time.isoformat(),
-                "upload_time": current_time,
-                "result": final_result,
-                "progress": 100,
-                "file_name": fileName,
-                "updated_at": current_time
-            },
-            ignore_duplicates=False
-        ).execute()
-        print("Final Supabase upsert successful.")
-    except Exception as e:
-        print("Final Supabase update failed:", e)
-
-    if os.path.exists(tmpfile_path):
-        os.remove(tmpfile_path)
-
-    cache.set(f"{job_id}_progress_dieharder", 15)
-    update_progress(15)
-    return {
-        "message": f"Dieharder tests executed at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-        "job_id": job_id,
-        "final_result": final_result
-    }
 
 
 @csrf_exempt
@@ -4608,7 +4531,7 @@ def fetch_qrng(request):
         return response
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500),
+        return JsonResponse({"error": str(e)}, status=500)
 
 import os
 import tempfile
