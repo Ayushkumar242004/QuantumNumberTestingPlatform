@@ -5,7 +5,7 @@ import redis
 def clear_stuck_locks():
     print("🧹 [CLEARING STUCK LOCKS]")
     
-    r = redis.Redis(host='100.97.115.11', port=6379, db=0)
+    r = redis.Redis(host='100.86.167.54', port=6379, db=0)
     
     # Clear all nist-related locks for user 63
     lock_pattern = "task_lock_nist_63_*"

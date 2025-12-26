@@ -465,7 +465,7 @@ def generate_pdf_report(request):
     #     13. <b>Cumulative Sums Test:</b> Evaluates the randomness based on the maximal excursion from the expected cumulative sum.<br/><br/>
     #     14. <b>Random Excursions Test:</b> Counts the number of visits to various states in a random walk derived from the sequence.<br/><br/>
     #     15. <b>Random Excursions Variant Test:</b> Focuses on the number of times a specific state is visited during a random walk.<br/><br/>
-    #     """
+          """
 
     description_style = ParagraphStyle(
         'Description',
@@ -2459,68 +2459,68 @@ def execute_nist_tests(self, job_data):
             except Exception as e:
                 logger.warning(f"⚠️ [CLEANUP ERROR] {e}")
 
-# @csrf_exempt
-# def run_nist_tests(request):
-#     if request.method != "POST":
-#         return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
+@csrf_exempt
+def run_nist_tests(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method. Use POST."}, status=405)
 
-#     try:
-#         uploaded_file = request.FILES.get("file")
-#         scheduled_time_str = request.POST.get("scheduled_time", "")
-#         scheduled_time_str1= request.POST.get("scheduled_time_str", "")
-#         job_id = request.POST.get("job_id", str(uuid.uuid4()))
-#         line_number = request.POST.get("line", "")
-#         user_id = request.POST.get("user_id", "")
-#         fileName = request.POST.get("file_name", uploaded_file.name if uploaded_file else "")
+    try:
+        uploaded_file = request.FILES.get("file")
+        scheduled_time_str = request.POST.get("scheduled_time", "")
+        scheduled_time_str1= request.POST.get("scheduled_time_str", "")
+        job_id = request.POST.get("job_id", str(uuid.uuid4()))
+        line_number = request.POST.get("line", "")
+        user_id = request.POST.get("user_id", "")
+        fileName = request.POST.get("file_name", uploaded_file.name if uploaded_file else "")
 
-#         if not uploaded_file:
-#             return JsonResponse({"error": "No file uploaded"}, status=400)
-#         if not scheduled_time_str:
-#             return JsonResponse({"error": "scheduled_time is required"}, status=400)
-#         if not user_id:
-#             return JsonResponse({"error": "user_id is required"}, status=400)
+        if not uploaded_file:
+            return JsonResponse({"error": "No file uploaded"}, status=400)
+        if not scheduled_time_str:
+            return JsonResponse({"error": "scheduled_time is required"}, status=400)
+        if not user_id:
+            return JsonResponse({"error": "user_id is required"}, status=400)
 
-#         # Save uploaded file to temporary location
-#         temp_file_path = os.path.join(STS_PATH, f"{job_id}_{uploaded_file.name}")
-#         with open(temp_file_path, "wb+") as f:
-#             for chunk in uploaded_file.chunks():
-#                 f.write(chunk)
+        # Save uploaded file to temporary location
+        temp_file_path = os.path.join(STS_PATH, f"{job_id}_{uploaded_file.name}")
+        with open(temp_file_path, "wb+") as f:
+            for chunk in uploaded_file.chunks():
+                f.write(chunk)
 
-#         # Prepare job_data
-#         job_data = {
-#             'uploaded_file_path': temp_file_path,
-#             'scheduled_time_str': scheduled_time_str,
-#             'scheduled_time_str1': scheduled_time_str1,
-#             'job_id': job_id,
-#             'line_number': line_number,
-#             'userId': user_id,
-#             'fileName': fileName,
-#         }
+        # Prepare job_data
+        job_data = {
+            'uploaded_file_path': temp_file_path,
+            'scheduled_time_str': scheduled_time_str,
+            'scheduled_time_str1': scheduled_time_str1,
+            'job_id': job_id,
+            'line_number': line_number,
+            'userId': user_id,
+            'fileName': fileName,
+        }
 
-#         # Calculate countdown for scheduling (0 if due now)
-#         kolkata_tz = pytz.timezone("Asia/Kolkata")
-#         scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
-#         current_time = datetime.datetime.now(kolkata_tz)
-#         countdown = max(0, int((scheduled_time - current_time).total_seconds()))
+        # Calculate countdown for scheduling (0 if due now)
+        kolkata_tz = pytz.timezone("Asia/Kolkata")
+        scheduled_time = kolkata_tz.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
+        current_time = datetime.datetime.now(kolkata_tz)
+        countdown = max(0, int((scheduled_time - current_time).total_seconds()))
 
-#         # Set initial progress
-#         cache.set(f"{job_id}_progress", 0, timeout=3600)
+        # Set initial progress
+        cache.set(f"{job_id}_progress", 0, timeout=3600)
 
-#         # ALWAYS queue a Celery task (task will add to internal queue or run immediately)
-#         task = execute_nist_tests.apply_async(kwargs={'job_data': job_data}, countdown=countdown, queue='nist_tests')
+        # ALWAYS queue a Celery task (task will add to internal queue or run immediately)
+        task = execute_nist_tests.apply_async(kwargs={'job_data': job_data}, countdown=countdown, queue='nist_tests')
 
-#         message = "NIST tests processing started" if countdown == 0 else "NIST tests scheduled"
-#         return JsonResponse({
-#             "status": "success",
-#             "job_id": job_id,
-#             "task_id": task.id,
-#             "message": message,
-#             "scheduled_time": scheduled_time_str,
-#         })
+        message = "NIST tests processing started" if countdown == 0 else "NIST tests scheduled"
+        return JsonResponse({
+            "status": "success",
+            "job_id": job_id,
+            "task_id": task.id,
+            "message": message,
+            "scheduled_time": scheduled_time_str,
+        })
 
-#     except Exception as e:
-#         logger.error(f"[RUN_NIST ERROR] {e}")
-#         return JsonResponse({"error": str(e)}, status=500)
+    except Exception as e:
+        logger.error(f"[RUN_NIST ERROR] {e}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 # ...existing code...
 
@@ -2602,66 +2602,66 @@ def execute_nist_tests(self, job_data):
 #         return JsonResponse({"error": str(e)}, status=500)
 
 
-@csrf_exempt
-def run_nist_tests(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid method"}, status=405)
+# @csrf_exempt
+# def run_nist_tests(request):
+#     if request.method != "POST":
+#         return JsonResponse({"error": "Invalid method"}, status=405)
 
-    try:
-        uploaded_file = request.FILES.get("file")
-        scheduled_time_str = request.POST.get("scheduled_time", "")
-        scheduled_time_str1 = request.POST.get("scheduled_time_str", "")
-        job_id = request.POST.get("job_id", str(uuid.uuid4()))
-        user_id = request.POST.get("user_id", "")
-        line_number = request.POST.get("line", "")
-        if not line_number or not line_number.strip():
-            return JsonResponse({"error": "line_number is required"}, status=400)
+#     try:
+#         uploaded_file = request.FILES.get("file")
+#         scheduled_time_str = request.POST.get("scheduled_time", "")
+#         scheduled_time_str1 = request.POST.get("scheduled_time_str", "")
+#         job_id = request.POST.get("job_id", str(uuid.uuid4()))
+#         user_id = request.POST.get("user_id", "")
+#         line_number = request.POST.get("line", "")
+#         if not line_number or not line_number.strip():
+#             return JsonResponse({"error": "line_number is required"}, status=400)
 
-        fileName = uploaded_file.name
+#         fileName = uploaded_file.name
 
-        if not uploaded_file:
-            return JsonResponse({"error": "No file uploaded"}, status=400)
+#         if not uploaded_file:
+#             return JsonResponse({"error": "No file uploaded"}, status=400)
 
-        # STREAM DIRECTLY TO DISK (NO RAM USAGE)
-        os.makedirs(STS_PATH, exist_ok=True)
-        temp_file_path = os.path.join(STS_PATH, f"{job_id}_{fileName}")
+#         # STREAM DIRECTLY TO DISK (NO RAM USAGE)
+#         os.makedirs(STS_PATH, exist_ok=True)
+#         temp_file_path = os.path.join(STS_PATH, f"{job_id}_{fileName}")
 
-        with open(temp_file_path, "wb") as dest:
-            for i, chunk in enumerate(uploaded_file.chunks(chunk_size=5*1024 * 1024)):
-                dest.write(chunk)
-                logger.warning(f"[UPLOAD] wrote chunk #{i} size={len(chunk)} bytes")
+#         with open(temp_file_path, "wb") as dest:
+#             for i, chunk in enumerate(uploaded_file.chunks(chunk_size=5*1024 * 1024)):
+#                 dest.write(chunk)
+#                 logger.warning(f"[UPLOAD] wrote chunk #{i} size={len(chunk)} bytes")
 
 
-        job_data = {
-            "uploaded_file_path": temp_file_path,
-            "scheduled_time_str": scheduled_time_str,
-            "scheduled_time_str1": scheduled_time_str1,
-            "job_id": job_id,
-            "line_number": line_number,
-            "userId": user_id,
-            "fileName": fileName,
-        }
+#         job_data = {
+#             "uploaded_file_path": temp_file_path,
+#             "scheduled_time_str": scheduled_time_str,
+#             "scheduled_time_str1": scheduled_time_str1,
+#             "job_id": job_id,
+#             "line_number": line_number,
+#             "userId": user_id,
+#             "fileName": fileName,
+#         }
 
-        cache.set(f"{job_id}_progress", 0, timeout=3600)
+#         cache.set(f"{job_id}_progress", 0, timeout=3600)
 
-        kolkata = pytz.timezone("Asia/Kolkata")
-        scheduled_time = kolkata.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
-        now = datetime.datetime.now(kolkata)
-        countdown = max(0, int((scheduled_time - now).total_seconds()))
+#         kolkata = pytz.timezone("Asia/Kolkata")
+#         scheduled_time = kolkata.localize(datetime.datetime.strptime(scheduled_time_str, "%Y-%m-%d %H:%M:%S"))
+#         now = datetime.datetime.now(kolkata)
+#         countdown = max(0, int((scheduled_time - now).total_seconds()))
 
-        task = execute_nist_tests.apply_async(kwargs={"job_data": job_data}, countdown=countdown, queue="nist_tests")
+#         task = execute_nist_tests.apply_async(kwargs={"job_data": job_data}, countdown=countdown, queue="nist_tests")
 
-        return JsonResponse({
-            "status": "success",
-            "job_id": job_id,
-            "task_id": task.id,
-            "message": "NIST tests scheduled",
-            "scheduled_time": scheduled_time_str,
-        })
+#         return JsonResponse({
+#             "status": "success",
+#             "job_id": job_id,
+#             "task_id": task.id,
+#             "message": "NIST tests scheduled",
+#             "scheduled_time": scheduled_time_str,
+#         })
 
-    except Exception as e:
-        logger.error(f"[RUN_NIST ERROR] {e}", exc_info=True)
-        return JsonResponse({"error": str(e)}, status=500)
+#     except Exception as e:
+#         logger.error(f"[RUN_NIST ERROR] {e}", exc_info=True)
+#         return JsonResponse({"error": str(e)}, status=500)
 
 
 from celery.result import AsyncResult
