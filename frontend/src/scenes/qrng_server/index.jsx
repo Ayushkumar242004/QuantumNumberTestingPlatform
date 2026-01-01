@@ -163,6 +163,25 @@ const Qrng_Server = () => {
       const userId = await fetchUserId();
       if (!userId) return;
 
+      // ✅ CRITICAL: Unsubscribe from existing subscriptions before creating new ones
+      // This prevents "tried to subscribe multiple times" error
+      try {
+        if (activeChannelsRef.current.subscription1) {
+          await activeChannelsRef.current.subscription1.unsubscribe();
+          delete activeChannelsRef.current.subscription1;
+        }
+        if (activeChannelsRef.current.subscription2) {
+          await activeChannelsRef.current.subscription2.unsubscribe();
+          delete activeChannelsRef.current.subscription2;
+        }
+        if (activeChannelsRef.current.subscription3) {
+          await activeChannelsRef.current.subscription3.unsubscribe();
+          delete activeChannelsRef.current.subscription3;
+        }
+      } catch (e) {
+        console.debug('Error unsubscribing existing channels:', e);
+      }
+
       // Fetch initial data for all three tables
       const fetchInitialData = async () => {
         try {
@@ -260,15 +279,15 @@ const Qrng_Server = () => {
       await fetchInitialData();
 
       // Subscription for results (NIST Test)
-      subscription1 = supabase
-        .channel('results-changes')
+      const channel1 = supabase
+        .channel(`results-changes-${userId}-6`)
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
             table: 'results',
-            filter: `user_id=eq.${userId} AND line=eq.1`
+            filter: `user_id=eq.${userId} AND line=eq.6`
           },
           (payload) => {
             console.debug('Realtime results payload:', payload);
@@ -288,21 +307,23 @@ const Qrng_Server = () => {
               localStorage.removeItem('nistResult');
             }
           }
-        )
-        .subscribe((status) => {
-        
-        });
+        );
+      
+      subscription1 = channel1.subscribe((status) => {
+        console.debug('Subscription 1 (results) status:', status);
+      });
+      activeChannelsRef.current.subscription1 = subscription1;
 
       // Subscription for results2 (NIST 90B Test)
-      subscription2 = supabase
-        .channel('results2-changes')
+      const channel2 = supabase
+        .channel(`results2-changes-${userId}-6`)
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
             table: 'results2',
-            filter: `user_id=eq.${userId} AND line=eq.1`
+            filter: `user_id=eq.${userId} AND line=eq.6`
           },
           (payload) => {
             console.debug('Realtime results2 payload:', payload);
@@ -322,21 +343,23 @@ const Qrng_Server = () => {
               localStorage.removeItem('nist90bResult');
             }
           }
-        )
-        .subscribe((status) => {
-          // console.log('Subscription 2 (results2) status:', status);
-        });
+        );
+      
+      subscription2 = channel2.subscribe((status) => {
+        console.debug('Subscription 2 (results2) status:', status);
+      });
+      activeChannelsRef.current.subscription2 = subscription2;
 
       // Subscription for results3 (Dieharder Test)
-      subscription3 = supabase
-        .channel('results3-changes')
+      const channel3 = supabase
+        .channel(`results3-changes-${userId}-6`)
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
             table: 'results3',
-            filter: `user_id=eq.${userId} AND line=eq.1`
+            filter: `user_id=eq.${userId} AND line=eq.6`
           },
           (payload) => {
             console.debug('Realtime results3 payload:', payload);
@@ -356,10 +379,12 @@ const Qrng_Server = () => {
               localStorage.removeItem('dieharderResult');
             }
           }
-        )
-        .subscribe((status) => {
-          console.log('Subscription 3 (results3) status:', status);
-        });
+        );
+      
+      subscription3 = channel3.subscribe((status) => {
+        console.debug('Subscription 3 (results3) status:', status);
+      });
+      activeChannelsRef.current.subscription3 = subscription3;
 
       // Start fallback polling for all tables
       startAggressiveFallbackPoll('results', setLoadingProgress, setNistResult, userId, 'nistResult');
@@ -414,6 +439,20 @@ const Qrng_Server = () => {
     return () => {
       // Cleanup
       try {
+        // Unsubscribe from all active channels stored in ref
+        if (activeChannelsRef.current.subscription1) {
+          activeChannelsRef.current.subscription1.unsubscribe();
+          delete activeChannelsRef.current.subscription1;
+        }
+        if (activeChannelsRef.current.subscription2) {
+          activeChannelsRef.current.subscription2.unsubscribe();
+          delete activeChannelsRef.current.subscription2;
+        }
+        if (activeChannelsRef.current.subscription3) {
+          activeChannelsRef.current.subscription3.unsubscribe();
+          delete activeChannelsRef.current.subscription3;
+        }
+        // Also try local variables as fallback
         if (subscription1) subscription1.unsubscribe();
         if (subscription2) subscription2.unsubscribe();
         if (subscription3) subscription3.unsubscribe();
@@ -819,6 +858,11 @@ const Qrng_Server = () => {
         if (data) {
           const progress = data.progress || 0;
           setLoadingProgress(progress);
+          
+          // Update result if available
+          if (data.result) {
+            setNistResult({ final_result: data.result });
+          }
 
           // Stop polling once progress is 100%
           if (progress >= 100 && progressIntervalId) {
@@ -993,6 +1037,11 @@ const Qrng_Server = () => {
         if (data) {
           const progress = data.progress || 0;
           setLoadingProgress2(progress);
+          
+          // Update result if available
+          if (data.result) {
+            setDieharderResult({ final_result: data.result });
+          }
 
           // Stop polling once progress is 100%
           if (progress >= 100 && progressIntervalId) {
@@ -1029,6 +1078,7 @@ const Qrng_Server = () => {
         const hardcodedTime = "2025-04-10 11:31:08";
 
         formData.append("scheduled_time", hardcodedTime);
+        formData.append("scheduled_time_str", hardcodedTime);
         formData.append("job_id", `dieharder_${Date.now()}`);
         formData.append("line", lineNo);
         formData.append("user_id", userId);
@@ -1163,6 +1213,11 @@ const Qrng_Server = () => {
         if (data) {
           const progress = data.progress || 0;
           setLoadingProgress3(progress);
+          
+          // Update result if available
+          if (data.result) {
+            setNist90bResult({ final_result: data.result });
+          }
 
           // Stop polling once progress is 100%
           if (progress >= 100 && progressIntervalId) {
@@ -1195,6 +1250,7 @@ const Qrng_Server = () => {
         const hardcodedTime = "2025-04-10 11:31:08";
 
         formData.append("scheduled_time", hardcodedTime);
+        formData.append("scheduled_time_str", hardcodedTime);
         formData.append("job_id", `nist90b_${Date.now()}`);
         formData.append("line", lineNo);
         formData.append("user_id", userId);
@@ -1534,10 +1590,10 @@ useEffect(() => {
         </CardContent>
       </Card>
 
-      {/* Testing Section - Three Horizontal Cards */}
+   
       <Grid container spacing={3}>
-        {/* NIST SP 800-20B Test Card */}
-        <Grid item xs={12} md={4}>
+    
+        {/* <Grid item xs={12} md={4}>
           <Card
             sx={{
               height: "100%",
@@ -1644,10 +1700,10 @@ useEffect(() => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid> */}
 
-        {/* Dieharder Test Card */}
-        <Grid item xs={12} md={4}>
+      
+        {/* <Grid item xs={12} md={4}>
           <Card
             sx={{
               height: "100%",
@@ -1754,10 +1810,10 @@ useEffect(() => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid> */}
 
-        {/* NIST SP 800-90B Test Card */}
-        <Grid item xs={12} md={4}>
+    
+        {/* <Grid item xs={12} md={4}>
           <Card
             sx={{
               height: "100%",
@@ -1864,11 +1920,11 @@ useEffect(() => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid> */}
       </Grid>
 
-      {/* Report Generation Card */}
-      <Card
+   
+      {/* <Card
         sx={{
           mt: 3,
           background: `linear-gradient(135deg, ${colors.primary[400]} 10%, ${colors.blueAccent[900]} 100%)`,
@@ -1922,7 +1978,7 @@ useEffect(() => {
             </Grid>
           </Grid>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* AI Analysis Section - Keep your existing beautiful AI section */}
       <Box

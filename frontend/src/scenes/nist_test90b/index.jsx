@@ -409,32 +409,44 @@ const Nist_tests90b = () => {
   // Handle file upload
   const handleFileUpload = () => {
     if (isUploadButtonEnabled) {
+      // ✅ Disable button IMMEDIATELY when clicked (before file selection)
+      setIsUploadButtonEnabled(false);
+      isProcessingFileRef.current = true;
+      sessionStorage.setItem('ongoingFileUpload_90b', 'true');
       fileInputRef.current.click();
     }
   };
   const handleFileUpload2 = () => {
     if (isUploadButtonEnabled2) {
+      setIsUploadButtonEnabled2(false);
+      isProcessingFileRef2.current = true;
+      sessionStorage.setItem('ongoingFileUpload_90b2', 'true');
       fileInputRef2.current.click();
     }
-
   };
   const handleFileUpload3 = () => {
     if (isUploadButtonEnabled3) {
+      setIsUploadButtonEnabled3(false);
+      isProcessingFileRef3.current = true;
+      sessionStorage.setItem('ongoingFileUpload_90b3', 'true');
       fileInputRef3.current.click();
     }
-
   };
   const handleFileUpload4 = () => {
     if (isUploadButtonEnabled4) {
+      setIsUploadButtonEnabled4(false);
+      isProcessingFileRef4.current = true;
+      sessionStorage.setItem('ongoingFileUpload_90b4', 'true');
       fileInputRef4.current.click();
     }
-
   };
   const handleFileUpload5 = () => {
     if (isUploadButtonEnabled5) {
+      setIsUploadButtonEnabled5(false);
+      isProcessingFileRef5.current = true;
+      sessionStorage.setItem('ongoingFileUpload_90b5', 'true');
       fileInputRef5.current.click();
     }
-
   };
 
   const [currentJobIdT, setCurrentJobIdT] = useState(() => {
@@ -523,22 +535,32 @@ const Nist_tests90b = () => {
   const handleUploadComplete = () => {
     isProcessingFileRef.current = false;
     setIsUploadButtonEnabled(true);
+    sessionStorage.removeItem('ongoingFileUpload_90b');
+    sessionStorage.removeItem('uploadProgress_90b');
   };
   const handleUploadComplete2 = () => {
     isProcessingFileRef2.current = false;
     setIsUploadButtonEnabled2(true);
+    sessionStorage.removeItem('ongoingFileUpload_90b2');
+    sessionStorage.removeItem('uploadProgress_90b2');
   };
   const handleUploadComplete3 = () => {
     isProcessingFileRef3.current = false;
     setIsUploadButtonEnabled3(true);
+    sessionStorage.removeItem('ongoingFileUpload_90b3');
+    sessionStorage.removeItem('uploadProgress_90b3');
   };
   const handleUploadComplete4 = () => {
     isProcessingFileRef4.current = false;
     setIsUploadButtonEnabled4(true);
+    sessionStorage.removeItem('ongoingFileUpload_90b4');
+    sessionStorage.removeItem('uploadProgress_90b4');
   };
   const handleUploadComplete5 = () => {
     isProcessingFileRef5.current = false;
     setIsUploadButtonEnabled5(true);
+    sessionStorage.removeItem('ongoingFileUpload_90b5');
+    sessionStorage.removeItem('uploadProgress_90b5');
   };
 
   const handleFileChange = async (event, instanceNumber = '') => {
@@ -658,18 +680,25 @@ const Nist_tests90b = () => {
     const instanceValues = getInstanceValues(instanceNumber);
     if (!instanceValues) return;
 
-    // Set processing flag
-    instanceValues.isProcessingFileRef.current = true;
+    // ✅ Button should already be disabled from handleFileUpload, but ensure it's disabled
+    // This handles cases where handleFileChange is called directly (e.g., drag & drop)
+    const storageKey = instanceNumber === '' ? 'ongoingFileUpload_90b' : `ongoingFileUpload_90b${instanceNumber}`;
+    if (!instanceValues.isProcessingFileRef.current) {
+      instanceValues.isProcessingFileRef.current = true;
+      instanceValues.setIsUploadButtonEnabled(false);
+      sessionStorage.setItem(storageKey, 'true');
+    }
 
     // Reset progress bars
     instanceValues.setLoadingProgressGr(0);
     instanceValues.setLoadingProgressRep(0);
 
-    // Set session storage
-    sessionStorage.setItem(`ongoingFileUpload${instanceNumber}`, 'true');
-
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
+      // ✅ No file selected - re-enable button and reset flags
+      instanceValues.isProcessingFileRef.current = false;
+      instanceValues.setIsUploadButtonEnabled(true);
+      sessionStorage.removeItem(storageKey);
       if (instanceValues.setShowRedButton) {
         instanceValues.setShowRedButton(false);
       }
@@ -681,7 +710,11 @@ const Nist_tests90b = () => {
     const isBin = fileName.endsWith(".bin");
 
     if (!isBin) {
+      // ✅ Invalid file - re-enable button and reset flags
       alert("Please upload a .bin file.");
+      instanceValues.isProcessingFileRef.current = false;
+      instanceValues.setIsUploadButtonEnabled(true);
+      sessionStorage.removeItem(storageKey);
       return;
     }
 
@@ -689,6 +722,10 @@ const Nist_tests90b = () => {
 
     const userId = await fetchUserId();
     if (!userId) {
+      // ✅ No userId - re-enable button and reset flags
+      instanceValues.isProcessingFileRef.current = false;
+      instanceValues.setIsUploadButtonEnabled(true);
+      sessionStorage.removeItem(storageKey);
       return;
     }
 
@@ -745,19 +782,29 @@ const Nist_tests90b = () => {
         instanceValues.setLoadingProgress(0);
 
         if (deleteError) {
+          // ✅ Delete error - re-enable button and reset flags
+          console.error('Delete error:', deleteError);
+          instanceValues.isProcessingFileRef.current = false;
+          instanceValues.setIsUploadButtonEnabled(true);
+          sessionStorage.removeItem(storageKey);
           return;
         }
       } catch (err) {
+        // ✅ Exception during delete - re-enable button and reset flags
+        console.error('Error deleting existing row:', err);
         instanceValues.isProcessingFileRef.current = false;
         instanceValues.setIsUploadButtonEnabled(true);
-      } finally {
-        instanceValues.isProcessingFileRef.current = false;
-
-        // Enable upload button for instance 1
-        if (instanceNumber === '') {
-          instanceValues.setIsUploadButtonEnabled(true);
-        }
+        sessionStorage.removeItem(storageKey);
+        return;
       }
+      
+      // ✅ File read successfully - keep button disabled (will be re-enabled when progress reaches 100%)
+      // Ensure button stays disabled and processing flag stays true
+      instanceValues.isProcessingFileRef.current = true;
+      instanceValues.setIsUploadButtonEnabled(false);
+      // Update sessionStorage to ensure button stays disabled even if progress is 0
+      sessionStorage.setItem(storageKey, 'true');
+      sessionStorage.setItem(`uploadProgress_90b${instanceNumber}`, '0');
 
       instanceValues.alertShownRef.current = false;
 
@@ -770,8 +817,12 @@ const Nist_tests90b = () => {
       event.target.value = "";
     };
     reader.onerror = () => {
+      // ✅ File read error - re-enable button and reset flags
+      console.error('FileReader error');
       instanceValues.isProcessingFileRef.current = false;
       instanceValues.setIsUploadButtonEnabled(true);
+      const storageKey = instanceNumber === '' ? 'ongoingFileUpload_90b' : `ongoingFileUpload_90b${instanceNumber}`;
+      sessionStorage.removeItem(storageKey);
     };
     reader.readAsArrayBuffer(selectedFile);
   };
@@ -1184,19 +1235,31 @@ const Nist_tests90b = () => {
   // Effect to check persistent state when component mounts for all uploads
   useEffect(() => {
     const checkPersistentState = (storageKey, isProcessingFileRef, setIsUploadButtonEnabled) => {
-      const ongoingUpload = sessionStorage.getItem(`ongoingFileUpload_90b${storageKey}`);
+      const fullStorageKey = storageKey === '' ? 'ongoingFileUpload_90b' : `ongoingFileUpload_90b${storageKey}`;
+      const ongoingUpload = sessionStorage.getItem(fullStorageKey);
       const storedProgress = sessionStorage.getItem(`uploadProgress_90b${storageKey}`);
 
-      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
-        // There's an ongoing upload that hasn't completed
-        isProcessingFileRef.current = true;
-        setIsUploadButtonEnabled(false);
+      // ✅ If there's an ongoing upload flag, keep button disabled regardless of progress value
+      // This handles the case when file is just uploaded (progress = 0) but upload hasn't started yet
+      if (ongoingUpload === 'true') {
+        const progress = storedProgress ? parseInt(storedProgress) : 0;
+        if (progress < 100) {
+          // There's an ongoing upload that hasn't completed
+          isProcessingFileRef.current = true;
+          setIsUploadButtonEnabled(false);
+        } else {
+          // Progress is 100, upload completed - clean up
+          isProcessingFileRef.current = false;
+          setIsUploadButtonEnabled(true);
+          sessionStorage.removeItem(fullStorageKey);
+          sessionStorage.removeItem(`uploadProgress_90b${storageKey}`);
+        }
       } else {
         // No ongoing upload or upload was completed
         isProcessingFileRef.current = false;
         setIsUploadButtonEnabled(true);
         // Clean up sessionStorage
-        sessionStorage.removeItem(`ongoingFileUpload_90b${storageKey}`);
+        sessionStorage.removeItem(fullStorageKey);
         sessionStorage.removeItem(`uploadProgress_90b${storageKey}`);
       }
     };
@@ -1212,18 +1275,28 @@ const Nist_tests90b = () => {
   // Effect to handle loading progress changes for all uploads
   useEffect(() => {
     const handleProgressUpdate = (progress, storageKey, isProcessingFileRef, setIsUploadButtonEnabled) => {
+      const fullStorageKey = storageKey === '' ? 'ongoingFileUpload_90b' : `ongoingFileUpload_90b${storageKey}`;
+      const ongoingUpload = sessionStorage.getItem(fullStorageKey);
+      
       if (progress === 100) {
         // Upload completed
         isProcessingFileRef.current = false;
         setIsUploadButtonEnabled(true);
-        sessionStorage.removeItem(`ongoingFileUpload_90b${storageKey}`);
+        sessionStorage.removeItem(fullStorageKey);
         sessionStorage.removeItem(`uploadProgress_90b${storageKey}`);
-      } else if (progress > 0 && progress < 100) {
-        // Upload in progress
-        isProcessingFileRef.current = true;
-        setIsUploadButtonEnabled(false);
-        sessionStorage.setItem(`ongoingFileUpload_90b${storageKey}`, 'true');
-        sessionStorage.setItem(`uploadProgress_90b${storageKey}`, progress.toString());
+      } else if (progress >= 0 && progress < 100) {
+        // ✅ Upload in progress OR file just uploaded (progress = 0 but ongoingUpload exists)
+        // Keep button disabled if:
+        // 1. Progress is > 0 and < 100 (upload in progress), OR
+        // 2. Progress is 0 but there's an ongoing upload flag (file just selected, waiting for upload to start)
+        if (progress > 0 || ongoingUpload === 'true' || isProcessingFileRef.current) {
+          isProcessingFileRef.current = true;
+          setIsUploadButtonEnabled(false);
+          sessionStorage.setItem(fullStorageKey, 'true');
+          if (progress > 0) {
+            sessionStorage.setItem(`uploadProgress_90b${storageKey}`, progress.toString());
+          }
+        }
       }
     };
 
@@ -1420,7 +1493,10 @@ const Nist_tests90b = () => {
               binaryInsertedRef: binaryInsertedRef,
               setIsEnabled: setIsEnabled,
               handleUploadComplete: handleUploadComplete,
-              binaryInput: null
+              binaryInput: null,
+              setIsUploadButtonEnabled: setIsUploadButtonEnabled,
+              isProcessingFileRef: isProcessingFileRef,
+              instanceNumber: ''
             };
           case 2:
             return {
@@ -1435,8 +1511,12 @@ const Nist_tests90b = () => {
               setShowRedButton: setShowRedButton2,
               alertShownRef: alertShownRef2,
               binaryInsertedRef: binaryInsertedRef2,
+              setIsEnabled: setIsEnabled2,
               handleUploadComplete: handleUploadComplete2,
-              binaryInput: null
+              binaryInput: null,
+              setIsUploadButtonEnabled: setIsUploadButtonEnabled2,
+              isProcessingFileRef: isProcessingFileRef2,
+              instanceNumber: '2'
             };
           case 3:
             return {
@@ -1451,8 +1531,12 @@ const Nist_tests90b = () => {
               setShowRedButton: setShowRedButton3,
               alertShownRef: alertShownRef3,
               binaryInsertedRef: binaryInsertedRef3,
+              setIsEnabled: setIsEnabled3,
               handleUploadComplete: handleUploadComplete3,
-              binaryInput: binaryInput3
+              binaryInput: binaryInput3,
+              setIsUploadButtonEnabled: setIsUploadButtonEnabled3,
+              isProcessingFileRef: isProcessingFileRef3,
+              instanceNumber: '3'
             };
           case 4:
             return {
@@ -1467,8 +1551,12 @@ const Nist_tests90b = () => {
               setShowRedButton: setShowRedButton4,
               alertShownRef: alertShownRef4,
               binaryInsertedRef: binaryInsertedRef4,
+              setIsEnabled: setIsEnabled4,
               handleUploadComplete: handleUploadComplete4,
-              binaryInput: binaryInput4
+              binaryInput: binaryInput4,
+              setIsUploadButtonEnabled: setIsUploadButtonEnabled4,
+              isProcessingFileRef: isProcessingFileRef4,
+              instanceNumber: '4'
             };
           case 5:
             return {
@@ -1483,8 +1571,12 @@ const Nist_tests90b = () => {
               setShowRedButton: setShowRedButton5,
               alertShownRef: alertShownRef5,
               binaryInsertedRef: binaryInsertedRef5,
+              setIsEnabled: setIsEnabled5,
               handleUploadComplete: handleUploadComplete5,
-              binaryInput: binaryInput5
+              binaryInput: binaryInput5,
+              setIsUploadButtonEnabled: setIsUploadButtonEnabled5,
+              isProcessingFileRef: isProcessingFileRef5,
+              instanceNumber: '5'
             };
           default:
             return null;
@@ -1622,6 +1714,16 @@ const Nist_tests90b = () => {
             clearInterval(progressIntervalId);
             progressIntervalId = null;
           }
+
+          // ✅ Re-enable button on upload error
+          if (lineValues.isProcessingFileRef) {
+            lineValues.isProcessingFileRef.current = false;
+          }
+          if (lineValues.setIsUploadButtonEnabled) {
+            lineValues.setIsUploadButtonEnabled(true);
+          }
+          const storageKey = lineValues.instanceNumber === '' ? 'ongoingFileUpload_90b' : `ongoingFileUpload_90b${lineValues.instanceNumber}`;
+          sessionStorage.removeItem(storageKey);
 
           lineValues.setLoadingProgress(0);
           await upsertProgress(0, userId);

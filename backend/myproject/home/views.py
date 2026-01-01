@@ -2225,13 +2225,67 @@ def execute_nist_tests(self, job_data):
 
     logger.info(f"🚀 [TASK START] Task {self.request.id} job_id={job_id} user={user_id}")
 
+    # ✅ CRITICAL: Check if tests already completed BEFORE doing anything
+    # This prevents deferred tasks from resetting progress after successful completion
     try:
-        # progress helper
+        existing_result = supabase.table("results").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+        if existing_result.data and len(existing_result.data) > 0:
+            existing_progress = existing_result.data[0].get('progress', 0)
+            existing_result_text = existing_result.data[0].get('result', '')
+            # Only skip if progress is 100% AND has a valid result (not empty/error)
+            # If progress is 0 or result is empty/error, proceed with new test
+            if existing_progress == 100 and existing_result_text and existing_result_text not in ['', 'null', 'Error:', 'Error: File not found', ' ']:
+                logger.info(f"✅ [NIST ALREADY COMPLETED AT START] Job {job_id} already completed - progress={existing_progress}, result={existing_result_text}")
+                # Get cached results if available
+                cached_results = cache.get(f"{line_number}_results")
+                if cached_results:
+                    return {
+                        "status": "already_completed",
+                        "job_id": job_id,
+                        "final_result": existing_result_text,
+                        "tests": cached_results.get("tests", {}),
+                        "message": "Tests were already completed successfully"
+                    }
+                else:
+                    return {
+                        "status": "already_completed",
+                        "job_id": job_id,
+                        "final_result": existing_result_text or "completed",
+                        "message": "Tests were already completed successfully"
+                    }
+            else:
+                logger.info(f"ℹ️ [NIST PROCEEDING] Job {job_id} - progress={existing_progress}, result='{existing_result_text}' - proceeding with test")
+    except Exception as early_check_error:
+        logger.warning(f"⚠️ [NIST EARLY COMPLETION CHECK ERROR] {early_check_error}")
+        # Continue if we can't check - don't block execution
+
+    try:
+        # ✅ IMPROVED Progress helper with better error handling
         def update_progress(step):
             try:
-                # ✅ CAP progress at 100% maximum
+                # Calculate progress based on steps, but ensure minimum is 10% if file is uploaded
                 capped_step = min(step, TOTAL_STEPS)
-                progress = round((capped_step / TOTAL_STEPS) * 100)
+                calculated_progress = round((capped_step / TOTAL_STEPS) * 100)
+                # Ensure progress doesn't go below 10% once file is uploaded (to prevent flickering)
+                progress = max(10, calculated_progress)
+                
+                # ✅ CRITICAL: Don't update progress if tests are already at 100%
+                # This prevents overwriting successful completion
+                try:
+                    current_status = supabase.table("results").select("progress").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                    if current_status.data and len(current_status.data) > 0:
+                        current_progress = current_status.data[0].get('progress', 0)
+                        if current_progress == 100:
+                            logger.info(f"⏭️ [NIST SKIP PROGRESS UPDATE] Tests already at 100% - skipping update to {progress}%")
+                            return  # Don't update if already at 100%
+                        # Don't allow progress to go backwards (prevent flickering from 10% to 0% or lower)
+                        if progress < current_progress and current_progress >= 10:
+                            logger.info(f"⏭️ [NIST SKIP PROGRESS DECREASE] Current progress {current_progress}% > calculated {progress}% - keeping current")
+                            return
+                except Exception as check_error:
+                    logger.warning(f"⚠️ [NIST PROGRESS CHECK ERROR] {check_error}")
+                    # Continue with update if check fails
+                
                 logger.info(f"📈 [PROGRESS] job={job_id} step={capped_step}/{TOTAL_STEPS} => {progress}%")
                 cache.set(f"{job_id}_progress", progress, timeout=3600)
                 supabase.table("results").update({"progress": progress}) \
@@ -2259,6 +2313,55 @@ def execute_nist_tests(self, job_data):
         time_diff = (scheduled_time - current_time).total_seconds()
         logger.info(f"⏰ [TIME CHECK] now={current_time.isoformat()} scheduled={scheduled_time.isoformat()} diff={time_diff}s")
 
+        # ✅ CRITICAL: Check if tests have already completed successfully BEFORE checking file
+        # If tests are already done (progress=100), skip file check and return success immediately
+        # This prevents errors when file was deleted after successful completion
+        tests_already_completed = False
+        final_result_text = None
+        
+        # Check cache first (faster and more reliable)
+        cached_results = cache.get(f"{line_number}_results")
+        if cached_results:
+            final_result_text = cached_results.get("final_result")
+            if final_result_text and final_result_text not in ['', 'null', 'Error:', 'Error: File not found']:
+                logger.info(f"✅ [NIST FOUND IN CACHE] Job {job_id} already completed with result: {final_result_text}")
+                tests_already_completed = True
+        
+        # Also check Supabase if cache doesn't have it
+        if not tests_already_completed:
+            try:
+                existing_result = supabase.table("results").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                if existing_result.data and len(existing_result.data) > 0:
+                    existing_progress = existing_result.data[0].get('progress', 0)
+                    existing_result_text = existing_result.data[0].get('result', '')
+                    # Check if progress is 100 OR if result exists and is valid (not error)
+                    if (existing_progress == 100) or (existing_result_text and existing_result_text not in ['', 'null', 'Error:', 'Error: File not found']):
+                        logger.info(f"✅ [NIST FOUND IN SUPABASE] Job {job_id} already completed - progress={existing_progress}, result={existing_result_text}")
+                        tests_already_completed = True
+                        final_result_text = existing_result_text if existing_result_text else "completed"
+            except Exception as check_error:
+                logger.warning(f"⚠️ [NIST COMPLETION CHECK ERROR] Could not check Supabase: {check_error}")
+                # Continue with file check if we can't verify completion
+        
+        # If tests already completed, return success immediately - don't check file
+        if tests_already_completed:
+            logger.info(f"✅ [NIST ALREADY COMPLETED] Job {job_id} already completed - skipping file check")
+            if cached_results:
+                return {
+                    "status": "already_completed",
+                    "job_id": job_id,
+                    "final_result": final_result_text,
+                    "tests": cached_results.get("tests", {}),
+                    "message": "Tests were already completed successfully"
+                }
+            else:
+                return {
+                    "status": "already_completed",
+                    "job_id": job_id,
+                    "final_result": final_result_text or "completed",
+                    "message": "Tests were already completed successfully"
+                }
+        
         if time_diff > 0:
             logger.info(f"⏳ [DEFER] Job {job_id} scheduled for future. Scheduling new Celery task after {time_diff}s")
             update_progress(2)
@@ -2273,14 +2376,148 @@ def execute_nist_tests(self, job_data):
 
             return {"status": "scheduled", "delay_seconds": time_diff}
 
-
         update_progress(2)
 
-        # file checks
+        # ✅ CRITICAL: Check file existence with retry logic before proceeding
         uploaded_file_path = job_data.get('uploaded_file_path')
-        if not uploaded_file_path or not os.path.exists(uploaded_file_path):
-            logger.error(f"❌ [FILE NOT FOUND] {uploaded_file_path}")
-            raise Exception(f"File not found: {uploaded_file_path}")
+        if not uploaded_file_path:
+            logger.error(f"❌ [NIST NO FILE PATH] uploaded_file_path is None or empty")
+            raise Exception(f"File path not provided in job_data")
+        
+        # Normalize path to absolute path to avoid path resolution issues
+        uploaded_file_path = os.path.abspath(uploaded_file_path)
+        logger.info(f"🔍 [NIST FILE CHECK START] Checking for file: {uploaded_file_path}")
+        
+        # Retry logic for file existence check (handles race conditions with parallel uploads)
+        max_retries = 5
+        retry_delay = 1.0  # seconds
+        file_exists = False
+        file_size = 0
+        
+        for attempt in range(max_retries):
+            try:
+                if os.path.exists(uploaded_file_path):
+                    # Verify file is not empty and is readable
+                    try:
+                        file_size = os.path.getsize(uploaded_file_path)
+                        if file_size > 0:
+                            # Additional check: Try to read from file
+                            try:
+                                with open(uploaded_file_path, "rb") as test_file:
+                                    test_file.read(1)  # Read first byte
+                                
+                                file_exists = True
+                                logger.info(f"✅ [NIST FILE VERIFIED] {uploaded_file_path} exists size={file_size} bytes (attempt {attempt + 1}/{max_retries})")
+                                break  # File found, exit loop immediately
+                            except (IOError, OSError) as read_error:
+                                logger.warning(f"⚠️ [NIST FILE NOT READABLE] {uploaded_file_path} error={read_error} (attempt {attempt + 1}/{max_retries})")
+                        else:
+                            logger.warning(f"⚠️ [NIST FILE EMPTY] {uploaded_file_path} exists but is empty (attempt {attempt + 1}/{max_retries})")
+                    except OSError as e:
+                        logger.warning(f"⚠️ [NIST FILE CHECK ERROR] {uploaded_file_path} error={e} (attempt {attempt + 1}/{max_retries})")
+                else:
+                    logger.warning(f"⚠️ [NIST FILE NOT FOUND] {uploaded_file_path} (attempt {attempt + 1}/{max_retries})")
+            except Exception as check_error:
+                logger.warning(f"⚠️ [NIST FILE CHECK EXCEPTION] {uploaded_file_path} error={check_error} (attempt {attempt + 1}/{max_retries})")
+            
+            # If this is the last attempt, stop immediately without sleeping
+            if attempt == max_retries - 1:
+                # Last attempt failed, stop polling immediately
+                logger.error(f"❌ [NIST FILE CHECK STOPPED] Stopped polling after {max_retries} attempts - file not found")
+                
+                # ✅ CRITICAL: Before raising error, check if tests already completed successfully
+                # This handles the case where file was deleted after successful completion
+                tests_already_completed = False
+                final_result_text = None
+                
+                # Check cache first (faster)
+                cached_results = cache.get(f"{line_number}_results")
+                if cached_results:
+                    final_result_text = cached_results.get("final_result")
+                    if final_result_text:
+                        logger.info(f"✅ [NIST FOUND IN CACHE] Job {job_id} already completed with result: {final_result_text}")
+                        tests_already_completed = True
+                
+                # Also check Supabase if cache doesn't have it
+                if not tests_already_completed:
+                    try:
+                        existing_result = supabase.table("results").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                        if existing_result.data and len(existing_result.data) > 0:
+                            existing_progress = existing_result.data[0].get('progress', 0)
+                            existing_result_text = existing_result.data[0].get('result', '')
+                            # Check if progress is 100 OR if result exists (tests completed)
+                            if (existing_progress == 100) or (existing_result_text and existing_result_text not in ['', 'null', 'Error:', 'Error: File not found']):
+                                logger.info(f"✅ [NIST FOUND IN SUPABASE] Job {job_id} already completed - progress={existing_progress}, result={existing_result_text}")
+                                tests_already_completed = True
+                                final_result_text = existing_result_text if existing_result_text else "completed"
+                    except Exception as completion_check_error:
+                        logger.warning(f"⚠️ [NIST COMPLETION CHECK ERROR] Could not check Supabase: {completion_check_error}")
+                
+                # If tests already completed, return success instead of error
+                if tests_already_completed:
+                    logger.info(f"✅ [NIST ALREADY COMPLETED] Job {job_id} already completed with result: {final_result_text} - file was deleted after completion")
+                    if cached_results:
+                        logger.info(f"✅ [NIST RETURNING CACHED RESULTS] Job {job_id}")
+                        return {
+                            "status": "already_completed",
+                            "job_id": job_id,
+                            "final_result": final_result_text,
+                            "tests": cached_results.get("tests", {}),
+                            "message": "Tests were already completed successfully - file was deleted"
+                        }
+                    else:
+                        # Return success even without cached results
+                        logger.info(f"✅ [NIST RETURNING SUCCESS] Job {job_id} - tests completed")
+                        return {
+                            "status": "already_completed",
+                            "job_id": job_id,
+                            "final_result": final_result_text or "completed",
+                            "message": "Tests were already completed successfully - file was deleted"
+                        }
+                
+                # Check if file exists in the directory at all (for debugging)
+                sts_dir = os.path.dirname(uploaded_file_path) if uploaded_file_path else STS_PATH
+                if os.path.exists(sts_dir):
+                    try:
+                        files_in_dir = os.listdir(sts_dir)
+                        logger.error(f"❌ [NIST FILE NOT FOUND AFTER {max_retries} ATTEMPTS] {uploaded_file_path}")
+                        logger.error(f"📁 [NIST DEBUG] Files in {sts_dir}: {files_in_dir[:10]}")  # Show first 10 files
+                        # Check if any file matches the job_id pattern
+                        matching_files = [f for f in files_in_dir if job_id in f]
+                        if matching_files:
+                            logger.error(f"📁 [NIST DEBUG] Found {len(matching_files)} files matching job_id: {matching_files[:5]}")
+                    except Exception as list_error:
+                        logger.error(f"❌ [NIST DEBUG] Failed to list directory: {list_error}")
+                else:
+                    logger.error(f"❌ [NIST DIRECTORY NOT FOUND] {sts_dir}")
+                
+                # Only update to error if tests haven't completed
+                try:
+                    # Check current status before updating - don't overwrite successful results
+                    current_status = supabase.table("results").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                    if current_status.data and len(current_status.data) > 0:
+                        current_progress = current_status.data[0].get('progress', 0)
+                        current_result = current_status.data[0].get('result', '')
+                        # Only update if not already successful
+                        if current_progress != 100 and (not current_result or current_result in ['', 'null']):
+                            supabase.table("results").update({
+                                "progress": 0,
+                                "result": f"Error: File not found after {max_retries} attempts",
+                                "updated_at": datetime.datetime.now().isoformat()
+                            }).eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                        else:
+                            logger.info(f"✅ [NIST SKIPPING ERROR UPDATE] Tests already have result: progress={current_progress}, result={current_result}")
+                except Exception as update_error:
+                    logger.error(f"❌ [NIST ERROR PROGRESS UPDATE FAILED] {update_error}")
+                
+                raise Exception(f"File not found after {max_retries} attempts: {uploaded_file_path}")
+            
+            # Sleep only if not the last attempt
+            if attempt < max_retries - 1:
+                __import__('time').sleep(retry_delay)
+
+        if not file_exists:
+            raise Exception(f"File verification failed unexpectedly: {uploaded_file_path}")
 
         num_bits = os.path.getsize(uploaded_file_path) * 8
         logger.info(f"📊 [FILE INFO] {uploaded_file_path} size_bytes={os.path.getsize(uploaded_file_path)} bits={num_bits}")
@@ -2385,7 +2622,7 @@ def execute_nist_tests(self, job_data):
         # Store the results in cache with debugging
         try:
             cache_key = f"{str(line_number)}_results"
-            logger.error(f"[CACHE WRITE] Attempting to write results for key={cache_key}")
+            logger.info(f"[CACHE WRITE] Attempting to write results for key={cache_key}")
 
             cache_value = {
                 "job_id": job_id,
@@ -2399,16 +2636,16 @@ def execute_nist_tests(self, job_data):
 
             # 1️⃣ Write into cache
             write_ok = cache.set(cache_key, cache_value, timeout=3600)
-            logger.error(f"[CACHE WRITE] cache.set returned: {write_ok}")
+            logger.info(f"[CACHE WRITE] cache.set returned: {write_ok}")
 
             # 2️⃣ Verify from cache
             read_back = cache.get(cache_key)
-            logger.error(f"[CACHE VERIFY] Read-back value for {cache_key}: {read_back}")
+            logger.info(f"[CACHE VERIFY] Read-back value for {cache_key}: {read_back}")
 
             if read_back is None:
                 logger.error(f"[CACHE FAIL] ❌ Cache write failed for key={cache_key}")
             else:
-                logger.error(f"[CACHE SUCCESS] ✅ Results successfully stored for key={cache_key}")
+                logger.info(f"[CACHE SUCCESS] ✅ Results successfully stored for key={cache_key}")
 
         except Exception as cache_error:
             logger.error(f"[CACHE EXCEPTION] ❌ Failed to store results for {cache_key}: {cache_error}")
@@ -2486,6 +2723,24 @@ def run_nist_tests(request):
             for chunk in uploaded_file.chunks():
                 f.write(chunk)
 
+        # ✅ CRITICAL: Clear all old data for this line_number before starting new test
+        # This ensures fresh start for each new upload
+        try:
+            # Clear Supabase row for this line_number
+            supabase.table("results").delete().eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+            logger.info(f"🗑️ [UPLOAD-NIST] Cleared Supabase data for user={user_id} line={line_number}")
+        except Exception as clear_error:
+            logger.warning(f"⚠️ [UPLOAD-NIST] Failed to clear Supabase data: {clear_error}")
+        
+        # Clear all cache entries related to this line_number and job_id
+        try:
+            cache.delete(f"{job_id}_progress")
+            cache.delete(f"{line_number}_results")
+            cache.delete(f"{job_id}_file_path")
+            logger.info(f"🗑️ [UPLOAD-NIST] Cleared cache for job_id={job_id} line={line_number}")
+        except Exception as cache_clear_error:
+            logger.warning(f"⚠️ [UPLOAD-NIST] Failed to clear cache: {cache_clear_error}")
+
         # Prepare job_data
         job_data = {
             'uploaded_file_path': temp_file_path,
@@ -2503,8 +2758,26 @@ def run_nist_tests(request):
         current_time = datetime.datetime.now(kolkata_tz)
         countdown = max(0, int((scheduled_time - current_time).total_seconds()))
 
-        # Set initial progress
-        cache.set(f"{job_id}_progress", 0, timeout=3600)
+        # Initialize progress to 10% to show user that upload was successful and evaluation has started
+        cache.set(f"{job_id}_progress", 10, timeout=3600)
+        
+        # Initialize Supabase row with fresh data - set progress to 10% to indicate upload successful
+        try:
+            current_time_iso = datetime.datetime.now().isoformat()
+            supabase.table("results").upsert({
+                "user_id": int(user_id),
+                "line": int(line_number),
+                "progress": 10,  # Set to 10% immediately to show upload successful
+                "result": "",
+                "file_name": fileName,
+                "scheduled_time": scheduled_time_str,
+                "upload_time": current_time_iso,
+                "updated_at": current_time_iso,
+                "binary_data": " "
+            }, ignore_duplicates=False).execute()
+            logger.info(f"✅ [UPLOAD-NIST] Initialized Supabase row with 10% progress for user={user_id} line={line_number}")
+        except Exception as init_error:
+            logger.warning(f"⚠️ [UPLOAD-NIST] Failed to initialize Supabase row: {init_error}")
 
         # ALWAYS queue a Celery task (task will add to internal queue or run immediately)
         task = execute_nist_tests.apply_async(kwargs={'job_data': job_data}, countdown=countdown, queue='nist_tests')
@@ -3133,14 +3406,69 @@ def execute_nist90b_tests(self, job_data):
     user_id = job_data.get('userId')
     line_number = job_data.get('line_number')
     fileName = job_data.get('fileName')
+    task_deferred = False  # Track if task was deferred to prevent premature file deletion
+    task_succeeded = False  # Track if task completed successfully
 
     logger.info(f"🚀 [90B TASK START] Task {self.request.id} job_id={job_id} user={user_id}")
+
+    # ✅ CRITICAL: Check if tests already completed BEFORE doing anything
+    # This prevents deferred tasks from resetting progress after successful completion
+    try:
+        existing_result = supabase.table("results2").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+        if existing_result.data and len(existing_result.data) > 0:
+            existing_progress = existing_result.data[0].get('progress', 0)
+            existing_result_text = existing_result.data[0].get('result', '')
+            # Only skip if progress is 100% AND has a valid result (not empty/error)
+            # If progress is 0 or result is empty/error, proceed with new test
+            if existing_progress == 100 and existing_result_text and existing_result_text not in ['', 'null', 'Error:', 'Error: File not found', ' ']:
+                logger.info(f"✅ [90B ALREADY COMPLETED AT START] Job {job_id} already completed - progress={existing_progress}, result={existing_result_text}")
+                # Get cached results if available
+                cached_results = cache.get(f"{line_number}_results90b")
+                if cached_results:
+                    return {
+                        "status": "already_completed",
+                        "job_id": job_id,
+                        "final_result": existing_result_text,
+                        "tests": cached_results.get("tests", {}),
+                        "message": "Tests were already completed successfully"
+                    }
+                else:
+                    return {
+                        "status": "already_completed",
+                        "job_id": job_id,
+                        "final_result": existing_result_text or "completed",
+                        "message": "Tests were already completed successfully"
+                    }
+    except Exception as early_check_error:
+        logger.warning(f"⚠️ [90B EARLY COMPLETION CHECK ERROR] {early_check_error}")
+        # Continue if we can't check - don't block execution
 
     try:
         # ✅ IMPROVED Progress helper with better error handling
         def update_progress(step):
             try:
-                progress = round((step / TOTAL_STEPS_90B) * 100)
+                # Calculate progress based on steps, but ensure minimum is 10% if file is uploaded
+                calculated_progress = round((step / TOTAL_STEPS_90B) * 100)
+                # Ensure progress doesn't go below 10% once file is uploaded (to prevent flickering)
+                progress = max(10, calculated_progress)
+                
+                # ✅ CRITICAL: Don't update progress if tests are already at 100%
+                # This prevents overwriting successful completion
+                try:
+                    current_status = supabase.table("results2").select("progress").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                    if current_status.data and len(current_status.data) > 0:
+                        current_progress = current_status.data[0].get('progress', 0)
+                        if current_progress == 100:
+                            logger.info(f"⏭️ [90B SKIP PROGRESS UPDATE] Tests already at 100% - skipping update to {progress}%")
+                            return  # Don't update if already at 100%
+                        # Don't allow progress to go backwards (prevent flickering from 10% to 0% or lower)
+                        if progress < current_progress and current_progress >= 10:
+                            logger.info(f"⏭️ [90B SKIP PROGRESS DECREASE] Current progress {current_progress}% > calculated {progress}% - keeping current")
+                            return
+                except Exception as check_error:
+                    logger.warning(f"⚠️ [90B PROGRESS CHECK ERROR] {check_error}")
+                    # Continue with update if check fails
+                
                 logger.info(f"📈 [90B PROGRESS] job={job_id} step={step}/{TOTAL_STEPS_90B} => {progress}%")
                 
                 # Update cache
@@ -3179,10 +3507,256 @@ def execute_nist90b_tests(self, job_data):
         time_diff = (scheduled_time - current_time).total_seconds()
         logger.info(f"⏰ [90B TIME CHECK] now={current_time.isoformat()} scheduled={scheduled_time.isoformat()} diff={time_diff}s")
 
+        # ✅ CRITICAL: Check if tests have already completed successfully BEFORE checking file
+        # If tests are already done (progress=100), skip file check and return success immediately
+        # This prevents errors when file was deleted after successful completion
+        tests_already_completed = False
+        final_result_text = None
+        
+        # Check cache first (faster and more reliable)
+        cached_results = cache.get(f"{line_number}_results90b")
+        if cached_results:
+            final_result_text = cached_results.get("final_result")
+            if final_result_text and final_result_text not in ['', 'null', 'Error:', 'Error: File not found']:
+                logger.info(f"✅ [90B FOUND IN CACHE] Job {job_id} already completed with result: {final_result_text}")
+                tests_already_completed = True
+        
+        # Also check Supabase if cache doesn't have it
+        if not tests_already_completed:
+            try:
+                existing_result = supabase.table("results2").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                if existing_result.data and len(existing_result.data) > 0:
+                    existing_progress = existing_result.data[0].get('progress', 0)
+                    existing_result_text = existing_result.data[0].get('result', '')
+                    # Check if progress is 100 OR if result exists and is valid (not error)
+                    if (existing_progress == 100) or (existing_result_text and existing_result_text not in ['', 'null', 'Error:', 'Error: File not found']):
+                        logger.info(f"✅ [90B FOUND IN SUPABASE] Job {job_id} already completed - progress={existing_progress}, result={existing_result_text}")
+                        tests_already_completed = True
+                        final_result_text = existing_result_text if existing_result_text else "completed"
+            except Exception as check_error:
+                logger.warning(f"⚠️ [90B COMPLETION CHECK ERROR] Could not check Supabase: {check_error}")
+                # Continue with file check if we can't verify completion
+        
+        # If tests already completed, return success immediately - don't check file
+        if tests_already_completed:
+            logger.info(f"✅ [90B ALREADY COMPLETED] Job {job_id} already completed - skipping file check")
+            if cached_results:
+                return {
+                    "status": "already_completed",
+                    "job_id": job_id,
+                    "final_result": final_result_text,
+                    "tests": cached_results.get("tests", {}),
+                    "message": "Tests were already completed successfully"
+                }
+            else:
+                return {
+                    "status": "already_completed",
+                    "job_id": job_id,
+                    "final_result": final_result_text or "completed",
+                    "message": "Tests were already completed successfully"
+                }
+        
+        # ✅ CRITICAL: Check file existence with retry logic before deferring or proceeding
+        uploaded_file_path = job_data.get('uploaded_file_path')
+        if not uploaded_file_path:
+            logger.error(f"❌ [90B NO FILE PATH] uploaded_file_path is None or empty")
+            raise Exception(f"File path not provided in job_data")
+        
+        # Normalize path to absolute path to avoid path resolution issues
+        uploaded_file_path = os.path.abspath(uploaded_file_path)
+        logger.info(f"🔍 [90B FILE CHECK START] Checking for file: {uploaded_file_path}")
+        
+        # Try to get file path from cache as backup (in case job_data path is wrong)
+        cached_file_path = cache.get(f"{job_id}_file_path_90b")
+        cached_file_size = cache.get(f"{job_id}_file_size_90b")
+        
+        if cached_file_path and cached_file_path != uploaded_file_path:
+            logger.warning(f"⚠️ [90B PATH MISMATCH] job_data path: {uploaded_file_path}, cached path: {cached_file_path}")
+            # Try cached path if job_data path doesn't exist
+            if not os.path.exists(uploaded_file_path) and os.path.exists(cached_file_path):
+                logger.info(f"✅ [90B USING CACHED PATH] Using cached file path: {cached_file_path}")
+                uploaded_file_path = cached_file_path
+        
+        # Retry logic for file existence check (handles race conditions with parallel uploads)
+        max_retries = 5
+        retry_delay = 1.0  # seconds
+        file_exists = False
+        file_size = 0
+        
+        for attempt in range(max_retries):
+            try:
+                if os.path.exists(uploaded_file_path):
+                    # Verify file is not empty and is readable
+                    try:
+                        file_size = os.path.getsize(uploaded_file_path)
+                        if file_size > 0:
+                            # Additional check: Try to read from file
+                            try:
+                                with open(uploaded_file_path, "rb") as test_file:
+                                    test_file.read(1)  # Read first byte
+                                
+                                # Verify size matches cached size if available
+                                if cached_file_size and file_size != cached_file_size:
+                                    logger.warning(f"⚠️ [90B SIZE MISMATCH] cached={cached_file_size}, actual={file_size}")
+                                
+                                file_exists = True
+                                logger.info(f"✅ [90B FILE VERIFIED] {uploaded_file_path} exists size={file_size} bytes (attempt {attempt + 1}/{max_retries})")
+                                break  # File found, exit loop immediately
+                            except (IOError, OSError) as read_error:
+                                logger.warning(f"⚠️ [90B FILE NOT READABLE] {uploaded_file_path} error={read_error} (attempt {attempt + 1}/{max_retries})")
+                        else:
+                            logger.warning(f"⚠️ [90B FILE EMPTY] {uploaded_file_path} exists but is empty (attempt {attempt + 1}/{max_retries})")
+                    except OSError as e:
+                        logger.warning(f"⚠️ [90B FILE CHECK ERROR] {uploaded_file_path} error={e} (attempt {attempt + 1}/{max_retries})")
+                else:
+                    logger.warning(f"⚠️ [90B FILE NOT FOUND] {uploaded_file_path} (attempt {attempt + 1}/{max_retries})")
+            except Exception as check_error:
+                logger.warning(f"⚠️ [90B FILE CHECK EXCEPTION] {uploaded_file_path} error={check_error} (attempt {attempt + 1}/{max_retries})")
+            
+            # If this is the last attempt, stop immediately without sleeping
+            if attempt == max_retries - 1:
+                # Last attempt failed, stop polling immediately
+                logger.error(f"❌ [90B FILE CHECK STOPPED] Stopped polling after {max_retries} attempts - file not found")
+                
+                # ✅ CRITICAL: Before raising error, check if tests already completed successfully
+                # This handles the case where file was deleted after successful completion
+                tests_already_completed = False
+                final_result_text = None
+                
+                # Check cache first (faster)
+                cached_results = cache.get(f"{line_number}_results90b")
+                if cached_results:
+                    final_result_text = cached_results.get("final_result")
+                    if final_result_text:
+                        logger.info(f"✅ [90B FOUND IN CACHE] Job {job_id} already completed with result: {final_result_text}")
+                        tests_already_completed = True
+                
+                # Also check Supabase if cache doesn't have it
+                if not tests_already_completed:
+                    try:
+                        existing_result = supabase.table("results2").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                        if existing_result.data and len(existing_result.data) > 0:
+                            existing_progress = existing_result.data[0].get('progress', 0)
+                            existing_result_text = existing_result.data[0].get('result', '')
+                            # Check if progress is 100 OR if result exists (tests completed)
+                            if (existing_progress == 100) or (existing_result_text and existing_result_text not in ['', 'null', 'Error:', 'Error: File not found']):
+                                logger.info(f"✅ [90B FOUND IN SUPABASE] Job {job_id} already completed - progress={existing_progress}, result={existing_result_text}")
+                                tests_already_completed = True
+                                final_result_text = existing_result_text if existing_result_text else "completed"
+                    except Exception as completion_check_error:
+                        logger.warning(f"⚠️ [90B COMPLETION CHECK ERROR] Could not check Supabase: {completion_check_error}")
+                
+                # If tests already completed, return success instead of error
+                if tests_already_completed:
+                    logger.info(f"✅ [90B ALREADY COMPLETED] Job {job_id} already completed with result: {final_result_text} - file was deleted after completion")
+                    if cached_results:
+                        logger.info(f"✅ [90B RETURNING CACHED RESULTS] Job {job_id}")
+                        return {
+                            "status": "already_completed",
+                            "job_id": job_id,
+                            "final_result": final_result_text,
+                            "tests": cached_results.get("tests", {}),
+                            "message": "Tests were already completed successfully - file was deleted"
+                        }
+                    else:
+                        # Return success even without cached results
+                        logger.info(f"✅ [90B RETURNING SUCCESS] Job {job_id} - tests completed")
+                        return {
+                            "status": "already_completed",
+                            "job_id": job_id,
+                            "final_result": final_result_text or "completed",
+                            "message": "Tests were already completed successfully - file was deleted"
+                        }
+                
+                # Check if file exists in the directory at all (for debugging)
+                cpp_dir = os.path.dirname(uploaded_file_path) if uploaded_file_path else CPP_FOLDER
+                if os.path.exists(cpp_dir):
+                    try:
+                        files_in_dir = os.listdir(cpp_dir)
+                        logger.error(f"❌ [90B FILE NOT FOUND AFTER {max_retries} ATTEMPTS] {uploaded_file_path}")
+                        logger.error(f"📁 [90B DEBUG] Files in {cpp_dir}: {files_in_dir[:10]}")  # Show first 10 files
+                        # Check if any file matches the job_id pattern
+                        matching_files = [f for f in files_in_dir if job_id in f]
+                        if matching_files:
+                            logger.error(f"📁 [90B DEBUG] Found {len(matching_files)} files matching job_id: {matching_files[:5]}")
+                    except Exception as list_error:
+                        logger.error(f"❌ [90B DEBUG] Failed to list directory: {list_error}")
+                else:
+                    logger.error(f"❌ [90B DIRECTORY NOT FOUND] {cpp_dir}")
+                
+                # ✅ FINAL CHECK: Before updating to error, verify tests haven't completed
+                # This prevents overwriting successful results with errors
+                final_check_completed = False
+                try:
+                    final_check_result = supabase.table("results2").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                    if final_check_result.data and len(final_check_result.data) > 0:
+                        final_check_progress = final_check_result.data[0].get('progress', 0)
+                        final_check_result_text = final_check_result.data[0].get('result', '')
+                        if (final_check_progress == 100) or (final_check_result_text and final_check_result_text not in ['', 'null', 'Error:', 'Error: File not found']):
+                            logger.info(f"✅ [90B FINAL CHECK] Tests already completed - progress={final_check_progress}, result={final_check_result_text}")
+                            final_check_completed = True
+                            # Get cached results
+                            final_cached_results = cache.get(f"{line_number}_results90b")
+                            if final_cached_results:
+                                return {
+                                    "status": "already_completed",
+                                    "job_id": job_id,
+                                    "final_result": final_check_result_text,
+                                    "tests": final_cached_results.get("tests", {}),
+                                    "message": "Tests were already completed successfully"
+                                }
+                            else:
+                                return {
+                                    "status": "already_completed",
+                                    "job_id": job_id,
+                                    "final_result": final_check_result_text or "completed",
+                                    "message": "Tests were already completed successfully"
+                                }
+                except Exception as final_check_error:
+                    logger.warning(f"⚠️ [90B FINAL CHECK ERROR] {final_check_error}")
+                
+                # Only update to error if tests haven't completed
+                if not final_check_completed:
+                    try:
+                        # Check current status before updating - don't overwrite successful results
+                        current_status = supabase.table("results2").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                        if current_status.data and len(current_status.data) > 0:
+                            current_progress = current_status.data[0].get('progress', 0)
+                            current_result = current_status.data[0].get('result', '')
+                            # Only update if not already successful
+                            if current_progress != 100 and (not current_result or current_result in ['', 'null']):
+                                supabase.table("results2").update({
+                                    "progress": 0,
+                                    "result": f"Error: File not found after {max_retries} attempts",
+                                    "updated_at": datetime.datetime.now().isoformat()
+                                }).eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                            else:
+                                logger.info(f"✅ [90B SKIPPING ERROR UPDATE] Tests already have result: progress={current_progress}, result={current_result}")
+                    except Exception as update_error:
+                        logger.error(f"❌ [90B ERROR PROGRESS UPDATE FAILED] {update_error}")
+                
+                # Stop immediately - raise exception without any further checks or retries
+                # This exception will stop the task completely
+                # DO NOT set failure flag in cache - let new uploads work normally
+                raise Exception(f"File not found after {max_retries} attempts: {uploaded_file_path}")
+            
+            # Sleep only if not the last attempt
+            __import__('time').sleep(retry_delay)
+        
+        # If we reach here, file was found (file_exists should be True)
+        if not file_exists:
+            # This should not happen, but as a safety check
+            raise Exception(f"File verification failed unexpectedly: {uploaded_file_path}")
+        
+        # Final verification: File must exist and be readable before proceeding
+        if not os.path.exists(uploaded_file_path) or file_size == 0:
+            raise Exception(f"File verification failed: {uploaded_file_path} exists={os.path.exists(uploaded_file_path)} size={file_size}")
+
         if time_diff > 0:
             logger.info(f"⏳ [90B DEFER] Job {job_id} scheduled for future. Scheduling new Celery task after {time_diff}s")
             update_progress(2)
             NIST90BTaskLock.release_90b_lock(user_id)  # Release only when deferring
+            task_deferred = True  # Mark as deferred to prevent file deletion
 
             # Schedule the same task to run after the required delay
             execute_nist90b_tests.apply_async(
@@ -3196,12 +3770,6 @@ def execute_nist90b_tests(self, job_data):
 
         # ✅ Only proceed with test execution if time_diff <= 0
         update_progress(2)
-
-        # File checks
-        uploaded_file_path = job_data.get('uploaded_file_path')
-        if not uploaded_file_path or not os.path.exists(uploaded_file_path):
-            logger.error(f"❌ [90B FILE NOT FOUND] {uploaded_file_path}")
-            raise Exception(f"File not found: {uploaded_file_path}")
 
         file_size_bytes = os.path.getsize(uploaded_file_path)
         file_size_bits = file_size_bytes * 8
@@ -3227,7 +3795,7 @@ def execute_nist90b_tests(self, job_data):
         combined_output = ""
 
         # ✅ IMPROVED: Add small delays between progress updates to avoid rate limiting
-        import time
+        # Note: time is already imported at module level, no need to import here
         
         # Run each test
         for test_name, test_info in tests_executables.items():
@@ -3238,7 +3806,7 @@ def execute_nist90b_tests(self, job_data):
                 results[test_name] = {"min_entropy": 0.0, "result": "executable missing"}
                 step_counter += 1
                 update_progress(step_counter)
-                time.sleep(0.1)  # Small delay to avoid rapid updates
+                __import__('time').sleep(0.1)  # Small delay to avoid rapid updates
                 continue
 
             try:
@@ -3279,7 +3847,7 @@ def execute_nist90b_tests(self, job_data):
             results[test_name] = {"min_entropy": min_entropy, "result": verdict}
             step_counter += 1
             update_progress(step_counter)
-            time.sleep(0.1)  # Small delay to avoid rapid updates
+            __import__('time').sleep(0.1)  # Small delay to avoid rapid updates
 
         # Store combined output in cache
         cache.set(f"{line_number}_download90b", combined_output, timeout=3600)
@@ -3330,6 +3898,7 @@ def execute_nist90b_tests(self, job_data):
         except Exception as e:
             logger.error(f"❌ [90B SUPABASE WARN] could not upsert final result: {e}")
 
+        task_succeeded = True  # Mark task as successful before returning
         logger.info(f"✅ [90B TASK SUCCESS] job={job_id}")
         return {
             "status": "completed", 
@@ -3357,17 +3926,37 @@ def execute_nist90b_tests(self, job_data):
     finally:
         # Always clean up - release lock and remove temp files
         try:
-            NIST90BTaskLock.release_90b_lock(user_id)
-            logger.info(f"🔓 [90B LOCK RELEASED] user={user_id}")
+            # Only release lock if it wasn't already released (i.e., task wasn't deferred)
+            if not task_deferred:
+                NIST90BTaskLock.release_90b_lock(user_id)
+                logger.info(f"🔓 [90B LOCK RELEASED] user={user_id}")
         except Exception as e:
             logger.warning(f"⚠️ [90B LOCK RELEASE ERROR] {e}")
 
-        if uploaded_file_path and os.path.exists(uploaded_file_path):
-            try:
-                os.remove(uploaded_file_path)
-                logger.info(f"🗑️ [90B FILE REMOVED] {uploaded_file_path}")
-            except Exception as e:
-                logger.warning(f"⚠️ [90B CLEANUP ERROR] {e}")
+        # ✅ CRITICAL: Only delete file if task actually executed successfully, not if it was deferred or failed
+        # Deferred tasks need the file to still exist when they run later
+        # Failed tasks should preserve files for debugging and potential retry
+        if task_deferred:
+            logger.info(f"📌 [90B FILE PRESERVED] {uploaded_file_path} preserved for deferred execution")
+        elif not task_deferred and uploaded_file_path:
+            # Only delete if task completed successfully
+            if task_succeeded and os.path.exists(uploaded_file_path):
+                try:
+                    # Verify file is not being used before deletion
+                    file_size_check = os.path.getsize(uploaded_file_path)
+                    os.remove(uploaded_file_path)
+                    logger.info(f"🗑️ [90B FILE REMOVED] {uploaded_file_path} (size was {file_size_check} bytes)")
+                    # Clear cache entries
+                    cache.delete(f"{job_id}_file_path_90b")
+                    cache.delete(f"{job_id}_file_size_90b")
+                except Exception as e:
+                    logger.warning(f"⚠️ [90B CLEANUP ERROR] {e}")
+            else:
+                # Task failed or file doesn't exist - preserve for debugging
+                if os.path.exists(uploaded_file_path):
+                    logger.info(f"📌 [90B FILE PRESERVED] {uploaded_file_path} preserved (task_succeeded={task_succeeded})")
+                else:
+                    logger.warning(f"⚠️ [90B FILE ALREADY GONE] {uploaded_file_path} was already deleted")
                 
 # @csrf_exempt
 # def run_nist90b_on_bin(request):
@@ -3567,15 +4156,108 @@ def run_nist90b_on_bin(request):
         fileName = uploaded_file.name
 
         # ====== STREAM DIRECTLY TO DISK (NO MEMORY USED) ======
-        os.makedirs(CPP_FOLDER, exist_ok=True)
-        temp_file_path = os.path.join(CPP_FOLDER, f"{job_id}_{fileName}")
+        # Ensure directory exists and is writable
+        try:
+            os.makedirs(CPP_FOLDER, exist_ok=True)
+            if not os.access(CPP_FOLDER, os.W_OK):
+                raise Exception(f"Directory is not writable: {CPP_FOLDER}")
+        except OSError as e:
+            logger.error(f"❌ [UPLOAD-90B] Failed to create/access directory {CPP_FOLDER}: {e}")
+            raise Exception(f"Failed to create directory: {CPP_FOLDER} - {e}")
+        
+        # Create absolute path to avoid any path resolution issues
+        temp_file_path = os.path.abspath(os.path.join(CPP_FOLDER, f"{job_id}_{fileName}"))
+        logger.info(f"📝 [UPLOAD-90B] Starting file upload: {temp_file_path}")
 
-        with open(temp_file_path, "wb") as dest:
-            for i, chunk in enumerate(uploaded_file.chunks(chunk_size=5 * 1024 * 1024)):
-                dest.write(chunk)
-                logger.warning(f"[UPLOAD-90B] wrote chunk #{i} size={len(chunk)} bytes")
-
-        logger.warning(f"[UPLOAD-90B COMPLETE] File saved to {temp_file_path}")
+        # Write file with comprehensive error handling
+        bytes_written = 0
+        try:
+            with open(temp_file_path, "wb") as dest:
+                for i, chunk in enumerate(uploaded_file.chunks(chunk_size=5 * 1024 * 1024)):
+                    try:
+                        dest.write(chunk)
+                        bytes_written += len(chunk)
+                        logger.info(f"[UPLOAD-90B] wrote chunk #{i} size={len(chunk)} bytes (total: {bytes_written})")
+                    except (IOError, OSError) as chunk_error:
+                        logger.error(f"❌ [UPLOAD-90B] Error writing chunk #{i}: {chunk_error}")
+                        # Clean up partial file
+                        try:
+                            dest.close()
+                            if os.path.exists(temp_file_path):
+                                os.remove(temp_file_path)
+                        except:
+                            pass
+                        raise Exception(f"Failed to write chunk #{i} to {temp_file_path}: {chunk_error}")
+                
+                # ✅ CRITICAL: Ensure file is fully written and flushed to disk before closing
+                try:
+                    dest.flush()
+                    os.fsync(dest.fileno())
+                    logger.info(f"✅ [UPLOAD-90B] File flushed and synced: {bytes_written} bytes")
+                except (IOError, OSError) as sync_error:
+                    logger.error(f"❌ [UPLOAD-90B] Error syncing file: {sync_error}")
+                    raise Exception(f"Failed to sync file {temp_file_path}: {sync_error}")
+                    
+        except (IOError, OSError) as write_error:
+            # Clean up partial file if it exists
+            if os.path.exists(temp_file_path):
+                try:
+                    os.remove(temp_file_path)
+                    logger.info(f"🗑️ [UPLOAD-90B] Removed partial file: {temp_file_path}")
+                except Exception as cleanup_error:
+                    logger.warning(f"⚠️ [UPLOAD-90B] Failed to cleanup partial file: {cleanup_error}")
+            
+            error_msg = f"Failed to write file {temp_file_path}: {write_error}"
+            logger.error(f"❌ [UPLOAD-90B] {error_msg}")
+            raise Exception(error_msg)
+        except Exception as unexpected_error:
+            # Clean up on any unexpected error
+            if os.path.exists(temp_file_path):
+                try:
+                    os.remove(temp_file_path)
+                except:
+                    pass
+            logger.error(f"❌ [UPLOAD-90B] Unexpected error during file write: {unexpected_error}")
+            raise Exception(f"Unexpected error writing file {temp_file_path}: {unexpected_error}")
+        
+        # ✅ MULTIPLE VERIFICATION STEPS: Verify file exists, is readable, and has content
+        verification_passed = False
+        file_size = 0
+        
+        # First check: File exists
+        if not os.path.exists(temp_file_path):
+            raise Exception(f"File was not created: {temp_file_path}")
+        
+        # Second check: File is readable and has size
+        try:
+            file_size = os.path.getsize(temp_file_path)
+            if file_size == 0:
+                raise Exception(f"File is empty: {temp_file_path}")
+            if file_size != bytes_written:
+                logger.warning(f"⚠️ [UPLOAD-90B] Size mismatch: written={bytes_written}, file={file_size}")
+        except OSError as e:
+            raise Exception(f"Failed to get file size for {temp_file_path}: {e}")
+        
+        # Third check: File is readable
+        try:
+            with open(temp_file_path, "rb") as test_read:
+                test_read.read(1)  # Read first byte to verify file is readable
+            verification_passed = True
+        except (IOError, OSError) as read_error:
+            raise Exception(f"File is not readable: {temp_file_path} - {read_error}")
+        
+        if not verification_passed:
+            raise Exception(f"File verification failed: {temp_file_path}")
+        
+        # Store file metadata in cache to verify later
+        cache.set(f"{job_id}_file_path_90b", temp_file_path, timeout=7200)  # 2 hours
+        cache.set(f"{job_id}_file_size_90b", file_size, timeout=7200)
+        
+        # Clear any previous failure flags since we have a new successful upload
+        cache.delete(f"{job_id}_90b_failed")
+        cache.delete(f"{job_id}_90b_failure_reason")
+        
+        logger.info(f"✅ [UPLOAD-90B COMPLETE] File saved and verified: {temp_file_path} size={file_size} bytes")
 
         # Build job data
         job_data = {
@@ -3587,8 +4269,48 @@ def run_nist90b_on_bin(request):
             "fileName": fileName,
         }
 
-        # Initialize progress
-        cache.set(f"{job_id}_progress_90b", 0, timeout=3600)
+        # ✅ CRITICAL: Clear all old data for this line_number before starting new test
+        # This ensures fresh start for each new upload
+        try:
+            # Clear Supabase row for this line_number
+            supabase.table("results2").delete().eq("user_id", int(userId)).eq("line", int(line_number)).execute()
+            logger.info(f"🗑️ [UPLOAD-90B] Cleared Supabase data for user={userId} line={line_number}")
+        except Exception as clear_error:
+            logger.warning(f"⚠️ [UPLOAD-90B] Failed to clear Supabase data: {clear_error}")
+        
+        # Clear all cache entries related to this line_number and job_id
+        try:
+            cache.delete(f"{job_id}_progress_90b")
+            cache.delete(f"{line_number}_results90b")
+            cache.delete(f"{line_number}_download90b")
+            cache.delete(f"{job_id}_file_path_90b")
+            cache.delete(f"{job_id}_file_size_90b")
+            cache.delete(f"{job_id}_90b_failed")
+            cache.delete(f"{job_id}_90b_failure_reason")
+            logger.info(f"🗑️ [UPLOAD-90B] Cleared cache for job_id={job_id} line={line_number}")
+        except Exception as cache_clear_error:
+            logger.warning(f"⚠️ [UPLOAD-90B] Failed to clear cache: {cache_clear_error}")
+
+        # Initialize progress to 10% to show user that upload was successful and evaluation has started
+        cache.set(f"{job_id}_progress_90b", 10, timeout=3600)
+        
+        # Initialize Supabase row with fresh data - set progress to 10% to indicate upload successful
+        try:
+            current_time = datetime.datetime.now().isoformat()
+            supabase.table("results2").upsert({
+                "user_id": int(userId),
+                "line": int(line_number),
+                "progress": 10,  # Set to 10% immediately to show upload successful
+                "result": "",
+                "file_name": fileName,
+                "scheduled_time": scheduled_time_str,
+                "upload_time": current_time,
+                "updated_at": current_time,
+                "binary_data": " "
+            }, ignore_duplicates=False).execute()
+            logger.info(f"✅ [UPLOAD-90B] Initialized Supabase row with 10% progress for user={userId} line={line_number}")
+        except Exception as init_error:
+            logger.warning(f"⚠️ [UPLOAD-90B] Failed to initialize Supabase row: {init_error}")
 
         # Scheduled execution
         kolkata_tz = pytz.timezone("Asia/Kolkata")
@@ -3847,24 +4569,92 @@ def execute_dieharder_tests(self, job_data):
     user_id = job_data.get('userId')
     line_number = job_data.get('line_number')
     fileName = job_data.get('fileName')
+    task_deferred = False  # Track if task was deferred to prevent premature file deletion
+    task_succeeded = False  # Track if task completed successfully
 
     logger.info(f"🚀 [DIEHARDER TASK START] Task {self.request.id} job_id={job_id} user={user_id}")
+
+    # ✅ CRITICAL: Check if tests already completed BEFORE doing anything
+    # This prevents deferred tasks from resetting progress after successful completion
+    try:
+        existing_result = supabase.table("results3").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+        if existing_result.data and len(existing_result.data) > 0:
+            existing_progress = existing_result.data[0].get('progress', 0)
+            existing_result_text = existing_result.data[0].get('result', '')
+            # Only skip if progress is 100% AND has a valid result (not empty/error)
+            # If progress is 0 or result is empty/error, proceed with new test
+            if existing_progress == 100 and existing_result_text and existing_result_text not in ['', 'null', 'Error:', 'Error: File not found', ' ']:
+                logger.info(f"✅ [DIEHARDER ALREADY COMPLETED AT START] Job {job_id} already completed - progress={existing_progress}, result={existing_result_text}")
+                # Get cached results if available
+                cached_results = cache.get(f"{line_number}_results_dieharder")
+                if cached_results:
+                    return {
+                        "status": "already_completed",
+                        "job_id": job_id,
+                        "final_result": existing_result_text,
+                        "tests": cached_results.get("tests", {}),
+                        "message": "Tests were already completed successfully"
+                    }
+                else:
+                    return {
+                        "status": "already_completed",
+                        "job_id": job_id,
+                        "final_result": existing_result_text or "completed",
+                        "message": "Tests were already completed successfully"
+                    }
+            else:
+                logger.info(f"ℹ️ [DIEHARDER PROCEEDING] Job {job_id} - progress={existing_progress}, result='{existing_result_text}' - proceeding with test")
+    except Exception as early_check_error:
+        logger.warning(f"⚠️ [DIEHARDER EARLY COMPLETION CHECK ERROR] {early_check_error}")
+        # Continue if we can't check - don't block execution
 
     try:
         # Progress helper
         def update_progress(step):
             try:
-                progress = round((step / TOTAL_STEPS_DIEHARDER) * 100)
+                # Calculate progress based on steps, but ensure minimum is 10% if file is uploaded
+                calculated_progress = round((step / TOTAL_STEPS_DIEHARDER) * 100)
+                # Ensure progress doesn't go below 10% once file is uploaded (to prevent flickering)
+                progress = max(10, calculated_progress)
+                
+                # ✅ CRITICAL: Don't update progress if tests are already at 100%
+                # This prevents overwriting successful completion
+                try:
+                    current_status = supabase.table("results3").select("progress").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                    if current_status.data and len(current_status.data) > 0:
+                        current_progress = current_status.data[0].get('progress', 0)
+                        if current_progress == 100:
+                            logger.info(f"⏭️ [DIEHARDER SKIP PROGRESS UPDATE] Tests already at 100% - skipping update to {progress}%")
+                            return  # Don't update if already at 100%
+                        # Don't allow progress to go backwards (prevent flickering from 10% to 0% or lower)
+                        if progress < current_progress and current_progress >= 10:
+                            logger.info(f"⏭️ [DIEHARDER SKIP PROGRESS DECREASE] Current progress {current_progress}% > calculated {progress}% - keeping current")
+                            return
+                except Exception as check_error:
+                    logger.warning(f"⚠️ [DIEHARDER PROGRESS CHECK ERROR] {check_error}")
+                    # Continue with update if check fails
+                
                 logger.info(
                     f"📈 [DIEHARDER PROGRESS] job={job_id} "
                     f"step={step}/{TOTAL_STEPS_DIEHARDER} => {progress}%"
                 )
                 cache.set(f"{job_id}_progress_dieharder", progress, timeout=3600)
-                # Update Supabase progress
-                supabase.table("results3").update({"progress": progress}) \
-                    .eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                
+                # ✅ IMPROVED: Update Supabase progress with better error handling
+                response = supabase.table("results3").update({
+                    "progress": progress,
+                    "updated_at": datetime.datetime.now().isoformat()
+                }).eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                
+                # ✅ Check if update was successful
+                if hasattr(response, 'error') and response.error:
+                    logger.error(f"❌ [DIEHARDER SUPABASE PROGRESS ERROR] Failed to update progress: {response.error}")
+                else:
+                    logger.info(f"✅ [DIEHARDER SUPABASE PROGRESS] Successfully updated to {progress}%")
+                    
             except Exception as e:
-                logger.warning(f"[DIEHARDER PROGRESS WARN] could not update progress: {e}")
+                logger.error(f"❌ [DIEHARDER PROGRESS ERROR] step={step}: {e}")
+                # Don't raise exception here, just log it
 
         update_progress(1)
 
@@ -3895,6 +4685,55 @@ def execute_dieharder_tests(self, job_data):
             f"diff={time_diff}s"
         )
 
+        # ✅ CRITICAL: Check if tests have already completed successfully BEFORE checking file
+        # If tests are already done (progress=100), skip file check and return success immediately
+        # This prevents errors when file was deleted after successful completion
+        tests_already_completed = False
+        final_result_text = None
+        
+        # Check cache first (faster and more reliable)
+        cached_results = cache.get(f"{line_number}_results_dieharder")
+        if cached_results:
+            final_result_text = cached_results.get("final_result")
+            if final_result_text and final_result_text not in ['', 'null', 'Error:', 'Error: File not found']:
+                logger.info(f"✅ [DIEHARDER FOUND IN CACHE] Job {job_id} already completed with result: {final_result_text}")
+                tests_already_completed = True
+        
+        # Also check Supabase if cache doesn't have it
+        if not tests_already_completed:
+            try:
+                existing_result = supabase.table("results3").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                if existing_result.data and len(existing_result.data) > 0:
+                    existing_progress = existing_result.data[0].get('progress', 0)
+                    existing_result_text = existing_result.data[0].get('result', '')
+                    # Check if progress is 100 OR if result exists and is valid (not error)
+                    if (existing_progress == 100) or (existing_result_text and existing_result_text not in ['', 'null', 'Error:', 'Error: File not found']):
+                        logger.info(f"✅ [DIEHARDER FOUND IN SUPABASE] Job {job_id} already completed - progress={existing_progress}, result={existing_result_text}")
+                        tests_already_completed = True
+                        final_result_text = existing_result_text if existing_result_text else "completed"
+            except Exception as check_error:
+                logger.warning(f"⚠️ [DIEHARDER COMPLETION CHECK ERROR] Could not check Supabase: {check_error}")
+                # Continue with file check if we can't verify completion
+        
+        # If tests already completed, return success immediately - don't check file
+        if tests_already_completed:
+            logger.info(f"✅ [DIEHARDER ALREADY COMPLETED] Job {job_id} already completed - skipping file check")
+            if cached_results:
+                return {
+                    "status": "already_completed",
+                    "job_id": job_id,
+                    "final_result": final_result_text,
+                    "tests": cached_results.get("tests", {}),
+                    "message": "Tests were already completed successfully"
+                }
+            else:
+                return {
+                    "status": "already_completed",
+                    "job_id": job_id,
+                    "final_result": final_result_text or "completed",
+                    "message": "Tests were already completed successfully"
+                }
+        
         if time_diff > 0:
             logger.info(
                 f"⏳ [DIEHARDER DEFER] Job {job_id} scheduled for future. "
@@ -3902,6 +4741,7 @@ def execute_dieharder_tests(self, job_data):
             )
             update_progress(2)
             DieharderTaskLock.release_dieharder_lock(user_id)  # Release only when deferring
+            task_deferred = True  # Mark as deferred to prevent file deletion
 
             # Schedule the same task to run after the required delay
             execute_dieharder_tests.apply_async(
@@ -3921,12 +4761,135 @@ def execute_dieharder_tests(self, job_data):
         # ---------------------------
         uploaded_file_path = job_data.get("uploaded_file_path")
         if not uploaded_file_path:
-            logger.error("❌ [DIEHARDER FILE ERROR] No uploaded_file_path in job_data")
-            raise Exception("No uploaded_file_path provided for Dieharder job")
-
-        if not os.path.exists(uploaded_file_path):
-            logger.error(f"❌ [DIEHARDER FILE NOT FOUND] {uploaded_file_path}")
-            raise Exception(f"File not found: {uploaded_file_path}")
+            logger.error("❌ [DIEHARDER NO FILE PATH] uploaded_file_path is None or empty")
+            raise Exception("File path not provided in job_data")
+        
+        # Normalize path to absolute path to avoid path resolution issues
+        uploaded_file_path = os.path.abspath(uploaded_file_path)
+        logger.info(f"🔍 [DIEHARDER FILE CHECK START] Checking for file: {uploaded_file_path}")
+        
+        # Retry logic for file existence check (handles race conditions with parallel uploads)
+        max_retries = 5
+        retry_delay = 1.0  # seconds
+        file_exists = False
+        file_size_bytes = 0
+        
+        for attempt in range(max_retries):
+            try:
+                if os.path.exists(uploaded_file_path):
+                    # Verify file is not empty and is readable
+                    try:
+                        file_size_bytes = os.path.getsize(uploaded_file_path)
+                        if file_size_bytes > 0:
+                            # Additional check: Try to read from file
+                            try:
+                                with open(uploaded_file_path, "rb") as test_file:
+                                    test_file.read(1)  # Read first byte
+                                
+                                # Verify it's a regular file
+                                if os.path.isfile(uploaded_file_path):
+                                    file_exists = True
+                                    logger.info(f"✅ [DIEHARDER FILE VERIFIED] {uploaded_file_path} exists size={file_size_bytes} bytes (attempt {attempt + 1}/{max_retries})")
+                                    break  # File found, exit loop immediately
+                                else:
+                                    logger.warning(f"⚠️ [DIEHARDER NOT REGULAR FILE] {uploaded_file_path} (attempt {attempt + 1}/{max_retries})")
+                            except (IOError, OSError) as read_error:
+                                logger.warning(f"⚠️ [DIEHARDER FILE NOT READABLE] {uploaded_file_path} error={read_error} (attempt {attempt + 1}/{max_retries})")
+                        else:
+                            logger.warning(f"⚠️ [DIEHARDER FILE EMPTY] {uploaded_file_path} exists but is empty (attempt {attempt + 1}/{max_retries})")
+                    except OSError as e:
+                        logger.warning(f"⚠️ [DIEHARDER FILE CHECK ERROR] {uploaded_file_path} error={e} (attempt {attempt + 1}/{max_retries})")
+                else:
+                    logger.warning(f"⚠️ [DIEHARDER FILE NOT FOUND] {uploaded_file_path} (attempt {attempt + 1}/{max_retries})")
+            except Exception as check_error:
+                logger.warning(f"⚠️ [DIEHARDER FILE CHECK EXCEPTION] {uploaded_file_path} error={check_error} (attempt {attempt + 1}/{max_retries})")
+            
+            # If this is the last attempt, stop immediately without sleeping
+            if attempt == max_retries - 1:
+                # Last attempt failed, stop polling immediately
+                logger.error(f"❌ [DIEHARDER FILE CHECK STOPPED] Stopped polling after {max_retries} attempts - file not found")
+                
+                # ✅ CRITICAL: Before raising error, check if tests already completed successfully
+                # This handles the case where file was deleted after successful completion
+                tests_already_completed = False
+                final_result_text = None
+                
+                # Check cache first (faster)
+                cached_results = cache.get(f"{line_number}_results_dieharder")
+                if cached_results:
+                    final_result_text = cached_results.get("final_result")
+                    if final_result_text:
+                        logger.info(f"✅ [DIEHARDER FOUND IN CACHE] Job {job_id} already completed with result: {final_result_text}")
+                        tests_already_completed = True
+                
+                # Also check Supabase if cache doesn't have it
+                if not tests_already_completed:
+                    try:
+                        existing_result = supabase.table("results3").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                        if existing_result.data and len(existing_result.data) > 0:
+                            existing_progress = existing_result.data[0].get('progress', 0)
+                            existing_result_text = existing_result.data[0].get('result', '')
+                            # Check if progress is 100 OR if result exists (tests completed)
+                            if (existing_progress == 100) or (existing_result_text and existing_result_text not in ['', 'null', 'Error:', 'Error: File not found']):
+                                logger.info(f"✅ [DIEHARDER FOUND IN SUPABASE] Job {job_id} already completed - progress={existing_progress}, result={existing_result_text}")
+                                tests_already_completed = True
+                                final_result_text = existing_result_text if existing_result_text else "completed"
+                    except Exception as completion_check_error:
+                        logger.warning(f"⚠️ [DIEHARDER COMPLETION CHECK ERROR] Could not check Supabase: {completion_check_error}")
+                
+                # If tests already completed, return success instead of error
+                if tests_already_completed:
+                    logger.info(f"✅ [DIEHARDER ALREADY COMPLETED] Job {job_id} already completed with result: {final_result_text} - file was deleted after completion")
+                    if cached_results:
+                        logger.info(f"✅ [DIEHARDER RETURNING CACHED RESULTS] Job {job_id}")
+                        return {
+                            "status": "already_completed",
+                            "job_id": job_id,
+                            "final_result": final_result_text,
+                            "tests": cached_results.get("tests", {}),
+                            "message": "Tests were already completed successfully - file was deleted"
+                        }
+                    else:
+                        # Return success even without cached results
+                        logger.info(f"✅ [DIEHARDER RETURNING SUCCESS] Job {job_id} - tests completed")
+                        return {
+                            "status": "already_completed",
+                            "job_id": job_id,
+                            "final_result": final_result_text or "completed",
+                            "message": "Tests were already completed successfully - file was deleted"
+                        }
+                
+                # Only update to error if tests haven't completed
+                try:
+                    # Check current status before updating - don't overwrite successful results
+                    current_status = supabase.table("results3").select("progress, result").eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                    if current_status.data and len(current_status.data) > 0:
+                        current_progress = current_status.data[0].get('progress', 0)
+                        current_result = current_status.data[0].get('result', '')
+                        # Only update if not already successful
+                        if current_progress != 100 and (not current_result or current_result in ['', 'null']):
+                            supabase.table("results3").update({
+                                "progress": 0,
+                                "result": f"Error: File not found after {max_retries} attempts",
+                                "updated_at": datetime.datetime.now().isoformat()
+                            }).eq("user_id", int(user_id)).eq("line", int(line_number)).execute()
+                        else:
+                            logger.info(f"✅ [DIEHARDER SKIPPING ERROR UPDATE] Tests already have result: progress={current_progress}, result={current_result}")
+                except Exception as update_error:
+                    logger.error(f"❌ [DIEHARDER ERROR PROGRESS UPDATE FAILED] {update_error}")
+                
+                raise Exception(f"File not found after {max_retries} attempts: {uploaded_file_path}")
+            
+            # Sleep only if not the last attempt
+            if attempt < max_retries - 1:
+                __import__('time').sleep(retry_delay)
+        
+        if not file_exists:
+            raise Exception(f"File verification failed unexpectedly: {uploaded_file_path}")
+        
+        # Final verification: File must exist and be readable before proceeding
+        if not os.path.exists(uploaded_file_path) or file_size_bytes == 0:
+            raise Exception(f"File verification failed: {uploaded_file_path} exists={os.path.exists(uploaded_file_path)} size={file_size_bytes}")
 
         if not os.path.isfile(uploaded_file_path):
             logger.error(f"❌ [DIEHARDER NOT REGULAR FILE] {uploaded_file_path}")
@@ -4179,6 +5142,7 @@ def execute_dieharder_tests(self, job_data):
                 f"[DIEHARDER SUPABASE WARN] could not upsert final result: {e}"
             )
 
+        task_succeeded = True  # Mark task as successful before returning
         logger.info(f"✅ [DIEHARDER TASK SUCCESS] job={job_id}")
         return {
             "status": "completed",
@@ -4197,13 +5161,16 @@ def execute_dieharder_tests(self, job_data):
         raise
 
     finally:
+        # Always clean up - release lock and remove temp files
         try:
-            DieharderTaskLock.release_dieharder_lock(user_id)
-            logger.info(f"🔓 [DIEHARDER LOCK RELEASED] user={user_id}")
+            # Only release lock if it wasn't already released (i.e., task wasn't deferred)
+            if not task_deferred:
+                DieharderTaskLock.release_dieharder_lock(user_id)
+                logger.info(f"🔓 [DIEHARDER LOCK RELEASED] user={user_id}")
         except Exception as e:
             logger.warning(f"⚠️ [DIEHARDER LOCK RELEASE ERROR] {e}")
 
-        # Remove temp input file
+        # Remove temp input file (always remove temp file)
         if temp_input_path and os.path.exists(temp_input_path):
             try:
                 os.remove(temp_input_path)
@@ -4213,13 +5180,20 @@ def execute_dieharder_tests(self, job_data):
                     f"⚠️ [DIEHARDER TEMP FILE CLEANUP ERROR] {temp_input_path}: {e}"
                 )
 
-        # Remove original uploaded file (your existing behavior)
-        if uploaded_file_path and os.path.exists(uploaded_file_path):
+        # ✅ CRITICAL: Only delete file if task actually executed successfully, not if it was deferred or failed
+        if task_succeeded and uploaded_file_path and os.path.exists(uploaded_file_path):
             try:
                 os.remove(uploaded_file_path)
                 logger.info(f"🗑️ [DIEHARDER FILE REMOVED] {uploaded_file_path}")
+                # Clear cache entries related to the file after successful deletion
+                cache.delete(f"{job_id}_file_path_dieharder")
+                cache.delete(f"{job_id}_file_size_dieharder")
             except Exception as e:
                 logger.warning(f"⚠️ [DIEHARDER CLEANUP ERROR] {e}")
+        elif task_deferred:
+            logger.info(f"📌 [DIEHARDER FILE PRESERVED] {uploaded_file_path} preserved for deferred execution")
+        else:
+            logger.warning(f"⚠️ [DIEHARDER FILE NOT DELETED] {uploaded_file_path} was not deleted (task failed or path invalid)")
 
                 
 # @csrf_exempt
@@ -4321,23 +5295,141 @@ def generate_final_ans_dieharder(request):
         if not line_number or not str(line_number).strip():
             return JsonResponse({"error": "line is required"}, status=400)
 
-        # Ensure tests directory exists (use settings.TESTS_DIR as in your code)
+        # ✅ CRITICAL: Clear all old data for this line_number before starting new test
+        # This ensures fresh start for each new upload
+        try:
+            # Clear Supabase row for this line_number
+            supabase.table("results3").delete().eq("user_id", int(userId)).eq("line", int(line_number)).execute()
+            logger.info(f"🗑️ [UPLOAD-DIEHARDER] Cleared Supabase data for user={userId} line={line_number}")
+        except Exception as clear_error:
+            logger.warning(f"⚠️ [UPLOAD-DIEHARDER] Failed to clear Supabase data: {clear_error}")
+        
+        # Clear all cache entries related to this line_number and job_id
+        try:
+            cache.delete(f"{job_id}_progress_dieharder")
+            cache.delete(f"{line_number}_results_dieharder")
+            cache.delete(f"{line_number}_download_dieharder")
+            cache.delete(f"{job_id}_file_path_dieharder")
+            cache.delete(f"{job_id}_file_size_dieharder")
+            cache.delete(f"{job_id}_dieharder_failed")
+            cache.delete(f"{job_id}_dieharder_failure_reason")
+            logger.info(f"🗑️ [UPLOAD-DIEHARDER] Cleared cache for job_id={job_id} line={line_number}")
+        except Exception as cache_clear_error:
+            logger.warning(f"⚠️ [UPLOAD-DIEHARDER] Failed to clear cache: {cache_clear_error}")
+
+        # Ensure tests directory exists and is writable
         os.makedirs(settings.TESTS_DIR, exist_ok=True)
+        if not os.access(settings.TESTS_DIR, os.W_OK):
+            raise Exception(f"Directory is not writable: {settings.TESTS_DIR}")
 
         # Build disk path (no big memory usage)
         temp_file_path = os.path.join(settings.TESTS_DIR, f"{job_id}_{fileName}")
+        logger.info(f"📝 [UPLOAD-DIEHARDER] Starting file upload: {temp_file_path}")
 
-        # Write to disk chunk-by-chunk
-        # use a reasonably large chunk (e.g. 5MB) to reduce syscall overhead but avoid RAM spikes
+        # Write to disk chunk-by-chunk with comprehensive error handling
         chunk_size = 5 * 1024 * 1024
         written = 0
-        with open(temp_file_path, "wb") as dest:
-            for i, chunk in enumerate(uploaded_file.chunks(chunk_size=chunk_size)):
-                dest.write(chunk)
-                written += len(chunk)
-                logger.warning(f"[UPLOAD-DIEHARDER] wrote chunk #{i} size={len(chunk)} bytes (total_written={written})")
+        try:
+            with open(temp_file_path, "wb") as dest:
+                for i, chunk in enumerate(uploaded_file.chunks(chunk_size=chunk_size)):
+                    try:
+                        dest.write(chunk)
+                        written += len(chunk)
+                        logger.info(f"[UPLOAD-DIEHARDER] wrote chunk #{i} size={len(chunk)} bytes (total: {written})")
+                    except (IOError, OSError) as chunk_error:
+                        logger.error(f"❌ [UPLOAD-DIEHARDER] Error writing chunk #{i}: {chunk_error}")
+                        # Clean up partial file
+                        try:
+                            dest.close()
+                            if os.path.exists(temp_file_path):
+                                os.remove(temp_file_path)
+                        except:
+                            pass
+                        raise Exception(f"Failed to write chunk #{i} to {temp_file_path}: {chunk_error}")
+                
+                # ✅ CRITICAL: Ensure file is fully written and flushed to disk before closing
+                try:
+                    dest.flush()
+                    os.fsync(dest.fileno())
+                    logger.info(f"✅ [UPLOAD-DIEHARDER] File flushed and synced: {written} bytes")
+                except (IOError, OSError) as sync_error:
+                    logger.error(f"❌ [UPLOAD-DIEHARDER] Error syncing file: {sync_error}")
+                    raise Exception(f"Failed to sync file {temp_file_path}: {sync_error}")
+                    
+        except (IOError, OSError) as write_error:
+            # Clean up partial file if it exists
+            if os.path.exists(temp_file_path):
+                try:
+                    os.remove(temp_file_path)
+                    logger.info(f"🗑️ [UPLOAD-DIEHARDER] Removed partial file: {temp_file_path}")
+                except Exception as cleanup_error:
+                    logger.warning(f"⚠️ [UPLOAD-DIEHARDER] Failed to cleanup partial file: {cleanup_error}")
+            
+            error_msg = f"Failed to write file {temp_file_path}: {write_error}"
+            logger.error(f"❌ [UPLOAD-DIEHARDER] {error_msg}")
+            raise Exception(error_msg)
+        except Exception as unexpected_error:
+            # Clean up on any unexpected error
+            if os.path.exists(temp_file_path):
+                try:
+                    os.remove(temp_file_path)
+                except:
+                    pass
+            logger.error(f"❌ [UPLOAD-DIEHARDER] Unexpected error during file write: {unexpected_error}")
+            raise Exception(f"Unexpected error writing file {temp_file_path}: {unexpected_error}")
 
-        logger.warning(f"[UPLOAD-DIEHARDER COMPLETE] File saved to {temp_file_path} (bytes={written})")
+        # ✅ Verify file exists and is not empty before scheduling
+        if not os.path.exists(temp_file_path):
+            raise Exception(f"File was not created: {temp_file_path}")
+        
+        try:
+            file_size = os.path.getsize(temp_file_path)
+            if file_size == 0:
+                raise Exception(f"File is empty: {temp_file_path}")
+        except OSError as e:
+            raise Exception(f"Failed to get file size for {temp_file_path}: {e}")
+        
+        # Third check: File is readable
+        try:
+            with open(temp_file_path, "rb") as test_read:
+                test_read.read(1)  # Read first byte to verify file is readable
+            verification_passed = True
+        except (IOError, OSError) as read_error:
+            raise Exception(f"File is not readable: {temp_file_path} - {read_error}")
+        
+        if not verification_passed:
+            raise Exception(f"File verification failed: {temp_file_path}")
+        
+        # Store file metadata in cache to verify later
+        cache.set(f"{job_id}_file_path_dieharder", temp_file_path, timeout=7200)  # 2 hours
+        cache.set(f"{job_id}_file_size_dieharder", file_size, timeout=7200)
+        
+        # Clear any previous failure flags since we have a new successful upload
+        cache.delete(f"{job_id}_dieharder_failed")
+        cache.delete(f"{job_id}_dieharder_failure_reason")
+        
+        logger.info(f"✅ [UPLOAD-DIEHARDER COMPLETE] File saved and verified: {temp_file_path} size={file_size} bytes")
+        
+        # Initialize progress to 10% to show user that upload was successful and evaluation has started
+        cache.set(f"{job_id}_progress_dieharder", 10, timeout=3600)
+        
+        # Initialize Supabase row with fresh data - set progress to 10% to indicate upload successful
+        try:
+            current_time = datetime.datetime.now().isoformat()
+            supabase.table("results3").upsert({
+                "user_id": int(userId),
+                "line": int(line_number),
+                "progress": 10,  # Set to 10% immediately to show upload successful
+                "result": "",
+                "file_name": fileName,
+                "scheduled_time": scheduled_time_str,
+                "upload_time": current_time,
+                "updated_at": current_time,
+                "binary_data": " "
+            }, ignore_duplicates=False).execute()
+            logger.info(f"✅ [UPLOAD-DIEHARDER] Initialized fresh Supabase row for user={userId} line={line_number}")
+        except Exception as init_error:
+            logger.warning(f"⚠️ [UPLOAD-DIEHARDER] Failed to initialize Supabase row: {init_error}")
 
         # Prepare job_data (pass path only)
         job_data = {

@@ -443,33 +443,45 @@ const Dieharder_tests = () => {
   const [showRedButton5, setShowRedButton5] = useState(false);
 
   const handleFileUpload = () => {
-    fileInputRef.current.click();
     if (isUploadButtonEnabled) {
+      // ✅ Disable button IMMEDIATELY when clicked (before file selection)
+      setIsUploadButtonEnabled(false);
+      isProcessingFileRef.current = true;
+      sessionStorage.setItem('ongoingFileUpload_dt', 'true');
+      fileInputRef.current.click();
     }
   };
   const handleFileUpload2 = () => {
-    fileInputRef2.current.click();
     if (isUploadButtonEnabled2) {
+      setIsUploadButtonEnabled2(false);
+      isProcessingFileRef2.current = true;
+      sessionStorage.setItem('ongoingFileUpload_dt2', 'true');
+      fileInputRef2.current.click();
     }
-
   };
   const handleFileUpload3 = () => {
     if (isUploadButtonEnabled3) {
+      setIsUploadButtonEnabled3(false);
+      isProcessingFileRef3.current = true;
+      sessionStorage.setItem('ongoingFileUpload_dt3', 'true');
       fileInputRef3.current.click();
     }
-
   };
   const handleFileUpload4 = () => {
     if (isUploadButtonEnabled4) {
+      setIsUploadButtonEnabled4(false);
+      isProcessingFileRef4.current = true;
+      sessionStorage.setItem('ongoingFileUpload_dt4', 'true');
       fileInputRef4.current.click();
     }
-
   };
   const handleFileUpload5 = () => {
     if (isUploadButtonEnabled5) {
+      setIsUploadButtonEnabled5(false);
+      isProcessingFileRef5.current = true;
+      sessionStorage.setItem('ongoingFileUpload_dt5', 'true');
       fileInputRef5.current.click();
     }
-
   };
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -492,7 +504,13 @@ const Dieharder_tests = () => {
 
 
   const handleFileChange = async (event) => {
-    isProcessingFileRef.current = true;
+    // ✅ Button should already be disabled from handleFileUpload, but ensure it's disabled
+    // This handles cases where handleFileChange is called directly (e.g., drag & drop)
+    if (!isProcessingFileRef.current) {
+      isProcessingFileRef.current = true;
+      setIsUploadButtonEnabled(false);
+      sessionStorage.setItem('ongoingFileUpload_dt', 'true');
+    }
 
     setLoadingProgressGr(0);
     setLoadingProgressRep(0);
@@ -500,7 +518,10 @@ const Dieharder_tests = () => {
 
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
-      // User closed the file picker without choosing a file
+      // ✅ No file selected - re-enable button and reset flags
+      isProcessingFileRef.current = false;
+      setIsUploadButtonEnabled(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt');
       setShowRedButton(false);
       return;
     }
@@ -514,21 +535,31 @@ const Dieharder_tests = () => {
 
 
     if (!isBin) {
+      // ✅ Invalid file type - re-enable button and reset flags
       alert("Please upload a .bin file.");
+      isProcessingFileRef.current = false;
+      setIsUploadButtonEnabled(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt');
       return;
     }
 
 
 
     const userId = await fetchUserId();
-    if (!userId) return;
+    if (!userId) {
+      // ✅ No userId - re-enable button and reset flags
+      isProcessingFileRef.current = false;
+      setIsUploadButtonEnabled(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt');
+      return;
+    }
 
     // Reset state
     setBinaryInput("");
     setResult("");
     setFileName("");
     setUploadTime("");
-    setLoadingProgress(0);
+    // Don't reset loadingProgress here - it will be set after file processing succeeds
     setTime("");
     setScheduledTime("");
     setDebouncedScheduledTime("");
@@ -550,26 +581,53 @@ const Dieharder_tests = () => {
         .match({ line: 1, user_id: userId });
 
       if (deleteError) {
+        // ✅ Delete error - re-enable button and reset flags
+        console.error('Delete error:', deleteError);
+        isProcessingFileRef.current = false;
+        setIsUploadButtonEnabled(true);
+        sessionStorage.removeItem('ongoingFileUpload_dt');
         return;
       }
     } catch (err) {
-
-    } finally {
-      isProcessingFileRef.current = false; // Reset flag when done
+      // ✅ Exception during delete - re-enable button and reset flags
+      console.error('Error deleting existing row:', err);
+      isProcessingFileRef.current = false;
+      setIsUploadButtonEnabled(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt');
+      return;
     }
+    
+    // ✅ File processed successfully - keep button disabled (will be re-enabled when progress reaches 100%)
+    // Ensure button stays disabled and processing flag stays true
+    isProcessingFileRef.current = true;
+    setIsUploadButtonEnabled(false);
+    // Update sessionStorage BEFORE setting progress to avoid race condition
+    sessionStorage.setItem('ongoingFileUpload_dt', 'true');
+    sessionStorage.setItem('uploadProgress_dt', '0');
+    // Now set progress to 0 - this will trigger useEffect but sessionStorage is already set
+    setLoadingProgress(0);
+    
     setIsEnabled(false);
     event.target.value = "";
   };
 
   const handleFileChange2 = async (event) => {
-    isProcessingFileRef2.current = true; // Set flag when processing starts
+    // ✅ Button should already be disabled from handleFileUpload2, but ensure it's disabled
+    if (!isProcessingFileRef2.current) {
+      isProcessingFileRef2.current = true;
+      setIsUploadButtonEnabled2(false);
+      sessionStorage.setItem('ongoingFileUpload_dt2', 'true');
+    }
 
     setLoadingProgress2Gr(0);
     setLoadingProgress2Rep(0);
     sessionStorage.setItem(`ongoingFileUpload_dt2`, 'true');
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
-      // User closed the file picker without choosing a file
+      // ✅ No file selected - re-enable button and reset flags
+      isProcessingFileRef2.current = false;
+      setIsUploadButtonEnabled2(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt2');
       setShowRedButton2(false);
       return;
     }
@@ -581,14 +639,21 @@ const Dieharder_tests = () => {
 
 
     if (!isBin) {
+      // ✅ Invalid file type - re-enable button and reset flags
       alert("Please upload a .bin file.");
+      isProcessingFileRef2.current = false;
+      setIsUploadButtonEnabled2(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt2');
       return;
     }
 
 
     const userId = await fetchUserId();
     if (!userId) {
-
+      // ✅ No userId - re-enable button and reset flags
+      isProcessingFileRef2.current = false;
+      setIsUploadButtonEnabled2(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt2');
       return;
     }
 
@@ -599,7 +664,7 @@ const Dieharder_tests = () => {
     setResult2("");
     setFileName2("");
     setUploadTime2("");
-    setLoadingProgress2(0);
+    // Don't reset loadingProgress2 here - it will be set after file processing succeeds
     setTime2("");
 
     // Set new filename
@@ -618,28 +683,53 @@ const Dieharder_tests = () => {
         .match({ line: 2, user_id: userId });
 
       if (deleteError) {
-
+        // ✅ Delete error - re-enable button and reset flags
+        console.error('Delete error:', deleteError);
+        isProcessingFileRef2.current = false;
+        setIsUploadButtonEnabled2(true);
+        sessionStorage.removeItem('ongoingFileUpload_dt2');
         return;
       }
     } catch (err) {
-
-    } finally {
-      isProcessingFileRef2.current = false; // Reset flag when done
+      // ✅ Exception during delete - re-enable button and reset flags
+      console.error('Error deleting existing row:', err);
+      isProcessingFileRef2.current = false;
+      setIsUploadButtonEnabled2(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt2');
+      return;
     }
+    
+    // ✅ File processed successfully - keep button disabled (will be re-enabled when progress reaches 100%)
+    isProcessingFileRef2.current = true;
+    setIsUploadButtonEnabled2(false);
+    // Update sessionStorage BEFORE setting progress to avoid race condition
+    sessionStorage.setItem('ongoingFileUpload_dt2', 'true');
+    sessionStorage.setItem('uploadProgress_dt2', '0');
+    // Now set progress to 0 - this will trigger useEffect but sessionStorage is already set
+    setLoadingProgress2(0);
+    
     setIsEnabled2(false);
 
     event.target.value = "";
   };
 
   const handleFileChange3 = async (event) => {
-    isProcessingFileRef3.current = true; // Set flag when processing starts
+    // ✅ Button should already be disabled from handleFileUpload3, but ensure it's disabled
+    if (!isProcessingFileRef3.current) {
+      isProcessingFileRef3.current = true;
+      setIsUploadButtonEnabled3(false);
+      sessionStorage.setItem('ongoingFileUpload_dt3', 'true');
+    }
 
     setLoadingProgress3Gr(0);
     setLoadingProgress3Rep(0);
     sessionStorage.setItem(`ongoingFileUpload_dt3`, 'true');
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
-      // User closed the file picker without choosing a file
+      // ✅ No file selected - re-enable button and reset flags
+      isProcessingFileRef3.current = false;
+      setIsUploadButtonEnabled3(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt3');
       setShowRedButton3(false);
       return;
     }
@@ -652,7 +742,11 @@ const Dieharder_tests = () => {
 
 
     if (!isBin) {
+      // ✅ Invalid file type - re-enable button and reset flags
       alert("Please upload a .bin file.");
+      isProcessingFileRef3.current = false;
+      setIsUploadButtonEnabled3(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt3');
       return;
     }
 
@@ -660,7 +754,10 @@ const Dieharder_tests = () => {
 
     const userId = await fetchUserId();
     if (!userId) {
-
+      // ✅ No userId - re-enable button and reset flags
+      isProcessingFileRef3.current = false;
+      setIsUploadButtonEnabled3(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt3');
       return;
     }
 
@@ -671,7 +768,7 @@ const Dieharder_tests = () => {
     setResult3("");
     setFileName3("");
     setUploadTime3("");
-    setLoadingProgress3(0);
+    // Don't reset loadingProgress3 here - it will be set after file processing succeeds
     setTime3("");
 
     // Set new filename
@@ -690,16 +787,32 @@ const Dieharder_tests = () => {
         .delete()
         .match({ line: 3, user_id: userId });
 
-      setLoadingProgress3(0);
       if (deleteError) {
-
+        // ✅ Delete error - re-enable button and reset flags
+        console.error('Delete error:', deleteError);
+        isProcessingFileRef3.current = false;
+        setIsUploadButtonEnabled3(true);
+        sessionStorage.removeItem('ongoingFileUpload_dt3');
         return;
       }
     } catch (err) {
-
-    } finally {
-      isProcessingFileRef3.current = false; // Reset flag when done
+      // ✅ Exception during delete - re-enable button and reset flags
+      console.error('Error deleting existing row:', err);
+      isProcessingFileRef3.current = false;
+      setIsUploadButtonEnabled3(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt3');
+      return;
     }
+    
+    // ✅ File processed successfully - keep button disabled (will be re-enabled when progress reaches 100%)
+    isProcessingFileRef3.current = true;
+    setIsUploadButtonEnabled3(false);
+    // Update sessionStorage BEFORE setting progress to avoid race condition
+    sessionStorage.setItem('ongoingFileUpload_dt3', 'true');
+    sessionStorage.setItem('uploadProgress_dt3', '0');
+    // Now set progress to 0 - this will trigger useEffect but sessionStorage is already set
+    setLoadingProgress3(0);
+    
     setIsEnabled3(false);
 
     // Reset the file input
@@ -708,13 +821,22 @@ const Dieharder_tests = () => {
 
 
   const handleFileChange4 = async (event) => {
-    isProcessingFileRef4.current = true;
+    // ✅ Button should already be disabled from handleFileUpload4, but ensure it's disabled
+    if (!isProcessingFileRef4.current) {
+      isProcessingFileRef4.current = true;
+      setIsUploadButtonEnabled4(false);
+      sessionStorage.setItem('ongoingFileUpload_dt4', 'true');
+    }
+    
     setLoadingProgress4Gr(0);
     setLoadingProgress4Rep(0);
     sessionStorage.setItem(`ongoingFileUpload_dt4`, 'true');
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
-      // User closed the file picker without choosing a file
+      // ✅ No file selected - re-enable button and reset flags
+      isProcessingFileRef4.current = false;
+      setIsUploadButtonEnabled4(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt4');
       setShowRedButton4(false);
       return;
     }
@@ -727,7 +849,11 @@ const Dieharder_tests = () => {
 
 
     if (!isBin) {
+      // ✅ Invalid file type - re-enable button and reset flags
       alert("Please upload a .bin file.");
+      isProcessingFileRef4.current = false;
+      setIsUploadButtonEnabled4(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt4');
       return;
     }
 
@@ -735,7 +861,10 @@ const Dieharder_tests = () => {
 
     const userId = await fetchUserId();
     if (!userId) {
-
+      // ✅ No userId - re-enable button and reset flags
+      isProcessingFileRef4.current = false;
+      setIsUploadButtonEnabled4(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt4');
       return;
     }
 
@@ -746,7 +875,7 @@ const Dieharder_tests = () => {
     setResult4("");
     setFileName4("");
     setUploadTime4("");
-    setLoadingProgress4(0);
+    // Don't reset loadingProgress4 here - it will be set after file processing succeeds
     setTime4("");
 
     // Set new filename
@@ -766,16 +895,32 @@ const Dieharder_tests = () => {
         .delete()
         .match({ line: 4, user_id: userId });
 
-      setLoadingProgress4(0);
       if (deleteError) {
-
+        // ✅ Delete error - re-enable button and reset flags
+        console.error('Delete error:', deleteError);
+        isProcessingFileRef4.current = false;
+        setIsUploadButtonEnabled4(true);
+        sessionStorage.removeItem('ongoingFileUpload_dt4');
         return;
       }
     } catch (err) {
-
-    } finally {
-      isProcessingFileRef4.current = false; // Reset flag when done
+      // ✅ Exception during delete - re-enable button and reset flags
+      console.error('Error deleting existing row:', err);
+      isProcessingFileRef4.current = false;
+      setIsUploadButtonEnabled4(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt4');
+      return;
     }
+    
+    // ✅ File processed successfully - keep button disabled (will be re-enabled when progress reaches 100%)
+    isProcessingFileRef4.current = true;
+    setIsUploadButtonEnabled4(false);
+    // Update sessionStorage BEFORE setting progress to avoid race condition
+    sessionStorage.setItem('ongoingFileUpload_dt4', 'true');
+    sessionStorage.setItem('uploadProgress_dt4', '0');
+    // Now set progress to 0 - this will trigger useEffect but sessionStorage is already set
+    setLoadingProgress4(0);
+    
     setIsEnabled4(false);
 
     // Reset the file input
@@ -784,13 +929,21 @@ const Dieharder_tests = () => {
 
 
   const handleFileChange5 = async (event) => {
-    isProcessingFileRef5.current = true;
+    // ✅ Button should already be disabled from handleFileUpload5, but ensure it's disabled
+    if (!isProcessingFileRef5.current) {
+      isProcessingFileRef5.current = true;
+      setIsUploadButtonEnabled5(false);
+      sessionStorage.setItem('ongoingFileUpload_dt5', 'true');
+    }
     setLoadingProgress5Gr(0);
     setLoadingProgress5Rep(0);
     sessionStorage.setItem(`ongoingFileUpload_dt5`, 'true');
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
-      // User closed the file picker without choosing a file
+      // ✅ No file selected - re-enable button and reset flags
+      isProcessingFileRef5.current = false;
+      setIsUploadButtonEnabled5(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt5');
       setShowRedButton5(false);
       return;
     }
@@ -803,14 +956,21 @@ const Dieharder_tests = () => {
 
 
     if (!isBin) {
+      // ✅ Invalid file type - re-enable button and reset flags
       alert("Please upload a .bin file.");
+      isProcessingFileRef5.current = false;
+      setIsUploadButtonEnabled5(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt5');
       return;
     }
 
 
     const userId = await fetchUserId();
     if (!userId) {
-
+      // ✅ No userId - re-enable button and reset flags
+      isProcessingFileRef5.current = false;
+      setIsUploadButtonEnabled5(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt5');
       return;
     }
 
@@ -821,7 +981,7 @@ const Dieharder_tests = () => {
     setResult5("");
     setFileName5("");
     setUploadTime5("");
-    setLoadingProgress5(0);
+    // Don't reset loadingProgress5 here - it will be set after file processing succeeds
     setTime5("");
 
     // Set new filename
@@ -841,16 +1001,32 @@ const Dieharder_tests = () => {
         .delete()
         .match({ line: 5, user_id: userId });
 
-      setLoadingProgress5(0);
       if (deleteError) {
-
+        // ✅ Delete error - re-enable button and reset flags
+        console.error('Delete error:', deleteError);
+        isProcessingFileRef5.current = false;
+        setIsUploadButtonEnabled5(true);
+        sessionStorage.removeItem('ongoingFileUpload_dt5');
         return;
       }
     } catch (err) {
-
-    } finally {
-      isProcessingFileRef5.current = false; // Reset flag when done
+      // ✅ Exception during delete - re-enable button and reset flags
+      console.error('Error deleting existing row:', err);
+      isProcessingFileRef5.current = false;
+      setIsUploadButtonEnabled5(true);
+      sessionStorage.removeItem('ongoingFileUpload_dt5');
+      return;
     }
+    
+    // ✅ File processed successfully - keep button disabled (will be re-enabled when progress reaches 100%)
+    isProcessingFileRef5.current = true;
+    setIsUploadButtonEnabled5(false);
+    // Update sessionStorage BEFORE setting progress to avoid race condition
+    sessionStorage.setItem('ongoingFileUpload_dt5', 'true');
+    sessionStorage.setItem('uploadProgress_dt5', '0');
+    // Now set progress to 0 - this will trigger useEffect but sessionStorage is already set
+    setLoadingProgress5(0);
+    
     setIsEnabled5(false);
 
     // Reset the file input
@@ -1254,22 +1430,32 @@ const Dieharder_tests = () => {
  const handleUploadComplete = () => {
     isProcessingFileRef.current = false;
     setIsUploadButtonEnabled(true);
+    sessionStorage.removeItem('ongoingFileUpload_dt');
+    sessionStorage.removeItem('uploadProgress_dt');
   };
   const handleUploadComplete2 = () => {
     isProcessingFileRef2.current = false;
     setIsUploadButtonEnabled2(true);
+    sessionStorage.removeItem('ongoingFileUpload_dt2');
+    sessionStorage.removeItem('uploadProgress_dt2');
   };
   const handleUploadComplete3 = () => {
     isProcessingFileRef3.current = false;
     setIsUploadButtonEnabled3(true);
+    sessionStorage.removeItem('ongoingFileUpload_dt3');
+    sessionStorage.removeItem('uploadProgress_dt3');
   };
   const handleUploadComplete4 = () => {
     isProcessingFileRef4.current = false;
     setIsUploadButtonEnabled4(true);
+    sessionStorage.removeItem('ongoingFileUpload_dt4');
+    sessionStorage.removeItem('uploadProgress_dt4');
   };
   const handleUploadComplete5 = () => {
     isProcessingFileRef5.current = false;
     setIsUploadButtonEnabled5(true);
+    sessionStorage.removeItem('ongoingFileUpload_dt5');
+    sessionStorage.removeItem('uploadProgress_dt5');
   };
 
   const [currentJobIdT, setCurrentJobIdT] = useState(() => {
@@ -1337,10 +1523,21 @@ const Dieharder_tests = () => {
       const ongoingUpload = sessionStorage.getItem(`ongoingFileUpload_dt${storageKey}`);
       const storedProgress = sessionStorage.getItem(`uploadProgress_dt${storageKey}`);
 
-      if (ongoingUpload === 'true' && storedProgress && parseInt(storedProgress) < 100) {
-        // There's an ongoing upload that hasn't completed
-        isProcessingFileRef.current = true;
-        setIsUploadButtonEnabled(false);
+      // ✅ If there's an ongoing upload flag, keep button disabled regardless of progress value
+      // This handles the case when file is just uploaded (progress = 0) but upload hasn't started yet
+      if (ongoingUpload === 'true') {
+        const progress = storedProgress ? parseInt(storedProgress) : 0;
+        if (progress < 100) {
+          // There's an ongoing upload that hasn't completed
+          isProcessingFileRef.current = true;
+          setIsUploadButtonEnabled(false);
+        } else {
+          // Progress is 100, upload completed - clean up
+          isProcessingFileRef.current = false;
+          setIsUploadButtonEnabled(true);
+          sessionStorage.removeItem(`ongoingFileUpload_dt${storageKey}`);
+          sessionStorage.removeItem(`uploadProgress_dt${storageKey}`);
+        }
       } else {
         // No ongoing upload or upload was completed
         isProcessingFileRef.current = false;
@@ -1362,18 +1559,27 @@ const Dieharder_tests = () => {
   // Effect to handle loading progress changes for all uploads
   useEffect(() => {
     const handleProgressUpdate = (progress, storageKey, isProcessingFileRef, setIsUploadButtonEnabled) => {
+      const ongoingUpload = sessionStorage.getItem(`ongoingFileUpload_dt${storageKey}`);
+      
       if (progress === 100) {
         // Upload completed
         isProcessingFileRef.current = false;
         setIsUploadButtonEnabled(true);
         sessionStorage.removeItem(`ongoingFileUpload_dt${storageKey}`);
         sessionStorage.removeItem(`uploadProgress_dt${storageKey}`);
-      } else if (progress > 0 && progress < 100) {
-        // Upload in progress
-        isProcessingFileRef.current = true;
-        setIsUploadButtonEnabled(false);
-        sessionStorage.setItem(`ongoingFileUpload_dt${storageKey}`, 'true');
-        sessionStorage.setItem(`uploadProgress_dt${storageKey}`, progress.toString());
+      } else if (progress >= 0 && progress < 100) {
+        // ✅ Upload in progress OR file just uploaded (progress = 0 but ongoingUpload exists)
+        // Keep button disabled if:
+        // 1. Progress is > 0 and < 100 (upload in progress), OR
+        // 2. Progress is 0 but there's an ongoing upload flag (file just selected, waiting for upload to start)
+        if (progress > 0 || ongoingUpload === 'true' || isProcessingFileRef.current) {
+          isProcessingFileRef.current = true;
+          setIsUploadButtonEnabled(false);
+          sessionStorage.setItem(`ongoingFileUpload_dt${storageKey}`, 'true');
+          if (progress > 0) {
+            sessionStorage.setItem(`uploadProgress_dt${storageKey}`, progress.toString());
+          }
+        }
       }
     };
 
