@@ -8,6 +8,9 @@ const UploadReport = () => {
     const [analysis, setAnalysis] = useState("");
     const [isUploading, setIsUploading] = useState(false);
     const [fileName, setFileName] = useState("");
+    const [apiKey, setApiKey] = useState("");
+    const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+    const [error, setError] = useState("");
 
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
@@ -19,25 +22,58 @@ const UploadReport = () => {
 
     const handleUpload = async () => {
         if (!file) {
-            alert("Please select a file first!");
+            setError("Please select a file first!");
+            setTimeout(() => setError(""), 5000);
+            return;
+        }
+
+        if (!apiKey || !apiKey.trim()) {
+            setError("Please provide your Gemini API key first!");
+            setShowApiKeyInput(true);
+            setTimeout(() => setError(""), 5000);
             return;
         }
 
         setIsUploading(true);
         setAnalysis(""); // Clear previous analysis
+        setError(""); // Clear previous errors
 
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("api_key", apiKey.trim());
 
         try {
             const response = await axios.post("http://100.86.167.54:8000/reports/upload/", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
-            setAnalysis(response.data.analysis);
+            if (response.data.analysis) {
+                setAnalysis(response.data.analysis);
+                setError(""); // Clear any previous errors on success
+            } else {
+                setError("No analysis received from server. Please try again.");
+            }
         } catch (error) {
             console.error("Error uploading file:", error);
-            alert("Error uploading file. Please try again.");
+            
+            // Extract error message from response
+            let errorMessage = "Error uploading file. Please try again.";
+            if (error.response && error.response.data) {
+                if (error.response.data.error) {
+                    errorMessage = error.response.data.error;
+                    // Add details if available
+                    if (error.response.data.details && error.response.data.details !== error.response.data.error) {
+                        errorMessage += `\n\nDetails: ${error.response.data.details}`;
+                    }
+                } else if (error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                }
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            setError(errorMessage);
+            setAnalysis(""); // Clear analysis on error
         } finally {
             setIsUploading(false);
         }
@@ -47,6 +83,7 @@ const UploadReport = () => {
         setFile(null);
         setFileName("");
         setAnalysis("");
+        setError("");
         // Reset the file input
         const fileInput = document.getElementById("fileInput");
         if (fileInput) {
@@ -54,9 +91,80 @@ const UploadReport = () => {
         }
     };
 
+    const handleApiKeySubmit = () => {
+        if (!apiKey || !apiKey.trim()) {
+            setError("Please enter a valid API key");
+            setTimeout(() => setError(""), 5000);
+            return;
+        }
+        setShowApiKeyInput(false);
+        setError("");
+    };
+
     return (
         <div className="container">
             <h2 className="upload-heading">Upload Test Report</h2>
+
+            {/* API Key Section */}
+            <div className="api-key-section">
+                {!showApiKeyInput && !apiKey ? (
+                    <button
+                        onClick={() => setShowApiKeyInput(true)}
+                        className="api-key-btn"
+                    >
+                        Add Gemini API Key
+                    </button>
+                ) : showApiKeyInput || !apiKey ? (
+                    <div className="api-key-input-container">
+                        <input
+                            type="password"
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            placeholder="Enter your Gemini API key"
+                            className="api-key-input"
+                            disabled={isUploading}
+                        />
+                        <button
+                            onClick={handleApiKeySubmit}
+                            className="api-key-submit-btn"
+                            disabled={isUploading}
+                        >
+                            Save
+                        </button>
+                        <button
+                            onClick={() => {
+                                setShowApiKeyInput(false);
+                                // Don't clear apiKey on cancel - keep the existing value
+                            }}
+                            className="api-key-cancel-btn"
+                            disabled={isUploading}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                ) : (
+                    <div className="api-key-display">
+                        <span className="api-key-status">✓ API Key configured</span>
+                        <button
+                            onClick={() => {
+                                setShowApiKeyInput(true);
+                            }}
+                            className="api-key-change-btn"
+                            disabled={isUploading}
+                        >
+                            Change
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Error Display */}
+            {error && (
+                <div className="error-message">
+                    <strong>Error:</strong>
+                    <pre>{error}</pre>
+                </div>
+            )}
 
             <div className="file-upload-container">
                 <input
@@ -98,12 +206,12 @@ const UploadReport = () => {
                 <button 
                     onClick={handleUpload} 
                     className="upload-btn" 
-                    disabled={isUploading || !file}
+                    disabled={isUploading || !file || !apiKey}
                 >
                     {isUploading ? (
                         <>
                             <span className="loading-spinner"></span>
-                            Uploading...
+                            Analyzing...
                         </>
                     ) : (
                         "Upload & Analyze"

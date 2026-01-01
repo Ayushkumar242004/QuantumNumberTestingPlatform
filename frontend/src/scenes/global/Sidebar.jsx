@@ -21,6 +21,7 @@ import {
 } from "@mui/icons-material";
 import { supabase } from "../../utils/supabaseClient";
 import "./Sidebar.css";
+import InternetIssuePopup from "../../components/InternetIssuePopup";
 
 const navItems = [
   {
@@ -53,6 +54,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
     email: "user@example.com",
     initials: "U",
   });
+  const [showInternetIssue, setShowInternetIssue] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -65,6 +67,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
   
       if (authError || !user) {
         console.error("Error fetching auth user:", authError);
+        // Username fetch failed, show internet issue popup
+        setShowInternetIssue(true);
         return;
       }
   
@@ -78,9 +82,14 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
   
       if (profileError) {
         console.error("Error fetching user profile:", profileError);
+        // Username fetch failed, show internet issue popup
+        setShowInternetIssue(true);
         return;
       }
   
+      // Fetch succeeded, hide popup
+      setShowInternetIssue(false);
+      
       const username = profile.username || "User";
   
       setUserInfo({
@@ -113,23 +122,25 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
   };
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        left: 0,
-        top: 0,
-        bottom: 0,
-        zIndex: 1000,
-        width: isCollapsed ? 80 : 256,
-        transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        background: `linear-gradient(180deg, #1A1A2E 0%, #16213E 40%, #0F3460 100%)`, // Enhanced gradient
-        borderRight: "1px solid rgba(255, 255, 255, 0.1)", // Subtle border
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)", // Deeper shadow
-        display: "flex",
-        flexDirection: "column",
-        color: "rgba(255, 255, 255, 0.8)",
-      }}
-    >
+    <>
+      <InternetIssuePopup show={showInternetIssue} />
+      <Box
+        sx={{
+          position: "fixed",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          zIndex: 1000,
+          width: isCollapsed ? 80 : 256,
+          transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          background: `linear-gradient(180deg, #1A1A2E 0%, #16213E 40%, #0F3460 100%)`, // Enhanced gradient
+          borderRight: "1px solid rgba(255, 255, 255, 0.1)", // Subtle border
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)", // Deeper shadow
+          display: "flex",
+          flexDirection: "column",
+          color: "rgba(255, 255, 255, 0.8)",
+        }}
+      >
       {/* Header */}
       <Box
         sx={{
@@ -349,5 +360,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
         )}
       </Box>
     </Box>
+    </>
   );
 }
